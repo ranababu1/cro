@@ -1,65 +1,122 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Experiment } from '@/lib/types';
 
-export default function Home() {
+async function getExperiments(): Promise<Experiment[]> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/experiments`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    const data = await res.json();
+    return data.experiments || [];
+  } catch (error) {
+    console.error('Failed to fetch experiments:', error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  const experiments = await getExperiments();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
+            A/B Testing Platform
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-2 text-zinc-600 dark:text-zinc-400">
+            Manage and analyze your experiments
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Actions */}
+        <div className="mb-6 flex justify-between items-center">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">
+            Experiments
+          </h2>
+          <Link
+            href="/experiments/new"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Create Experiment
+          </Link>
         </div>
-      </main>
+
+        {/* Experiments List */}
+        {experiments.length === 0 ? (
+          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow p-12 text-center">
+            <h3 className="text-lg font-medium text-zinc-900 dark:text-white mb-2">
+              No experiments yet
+            </h3>
+            <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+              Get started by creating your first experiment
+            </p>
+            <Link
+              href="/experiments/new"
+              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Create Your First Experiment
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {experiments.map((experiment) => (
+              <Link
+                key={experiment.id}
+                href={`/experiments/${experiment.id}`}
+                className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                      {experiment.name}
+                    </h3>
+                    {experiment.description && (
+                      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                        {experiment.description}
+                      </p>
+                    )}
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${experiment.status === 'running'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : experiment.status === 'draft'
+                          ? 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+                          : experiment.status === 'paused'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                            : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                      }`}
+                  >
+                    {experiment.status}
+                  </span>
+                </div>
+                <div className="flex gap-6 text-sm text-zinc-600 dark:text-zinc-400">
+                  <div>
+                    <span className="font-medium">Traffic:</span> {experiment.traffic_allocation}%
+                  </div>
+                  <div>
+                    <span className="font-medium">Created:</span>{' '}
+                    {new Date(experiment.created_at).toLocaleDateString()}
+                  </div>
+                  {experiment.started_at && (
+                    <div>
+                      <span className="font-medium">Started:</span>{' '}
+                      {new Date(experiment.started_at).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

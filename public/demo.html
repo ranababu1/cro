@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="http://localhost:3000/sdk.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/B Test Demo Page</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+        }
+
+        .cta-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #f0fdf4;
+            border-color: #22c55e;
+            color: #166534;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>A/B Test Demo Page</h1>
+
+    <div class="info-box">
+        <h3>🧪 This page is running an A/B test</h3>
+        <p>The button below will show different variations based on the A/B test configuration.</p>
+        <p><strong>Current Variation:</strong> <span id="variation-name">Loading...</span></p>
+    </div>
+
+    <div style="text-align: center;">
+        <button class="cta-button" id="cta-button">
+            Click Me!
+        </button>
+    </div>
+
+    <div class="success" id="success-message">
+        ✅ Conversion tracked! Check your experiment dashboard.
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Create an experiment in the dashboard at <a href="http://localhost:3000">http://localhost:3000</a></li>
+            <li>Copy the experiment ID from the URL</li>
+            <li>Replace <code>YOUR_EXPERIMENT_ID</code> in the script below with your actual experiment ID</li>
+            <li><strong>Optional:</strong> Add URLs to your variations (e.g., Control: /page-a, Variation A: /page-b)
+            </li>
+            <li>Reload this page to see the test in action</li>
+        </ol>
+
+        <div
+            style="margin-top: 20px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px;">
+            <h4 style="margin: 0 0 10px 0;">🎯 Two Testing Modes:</h4>
+            <ul style="margin: 0; padding-left: 20px;">
+                <li><strong>Element Testing:</strong> Change button colors, text, or any page elements (default)</li>
+                <li><strong>URL Testing:</strong> Test completely different pages (add URLs to variations in dashboard)
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <script>
+        // Replace this with your actual experiment ID from the dashboard
+        const EXPERIMENT_ID = 'exp_mj4hikq7_dkjuiuz';
+
+        // Initialize the SDK
+        ABTest.init({
+            apiUrl: 'http://localhost:3000'
+        });
+
+        // Run the experiment (set autoRedirect: true if using URL-based testing)
+        ABTest.run(EXPERIMENT_ID, function (variation) {
+            const button = document.getElementById('cta-button');
+            const variationName = document.getElementById('variation-name');
+
+            if (!variation.assigned) {
+                variationName.textContent = 'Not assigned (experiment not running or out of traffic allocation)';
+                return;
+            }
+
+            // Display which variation the user is seeing
+            variationName.textContent = variation.variation_name +
+                (variation.variation_url ? ` (URL: ${variation.variation_url})` : '');
+
+            // Apply variation-specific changes
+            if (variation.variation_name === 'Control') {
+                // Control variation - blue button
+                button.style.backgroundColor = '#3b82f6';
+                button.style.color = 'white';
+                button.textContent = 'Sign Up Now';
+            } else if (variation.variation_name === 'Variation A') {
+                // Variation A - green button
+                button.style.backgroundColor = '#22c55e';
+                button.style.color = 'white';
+                button.textContent = 'Get Started Free';
+            } else if (variation.variation_name === 'Variation B') {
+                // Variation B - purple button
+                button.style.backgroundColor = '#a855f7';
+                button.style.color = 'white';
+                button.textContent = 'Try It Now';
+            } else {
+                // Fallback for other variations
+                button.style.backgroundColor = '#6366f1';
+                button.style.color = 'white';
+                button.textContent = variation.variation_name;
+            }
+        }, { autoRedirect: false }); // Set to true to enable automatic URL redirects
+
+        // Track conversions when button is clicked
+        document.getElementById('cta-button').addEventListener('click', function () {
+            ABTest.trackConversion(EXPERIMENT_ID, 'button_click');
+
+            // Show success message
+            const successMessage = document.getElementById('success-message');
+            successMessage.style.display = 'block';
+
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        });
+    </script>
+</body>
+
+</html>
