@@ -2,8 +2,17 @@
 
 export type ExperimentStatus = 'draft' | 'running' | 'paused' | 'completed';
 
+export interface User {
+    id: string;
+    email: string;
+    name: string;
+    image?: string;
+    created_at: string;
+}
+
 export interface Experiment {
     id: string;
+    user_id: string;
     name: string;
     description?: string;
     status: ExperimentStatus;

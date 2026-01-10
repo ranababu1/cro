@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { CreateExperimentRequest } from '@/lib/types';
 import { generateId, validateVariationWeights } from '@/lib/assignment';
 
-// GET /api/experiments - List all experiments
-export async function GET() {
+// GET /api/experiments - List experiments for authenticated user
+export async function GET(request: NextRequest) {
     try {
-        const experiments = await db.getExperiments();
+        const session = await getServerSession(authOptions);
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
+        // If userId is provided (for server-side fetching), use it
+        // Otherwise, require authentication
+        if (!userId && !session?.user?.id) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
+        const experiments = await db.getExperiments(userId || session!.user.id);
         return NextResponse.json({ experiments });
     } catch (error) {
         console.error('Failed to fetch experiments:', error);
@@ -20,6 +35,15 @@ export async function GET() {
 // POST /api/experiments - Create a new experiment
 export async function POST(request: NextRequest) {
     try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user?.id) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            );
+        }
+
         const body: CreateExperimentRequest = await request.json();
 
         // Validate request
@@ -51,6 +75,7 @@ export async function POST(request: NextRequest) {
         const experimentId = generateId('exp');
         await db.createExperiment({
             id: experimentId,
+            user_id: session.user.id,
             name: body.name,
             description: body.description,
             status: 'draft',

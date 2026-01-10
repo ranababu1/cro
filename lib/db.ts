@@ -1,13 +1,16 @@
-import { Experiment, Variation, Assignment, Event } from './types';
+import { Experiment, Variation, Assignment, Event, User } from './types';
 
 // Database interface - can be swapped for different implementations
 export interface Database {
     query<T = any>(sql: string, params?: any[]): Promise<T[]>;
     execute(sql: string, params?: any[]): Promise<void>;
+    getUserByEmail(email: string): Promise<User | null>;
+    createUser(user: Omit<User, 'id' | 'created_at'>): Promise<User>;
 }
 
 // In-memory database for development (will be replaced with D1 in production)
 class InMemoryDatabase implements Database {
+    private users: Map<string, User> = new Map();
     private experiments: Map<string, Experiment> = new Map();
     private variations: Map<string, Variation> = new Map();
     private assignments: Map<string, Assignment> = new Map();
@@ -21,6 +24,11 @@ class InMemoryDatabase implements Database {
                 if (lowerSql.includes('where id = ?') && params[0]) {
                     const exp = this.experiments.get(params[0]);
                     return exp ? [exp] as T[] : [];
+                }
+                if (lowerSql.includes('where user_id = ?') && params[0]) {
+                    return Array.from(this.experiments.values())
+                        .filter(e => e.user_id === params[0])
+                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as T[];
                 }
                 return Array.from(this.experiments.values()).sort((a, b) =>
                     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -80,9 +88,9 @@ class InMemoryDatabase implements Database {
 
         if (lowerSql.startsWith('insert')) {
             if (lowerSql.includes('into experiments')) {
-                const [id, name, description, status, traffic_allocation, started_at, ended_at] = params;
+                const [id, user_id, name, description, status, traffic_allocation, started_at, ended_at] = params;
                 this.experiments.set(id, {
-                    id, name, description, status, traffic_allocation, started_at, ended_at,
+                    id, user_id, name, description, status, traffic_allocation, started_at, ended_at,
                     created_at: now,
                     updated_at: now
                 });
@@ -146,6 +154,26 @@ class InMemoryDatabase implements Database {
             }
         }
     }
+
+    async getUserByEmail(email: string): Promise<User | null> {
+        for (const user of this.users.values()) {
+            if (user.email === email) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+    async createUser(userData: Omit<User, 'id' | 'created_at'>): Promise<User> {
+        const id = `usr_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        const user: User = {
+            id,
+            ...userData,
+            created_at: new Date().toISOString()
+        };
+        this.users.set(id, user);
+        return user;
+    }
 }
 
 // Singleton instance
@@ -168,8 +196,11 @@ export function getDatabase(): Database {
 // Database operations
 export const db = {
     // Experiments
-    async getExperiments(): Promise<Experiment[]> {
+    async getExperiments(userId?: string): Promise<Experiment[]> {
         const db = getDatabase();
+        if (userId) {
+            return db.query<Experiment>('SELECT * FROM experiments WHERE user_id = ? ORDER BY created_at DESC', [userId]);
+        }
         return db.query<Experiment>('SELECT * FROM experiments ORDER BY created_at DESC');
     },
 
@@ -182,8 +213,8 @@ export const db = {
     async createExperiment(experiment: Omit<Experiment, 'created_at' | 'updated_at'>): Promise<void> {
         const db = getDatabase();
         await db.execute(
-            'INSERT INTO experiments (id, name, description, status, traffic_allocation, started_at, ended_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [experiment.id, experiment.name, experiment.description, experiment.status, experiment.traffic_allocation, experiment.started_at, experiment.ended_at]
+            'INSERT INTO experiments (id, user_id, name, description, status, traffic_allocation, started_at, ended_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [experiment.id, experiment.user_id, experiment.name, experiment.description, experiment.status, experiment.traffic_allocation, experiment.started_at, experiment.ended_at]
         );
     },
 
@@ -252,5 +283,16 @@ export const db = {
       GROUP BY variation_id`,
             [experimentId]
         );
+    },
+
+    // Users
+    async getUserByEmail(email: string): Promise<User | null> {
+        const db = getDatabase();
+        return db.getUserByEmail(email);
+    },
+
+    async createUser(userData: Omit<User, 'id' | 'created_at'>): Promise<User> {
+        const db = getDatabase();
+        return db.createUser(userData);
     }
 };

@@ -1,6 +1,16 @@
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  image TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Experiments table
 CREATE TABLE IF NOT EXISTS experiments (
   id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
   status TEXT NOT NULL CHECK (status IN ('draft', 'running', 'paused', 'completed')),
@@ -8,7 +18,8 @@ CREATE TABLE IF NOT EXISTS experiments (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   started_at TEXT,
-  ended_at TEXT
+  ended_at TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- Variations table
@@ -51,6 +62,8 @@ CREATE TABLE IF NOT EXISTS events (
 );
 
 -- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_experiments_user ON experiments(user_id);
 CREATE INDEX IF NOT EXISTS idx_experiments_status ON experiments(status);
 CREATE INDEX IF NOT EXISTS idx_variations_experiment ON variations(experiment_id);
 CREATE INDEX IF NOT EXISTS idx_assignments_experiment ON assignments(experiment_id);
