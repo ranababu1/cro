@@ -8,11 +8,11 @@ export default function LandingPage() {
         <div className="hero-content text-center">
           <div className="max-w-4xl">
             <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Self-Hosted A/B Testing Platform
+              Free A/B Testing Platform
             </h1>
             <p className="text-xl mb-8 text-base-content/80">
               Powerful, cost-efficient A/B testing with deterministic user assignment and statistical rigor.
-              Deploy on your infrastructure, own your data.
+              Run your experiments at zero cost.
             </p>
 
             <div className="flex gap-4 justify-center mb-12">
@@ -39,7 +39,7 @@ export default function LandingPage() {
               <div className="stat">
                 <div className="stat-title">Cost</div>
                 <div className="stat-value text-accent">$0</div>
-                <div className="stat-desc">Self-hosted, open source</div>
+                <div className="stat-desc">Forever free</div>
               </div>
             </div>
           </div>
@@ -83,11 +83,11 @@ export default function LandingPage() {
               <div className="card-body">
                 <h3 className="card-title text-2xl">
                   <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  Self-Hosted
+                  Secure & Private
                 </h3>
-                <p>Deploy on Vercel + Cloudflare D1 or your own infrastructure. You own your data.</p>
+                <p>Your data is protected with enterprise-grade security. Full control over your experiments and results.</p>
               </div>
             </div>
 
@@ -100,7 +100,7 @@ export default function LandingPage() {
                   </svg>
                   Lightweight SDK
                 </h3>
-                <p>Vanilla JavaScript SDK with localStorage caching. No heavy dependencies.</p>
+                <p>Lightweight JavaScript SDK. Designed for simplicity and efficient performance. No heavy dependencies.</p>
               </div>
             </div>
 
@@ -111,9 +111,9 @@ export default function LandingPage() {
                   <svg className="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Cost Efficient
+                  Zero Cost
                 </h3>
-                <p>Free to run on free tiers. Cloudflare D1 provides generous limits for most use cases.</p>
+                <p>Free forever. No hidden fees, no credit card required. Run unlimited experiments for your business.</p>
               </div>
             </div>
 
@@ -122,11 +122,11 @@ export default function LandingPage() {
               <div className="card-body">
                 <h3 className="card-title text-2xl">
                   <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Developer Friendly
+                  Easy Integration
                 </h3>
-                <p>RESTful API, TypeScript support, and comprehensive documentation.</p>
+                <p>Simple JavaScript SDK gets you started in minutes. RESTful API for advanced use cases.</p>
               </div>
             </div>
           </div>
@@ -150,8 +150,7 @@ export default function LandingPage() {
       <footer className="footer footer-center p-10 bg-base-300 text-base-content">
         <div>
           <p className="font-bold text-lg">CRO Platform</p>
-          <p>Self-hosted A/B testing for modern teams</p>
-          <p className="text-sm opacity-60">Built with Next.js, Tailwind CSS, and daisyUI</p>
+          <p>Free A/B testing for growing businesses</p>
         </div>
       </footer>
     </div>
