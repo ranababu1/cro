@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import DevToast from './components/DevToast';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-base-300">
+      <DevToast />
       {/* Hero Section */}
       <div className="hero min-h-screen">
         <div className="hero-content text-center">
