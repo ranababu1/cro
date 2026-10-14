@@ -6,14 +6,16 @@
  */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hand: var(--font-hand-face), cursive;
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-500: #5b5bd6;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
+  /* Green accent. 600/700 keep AA contrast with white text. */
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-500: #10b981;
+  --color-brand-600: #047857;
+  --color-brand-700: #065f46;
 
   --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
   --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06);
@@ -34,4 +36,33 @@
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-600;
   }
+}
+
+/* Marketing page background blobs. Transform-only animation, disabled for reduced motion. */
+@keyframes blob-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  33% { transform: translate3d(4%, -3%, 0) scale(1.08) rotate(8deg); }
+  66% { transform: translate3d(-3%, 4%, 0) scale(0.95) rotate(-6deg); }
+}
+@keyframes blob-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate3d(-5%, 3%, 0) scale(1.12) rotate(-10deg); }
+}
+@keyframes blob-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
+  40% { transform: translate3d(3%, 5%, 0) scale(0.92); }
+  75% { transform: translate3d(-4%, -2%, 0) scale(1.1); }
+}
+.blob {
+  position: absolute;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  filter: blur(48px);
+  will-change: transform;
+  pointer-events: none;
+}
+.blob-a { animation: blob-drift-a 22s ease-in-out infinite; }
+.blob-b { animation: blob-drift-b 28s ease-in-out infinite; }
+.blob-c { animation: blob-drift-c 18s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .blob-a, .blob-b, .blob-c { animation: none; }
 }

@@ -1,6 +1,6 @@
 # Current State
 
-As of 2026-10-14 16:20 IST, branch redesign/saas-ui (Phase 1 milestone M0, platform admin, and the UI redesign). Usable for local development and
+As of 2026-10-14 18:20 IST, branch redesign/homepage-mockup (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
@@ -17,7 +17,7 @@ users, organizations (with status, suspended_at, suspended_reason, plan, monthly
 experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
 
 ## UI
-- Light, neutral B2B design with one indigo accent. See the UI conventions in `docs/agent.md`.
+- Light, neutral B2B design with one green accent, branded freeabtest.com (leaf logo). The landing page follows the homepage mockup: hero with an example-data dashboard mock, "Works with your stack" row (only JavaScript and HTML available, the rest marked Planned), How it works, Test anything section and a stats strip of verified facts, with animated blobs. See the UI conventions in `docs/agent.md`.
 - Marketing page `/`: hero with an example results card (labelled example data), features available today, how it works with the SDK snippet,
   public roadmap by phase, pricing placeholder (clearly marked, no prices), FAQ, footer.
 - Sign-in page `/signin` (Google). next-auth uses it as its sign-in page.
