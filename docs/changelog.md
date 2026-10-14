@@ -32,3 +32,4 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 | 759f0e7 | 2025-12-13 22:22 IST | Experiments setup updated |
 | 3322f4f | 2025-12-13 10:22 IST | Minor Update |
 | 3bed0c1 | 2025-12-13 09:34 IST | Initial commit from Create Next App |
+| ef4f7f7 | 2026-10-15 03:38 IST | Trimmed README to overview and features only |
