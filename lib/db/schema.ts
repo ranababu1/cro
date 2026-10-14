@@ -136,7 +136,7 @@ export const events = sqliteTable('events', {
     variation_id: text('variation_id').notNull().references(() => variations.id, { onDelete: 'cascade' }),
     environment_id: text('environment_id').references(() => environments.id, { onDelete: 'cascade' }),
     user_id: text('user_id').notNull(),
-    event_type: text('event_type', { enum: ['page_view', 'conversion'] }).notNull(),
+    event_type: text('event_type', { enum: ['page_view', 'conversion', 'redirect'] }).notNull(),
     event_name: text('event_name'),
     goal_id: text('goal_id').references(() => goals.id, { onDelete: 'set null' }),
     metadata: text('metadata'),

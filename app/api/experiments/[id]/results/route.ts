@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment } from '@/lib/access';
 import type { ExperimentResults, GoalResults, VariationMetrics } from '@/lib/types';
+import { buildLiveStats } from '@/lib/liveStats';
 import { calculateConfidenceInterval, calculateStatisticalSignificance } from '@/lib/statistics';
 
 function metricsFromStats(
@@ -114,6 +115,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             statistical_significance: statisticalSignificance,
             sample_size: variationMetrics.reduce((sum, v) => sum + v.total_users, 0),
             winner,
+            live: buildLiveStats(variations, goals, await db.getLiveCounts(id, environmentId)),
         };
         return NextResponse.json(results);
     } catch (error) {

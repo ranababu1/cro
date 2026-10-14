@@ -57,6 +57,13 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
   Past the experiment limit, starting a new experiment returns 403 (resuming paused ones is allowed). No billing.
 - Browser SDK `public/sdk.js` (needs `apiKey` in `ABTest.init`). The duplicate `public/ab-sdk.js` was removed.
 
+- Live stats on the experiment Results tab (auto-refresh every 30 s while running): total visitors, visitors and share per variation,
+  visitors redirected from the control URL to each variation URL (recorded server side as a `redirect` event at bootstrap), page views,
+  goal clicks per CSS-selector goal by variation ranked by clicks, conversion rate with Wilson 95% interval, relative uplift vs control
+  with a 95% interval (Newcombe score method), status per goal and overall ("Variation 1 is ahead", "Control is ahead", "Too early to call";
+  significance needs 100+ visitors per arm and p < 0.05), daily unique visitors chart (UTC). Empty state before the first visitor.
+  Experiments list shows visitors, goal clicks and the result so far. Logic in `lib/liveStats.ts`, counts in `db.getLiveCounts`.
+
 ## Fixes in this milestone
 - Removed the `?userId=` query parameter that let anyone list another user's experiments.
 - Experiment detail, update, delete and results endpoints had no auth. They now require access to the project.
