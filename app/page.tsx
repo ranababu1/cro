@@ -79,7 +79,7 @@ const stack = [
 
 const howSteps = [
     { title: 'Create', body: 'Set up an experiment, write the hypothesis and add your variations.', tone: 'bg-sky-50 ring-sky-100', icon: 'text-sky-600 bg-sky-100', d: 'M12 5v14M5 12h14' },
-    { title: 'Test', body: 'Add a few lines of code. Visitors are split between variations automatically.', tone: 'bg-emerald-50 ring-emerald-100', icon: 'text-emerald-700 bg-emerald-100', d: 'M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3' },
+    { title: 'Test', body: 'Add a few lines of code. Visitors are split between variations automatically.', tone: 'bg-teal-50 ring-teal-100', icon: 'text-teal-700 bg-teal-100', d: 'M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3' },
     { title: 'Grow', body: 'Read conversion rates and confidence intervals, then ship the winner.', tone: 'bg-amber-50 ring-amber-100', icon: 'text-amber-700 bg-amber-100', d: 'M4 19 10 13l4 4 6-8M15 9h5v5' },
 ];
 
@@ -114,7 +114,7 @@ function Section({ id, eyebrow, title, intro, children }: { id?: string; eyebrow
 
 function Tick() {
     return (
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
             <CheckIcon className="h-3 w-3" />
         </span>
     );
@@ -141,13 +141,13 @@ export default function LandingPage() {
                     <Blobs variant="hero" />
                     <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:pb-24 lg:pt-20 [&>*]:min-w-0">
                         <div>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/70 px-3 py-1 text-xs font-medium text-emerald-800">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1 text-xs font-medium text-blue-800">
+                                <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
                                 Free A/B testing for growing teams
                             </span>
                             <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight text-zinc-950 sm:text-6xl xl:text-7xl">
                                 Build, test and{' '}
-                                <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent">grow faster.</span>
+                                <span className="bg-gradient-to-r from-blue-600 via-sky-500 to-teal-500 bg-clip-text text-transparent">grow faster.</span>
                             </h1>
                             <p className="mt-6 max-w-lg text-lg leading-8 text-zinc-600">
                                 Run A/B tests on your website, see which version converts better, and make decisions backed by real statistics. A few lines of code to get started.
@@ -164,7 +164,7 @@ export default function LandingPage() {
                         </div>
                         <div className="relative">
                             <DashboardMock />
-                            <div className="pointer-events-none absolute -bottom-14 left-4 hidden items-end gap-1 font-hand text-2xl text-emerald-800 sm:flex lg:-left-10" aria-hidden>
+                            <div className="pointer-events-none absolute -bottom-14 left-4 hidden items-end gap-1 font-hand text-2xl text-blue-800 sm:flex lg:-left-10" aria-hidden>
                                 <svg viewBox="0 0 60 50" className="h-12 w-14 -rotate-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                                     <path d="M6 44C14 30 26 18 50 10" />
                                     <path d="M40 6l10 4-6 9" />
@@ -189,7 +189,7 @@ export default function LandingPage() {
 
                 <section id="how-it-works" className="scroll-mt-20 py-20 sm:py-24">
                     <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                        <p className="text-center text-sm font-medium text-emerald-700">How it works</p>
+                        <p className="text-center text-sm font-medium text-blue-700">How it works</p>
                         <h2 className="mt-2 text-center text-3xl font-bold tracking-tight sm:text-4xl">Simple steps. Real results.</h2>
                         <div className="mt-12 grid gap-6 md:grid-cols-3">
                             {howSteps.map((s, i) => (

@@ -13,7 +13,7 @@ A change without these updates is incomplete.
 
 ## UI conventions
 - Use the components in `app/components/ui` (Button, ButtonLink, Input, Textarea, Select, Field, Card, Badge, StatusBadge, Table, Tabs, EmptyState, Alert, Stat, PageHeader, CodeBlock). Add a component there before repeating markup.
-- Light, neutral theme. Zinc greys for text, borders and surfaces, one brand accent (`brand-600`, green #047857) for primary actions and focus. Green, amber and red only for status.
+- Light, neutral theme. Zinc greys for text, borders and surfaces, one brand accent (`brand-600`, blue #2563eb, with teal #0d9488 / #14b8a6 as the secondary accent) for primary actions and focus. Green (emerald), amber and red only for status, such as Running, Completed and positive lift.
 - No gradients, glows, glassmorphism, emoji or decorative icons. Exception: the marketing landing page (`app/page.tsx`) may use the gradient headline text, the handwritten annotation and the slow animated background blobs (`.blob` in globals.css: transform only, 15 to 30s loops, off under prefers-reduced-motion). Landing page numbers must be verified product facts; mock dashboards are labelled "Example data". Borders are 1px `zinc-200`; shadows are `shadow-xs`, `shadow-card` or `shadow-pop` only.
 - Type: Inter (via next/font). Page titles `text-xl`/`text-2xl font-semibold`, body `text-sm`. Numbers in tables use `tabular-nums`.
 - Spacing: stick to the 4px scale (1, 2, 3, 4, 6, 8, 12, 16, 24).
