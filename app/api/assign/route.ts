@@ -4,6 +4,7 @@ import { AssignmentResponse } from '@/lib/types';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { assignSchema, formatZodError } from '@/lib/validation';
+import { checkVisitorQuota } from '@/lib/quotas';
 
 const notAssigned = (experimentId: string): AssignmentResponse => ({
     experiment_id: experimentId,
@@ -57,6 +58,12 @@ export async function POST(request: NextRequest) {
 
         const assigned = assignUserToVariation(body.user_id, body.experiment_id, experiment.traffic_allocation, variations);
         if (!assigned) return sdkJson(notAssigned(body.experiment_id));
+
+        // Quota hook: stop enrolling new visitors past the plan's monthly limit.
+        const quota = await checkVisitorQuota(auth.ctx.orgId);
+        if (!quota.allowed) {
+            return sdkJson({ ...notAssigned(body.experiment_id), reason: 'quota_exceeded' } satisfies AssignmentResponse);
+        }
 
         await db.createAssignment({
             experiment_id: body.experiment_id,

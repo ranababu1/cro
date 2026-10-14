@@ -57,3 +57,17 @@ export const createApiKeySchema = z.object({
 export function formatZodError(error: z.ZodError): string {
     return error.issues.map((i) => (i.path.length ? `${i.path.join('.')}: ${i.message}` : i.message)).join('; ');
 }
+
+const limit = z.number().int().min(0).max(1_000_000_000).nullable();
+
+export const adminUpdateOrgSchema = z
+    .object({
+        status: z.enum(['active', 'suspended']),
+        suspended_reason: z.string().trim().max(500).nullable(),
+        plan: z.string().trim().min(1).max(50),
+        monthly_visitor_limit: limit,
+        monthly_experiment_limit: limit,
+    })
+    .partial()
+    .strict()
+    .refine((v) => Object.keys(v).length > 0, 'No changes');

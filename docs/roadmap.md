@@ -160,6 +160,12 @@ Goal: a team can install one snippet on a real site, run code-based A/B and A/B/
 13. Admin
 - Multi-tenant organization support
 - Projects and environments
+- Platform super-admin role, separate from org roles (bootstrapped from PLATFORM_ADMIN_EMAILS)
+- Platform admin console: all tenants with members, projects, experiment counts, visitor and event usage
+- Suspend and reactivate tenants (blocks SDK keys, secret keys and dashboard)
+- Basic plan fields on orgs (plan name) and usage tracking and quotas (moved from Phase 2)
+- Monthly active experiment and visitor limits, basic enforcement (moved from Phase 3)
+- Admin actions written to the audit log
 
 Phase 1 exit criteria
 - Real persistence (Postgres) with migrations; no in-memory store anywhere.
@@ -270,7 +276,6 @@ Goal: credible for a team running many tests in parallel, with server-side use, 
 
 13. Admin
 - User and team permissions UI
-- Usage tracking and quotas
 - API usage monitoring
 - Data export and account deletion (needed for GDPR)
 
@@ -329,7 +334,6 @@ Phase 2 exit criteria
 - Identify audience segments with differing responses (heterogeneous effect analysis)
 
 13. Admin and Billing
-- Monthly active experiment and visitor limits
 - Event ingestion limits
 - Plan management and billing (Stripe)
 - System health dashboard
@@ -387,7 +391,8 @@ M0. Foundation (week 1 to 2)
 3. Add Postgres + Drizzle, write initial migration from the data model above; delete in-memory `lib/db.ts` and unused `schema.sql`. Done with SQLite/libSQL instead of Postgres so dev needs no hosted DB; production uses Turso. Schema uses portable types so a Postgres port stays cheap.
 4. Orgs, memberships, projects, environments; keep Google login; scope every query by org. Done (scoped by project membership).
 5. API keys per environment (SDK key public, secret key hashed), key management UI. Done. All keys are stored as hashes and shown once.
-6. Audit log table and write helper used by all mutations. Done for experiments, keys and org creation. No audit UI yet.
+6. Audit log table and write helper used by all mutations. Done for experiments, keys and org creation. Tenant audit log visible in the admin console.
+7. Platform admin and tenant controls (added to Phase 1 on 2026-10-14). Done: super-admin role from PLATFORM_ADMIN_EMAILS, /admin console, suspend and reactivate, plan and monthly limits per org, quota hooks on new visitors and experiment starts, admin actions audited. Billing (Stripe) stays in Phase 3.
 
 M1. Core + SDK (week 3 to 5)
 7. `packages/core`: MurmurHash3 bucketing, traffic allocation, weighted variants, shared test vectors; port logic from `lib/assignment.ts`.

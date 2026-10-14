@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 
 async function getExperiments(userId: string): Promise<Experiment[]> {
     try {
-        const projects = await db.getProjectsForUser(userId);
+        const projects = (await db.getProjectsForUser(userId)).filter((p) => p.org_status === 'active');
         return await db.getExperiments(projects.map((p) => p.id));
     } catch (error) {
         console.error('Failed to fetch experiments:', error);
@@ -26,6 +26,16 @@ export default async function Dashboard() {
                 <Link href="/api/auth/signin" className="btn btn-primary">
                     Sign In with Google
                 </Link>
+            </div>
+        );
+    }
+
+    const memberships = await db.getProjectsForUser(session.user.id || '');
+    if (memberships.length > 0 && memberships.every((p) => p.org_status !== 'active')) {
+        return (
+            <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-4">
+                <h1 className="text-2xl font-bold">Account suspended</h1>
+                <p className="text-base-content/70">Your organization is suspended. Contact support to restore access.</p>
             </div>
         );
     }

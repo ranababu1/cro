@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateId } from '@/lib/ids';
 import { validateVariationWeights } from '@/lib/assignment';
-import { getUserContext, unauthorized } from '@/lib/requestAuth';
+import { requireUserContext } from '@/lib/requestAuth';
 import { createExperimentSchema, formatZodError } from '@/lib/validation';
 import { orgIdForProject } from '@/lib/access';
 
 // GET /api/experiments - List experiments the caller can access
 export async function GET(request: NextRequest) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const experiments = await db.getExperiments(ctx.projectIds);
         return NextResponse.json({ experiments });
     } catch (error) {
@@ -22,8 +22,8 @@ export async function GET(request: NextRequest) {
 // POST /api/experiments - Create a new experiment
 export async function POST(request: NextRequest) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
 
         const parsed = createExperimentSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) {

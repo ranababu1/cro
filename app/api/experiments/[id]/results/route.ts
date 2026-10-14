@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getUserContext, unauthorized } from '@/lib/requestAuth';
+import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment } from '@/lib/access';
 import { ExperimentResults, VariationMetrics } from '@/lib/types';
 import {
@@ -14,8 +14,8 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
         const experiment = await getAccessibleExperiment(ctx, id);
 

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getUserContext, unauthorized } from '@/lib/requestAuth';
+import { requireUserContext, unauthorized } from '@/lib/requestAuth';
 import { createApiKeySchema, formatZodError } from '@/lib/validation';
 import { orgIdForProject } from '@/lib/access';
 
 // GET /api/keys - Environments and API keys (prefix only) for the caller's projects. Session only.
 export async function GET(request: NextRequest) {
-    const ctx = await getUserContext(request);
-    if (!ctx || ctx.via !== 'session') return unauthorized();
+    const ctx = await requireUserContext(request);
+    if (ctx instanceof NextResponse) return ctx;
+    if (ctx.via !== 'session') return unauthorized();
     const projects = await Promise.all(
         ctx.projectIds.map(async (projectId) => ({
             project: await db.getProject(projectId),
@@ -20,8 +21,9 @@ export async function GET(request: NextRequest) {
 
 // POST /api/keys - Create a key. The plaintext is returned once and never stored.
 export async function POST(request: NextRequest) {
-    const ctx = await getUserContext(request);
-    if (!ctx || ctx.via !== 'session') return unauthorized();
+    const ctx = await requireUserContext(request);
+    if (ctx instanceof NextResponse) return ctx;
+    if (ctx.via !== 'session') return unauthorized();
     const parsed = createApiKeySchema.safeParse(await request.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
 

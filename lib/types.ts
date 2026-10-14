@@ -47,6 +47,7 @@ export interface AssignmentResponse {
     variation_name: string;
     variation_url?: string;
     assigned: boolean;
+    reason?: 'quota_exceeded';
 }
 
 export interface TrackEventRequest {

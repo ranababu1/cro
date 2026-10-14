@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, desc, asc, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, desc, asc, sql, gte, count } from 'drizzle-orm';
 import { getDb } from './client';
 import * as s from './schema';
 import type { EnvironmentKey } from './schema';
@@ -26,7 +26,21 @@ export interface SdkKeyContext {
     environmentKey: EnvironmentKey;
     projectId: string;
     orgId: string;
+    orgStatus: 'active' | 'suspended';
     type: ApiKeyType;
+}
+
+export interface OrgUpdate {
+    status?: 'active' | 'suspended';
+    suspended_reason?: string | null;
+    plan?: string;
+    monthly_visitor_limit?: number | null;
+    monthly_experiment_limit?: number | null;
+}
+
+/** First instant of the current calendar month in UTC, as an ISO string. */
+export function monthStartIso(now = new Date()): string {
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
 export const db = {
@@ -81,9 +95,10 @@ export const db = {
     async getProjectsForUser(userId: string) {
         const d = await getDb();
         return d
-            .select({ id: s.projects.id, org_id: s.projects.org_id, name: s.projects.name })
+            .select({ id: s.projects.id, org_id: s.projects.org_id, name: s.projects.name, org_status: s.organizations.status })
             .from(s.memberships)
             .innerJoin(s.projects, eq(s.projects.org_id, s.memberships.org_id))
+            .innerJoin(s.organizations, eq(s.organizations.id, s.memberships.org_id))
             .where(eq(s.memberships.user_id, userId))
             .orderBy(asc(s.projects.created_at));
     },
@@ -170,10 +185,12 @@ export const db = {
                 environmentKey: s.environments.key,
                 projectId: s.projects.id,
                 orgId: s.projects.org_id,
+                orgStatus: s.organizations.status,
             })
             .from(s.apiKeys)
             .innerJoin(s.environments, eq(s.environments.id, s.apiKeys.environment_id))
             .innerJoin(s.projects, eq(s.projects.id, s.environments.project_id))
+            .innerJoin(s.organizations, eq(s.organizations.id, s.projects.org_id))
             .where(eq(s.apiKeys.key_hash, hashApiKey(plaintext)))
             .limit(1);
         const row = rows[0];
@@ -189,6 +206,7 @@ export const db = {
             environmentKey: row.environmentKey,
             projectId: row.projectId,
             orgId: row.orgId,
+            orgStatus: row.orgStatus,
         };
     },
 
@@ -288,6 +306,76 @@ export const db = {
             .from(s.events)
             .where(where)
             .groupBy(s.events.variation_id);
+    },
+
+    // Tenants, usage and quotas
+    async getOrganization(orgId: string) {
+        const d = await getDb();
+        return (await d.query.organizations.findFirst({ where: eq(s.organizations.id, orgId) })) ?? null;
+    },
+
+    async updateOrganization(orgId: string, update: OrgUpdate): Promise<void> {
+        const d = await getDb();
+        const values: Partial<typeof s.organizations.$inferInsert> = { ...update };
+        if (update.status === 'suspended') values.suspended_at = nowIso();
+        if (update.status === 'active') {
+            values.suspended_at = null;
+            values.suspended_reason = null;
+        }
+        await d.update(s.organizations).set(values).where(eq(s.organizations.id, orgId));
+    },
+
+    /** Unique visitors assigned and events recorded across the org, since `since` (ISO) or all time. */
+    async getOrgUsage(orgId: string, since?: string) {
+        const d = await getDb();
+        const projectIds = (await d.select({ id: s.projects.id }).from(s.projects).where(eq(s.projects.org_id, orgId))).map((p) => p.id);
+        if (projectIds.length === 0) return { visitors: 0, events: 0, experiments: 0, running: 0 };
+        const expIds = d.select({ id: s.experiments.id }).from(s.experiments).where(inArray(s.experiments.project_id, projectIds));
+        const [v] = await d
+            .select({ n: sql<number>`count(distinct ${s.assignments.user_id})` })
+            .from(s.assignments)
+            .where(since ? and(inArray(s.assignments.experiment_id, expIds), gte(s.assignments.assigned_at, since)) : inArray(s.assignments.experiment_id, expIds));
+        const [e] = await d
+            .select({ n: count() })
+            .from(s.events)
+            .where(since ? and(inArray(s.events.experiment_id, expIds), gte(s.events.created_at, since)) : inArray(s.events.experiment_id, expIds));
+        const [x] = await d.select({ n: count() }).from(s.experiments).where(inArray(s.experiments.project_id, projectIds));
+        const [r] = await d
+            .select({ n: count() })
+            .from(s.experiments)
+            .where(and(inArray(s.experiments.project_id, projectIds), eq(s.experiments.status, 'running')));
+        return { visitors: Number(v?.n ?? 0), events: Number(e?.n ?? 0), experiments: Number(x?.n ?? 0), running: Number(r?.n ?? 0) };
+    },
+
+    /** Experiments in the org first started on or after `since`. Used for the monthly experiment quota. */
+    async countExperimentsStartedSince(orgId: string, since: string): Promise<number> {
+        const d = await getDb();
+        const [row] = await d
+            .select({ n: count() })
+            .from(s.experiments)
+            .innerJoin(s.projects, eq(s.projects.id, s.experiments.project_id))
+            .where(and(eq(s.projects.org_id, orgId), gte(s.experiments.started_at, since)));
+        return Number(row?.n ?? 0);
+    },
+
+    async listOrganizations() {
+        const d = await getDb();
+        return d.select().from(s.organizations).orderBy(desc(s.organizations.created_at));
+    },
+
+    async getOrgMembers(orgId: string) {
+        const d = await getDb();
+        return d
+            .select({ user_id: s.users.id, email: s.users.email, name: s.users.name, role: s.memberships.role, joined_at: s.memberships.created_at })
+            .from(s.memberships)
+            .innerJoin(s.users, eq(s.users.id, s.memberships.user_id))
+            .where(eq(s.memberships.org_id, orgId))
+            .orderBy(asc(s.memberships.created_at));
+    },
+
+    async getOrgProjects(orgId: string) {
+        const d = await getDb();
+        return d.select().from(s.projects).where(eq(s.projects.org_id, orgId)).orderBy(asc(s.projects.created_at));
     },
 
     // Audit

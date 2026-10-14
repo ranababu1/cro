@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getUserContext, unauthorized } from '@/lib/requestAuth';
+import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
+import { checkExperimentStartQuota } from '@/lib/quotas';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -19,8 +20,8 @@ const VALID_TRANSITIONS: Record<ExperimentStatus, ExperimentStatus[]> = {
 // GET /api/experiments/[id]
 export async function GET(request: NextRequest, { params }: Params) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();
@@ -35,8 +36,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 // PATCH /api/experiments/[id]
 export async function PATCH(request: NextRequest, { params }: Params) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();
@@ -52,7 +53,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
                     { status: 400 },
                 );
             }
-            if (updates.status === 'running' && !experiment.started_at) updates.started_at = new Date().toISOString();
+            if (updates.status === 'running' && !experiment.started_at) {
+                // Quota hook: first start counts against the plan's monthly experiment limit.
+                const quota = await checkExperimentStartQuota(await orgIdForProject(experiment.project_id));
+                if (!quota.allowed) {
+                    return NextResponse.json(
+                        { error: `Monthly experiment limit reached (${quota.used} of ${quota.limit}). Contact support to upgrade.` },
+                        { status: 403 },
+                    );
+                }
+                updates.started_at = new Date().toISOString();
+            }
             if (updates.status === 'completed' && !experiment.ended_at) updates.ended_at = new Date().toISOString();
         }
 
@@ -78,8 +89,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 // DELETE /api/experiments/[id] - Only drafts can be deleted
 export async function DELETE(request: NextRequest, { params }: Params) {
     try {
-        const ctx = await getUserContext(request);
-        if (!ctx) return unauthorized();
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();

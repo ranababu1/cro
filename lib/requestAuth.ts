@@ -48,6 +48,9 @@ export async function authenticateSdkRequest(
     if (!ctx) {
         return { error: sdkJson({ error: 'Unknown or revoked API key' }, 401) };
     }
+    if (ctx.orgStatus !== 'active') {
+        return { error: sdkJson({ error: 'This account is suspended' }, 403) };
+    }
     return { ctx };
 }
 
@@ -56,6 +59,8 @@ export interface UserContext {
     projectIds: string[];
     orgIds: string[];
     via: 'session' | 'secret_key';
+    /** True when every org the caller belongs to is suspended. */
+    suspended: boolean;
 }
 
 /**
@@ -69,18 +74,32 @@ export async function getUserContext(request?: NextRequest): Promise<UserContext
         if (apiKeyType(key) !== 'secret') return null;
         const ctx = await db.authenticateApiKey(key);
         if (!ctx) return null;
-        return { userId: null, projectIds: [ctx.projectId], orgIds: [ctx.orgId], via: 'secret_key' };
+        const active = ctx.orgStatus === 'active';
+        return { userId: null, projectIds: active ? [ctx.projectId] : [], orgIds: active ? [ctx.orgId] : [], via: 'secret_key', suspended: !active };
     }
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
     if (!userId) return null;
-    const projects = await db.getProjectsForUser(userId);
+    const all = await db.getProjectsForUser(userId);
+    // Projects in suspended orgs are invisible, so every scoped query excludes them.
+    const projects = all.filter((p) => p.org_status === 'active');
     return {
         userId,
         projectIds: projects.map((p) => p.id),
         orgIds: [...new Set(projects.map((p) => p.org_id))],
         via: 'session',
+        suspended: all.length > 0 && projects.length === 0,
     };
+}
+
+/**
+ * Like getUserContext but returns a ready error: 401 when not signed in, 403 when the caller's tenant is suspended.
+ */
+export async function requireUserContext(request?: NextRequest): Promise<UserContext | NextResponse> {
+    const ctx = await getUserContext(request);
+    if (!ctx) return unauthorized();
+    if (ctx.suspended) return NextResponse.json({ error: 'This account is suspended' }, { status: 403 });
+    return ctx;
 }
 
 export function unauthorized(): NextResponse {

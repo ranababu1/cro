@@ -1,6 +1,6 @@
 # Current State
 
-As of 2026-10-14 11:48 IST, branch phase1/foundation (Phase 1 milestone M0). Usable for local development and
+As of 2026-10-14 15:15 IST, branch phase1/foundation (Phase 1 milestone M0 plus platform admin). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
@@ -9,11 +9,11 @@ a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and 
 - Database: SQLite through libSQL (`@libsql/client`) and Drizzle ORM. Local file `data/cro.db` by default, Turso in production.
   Schema in `lib/db/schema.ts`, SQL migrations in `drizzle/`, applied automatically on first request (turn off with `DB_AUTO_MIGRATE=false`) or with `npm run db:migrate`.
 - Validation: Zod (`lib/validation.ts`).
-- Tests: Vitest, 54 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes).
+- Tests: Vitest, 64 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes, platform admin authz, suspension and quotas).
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, tests and build on pushes to main and on pull requests.
 
 ## Data model
-users, organizations, memberships (owner or member), projects, environments (dev, staging, prod), api_keys,
+users, organizations (with status, suspended_at, suspended_reason, plan, monthly_visitor_limit, monthly_experiment_limit), memberships (owner or member), projects, environments (dev, staging, prod), api_keys,
 experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
 
 ## Features that work
@@ -28,6 +28,14 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Results: conversion rate per variation, Wilson confidence intervals, two-proportion z-test, optional `?environment=dev|staging|prod` filter.
   Conversions count unique converting visitors, so rates cannot exceed 100%.
 - Audit log entries for org creation, experiment create, update, status change and delete, and key create and revoke.
+- Platform admin: super-admins are listed in `PLATFORM_ADMIN_EMAILS` (separate from org roles; secret keys never grant it).
+  `/admin` (server-side guarded, 404 for everyone else) lists all tenants with members, projects, experiment and running counts,
+  visitors and events this month, limits and created date. `/admin/orgs/[id]` shows details and the tenant audit log and lets the admin
+  suspend or reactivate the tenant and edit plan name and monthly visitor and experiment limits. API: `GET /api/admin/orgs`, `GET` and `PATCH /api/admin/orgs/[id]`.
+  Every admin change is audited as `admin:suspend`, `admin:reactivate` or `admin:update` with before and after values.
+- Suspension: SDK keys of a suspended tenant get 403 on assign and track, secret keys get 403, and the dashboard and management APIs return 403 or show a suspended page. Data is kept.
+- Quotas (basic, calendar month UTC, null = unlimited): past the visitor limit, new visitors get `assigned: false, reason: "quota_exceeded"` while already enrolled visitors keep their variant.
+  Past the experiment limit, starting a new experiment returns 403 (resuming paused ones is allowed). No billing.
 - Browser SDK `public/sdk.js` (needs `apiKey` in `ABTest.init`). The duplicate `public/ab-sdk.js` was removed.
 
 ## Fixes in this milestone
@@ -42,7 +50,9 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - CORS allows any origin. Per-project domain allowlists come in M2 with the new ingest endpoint.
 - SDK still makes a server call per visitor, has no anti-flicker, no batching or retries. Rebuilt in M1.
 - No targeting, goal definitions, revenue metrics, SRM check, sample size page or CSV export (M1 to M3).
-- No audit log UI, no org or member management UI, roles are owner or member only.
+- Audit log is visible only to platform admins. No org or member management UI for tenants, org roles are owner or member only.
+- Quota checks run a count query per new visitor. Cache usage or move it to the rollup job before heavy traffic.
+- Platform admin is env-based only: no admin UI to grant it, and no impersonation (not planned).
 - Not a monorepo yet; no Playwright tests yet.
 
 ## Next

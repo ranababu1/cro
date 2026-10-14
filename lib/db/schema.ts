@@ -18,6 +18,14 @@ export const organizations = sqliteTable('organizations', {
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     slug: text('slug').notNull().unique(),
+    // Platform-level tenant controls, editable only by platform admins.
+    status: text('status', { enum: ['active', 'suspended'] }).notNull().default('active'),
+    suspended_at: text('suspended_at'),
+    suspended_reason: text('suspended_reason'),
+    plan: text('plan').notNull().default('free'),
+    // null means unlimited
+    monthly_visitor_limit: integer('monthly_visitor_limit'),
+    monthly_experiment_limit: integer('monthly_experiment_limit'),
     created_at: text('created_at').notNull().default(now),
 });
 
