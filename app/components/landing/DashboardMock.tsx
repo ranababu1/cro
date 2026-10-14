@@ -23,9 +23,9 @@ const nav = [
 
 function Stat({ label, value, delta }: { label: string; value: string; delta: string }) {
     return (
-        <div className="rounded-xl border border-zinc-200/80 bg-white p-4 shadow-[0_1px_2px_rgb(15_23_42/0.04)]">
-            <p className="text-[13px] text-zinc-500">{label}</p>
-            <p className="mt-1 text-[28px] font-semibold leading-tight tracking-tight text-zinc-900 tabular-nums">{value}</p>
+        <div className="min-w-0 rounded-xl border border-zinc-200/80 bg-white p-2.5 shadow-[0_1px_2px_rgb(15_23_42/0.04)] sm:p-4">
+            <p className="truncate text-[11px] text-zinc-500 sm:text-[13px]">{label}</p>
+            <p className="mt-1 text-[19px] font-semibold leading-tight sm:text-[28px] tracking-tight text-zinc-900 tabular-nums">{value}</p>
             <span className="mt-2 inline-flex items-center gap-1 rounded-md bg-emerald-50 px-1.5 py-0.5 text-[11px] font-medium text-emerald-700">↑ {delta}</span>
         </div>
     );
@@ -78,8 +78,8 @@ export function DashboardMock() {
             </div>
             <div className="flex items-center border-b border-zinc-100 px-5 py-3">
                 <span className="flex items-center gap-1.5 text-[15px] font-semibold"><LeafMark className="h-5 w-5" />freeabtest<span className="font-normal text-zinc-500">.com</span></span>
-                <span className="ml-auto mr-3 rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">Example data</span>
-                <span className="text-[13px] text-zinc-700">My Project ⌄</span>
+                <span className="ml-auto mr-3 hidden rounded bg-zinc-100 sm:inline px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">Example data</span>
+                <span className="ml-auto text-[13px] text-zinc-700 sm:ml-0">My Project ⌄</span>
                 <span className="ml-3 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-200 text-[11px] font-semibold text-zinc-600">IH</span>
             </div>
             <div className="flex">
@@ -94,7 +94,7 @@ export function DashboardMock() {
                     <div className="flex flex-wrap items-center gap-3">
                         <p className="text-[21px] font-semibold tracking-tight text-zinc-900">Homepage Headline Test</p>
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-medium text-emerald-700"><span className="h-2 w-2 rounded-full bg-emerald-500" />Running</span>
-                        <span className="ml-auto rounded-lg border border-zinc-200 px-2.5 py-1.5 text-[12px] text-zinc-700">Last 30 days ⌄</span>
+                        <span className="rounded-lg border border-zinc-200 px-2.5 py-1.5 text-[12px] text-zinc-700 sm:ml-auto">Last 30 days ⌄</span>
                     </div>
                     <div className="mt-4 flex gap-6 border-b border-zinc-100 text-[13px] text-zinc-500">
                         {['Overview', 'Results', 'Variations', 'Audience', 'Settings'].map((t, i) => (
