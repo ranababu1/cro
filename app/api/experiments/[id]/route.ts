@@ -26,7 +26,8 @@ export async function GET(request: NextRequest, { params }: Params) {
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();
         const variations = await db.getVariations(id);
-        return NextResponse.json({ experiment, variations });
+        const goals = await db.getGoals(id);
+        return NextResponse.json({ experiment, variations, goals });
     } catch (error) {
         console.error('Failed to fetch experiment:', error);
         return NextResponse.json({ error: 'Failed to fetch experiment' }, { status: 500 });
@@ -79,7 +80,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
         const updatedExperiment = await db.getExperiment(id);
         const variations = await db.getVariations(id);
-        return NextResponse.json({ experiment: updatedExperiment, variations });
+        const goals = await db.getGoals(id);
+        return NextResponse.json({ experiment: updatedExperiment, variations, goals });
     } catch (error) {
         console.error('Failed to update experiment:', error);
         return NextResponse.json({ error: 'Failed to update experiment' }, { status: 500 });

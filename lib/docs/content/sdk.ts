@@ -8,14 +8,8 @@ export const sdk: DocPage = {
     blocks: [
         { type: 'p', text: 'The SDK is a single dependency-free script, `sdk.js`, served by freeabtest.com. It is about 7.5 KB raw and about 2 KB gzipped. It exposes one global object, `window.ABTest`.' },
         { type: 'h2', text: 'Install' },
-        { type: 'code', label: 'HTML', code: `<script src="https://YOUR-HOST/sdk.js"></script>
-<script>
-  ABTest.init({
-    apiUrl: 'https://YOUR-HOST',
-    apiKey: 'cro_pk_prod_...',
-    userId: undefined // optional, see below
-  });
-</script>` },
+        { type: 'code', label: 'HTML', code: `<script src="https://YOUR-HOST/sdk.js" data-key="YOUR_SDK_KEY" async></script>` },
+        { type: 'p', text: 'Put the same tag on the control page and every variation page. The SDK reads the key from `data-key`, matches a running test by the current URL, and handles bucketing, redirects and click goals automatically.' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'An npm package, React and Next.js helpers and server SDKs are planned for Phase 2. Today, load the script tag as shown.' },
         { type: 'h2', text: 'init(options)', id: 'init' },
         { type: 'p', text: 'Call once per page before anything else. It stores the configuration and makes no network request.' },

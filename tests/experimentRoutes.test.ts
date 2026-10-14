@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => session.current) }));
@@ -23,13 +23,7 @@ const json = (method: string, url: string, body?: unknown, headers: Record<strin
     });
 const params = (id: string) => ({ params: Promise.resolve({ id }) });
 
-const validBody = {
-    name: 'Homepage CTA',
-    variations: [
-        { name: 'Control', weight: 50, is_control: true },
-        { name: 'Green button', weight: 50, is_control: false },
-    ],
-};
+const validBody = flowExperimentBody();
 
 beforeAll(async () => {
     cleanup = useTempDatabase();
@@ -37,6 +31,7 @@ beforeAll(async () => {
     const b = await db.createUser({ email: 'bob@example.com', name: 'Bob' });
     const wsA = await db.ensureWorkspace(a);
     await db.ensureWorkspace(b);
+    await seedProjectDomain(wsA.projectId, 'localhost');
     alice = a.id;
     bob = b.id;
     const env = (await db.getEnvironments(wsA.projectId))[0];
@@ -84,7 +79,7 @@ describe('experiment API', () => {
 
     it('accepts blank optional fields from the form', async () => {
         session.current = { user: { id: alice } };
-        const body = { ...validBody, name: 'Blank fields', description: '', variations: validBody.variations.map((v) => ({ ...v, description: '', url: '' })) };
+        const body = { ...validBody, name: 'Blank fields', description: '', variations: validBody.variations.map((v) => ({ ...v, description: '' })) };
         expect((await create(json('POST', '/api/experiments', body))).status).toBe(201);
     });
 

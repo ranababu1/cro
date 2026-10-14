@@ -1,244 +1,196 @@
 /**
- * A/B Testing Client SDK
- * Lightweight JavaScript snippet for embedding on client sites
- * 
- * Usage:
- * <script src="https://your-domain.com/sdk.js"></script>
- * <script>
- *   ABTest.init({
- *     apiUrl: 'https://your-domain.com',
- *     apiKey: 'cro_pk_prod_...', // SDK key from Settings > API Keys
- *     userId: 'unique-user-id' // or leave empty for auto-generated
- *   });
- * 
- *   ABTest.getVariation('experiment-id').then(variation => {
- *     if (variation.assigned) {
- *       // Apply variation logic
- *       if (variation.variation_name === 'Variation A') {
- *         // Show variation A
- *       }
- *     }
- *   });
- * 
- *   // Track conversions
- *   ABTest.trackConversion('experiment-id', 'button_click');
- * </script>
+ * freeabtest.com browser SDK
+ *
+ * Install once in <head> on the control and every variation page:
+ *   <script src="https://YOUR-HOST/sdk.js" data-key="cro_pk_..." async></script>
+ *
+ * The SDK matches the current URL to a running test, sticky-buckets visitors,
+ * redirects variation traffic without flicker, records exposures, and tracks
+ * click goals by CSS selector. Bots are ignored.
  */
-
-(function (window) {
+(function (window, document) {
     'use strict';
 
-    // Configuration
-    let config = {
-        apiUrl: '',
-        apiKey: '',
-        userId: null,
-    };
+    var BOT = /bot|crawl|spider|slurp|facebookexternalhit|preview|headless/i;
+    if (BOT.test(navigator.userAgent || '')) return;
 
-    // User ID management
+    var script = document.currentScript || (function () {
+        var list = document.getElementsByTagName('script');
+        for (var i = list.length - 1; i >= 0; i--) {
+            if ((list[i].src || '').indexOf('sdk.js') !== -1) return list[i];
+        }
+        return null;
+    })();
+
+    var apiKey = (script && (script.getAttribute('data-key') || script.getAttribute('data-api-key'))) || '';
+    var apiUrl = '';
+    if (script && script.src) {
+        try { apiUrl = new URL(script.src).origin; } catch { apiUrl = ''; }
+    }
+    // Allow ABTest.init override for demos and tests.
+    var config = { apiUrl: apiUrl, apiKey: apiKey, userId: null };
+    var FLICKER_MS = 800;
+    var assignmentCache = {};
+    var goalsBound = false;
+    var styleEl = null;
+
+    function hide() {
+        if (styleEl) return;
+        styleEl = document.createElement('style');
+        styleEl.setAttribute('data-abtest-flicker', '1');
+        styleEl.textContent = 'html.abtest-wait,html.abtest-wait body{visibility:hidden!important}';
+        (document.documentElement || document.head).appendChild(styleEl);
+        document.documentElement.classList.add('abtest-wait');
+        setTimeout(reveal, FLICKER_MS);
+    }
+
+    function reveal() {
+        document.documentElement.classList.remove('abtest-wait');
+        if (styleEl && styleEl.parentNode) styleEl.parentNode.removeChild(styleEl);
+        styleEl = null;
+    }
+
     function getUserId() {
-        if (config.userId) {
-            return config.userId;
+        if (config.userId) return config.userId;
+        try {
+            var id = localStorage.getItem('ab_user_id');
+            if (!id) {
+                id = 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+                localStorage.setItem('ab_user_id', id);
+            }
+            return id;
+        } catch {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
         }
-
-        // Check for existing user ID in localStorage
-        let userId = localStorage.getItem('ab_user_id');
-        if (!userId) {
-            // Generate new user ID
-            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
-            localStorage.setItem('ab_user_id', userId);
-        }
-
-        return userId;
     }
 
-    // Cache for assignments
-    const assignmentCache = new Map();
+    function send(path, body, keepalive) {
+        var url = config.apiUrl + path;
+        var payload = JSON.stringify(body);
+        var headers = { 'Content-Type': 'application/json', 'X-API-Key': config.apiKey };
+        
+        return fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: payload,
+            keepalive: !!keepalive,
+            credentials: 'omit',
+            mode: 'cors',
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, body: j }; }); });
+    }
 
-    /**
-     * Initialize the SDK
-     * @param {Object} options - Configuration options
-     * @param {string} options.apiUrl - Base URL of the API
-     * @param {string} [options.userId] - Optional user ID
-     */
+    function track(experimentId, variationId, eventType, goalId, eventName) {
+        return send('/api/track', {
+            experiment_id: experimentId,
+            variation_id: variationId,
+            user_id: getUserId(),
+            event_type: eventType,
+            goal_id: goalId,
+            event_name: eventName,
+        }, eventType === 'conversion');
+    }
+
+    function bindGoals(data) {
+        if (goalsBound || !data.goals || !data.goals.length || !data.variation_id) return;
+        goalsBound = true;
+        var fired = {};
+        document.addEventListener('click', function (ev) {
+            var node = ev.target;
+            if (!node) return;
+            for (var i = 0; i < data.goals.length; i++) {
+                var g = data.goals[i];
+                try {
+                    var el = node.closest ? node.closest(g.selector) : null;
+                    if (!el) continue;
+                    var key = data.experiment_id + ':' + g.id;
+                    if (fired[key]) continue;
+                    fired[key] = true;
+                    track(data.experiment_id, data.variation_id, 'conversion', g.id, g.name);
+                } catch { /* bad selector */ }
+            }
+        }, true);
+    }
+
+    function redirectTo(variationUrl) {
+        try {
+            var target = new URL(variationUrl, window.location.href);
+            // Keep query and hash from the current page.
+            var cur = new URL(window.location.href);
+            cur.searchParams.forEach(function (v, k) {
+                if (!target.searchParams.has(k)) target.searchParams.set(k, v);
+            });
+            if (cur.hash && !target.hash) target.hash = cur.hash;
+            // Loop guard: do not redirect if already on the variation path.
+            if (window.location.pathname === target.pathname && window.location.origin === target.origin) {
+                reveal();
+                return;
+            }
+            window.location.replace(target.toString());
+        } catch {
+            reveal();
+        }
+    }
+
+    function bootstrap() {
+        if (!config.apiUrl || !config.apiKey) {
+            console.error('[ABTest] Missing apiUrl or data-key');
+            reveal();
+            return Promise.resolve({ matched: false, action: 'none' });
+        }
+        hide();
+        return send('/api/sdk/bootstrap', { url: window.location.href, user_id: getUserId() })
+            .then(function (res) {
+                var data = res.body || { matched: false, action: 'none' };
+                if (!res.ok) {
+                    reveal();
+                    return data;
+                }
+                if (data.action === 'redirect' && data.variation_url) {
+                    redirectTo(data.variation_url);
+                    return data;
+                }
+                reveal();
+                if (data.matched && data.variation_id && data.action !== 'guard') {
+                    assignmentCache[data.experiment_id] = data;
+                    track(data.experiment_id, data.variation_id, 'page_view');
+                    bindGoals(data);
+                }
+                return data;
+            })
+            .catch(function (err) {
+                console.error('[ABTest]', err);
+                reveal();
+                return { matched: false, action: 'none' };
+            });
+    }
+
     function init(options) {
-        if (!options || !options.apiUrl) {
-            console.error('[ABTest] apiUrl is required');
-            return;
-        }
-        if (!options.apiKey) {
-            console.error('[ABTest] apiKey is required (an SDK key, cro_pk_...)');
-            return;
-        }
-
-        config = {
-            ...config,
-            ...options,
-        };
-
+        if (!options) return;
+        if (options.apiUrl) config.apiUrl = options.apiUrl.replace(/\/$/, '');
+        if (options.apiKey) config.apiKey = options.apiKey;
+        if (options.userId) config.userId = options.userId;
     }
 
-    /**
-     * Get variation assignment for an experiment
-     * @param {string} experimentId - Experiment ID
-     * @returns {Promise<Object>} Assignment data
-     */
-    async function getVariation(experimentId) {
-        if (!config.apiUrl) {
-            console.error('[ABTest] SDK not initialized. Call ABTest.init() first.');
-            return { assigned: false };
-        }
-
-        // Check cache
-        if (assignmentCache.has(experimentId)) {
-            return assignmentCache.get(experimentId);
-        }
-
-        try {
-            const userId = getUserId();
-            const response = await fetch(`${config.apiUrl}/api/assign`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': config.apiKey,
-                },
-                body: JSON.stringify({
-                    experiment_id: experimentId,
-                    user_id: userId,
-                }),
-            });
-
-            if (!response.ok) {
-                console.error('[ABTest] Failed to get variation:', response.statusText);
-                return { assigned: false };
-            }
-
-            const data = await response.json();
-
-            // Cache the assignment
-            assignmentCache.set(experimentId, data);
-
-            // Track page view automatically
-            if (data.assigned) {
-                trackEvent(experimentId, data.variation_id, 'page_view');
-            }
-
-            return data;
-        } catch (error) {
-            console.error('[ABTest] Error getting variation:', error);
-            return { assigned: false };
-        }
-    }
-
-    /**
-     * Track an event
-     * @param {string} experimentId - Experiment ID
-     * @param {string} variationId - Variation ID
-     * @param {string} eventType - Event type ('page_view' or 'conversion')
-     * @param {string} [eventName] - Optional event name
-     * @param {Object} [metadata] - Optional metadata
-     */
-    async function trackEvent(experimentId, variationId, eventType, eventName, metadata) {
-        if (!config.apiUrl) {
-            console.error('[ABTest] SDK not initialized. Call ABTest.init() first.');
-            return;
-        }
-
-        try {
-            const userId = getUserId();
-            const response = await fetch(`${config.apiUrl}/api/track`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-API-Key': config.apiKey,
-                },
-                body: JSON.stringify({
-                    experiment_id: experimentId,
-                    variation_id: variationId,
-                    user_id: userId,
-                    event_type: eventType,
-                    event_name: eventName,
-                    metadata: metadata,
-                }),
-            });
-
-            if (!response.ok) {
-                console.error('[ABTest] Failed to track event:', response.statusText);
-            }
-        } catch (error) {
-            console.error('[ABTest] Error tracking event:', error);
-        }
-    }
-
-    /**
-     * Track a conversion event
-     * @param {string} experimentId - Experiment ID
-     * @param {string} [eventName] - Optional event name
-     * @param {Object} [metadata] - Optional metadata
-     */
-    async function trackConversion(experimentId, eventName, metadata) {
-        // Get variation from cache
-        const assignment = assignmentCache.get(experimentId);
-
-        if (!assignment || !assignment.assigned) {
-            console.warn('[ABTest] No assignment found for experiment:', experimentId);
-            return;
-        }
-
-        await trackEvent(
-            experimentId,
-            assignment.variation_id,
-            'conversion',
-            eventName,
-            metadata
-        );
-    }
-
-    /**
-     * Run an experiment with callback
-     * @param {string} experimentId - Experiment ID
-     * @param {Function} callback - Callback function receiving variation
-     * @param {Object} options - Options for redirect behavior
-     */
-    async function run(experimentId, callback, options = {}) {
-        const variation = await getVariation(experimentId);
-
-        // Handle URL-based redirect if variation has a URL
-        if (variation.assigned && variation.variation_url && options.autoRedirect !== false) {
-            const currentUrl = window.location.href;
-            const variationUrl = variation.variation_url;
-
-            // Only redirect if we're not already on the variation URL
-            if (!currentUrl.includes(variationUrl) && window.location.pathname !== new URL(variationUrl, window.location.origin).pathname) {
-                window.location.href = variationUrl;
-                return variation;
-            }
-        }
-
-        if (typeof callback === 'function') {
-            callback(variation);
-        }
-
-        return variation;
-    }
-
-    /**
-     * Run URL-based redirect experiment (will automatically redirect)
-     * @param {string} experimentId - Experiment ID
-     */
-    async function runUrlTest(experimentId) {
-        return run(experimentId, null, { autoRedirect: true });
-    }
-
-    // Expose public API
     window.ABTest = {
         init: init,
-        getVariation: getVariation,
-        trackConversion: trackConversion,
-        trackEvent: trackEvent,
-        run: run,
-        runUrlTest: runUrlTest,
+        bootstrap: bootstrap,
         getUserId: getUserId,
+        trackConversion: function (experimentId, eventName) {
+            var a = assignmentCache[experimentId];
+            if (!a || !a.variation_id) return Promise.resolve();
+            return track(experimentId, a.variation_id, 'conversion', undefined, eventName);
+        },
     };
 
-})(window);
+    // Auto-start when a data-key is present on the script tag.
+    if (config.apiKey && config.apiUrl) {
+        if (document.readyState === 'loading') {
+            // Hide ASAP, bootstrap ASAP
+            hide();
+            bootstrap();
+        } else {
+            hide();
+            bootstrap();
+        }
+    }
+})(window, document);

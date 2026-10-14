@@ -1,3 +1,6 @@
+## Shipped
+- URL split flow with domains, click goals, plan variation limits (free 1 / paid 10), and automatic SDK.
+
 # CRO A/B Testing Platform: 3-Phase Roadmap
 
 Repo: ranababu1/cro (main @ 5c9fc1d "Toast added - wip"). Plan only, no repo changes made.

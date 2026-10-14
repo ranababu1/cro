@@ -31,10 +31,10 @@ export const introduction: DocPage = {
         ] },
         { type: 'h2', text: 'What is available today' },
         { type: 'list', items: [
-            'A/B and A/B/n tests with up to 26 variations and any weight split.',
-            'Split URL tests, where each variation redirects to its own URL.',
+            'URL split tests with a control page and variation pages (1 variation on free, up to 10 on paid).',
+            'Automatic redirect from the control page to the assigned variation, without a flash of the wrong page.',
             'Sticky, deterministic assignment based on a hash of the visitor and experiment IDs.',
-            'Page view and conversion tracking with optional event names and metadata.',
+            'Click goals by CSS selector, with a primary goal and deduped conversions per visitor.',
             'Results with conversion rate, lift, Wilson 95% intervals and a two-proportion z-test.',
             'Separate dev, staging and prod environments, each with its own keys.',
             'An audit log of every change to experiments and keys.',

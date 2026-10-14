@@ -1,31 +1,33 @@
 import type { InferSelectModel } from 'drizzle-orm';
 import type * as schema from './db/schema';
 
-// Database Types
-
 export type ExperimentStatus = 'draft' | 'running' | 'paused' | 'completed';
 
-
-// Row types come from the Drizzle schema so they cannot drift from the database.
 export type User = InferSelectModel<typeof schema.users>;
 export type Experiment = InferSelectModel<typeof schema.experiments>;
 export type Variation = InferSelectModel<typeof schema.variations>;
+export type Goal = InferSelectModel<typeof schema.goals>;
+export type ProjectDomain = InferSelectModel<typeof schema.projectDomains>;
 export type Assignment = InferSelectModel<typeof schema.assignments>;
 export type Event = InferSelectModel<typeof schema.events>;
 export type EventType = Event['event_type'];
 
-// API Request/Response Types
-
 export interface CreateExperimentRequest {
     name: string;
     description?: string;
+    control_url: string;
     traffic_allocation?: number;
     variations: {
         name: string;
         description?: string;
-        url?: string;
+        url: string;
         weight: number;
         is_control: boolean;
+    }[];
+    goals: {
+        name: string;
+        selector: string;
+        is_primary: boolean;
     }[];
 }
 
@@ -36,30 +38,34 @@ export interface UpdateExperimentRequest {
     traffic_allocation?: number;
 }
 
-export interface AssignmentRequest {
-    experiment_id: string;
-    user_id: string;
-}
-
 export interface AssignmentResponse {
     experiment_id: string;
     variation_id: string;
     variation_name: string;
     variation_url?: string;
     assigned: boolean;
-    reason?: 'quota_exceeded';
+    reason?: 'quota_exceeded' | 'domain_not_allowed' | 'no_match' | 'not_running';
 }
 
-export interface TrackEventRequest {
-    experiment_id: string;
-    variation_id: string;
-    user_id: string;
-    event_type: EventType;
-    event_name?: string;
-    metadata?: Record<string, unknown>;
+export interface BootstrapGoal {
+    id: string;
+    name: string;
+    selector: string;
+    is_primary: boolean;
 }
 
-// Statistics Types
+export interface BootstrapResponse {
+    matched: boolean;
+    action: 'none' | 'stay' | 'redirect' | 'guard';
+    experiment_id?: string;
+    variation_id?: string;
+    variation_name?: string;
+    variation_url?: string;
+    is_control?: boolean;
+    control_url?: string;
+    goals?: BootstrapGoal[];
+    reason?: string;
+}
 
 export interface VariationMetrics {
     variation_id: string;
@@ -68,10 +74,21 @@ export interface VariationMetrics {
     total_users: number;
     conversions: number;
     conversion_rate: number;
-    confidence_interval?: {
-        lower: number;
-        upper: number;
+    confidence_interval?: { lower: number; upper: number };
+}
+
+export interface GoalResults {
+    goal_id: string;
+    goal_name: string;
+    is_primary: boolean;
+    variations: VariationMetrics[];
+    statistical_significance?: {
+        is_significant: boolean;
+        p_value: number;
+        confidence_level: number;
+        z_score: number;
     };
+    winner?: string;
 }
 
 export interface ExperimentResults {
@@ -79,11 +96,13 @@ export interface ExperimentResults {
     experiment_name: string;
     status: ExperimentStatus;
     variations: VariationMetrics[];
+    goals: GoalResults[];
     statistical_significance?: {
         is_significant: boolean;
         p_value: number;
         confidence_level: number;
+        z_score: number;
     };
     sample_size: number;
-    winner?: string; // variation_id if there's a clear winner
+    winner?: string;
 }
