@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 describe('SDK source guarantees', () => {
-    const code = fs.readFileSync(path.join(__dirname, '../public/sdk.js'), 'utf8');
+    const code = fs.readFileSync(path.join(__dirname, '../sdk-src/sdk.js'), 'utf8');
 
     it('auto-starts from data-key, uses bootstrap, sendBeacon-capable track, bot filter, flicker hide, location.replace', () => {
         expect(code).toMatch(/data-key/);
@@ -19,5 +19,21 @@ describe('SDK source guarantees', () => {
     it('install snippet is a single script tag pattern', () => {
         expect(code).toMatch(/data-key/);
         expect(code).not.toMatch(/ABTest\.run\(/);
+    });
+});
+
+describe('built obfuscated SDK artifact', () => {
+    const builtPath = path.join(__dirname, '../public/sdk.js');
+    const built = fs.readFileSync(builtPath, 'utf8');
+
+    it('is multi-line and large enough to span many printed pages', () => {
+        expect(built.split('\n').length).toBeGreaterThanOrEqual(300);
+        expect(Buffer.byteLength(built, 'utf8')).toBeGreaterThanOrEqual(25_000);
+    });
+
+    it('is clearly marked as built and does not keep readable FLICKER_MS', () => {
+        expect(built).toMatch(/sdk-src\/sdk\.js/);
+        expect(built).not.toMatch(/FLICKER_MS/);
+        expect(built).toMatch(/function /);
     });
 });

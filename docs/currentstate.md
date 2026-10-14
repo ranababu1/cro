@@ -1,6 +1,6 @@
 # Current State
 
-As of 2026-10-14 21:45 IST, branch feature/telemetry (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
+As of 2026-10-14 21:45 IST, branch build/sdk-obfuscation (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
@@ -18,6 +18,8 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## UI
 - Light, neutral B2B design with a blue primary and teal secondary accent (green kept for status only), branded freeabtest.com (leaf logo). The landing page matches the homepage mockup section by section and contains only: nav, hero with an example-data dashboard mock and handwritten annotation, "Works with your stack" row (only JavaScript and HTML available, the rest marked soon), How it works, Test anything with the layered illustration, a stats strip of verified facts, and a footer. Pricing plus FAQ live at /pricing, features and roadmap at /roadmap. Shared marketing header and footer in app/components/landing/SiteChrome.tsx.
+- Vercel Analytics on every page via root layout (`@vercel/analytics`).
+- Browser SDK: readable source in `sdk-src/sdk.js`, built/obfuscated to `public/sdk.js` via `npm run sdk:build` (hooked into `npm run build`).
 - Platform telemetry (super-admin /admin/telemetry only): usage volume per user/org/project/experiment, DAU/WAU/MAU, SDK event counters, quota %, CSV export. Aggregated daily rows; no visitor PII (IPs hashed).
 - URL split tests: register domains per project, wizard to create control + variation URLs and CSS click goals, one-line SDK install, flicker-free redirect, per-goal results. Free plan: 1 variation; paid: up to 10.
 - In-product documentation at /docs (12 customer-facing pages: introduction, quick start, SDK, experiments, variations, goals, results, choosing a winner, REST API, environments and keys, organizations and projects, troubleshooting and FAQ). Public pages never mention internals (stack, database, hosting, env vars, rate limiter, repo, admin console); tests/publicContent.test.ts enforces this. Setup and admin knowledge stays in README and docs/*.md. Content is data in lib/docs/content/*.ts, rendered by app/docs with a sidebar, on-page TOC, client-side search, copyable code, callouts and SVG diagrams. Linked from the site nav (Resources), footer and app sidebar. Planned features are marked Coming later. tests/docs.test.ts checks links, headings, no em dashes and limits against the code. See the UI conventions in `docs/agent.md`.
