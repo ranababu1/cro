@@ -10,14 +10,14 @@ const faqs = [
     { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of the best variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors. Bayesian and sequential methods are on the roadmap.' },
     { q: 'Will it slow my site down?', a: 'The current SDK is a small script that requests an assignment per experiment. A version that buckets locally from a cached config, with no extra request per visitor and no flicker, is part of Phase 1.' },
     { q: 'Can I keep test data separate from production?', a: 'Yes. Every project has dev, staging and production environments, each with its own keys. Results can be filtered by environment.' },
-    { q: 'Where is my data stored?', a: 'In your own database. freeabtest.com is self-hostable and uses SQLite locally or a hosted libSQL database such as Turso in production.' },
+    { q: 'Where is my data stored?', a: 'In our secure database. Data from each organization is kept separate, and test data in dev and staging is kept apart from production.' },
     { q: 'Is there a visual editor?', a: 'Not yet. Variants are written in code today. The visual editor is planned for Phase 3.' },
 ];
 
 const tiers = [
     { name: 'Free', price: 'TBD', body: 'For trying it out on one site.', items: ['1 project', 'Monthly visitor limit', 'Core A/B and A/B/n tests'] },
     { name: 'Team', price: 'TBD', body: 'For teams running tests every week.', items: ['Multiple projects', 'Higher visitor limits', 'Roles and audit log'], highlight: true },
-    { name: 'Enterprise', price: 'Contact us', body: 'For larger traffic and compliance needs.', items: ['Custom limits', 'SSO', 'Self-hosting support'] },
+    { name: 'Enterprise', price: 'Contact us', body: 'For larger traffic and compliance needs.', items: ['Custom limits', 'SSO', 'Priority support'] },
 ];
 
 export default function PricingPage() {

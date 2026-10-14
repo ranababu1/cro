@@ -80,7 +80,7 @@ function Bucketing() {
             <text x="70" y="100" textAnchor="middle" style={text}>All visitors</text>
             <rect x="200" y="70" width="140" height="50" rx="10" className="fill-brand-50 stroke-brand-200" />
             <text x="270" y="93" textAnchor="middle" style={text}>Traffic allocation</text>
-            <text x="270" y="109" textAnchor="middle" style={sub}>hash(traffic:exp, visitor)</text>
+            <text x="270" y="109" textAnchor="middle" style={sub}>share of visitors</text>
             <rect x="420" y="15" width="200" height="40" rx="8" className="fill-teal-50 stroke-teal-200" />
             <text x="520" y="40" textAnchor="middle" style={text}>Control (weight 50)</text>
             <rect x="420" y="65" width="200" height="40" rx="8" className="fill-teal-50 stroke-teal-200" />

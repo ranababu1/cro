@@ -10,14 +10,13 @@ import { winners } from './content/winners';
 import { restApi } from './content/restApi';
 import { environments } from './content/environments';
 import { organizations } from './content/organizations';
-import { selfHosting } from './content/selfHosting';
 import { troubleshooting } from './content/troubleshooting';
 
 export type { Block, DocPage } from './types';
 
 /** Reading order. The sidebar groups pages by `group` in this order. */
 export const docPages: DocPage[] = [
-    introduction, quickStart, sdk, experiments, variations, goals, results, winners, restApi, environments, organizations, selfHosting, troubleshooting,
+    introduction, quickStart, sdk, experiments, variations, goals, results, winners, restApi, environments, organizations, troubleshooting,
 ];
 
 export function getDocPage(slug: string): DocPage | undefined {

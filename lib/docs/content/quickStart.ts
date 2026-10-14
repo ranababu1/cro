@@ -14,7 +14,7 @@ export const quickStart: DocPage = {
         { type: 'callout', tone: 'warning', title: 'Copy the key now', text: 'The full key is shown once. Only a hash is stored, so it cannot be shown again. If you lose it, revoke it and create a new one.' },
         { type: 'p', text: 'SDK keys look like `cro_pk_dev_` followed by 32 characters. They are safe to put in page source. Never put a secret key (`cro_sk_...`) in a browser.' },
         { type: 'h2', text: '3. Add the SDK to your page', id: 'install' },
-        { type: 'p', text: 'Add the script tag and call `ABTest.init` once per page, as early as you can (in the `<head>` is best). Replace the host with the address of your freeabtest.com instance.' },
+        { type: 'p', text: 'Add the script tag and call `ABTest.init` once per page, as early as you can (in the `<head>` is best). Replace `YOUR-HOST` with the address shown in the snippet on your experiment\'s **Setup** tab.' },
         { type: 'code', label: 'HTML', code: `<script src="https://YOUR-HOST/sdk.js"></script>
 <script>
   ABTest.init({

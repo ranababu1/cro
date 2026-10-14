@@ -6,7 +6,7 @@ export const sdk: DocPage = {
     description: 'Install the browser SDK, the full API, single-page apps and how to avoid flicker.',
     group: 'Guides',
     blocks: [
-        { type: 'p', text: 'The SDK is a single dependency-free script, `sdk.js`, served by your freeabtest.com instance. It is about 7.5 KB raw and about 2 KB gzipped. It exposes one global object, `window.ABTest`.' },
+        { type: 'p', text: 'The SDK is a single dependency-free script, `sdk.js`, served by freeabtest.com. It is about 7.5 KB raw and about 2 KB gzipped. It exposes one global object, `window.ABTest`.' },
         { type: 'h2', text: 'Install' },
         { type: 'code', label: 'HTML', code: `<script src="https://YOUR-HOST/sdk.js"></script>
 <script>
@@ -20,7 +20,7 @@ export const sdk: DocPage = {
         { type: 'h2', text: 'init(options)', id: 'init' },
         { type: 'p', text: 'Call once per page before anything else. It stores the configuration and makes no network request.' },
         { type: 'table', head: ['Option', 'Required', 'Description'], rows: [
-            ['`apiUrl`', 'Yes', 'Base URL of your instance, with no trailing slash. Requests go to `apiUrl + /api/assign` and `apiUrl + /api/track`.'],
+            ['`apiUrl`', 'Yes', 'The base URL shown in your experiment\'s Setup snippet, with no trailing slash. Requests go to `apiUrl + /api/assign` and `apiUrl + /api/track`.'],
             ['`apiKey`', 'Yes', 'An SDK key (`cro_pk_<env>_...`). The key decides which project and environment the data goes to.'],
             ['`userId`', 'No', 'Your own stable visitor ID, such as a logged-in user ID. If omitted, the SDK generates one and keeps it in localStorage under `ab_user_id`.'],
         ] },
@@ -37,7 +37,7 @@ export const sdk: DocPage = {
 });` },
         { type: 'p', text: 'If the assigned variation has a redirect URL and the visitor is not already on it, `run` sends the browser there and does not call the callback. Pass `{ autoRedirect: false }` as the third argument to turn that off and handle `variation.variation_url` yourself.' },
         { type: 'h2', text: 'getVariation(experimentId)', id: 'get-variation' },
-        { type: 'p', text: 'Lower level than `run`. Returns a promise with the assignment and never redirects. Results are cached in memory for the life of the page, so calling it twice makes one request.' },
+        { type: 'p', text: 'Lower level than `run`. Returns a promise with the assignment and never redirects. Results are cached for the life of the page, so calling it twice makes one request.' },
         { type: 'code', label: 'Response', code: `{
   "experiment_id": "exp_123",
   "variation_id": "var_456",
@@ -88,6 +88,6 @@ export const sdk: DocPage = {
 </script>` },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1 adds a flicker-free snippet that downloads the experiment config once and buckets visitors locally, with no request per visitor.' },
         { type: 'h2', text: 'Rate limits and errors', id: 'errors' },
-        { type: 'p', text: 'Requests are limited per SDK key and client IP (600 per minute by default). All SDK methods catch errors and log them to the console with an `[ABTest]` prefix, so a failure never breaks your page.' },
+        { type: 'p', text: 'Requests are limited per SDK key and client IP. All SDK methods catch errors and log them to the console with an `[ABTest]` prefix, so a failure never breaks your page.' },
     ],
 };

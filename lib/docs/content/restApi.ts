@@ -6,13 +6,12 @@ export const restApi: DocPage = {
     description: 'Authentication, every endpoint, request and response shapes, errors and examples.',
     group: 'Reference',
     blocks: [
-        { type: 'p', text: 'All endpoints live under your instance\'s base URL, for example `https://YOUR-HOST/api/...`. Requests and responses are JSON. Errors always have the shape `{ "error": "message" }`.' },
+        { type: 'p', text: 'All endpoints live under the base URL shown on the experiment **Setup** tab, written here as `https://YOUR-HOST/api/...`. Requests and responses are JSON. Errors always have the shape `{ "error": "message" }`.' },
         { type: 'h2', text: 'Authentication' },
         { type: 'table', head: ['Used for', 'How to authenticate'], rows: [
             ['SDK endpoints (`/api/assign`, `/api/track`)', 'An SDK key in the `X-API-Key` header (or a `?key=` query parameter). Secret keys are rejected here.'],
             ['Management endpoints (`/api/experiments...`)', 'A signed-in dashboard session, or a secret key: `Authorization: Bearer cro_sk_...`. A secret key only sees experiments in its own project.'],
             ['Key management (`/api/keys...`)', 'Dashboard session only.'],
-            ['Admin endpoints (`/api/admin...`)', 'Dashboard session of a platform admin only.'],
         ] },
         { type: 'callout', tone: 'warning', title: 'Keep secret keys on the server', text: 'A secret key can read and change every experiment in its project. Store it in an environment variable, never in client code or a repository.' },
         { type: 'h2', text: 'Errors' },
@@ -24,7 +23,7 @@ export const restApi: DocPage = {
             ['429', 'Rate limit exceeded on SDK endpoints. A `Retry-After` header says how many seconds to wait.'],
         ] },
         { type: 'h2', text: 'SDK endpoints' },
-        { type: 'p', text: 'These accept cross-origin requests from any site (CORS `*`) and answer `OPTIONS` preflights. They are rate limited per key and client IP, 600 requests per minute by default.' },
+        { type: 'p', text: 'These accept cross-origin requests from any site (CORS `*`) and answer `OPTIONS` preflights. They are rate limited per key and client IP.' },
         { type: 'h3', text: 'POST /api/assign', id: 'assign' },
         { type: 'p', text: 'Returns the visitor\'s variation, creating the assignment if needed. The data is recorded in the environment of the key.' },
         { type: 'code', label: 'curl', code: `curl -X POST https://YOUR-HOST/api/assign \\
@@ -103,7 +102,5 @@ export const restApi: DocPage = {
         { type: 'p', text: '`z_score` is computed as control minus variant, so a negative value means the variant converts better.' },
         { type: 'h2', text: 'API keys' },
         { type: 'p', text: 'Dashboard session only. `GET /api/keys` lists environments and keys (prefix only). `POST /api/keys` with `{ "environment_id": "env_...", "type": "sdk" | "secret", "label": "optional" }` creates a key and returns the plaintext once. `DELETE /api/keys/{id}` revokes it immediately.' },
-        { type: 'h2', text: 'Admin' },
-        { type: 'p', text: 'Platform admins only. `GET /api/admin/orgs` lists organizations with usage. `GET /api/admin/orgs/{id}` returns one. `PATCH /api/admin/orgs/{id}` accepts `status` (`active` or `suspended`), `suspended_reason`, `plan`, `monthly_visitor_limit` and `monthly_experiment_limit` (a number, or `null` for unlimited). See [Organizations and admin](/docs/organizations-and-admin).' },
     ],
 };

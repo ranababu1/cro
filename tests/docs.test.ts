@@ -9,7 +9,7 @@ describe('in-app docs', () => {
     it('has unique slugs and covers every required section', () => {
         const slugs = docPages.map((p) => p.slug);
         expect(new Set(slugs).size).toBe(slugs.length);
-        for (const s of ['introduction', 'quick-start', 'sdk', 'experiments', 'variations', 'goals', 'results', 'choosing-a-winner', 'rest-api', 'environments-and-keys', 'organizations-and-admin', 'self-hosting', 'troubleshooting']) {
+        for (const s of ['introduction', 'quick-start', 'sdk', 'experiments', 'variations', 'goals', 'results', 'choosing-a-winner', 'rest-api', 'environments-and-keys', 'organizations-and-projects', 'troubleshooting']) {
             expect(getDocPage(s), s).toBeDefined();
         }
     });
