@@ -8,6 +8,7 @@ import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { maxVariationUrlsForPlan, upgradeHintForVariations } from '@/lib/plans';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
+import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 export async function GET(request: NextRequest) {
     try {
@@ -108,6 +109,18 @@ export async function POST(request: NextRequest) {
             entityId: experimentId,
             action: 'create',
             diff: body,
+        });
+        const variationCount = body.variations.filter((v) => !v.is_control).length;
+        await bumpMetric(METRICS.tests_created, { userId: ctx.userId, orgId, projectId, experimentId });
+        await bumpMetric(METRICS.variations_created, { userId: ctx.userId, orgId, projectId, experimentId, by: variationCount });
+        await recordProductEvent({
+            action: 'experiment.create',
+            userId: ctx.userId,
+            orgId,
+            projectId,
+            experimentId,
+            ip: clientIpFromHeaders(request.headers),
+            meta: { variations: body.variations.length, goals: body.goals?.length ?? 0 },
         });
 
         const experiment = await db.getExperiment(experimentId);

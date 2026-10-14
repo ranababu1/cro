@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, desc, asc, sql, gte, count } from 'drizzle-orm';
+import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count } from 'drizzle-orm';
 import { getDb } from './client';
 import * as s from './schema';
 import type { EnvironmentKey } from './schema';
@@ -498,4 +498,173 @@ export const db = {
         const d = await getDb();
         return d.select().from(s.auditLog).where(eq(s.auditLog.org_id, orgId)).orderBy(desc(s.auditLog.created_at)).limit(limit);
     },
+    // Platform telemetry
+    async bumpTelemetry(day: string, scopeType: 'platform' | 'org' | 'user' | 'project' | 'experiment', scopeId: string, metric: string, by = 1): Promise<void> {
+        const d = await getDb();
+        await d
+            .insert(s.telemetryDaily)
+            .values({ day, scope_type: scopeType, scope_id: scopeId, metric, value: by })
+            .onConflictDoUpdate({
+                target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
+                set: { value: sql`${s.telemetryDaily.value} + ${by}` },
+            });
+    },
+
+    async getTelemetryRange(opts: {
+        from: string;
+        to: string;
+        scopeType?: 'platform' | 'org' | 'user' | 'project' | 'experiment';
+        scopeId?: string;
+        metrics?: string[];
+    }) {
+        const d = await getDb();
+        const parts = [gte(s.telemetryDaily.day, opts.from), lte(s.telemetryDaily.day, opts.to)];
+        if (opts.scopeType) parts.push(eq(s.telemetryDaily.scope_type, opts.scopeType));
+        if (opts.scopeId) parts.push(eq(s.telemetryDaily.scope_id, opts.scopeId));
+        if (opts.metrics?.length) parts.push(inArray(s.telemetryDaily.metric, opts.metrics));
+        return d.select().from(s.telemetryDaily).where(and(...parts)).orderBy(asc(s.telemetryDaily.day));
+    },
+
+    async sumTelemetry(opts: {
+        from: string;
+        to: string;
+        scopeType?: 'platform' | 'org' | 'user' | 'project' | 'experiment';
+        scopeId?: string;
+        metric?: string;
+    }): Promise<number> {
+        const d = await getDb();
+        const parts = [gte(s.telemetryDaily.day, opts.from), lte(s.telemetryDaily.day, opts.to)];
+        if (opts.scopeType) parts.push(eq(s.telemetryDaily.scope_type, opts.scopeType));
+        if (opts.scopeId) parts.push(eq(s.telemetryDaily.scope_id, opts.scopeId));
+        if (opts.metric) parts.push(eq(s.telemetryDaily.metric, opts.metric));
+        const [row] = await d.select({ n: sql<number>`coalesce(sum(${s.telemetryDaily.value}), 0)` }).from(s.telemetryDaily).where(and(...parts));
+        return Number(row?.n ?? 0);
+    },
+
+    async topTelemetryScopes(opts: {
+        from: string;
+        to: string;
+        scopeType: 'org' | 'user' | 'project' | 'experiment';
+        metric: string;
+        limit?: number;
+    }) {
+        const d = await getDb();
+        const lim = opts.limit ?? 50;
+        return d
+            .select({
+                scope_id: s.telemetryDaily.scope_id,
+                total: sql<number>`sum(${s.telemetryDaily.value})`.mapWith(Number),
+            })
+            .from(s.telemetryDaily)
+            .where(and(
+                eq(s.telemetryDaily.scope_type, opts.scopeType),
+                eq(s.telemetryDaily.metric, opts.metric),
+                gte(s.telemetryDaily.day, opts.from),
+                lte(s.telemetryDaily.day, opts.to),
+            ))
+            .groupBy(s.telemetryDaily.scope_id)
+            .orderBy(sql`sum(${s.telemetryDaily.value}) desc`)
+            .limit(lim);
+    },
+
+    async createProductEvent(e: {
+        id: string;
+        user_id?: string | null;
+        org_id?: string | null;
+        project_id?: string | null;
+        experiment_id?: string | null;
+        action: string;
+        meta?: string | null;
+        ip_hash?: string | null;
+    }): Promise<void> {
+        const d = await getDb();
+        await d.insert(s.productEvents).values({
+            id: e.id,
+            user_id: e.user_id ?? null,
+            org_id: e.org_id ?? null,
+            project_id: e.project_id ?? null,
+            experiment_id: e.experiment_id ?? null,
+            action: e.action,
+            meta: e.meta ?? null,
+            ip_hash: e.ip_hash ?? null,
+        });
+    },
+
+    async listProductEvents(opts: {
+        from: string;
+        to: string;
+        userId?: string;
+        orgId?: string;
+        action?: string;
+        limit?: number;
+    }) {
+        const d = await getDb();
+        const parts = [gte(s.productEvents.occurred_at, opts.from), lte(s.productEvents.occurred_at, opts.to + 'T23:59:59.999Z')];
+        if (opts.userId) parts.push(eq(s.productEvents.user_id, opts.userId));
+        if (opts.orgId) parts.push(eq(s.productEvents.org_id, opts.orgId));
+        if (opts.action) parts.push(eq(s.productEvents.action, opts.action));
+        return d.select().from(s.productEvents).where(and(...parts)).orderBy(desc(s.productEvents.occurred_at)).limit(opts.limit ?? 200);
+    },
+
+    async touchUserActivity(userId: string, kind: 'login' | 'active'): Promise<void> {
+        const d = await getDb();
+        const now = nowIso();
+        if (kind === 'login') {
+            await d.update(s.users).set({ last_login_at: now, last_active_at: now }).where(eq(s.users.id, userId));
+        } else {
+            // Throttle active writes: only if last_active_at is null or older than 5 minutes
+            const u = await d.query.users.findFirst({ where: eq(s.users.id, userId) });
+            if (!u) return;
+            if (u.last_active_at && Date.now() - Date.parse(u.last_active_at) < 5 * 60_000) return;
+            await d.update(s.users).set({ last_active_at: now }).where(eq(s.users.id, userId));
+        }
+    },
+
+    async listUsersForTelemetry(limit = 500) {
+        const d = await getDb();
+        return d.select({
+            id: s.users.id,
+            email: s.users.email,
+            name: s.users.name,
+            created_at: s.users.created_at,
+            last_active_at: s.users.last_active_at,
+            last_login_at: s.users.last_login_at,
+        }).from(s.users).orderBy(desc(s.users.created_at)).limit(limit);
+    },
+
+    async getUser(id: string) {
+        const d = await getDb();
+        return (await d.query.users.findFirst({ where: eq(s.users.id, id) })) ?? null;
+    },
+
+    async countUsers(): Promise<number> {
+        const d = await getDb();
+        const [row] = await d.select({ n: count() }).from(s.users);
+        return Number(row?.n ?? 0);
+    },
+
+    async countActiveUsersSince(sinceIso: string): Promise<number> {
+        const d = await getDb();
+        const [row] = await d.select({ n: count() }).from(s.users).where(gte(s.users.last_active_at, sinceIso));
+        return Number(row?.n ?? 0);
+    },
+
+    async listApiKeyUsage(limit = 100) {
+        const d = await getDb();
+        return d
+            .select({
+                id: s.apiKeys.id,
+                prefix: s.apiKeys.prefix,
+                type: s.apiKeys.type,
+                label: s.apiKeys.label,
+                last_used_at: s.apiKeys.last_used_at,
+                created_at: s.apiKeys.created_at,
+                revoked_at: s.apiKeys.revoked_at,
+                environment_id: s.apiKeys.environment_id,
+            })
+            .from(s.apiKeys)
+            .orderBy(desc(s.apiKeys.last_used_at))
+            .limit(limit);
+    },
+
 };

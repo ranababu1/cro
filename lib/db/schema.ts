@@ -12,6 +12,8 @@ export const users = sqliteTable('users', {
     name: text('name').notNull(),
     image: text('image'),
     created_at: text('created_at').notNull().default(now),
+    last_active_at: text('last_active_at'),
+    last_login_at: text('last_login_at'),
 });
 
 export const organizations = sqliteTable('organizations', {
@@ -152,3 +154,34 @@ export const auditLog = sqliteTable('audit_log', {
     diff: text('diff'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_audit_org_created').on(t.org_id, t.created_at)]);
+
+/** Daily aggregated platform telemetry counters. scope_type+scope_id identify platform/org/user/project/experiment. */
+export const telemetryDaily = sqliteTable('telemetry_daily', {
+    day: text('day').notNull(), // YYYY-MM-DD UTC
+    scope_type: text('scope_type', { enum: ['platform', 'org', 'user', 'project', 'experiment'] }).notNull(),
+    scope_id: text('scope_id').notNull(), // 'platform' for platform scope
+    metric: text('metric').notNull(),
+    value: integer('value').notNull().default(0),
+}, (t) => [
+    primaryKey({ columns: [t.day, t.scope_type, t.scope_id, t.metric] }),
+    index('idx_telemetry_daily_scope').on(t.scope_type, t.scope_id, t.day),
+    index('idx_telemetry_daily_metric').on(t.metric, t.day),
+]);
+
+/** Server-side product usage events for dashboard actions (not visitor page views). */
+export const productEvents = sqliteTable('product_events', {
+    id: text('id').primaryKey(),
+    occurred_at: text('occurred_at').notNull().default(now),
+    user_id: text('user_id'),
+    org_id: text('org_id'),
+    project_id: text('project_id'),
+    experiment_id: text('experiment_id'),
+    action: text('action').notNull(), // e.g. experiment.create, domain.add, dashboard.view
+    meta: text('meta'), // JSON, no visitor PII
+    ip_hash: text('ip_hash'), // sha256 of IP + salt, never raw IP
+}, (t) => [
+    index('idx_product_events_occurred').on(t.occurred_at),
+    index('idx_product_events_action').on(t.action, t.occurred_at),
+    index('idx_product_events_user').on(t.user_id, t.occurred_at),
+    index('idx_product_events_org').on(t.org_id, t.occurred_at),
+]);

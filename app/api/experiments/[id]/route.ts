@@ -5,6 +5,7 @@ import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
 import { checkExperimentStartQuota } from '@/lib/quotas';
+import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -69,6 +70,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         }
 
         await db.updateExperiment(id, updates);
+        if (updates.status === 'running' && experiment.status !== 'running') {
+            const orgId = await orgIdForProject(experiment.project_id);
+            await bumpMetric(METRICS.tests_started, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
+            await recordProductEvent({ action: 'experiment.start', userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id, ip: clientIpFromHeaders(request.headers) });
+        }
+        if (updates.status === 'completed' && experiment.status !== 'completed') {
+            const orgId = await orgIdForProject(experiment.project_id);
+            await bumpMetric(METRICS.tests_completed, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
+            await recordProductEvent({ action: 'experiment.complete', userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id, ip: clientIpFromHeaders(request.headers) });
+        }
         await db.audit({
             orgId: await orgIdForProject(experiment.project_id),
             actorId: ctx.userId,

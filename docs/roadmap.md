@@ -1,4 +1,5 @@
 ## Shipped
+- Platform telemetry for super-admins (/admin/telemetry): daily aggregates, charts, drill-downs, CSV.
 - URL split flow with domains, click goals, plan variation limits (free 1 / paid 10), and automatic SDK.
 
 # CRO A/B Testing Platform: 3-Phase Roadmap

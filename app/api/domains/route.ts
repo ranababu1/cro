@@ -5,6 +5,7 @@ import { createDomainSchema, formatZodError } from '@/lib/validation';
 import { normalizeHost } from '@/lib/domains';
 import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
+import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 export async function GET(request: NextRequest) {
     const ctx = await requireUserContext(request);
@@ -33,6 +34,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'That domain is already added' }, { status: 400 });
     }
     const domain = await db.addDomain(projectId, host);
-    await db.audit({ orgId: await orgIdForProject(projectId), actorId: ctx.userId, entity: 'domain', entityId: domain.id, action: 'create', diff: { host } });
+    const orgId = await orgIdForProject(projectId);
+    await db.audit({ orgId, actorId: ctx.userId, entity: 'domain', entityId: domain.id, action: 'create', diff: { host } });
+    await bumpMetric(METRICS.domains_added, { userId: ctx.userId, orgId, projectId });
+    await recordProductEvent({ action: 'domain.add', userId: ctx.userId, orgId, projectId, ip: clientIpFromHeaders(request.headers), meta: { host } });
     return NextResponse.json({ domain }, { status: 201 });
 }

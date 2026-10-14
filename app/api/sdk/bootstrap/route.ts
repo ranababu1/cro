@@ -6,6 +6,7 @@ import { hostFromRequestHeaders, isHostAllowed, normalizePageUrl, urlsMatch } fr
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
+import { bumpMetric, METRICS } from '@/lib/telemetry';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -19,6 +20,7 @@ export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
         if ('error' in auth) return auth.error;
+        void bumpMetric(METRICS.sdk_bootstrap, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
 
         const hosts = await db.getDomainHosts(auth.ctx.projectId);
         const reqHost = hostFromRequestHeaders(request.headers.get('origin'), request.headers.get('referer'));

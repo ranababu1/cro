@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { listTenants } from '@/lib/admin';
-import { PageHeader, Card, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState } from '@/app/components/ui';
+import { PageHeader, Card, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState, ButtonLink } from '@/app/components/ui';
 
 export const metadata: Metadata = { title: 'Admin console' };
 
@@ -15,7 +15,11 @@ export default async function AdminHome() {
 
     return (
         <>
-            <PageHeader title="Tenants" description="Every organization on this installation. Visible to platform admins only." />
+            <PageHeader
+                title="Tenants"
+                description="Every organization on this installation. Visible to platform admins only."
+                actions={<ButtonLink href="/admin/telemetry" variant="secondary" size="sm">Platform telemetry</ButtonLink>}
+            />
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Organizations" value={tenants.length} />
                 <Stat label="Active" value={active} hint={`${tenants.length - active} suspended`} />
