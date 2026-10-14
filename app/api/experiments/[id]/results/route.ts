@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { requireUserContext } from '@/lib/requestAuth';
+import { getAccessibleExperiment } from '@/lib/access';
 import { ExperimentResults, VariationMetrics } from '@/lib/types';
 import {
     calculateConfidenceInterval,
     calculateStatisticalSignificance,
-    calculateLift,
 } from '@/lib/statistics';
 
 // GET /api/experiments/[id]/results - Get experiment results with statistics
@@ -13,8 +14,10 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
-        const experiment = await db.getExperiment(id);
+        const experiment = await getAccessibleExperiment(ctx, id);
 
         if (!experiment) {
             return NextResponse.json(
@@ -27,17 +30,27 @@ export async function GET(
         const variations = await db.getVariations(id);
 
         // Get event stats
-        const eventStats = await db.getEventStats(id);
+        // Optional ?environment=dev|staging|prod filter. Defaults to all environments.
+        const envKey = request.nextUrl.searchParams.get('environment');
+        let environmentId: string | undefined;
+        if (envKey) {
+            const env = (await db.getEnvironments(experiment.project_id)).find((e) => e.key === envKey);
+            if (!env) {
+                return NextResponse.json({ error: 'Unknown environment' }, { status: 400 });
+            }
+            environmentId = env.id;
+        }
+        const eventStats = await db.getEventStats(id, environmentId);
 
         // Build metrics for each variation
         const variationMetrics: VariationMetrics[] = variations.map(variation => {
-            const stats = eventStats.find((s: any) => s.variation_id === variation.id) || {
+            const stats = eventStats.find((s) => s.variation_id === variation.id) || {
                 total_users: 0,
                 conversions: 0,
             };
 
-            const totalUsers = stats.total_users || 0;
-            const conversions = stats.conversions || 0;
+            const totalUsers = Number(stats.total_users) || 0;
+            const conversions = Number(stats.conversions) || 0;
             const conversionRate = totalUsers > 0 ? conversions / totalUsers : 0;
 
             const confidenceInterval = calculateConfidenceInterval(conversions, totalUsers, 0.95);

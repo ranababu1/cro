@@ -7,6 +7,7 @@
  * <script>
  *   ABTest.init({
  *     apiUrl: 'https://your-domain.com',
+ *     apiKey: 'cro_pk_prod_...', // SDK key from Settings > API Keys
  *     userId: 'unique-user-id' // or leave empty for auto-generated
  *   });
  * 
@@ -30,6 +31,7 @@
     // Configuration
     let config = {
         apiUrl: '',
+        apiKey: '',
         userId: null,
     };
 
@@ -64,13 +66,16 @@
             console.error('[ABTest] apiUrl is required');
             return;
         }
+        if (!options.apiKey) {
+            console.error('[ABTest] apiKey is required (an SDK key, cro_pk_...)');
+            return;
+        }
 
         config = {
             ...config,
             ...options,
         };
 
-        console.log('[ABTest] Initialized with config:', config);
     }
 
     /**
@@ -95,6 +100,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-API-Key': config.apiKey,
                 },
                 body: JSON.stringify({
                     experiment_id: experimentId,
@@ -144,6 +150,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-API-Key': config.apiKey,
                 },
                 body: JSON.stringify({
                     experiment_id: experimentId,

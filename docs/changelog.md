@@ -5,6 +5,10 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| cec2adc | 2026-10-14 15:15 IST | feat: platform admin and tenant controls. Super-admin role from PLATFORM_ADMIN_EMAILS, /admin console with tenant list, usage and details, suspend and reactivate (blocks SDK keys, secret keys and dashboard), plan and monthly visitor and experiment limits with basic enforcement, admin actions audited, 10 new tests (64 total) |
+| 4934497 | 2026-10-14 11:48 IST | feat: Phase 1 M0 foundation. SQLite/libSQL with Drizzle and migrations, orgs, projects, dev/staging/prod environments, hashed API keys, audit log, SDK key auth and rate limiting on assign and track, session or secret key auth with project scoping on experiment APIs, Zod validation, key management page, stats fixes, Vitest suite (54 tests), GitHub Actions CI |
+| 8c1a889 | 2026-10-14 09:38 IST | docs: restore changelog instruction wording |
+| 0b3369e | 2026-10-14 09:38 IST | docs: fill commit ID in changelog |
 | a6cdf7f | 2026-10-14 03:40 IST | docs: add roadmap, agent guide, changelog and current state docs |
 | 5c9fc1d | 2026-01-11 14:30 IST | Toast added - wip |
 | fc520ae | 2026-01-11 10:53 IST | Messaging updated |

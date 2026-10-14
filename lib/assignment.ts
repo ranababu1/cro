@@ -72,15 +72,6 @@ export function validateVariationWeights(variations: { weight: number }[]): bool
 }
 
 /**
- * Generate a unique ID using timestamp and random string
- */
-export function generateId(prefix: string = ''): string {
-    const timestamp = Date.now().toString(36);
-    const randomStr = Math.random().toString(36).substring(2, 9);
-    return prefix ? `${prefix}_${timestamp}_${randomStr}` : `${timestamp}_${randomStr}`;
-}
-
-/**
  * Check if an experiment is eligible to assign users
  */
 export function isExperimentEligible(

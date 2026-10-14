@@ -84,7 +84,7 @@ export default function NewExperiment() {
         setVariations(redistributed);
     };
 
-    const updateVariation = (index: number, field: keyof Variation, value: any) => {
+    const updateVariation = (index: number, field: keyof Variation, value: Variation[keyof Variation]) => {
         const updated = [...variations];
         updated[index] = { ...updated[index], [field]: value };
 
@@ -142,8 +142,8 @@ export default function NewExperiment() {
 
             const data = await response.json();
             router.push(`/experiments/${data.experiment.id}`);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
             setIsSubmitting(false);
         }
     };
