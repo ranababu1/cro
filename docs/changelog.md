@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| ef4f7f7 | 2026-10-15 03:38 IST | Trimmed README to overview and features only |
 | 79d28d0 | 2026-10-15 03:40 IST | feat: live stats while a test runs. Results tab shows visitors, per-variation visitors and redirects (new server-side redirect event at bootstrap), goal clicks per CSS selector by variation ranked by clicks, conversion rate with Wilson 95% CI, uplift vs control with 95% CI, plain status (ahead / too early to call), daily visitors chart, 30 s auto-refresh, empty state. Experiments list shows visitors, clicks and result so far. 9 new tests. |
 | d8fc076 | 2026-10-15 03:25 IST | fix: migration 0004 (api_keys.key_plaintext) was skipped on existing DBs because its journal timestamp was older than 0001; bumped it, added migration-order test, install API returns a clear error. |
 | 2db18d1 | 2026-10-15 02:55 IST | fix: auto-create public SDK keys and pre-fill install snippets with https://www.freeabtest.com + real key; Production/Development toggle; store SDK key plaintext (secrets stay hash-only). |
@@ -32,4 +33,3 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 | 759f0e7 | 2025-12-13 22:22 IST | Experiments setup updated |
 | 3322f4f | 2025-12-13 10:22 IST | Minor Update |
 | 3bed0c1 | 2025-12-13 09:34 IST | Initial commit from Create Next App |
-| ef4f7f7 | 2026-10-15 03:38 IST | Trimmed README to overview and features only |
