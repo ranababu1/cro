@@ -61,7 +61,8 @@ const menus = {
     ],
     Pricing: [{ href: '#pricing', title: 'Plans', body: 'Intended plan structure (placeholder)' }],
     Resources: [
-        { href: 'https://github.com/ranababu1/cro#readme', title: 'Documentation', body: 'Setup and SDK reference' },
+        { href: '/docs', title: 'Documentation', body: 'Guides, SDK and API reference' },
+        { href: '/docs/quick-start', title: 'Quick start', body: 'Your first experiment, step by step' },
         { href: '/demo.html', title: 'Demo page', body: 'See the SDK on a sample page' },
         { href: '#faq', title: 'FAQ', body: 'Common questions' },
     ],
@@ -329,7 +330,8 @@ export default function LandingPage() {
                     <div>
                         <p className="font-medium text-zinc-900">Developers</p>
                         <ul className="mt-3 space-y-2 text-zinc-600">
-                            <li><a href="https://github.com/ranababu1/cro#readme" className="hover:text-zinc-900">Documentation</a></li>
+                            <li><Link href="/docs" className="hover:text-zinc-900">Documentation</Link></li>
+                            <li><Link href="/docs/rest-api" className="hover:text-zinc-900">REST API</Link></li>
                             <li><a href="/demo.html" className="hover:text-zinc-900">SDK demo page</a></li>
                         </ul>
                     </div>

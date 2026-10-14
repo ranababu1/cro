@@ -1,0 +1,45 @@
+import type { DocPage } from '../types';
+
+export const introduction: DocPage = {
+    slug: 'introduction',
+    title: 'Introduction',
+    description: 'What freeabtest.com does, how the pieces fit together, and the terms used throughout these docs.',
+    group: 'Getting started',
+    blocks: [
+        { type: 'p', text: 'freeabtest.com is an A/B testing platform. You create an experiment with two or more variations, add a small JavaScript snippet to your site, and the platform splits visitors between the variations. It records who saw what and who converted, and tells you whether the difference is real or likely noise.' },
+        { type: 'p', text: 'These docs describe what the product does today. Features that are planned but not built yet are marked **Coming later** with the phase they belong to.' },
+        { type: 'callout', tone: 'info', title: 'New here?', text: 'Follow the [Quick start](/docs/quick-start). It takes you from sign in to reading your first result in about fifteen minutes.' },
+        { type: 'h2', text: 'How it works' },
+        { type: 'diagram', name: 'flow', caption: 'The SDK asks for an assignment, applies the variation, and reports page views and conversions. The dashboard reads the same data.' },
+        { type: 'steps', items: [
+            { title: 'Assign', text: 'When a page loads, the SDK calls `POST /api/assign` with the experiment ID and a visitor ID. The server picks a variation and stores the assignment.' },
+            { title: 'Apply', text: 'Your code receives the variation name (and an optional redirect URL) and changes the page to match.' },
+            { title: 'Track', text: 'The SDK records a page view automatically. You call `ABTest.trackConversion()` when the visitor does the thing you care about.' },
+            { title: 'Analyze', text: 'The results page compares each variation with the control: conversion rate, lift, a 95% interval and a p-value.' },
+        ] },
+        { type: 'h2', text: 'Core concepts' },
+        { type: 'table', head: ['Term', 'Meaning'], rows: [
+            ['Organization', 'Your account. Created automatically the first time you sign in. Plans, limits and suspension apply at this level.'],
+            ['Project', 'A site or app you test on. Every organization starts with one project called Default project.'],
+            ['Environment', 'Each project has three: Development (`dev`), Staging (`staging`) and Production (`prod`). Data from each is kept apart.'],
+            ['API key', 'SDK keys (`cro_pk_...`) are public and used in browsers. Secret keys (`cro_sk_...`) are private and used from servers.'],
+            ['Experiment', 'A test with a name, a hypothesis, a traffic allocation and two to 26 variations.'],
+            ['Variation', 'One version of the page. Exactly one variation is the control (your current version).'],
+            ['Visitor', 'Identified by a visitor ID. The SDK creates one and stores it in localStorage, or you can pass your own.'],
+            ['Assignment', 'The record that a visitor belongs to a variation. It never changes for the life of the experiment.'],
+            ['Conversion', 'An event you send when a visitor reaches your goal, such as a signup or a purchase.'],
+        ] },
+        { type: 'h2', text: 'What is available today' },
+        { type: 'list', items: [
+            'A/B and A/B/n tests with up to 26 variations and any weight split.',
+            'Split URL tests, where each variation redirects to its own URL.',
+            'Sticky, deterministic assignment based on a hash of the visitor and experiment IDs.',
+            'Page view and conversion tracking with optional event names and metadata.',
+            'Results with conversion rate, lift, Wilson 95% intervals and a two-proportion z-test.',
+            'Separate dev, staging and prod environments, each with its own keys.',
+            'An audit log of changes, and a platform admin console for operators.',
+        ] },
+        { type: 'h2', text: 'What is coming later' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1: flicker-free snippet with local bucketing, URL, device and UTM targeting, click and form goals, sample ratio mismatch alerts, a sample size calculator. Phase 2: Bayesian and sequential statistics, feature flags, server SDKs, React and Next.js packages, GA4, GTM and WordPress integrations. Phase 3: visual editor, multi-armed bandits, CUPED, edge delivery.' },
+    ],
+};
