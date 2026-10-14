@@ -5,7 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
-| pending | 2026-10-14 19:05 IST | feat(theme): replace the green accent with blue (#2563eb) and teal (#0d9488, #14b8a6) across landing and app. Brand tokens, leaf logo, gradient headline, blobs, landing illustrations and demo page button. Status colors (Running, Completed, positive lift) stay green |
+| 36dbfd0 | 2026-10-14 19:05 IST | feat(theme): replace the green accent with blue (#2563eb) and teal (#0d9488, #14b8a6) across landing and app. Brand tokens, leaf logo, gradient headline, blobs, landing illustrations and demo page button. Status colors (Running, Completed, positive lift) stay green |
 | 616b591 | 2026-10-14 18:20 IST | feat(landing): rebuild the landing page to the homepage mockup and rebrand to freeabtest.com. Leaf logo, nav dropdowns, gradient hero headline, example-data dashboard mock, handwritten annotation, Works with your stack row (planned items marked), How it works cards, Test anything section, stats strip of verified product facts, animated background blobs (reduced motion respected). Brand accent changed from indigo to green across the app |
 | 9d6f931 | 2026-10-14 16:20 IST | feat(ui): redesign the whole site in a clean light B2B style. New component set, app shell with sidebar and project switcher, marketing landing page, sign-in page, overview, experiments list, edit settings, results with lift and interval chart, restyled API keys and admin console. DaisyUI removed. 3 new tests (67 total) |
 | 24a95db | 2026-10-14 15:34 IST | Squash merge of PR #1 into main (contains the cec2adc and 4934497 work below; those IDs exist only on the PR branch) |
