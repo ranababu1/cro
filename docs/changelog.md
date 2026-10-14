@@ -5,6 +5,8 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-14 16:20 IST | feat(ui): redesign the whole site in a clean light B2B style. New component set, app shell with sidebar and project switcher, marketing landing page, sign-in page, overview, experiments list, edit settings, results with lift and interval chart, restyled API keys and admin console. DaisyUI removed. 3 new tests (67 total) |
+| 24a95db | 2026-10-14 15:30 IST | Squash merge of PR #1 into main (contains the cec2adc and 4934497 work below; those IDs exist only on the PR branch) |
 | cec2adc | 2026-10-14 15:15 IST | feat: platform admin and tenant controls. Super-admin role from PLATFORM_ADMIN_EMAILS, /admin console with tenant list, usage and details, suspend and reactivate (blocks SDK keys, secret keys and dashboard), plan and monthly visitor and experiment limits with basic enforcement, admin actions audited, 10 new tests (64 total) |
 | 4934497 | 2026-10-14 11:48 IST | feat: Phase 1 M0 foundation. SQLite/libSQL with Drizzle and migrations, orgs, projects, dev/staging/prod environments, hashed API keys, audit log, SDK key auth and rate limiting on assign and track, session or secret key auth with project scoping on experiment APIs, Zod validation, key management page, stats fixes, Vitest suite (54 tests), GitHub Actions CI |
 | 8c1a889 | 2026-10-14 09:38 IST | docs: restore changelog instruction wording |

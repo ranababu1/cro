@@ -1,20 +1,34 @@
 # Current State
 
-As of 2026-10-14 15:15 IST, branch phase1/foundation (Phase 1 milestone M0 plus platform admin). Usable for local development and
+As of 2026-10-14 16:20 IST, branch redesign/saas-ui (Phase 1 milestone M0, platform admin, and the UI redesign). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
-- Next.js 16 App Router, React 19, TypeScript (strict), Tailwind 4, DaisyUI.
+- Next.js 16 App Router, React 19, TypeScript (strict), Tailwind 4 with an in-house component set (`app/components/ui`). Inter and JetBrains Mono via next/font. DaisyUI removed.
 - Auth: next-auth v4 with Google. Users get an organization, a default project and dev, staging and prod environments on first sign-in.
 - Database: SQLite through libSQL (`@libsql/client`) and Drizzle ORM. Local file `data/cro.db` by default, Turso in production.
   Schema in `lib/db/schema.ts`, SQL migrations in `drizzle/`, applied automatically on first request (turn off with `DB_AUTO_MIGRATE=false`) or with `npm run db:migrate`.
 - Validation: Zod (`lib/validation.ts`).
-- Tests: Vitest, 64 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes, platform admin authz, suspension and quotas).
+- Tests: Vitest, 67 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes, platform admin authz, suspension and quotas).
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, tests and build on pushes to main and on pull requests.
 
 ## Data model
 users, organizations (with status, suspended_at, suspended_reason, plan, monthly_visitor_limit, monthly_experiment_limit), memberships (owner or member), projects, environments (dev, staging, prod), api_keys,
 experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
+
+## UI
+- Light, neutral B2B design with one indigo accent. See the UI conventions in `docs/agent.md`.
+- Marketing page `/`: hero with an example results card (labelled example data), features available today, how it works with the SDK snippet,
+  public roadmap by phase, pricing placeholder (clearly marked, no prices), FAQ, footer.
+- Sign-in page `/signin` (Google). next-auth uses it as its sign-in page.
+- App shell for signed-in pages (`app/(app)/layout.tsx`): sidebar (Overview, Experiments, API keys, Admin console for platform admins),
+  top bar with org and project switcher and account menu, mobile drawer. Signed-out visitors are redirected to `/signin`; suspended tenants see a suspended page.
+- Project switcher stores the selection in the `cro_project` cookie. Overview and Experiments show that project, and new experiments are created in it.
+- Overview `/dashboard`: status counts, visitors this month, get-started checklist, recent experiments.
+- Experiments `/experiments`: table with status tabs. `/experiments/new`: create form with weights that always total 100.
+- Experiment page `/experiments/[id]`: start, pause, resume, complete and delete actions; Results tab (summary, table with lift and intervals,
+  confidence interval chart), Setup tab (variations and install snippet), Settings tab (edit name, description and traffic allocation).
+- API keys `/settings/keys` and the admin console `/admin` use the same shell and components.
 
 ## Features that work
 - Google sign-in with automatic workspace setup.

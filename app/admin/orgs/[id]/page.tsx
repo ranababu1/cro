@@ -2,7 +2,10 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTenantSummary } from '@/lib/admin';
 import { db } from '@/lib/db';
+import { PageHeader, Card, CardHeader, StatusBadge, Badge, Table, THead, TBody, TR, TH, TD, Stat, Alert, EmptyState } from '@/app/components/ui';
 import TenantControls from './TenantControls';
+
+const when = (iso: string) => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 
 export default async function TenantDetail({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -12,40 +15,63 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
     const { org, members, projects, usage } = tenant;
 
     return (
-        <div className="space-y-6">
-            <Link href="/admin" className="link">All tenants</Link>
-            <h1 className="text-3xl font-bold">{org.name}</h1>
-            <div className="stats bg-base-200">
-                <div className="stat"><div className="stat-title">Status</div><div className="stat-value text-lg">{org.status}</div>
-                    {org.suspended_reason && <div className="stat-desc">{org.suspended_reason}</div>}</div>
-                <div className="stat"><div className="stat-title">Visitors this month</div><div className="stat-value text-lg">{usage.month.visitors}</div></div>
-                <div className="stat"><div className="stat-title">Events this month</div><div className="stat-value text-lg">{usage.month.events}</div></div>
-                <div className="stat"><div className="stat-title">Experiments</div><div className="stat-value text-lg">{usage.total.experiments}</div><div className="stat-desc">{usage.total.running} running</div></div>
-                <div className="stat"><div className="stat-title">All-time visitors / events</div><div className="stat-value text-lg">{usage.total.visitors} / {usage.total.events}</div></div>
+        <>
+            <PageHeader
+                breadcrumb={<Link href="/admin" className="hover:text-zinc-900">Tenants</Link>}
+                title={<span className="flex flex-wrap items-center gap-3">{org.name}<StatusBadge status={org.status} /></span>}
+                description={`${org.slug} · created ${when(org.created_at)}`}
+            />
+            {org.status === 'suspended' && (
+                <Alert tone="danger" className="mb-6" title="Suspended">
+                    {org.suspended_reason || 'No reason recorded.'} {org.suspended_at && `Since ${when(org.suspended_at)}.`} SDK keys, secret keys and the dashboard are blocked.
+                </Alert>
+            )}
+            <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Stat label="Visitors this month" value={usage.month.visitors.toLocaleString()} hint={org.monthly_visitor_limit === null ? 'No limit' : `Limit ${org.monthly_visitor_limit.toLocaleString()}`} />
+                <Stat label="Events this month" value={usage.month.events.toLocaleString()} />
+                <Stat label="Experiments" value={usage.total.experiments} hint={`${usage.total.running} running`} />
+                <Stat label="All-time visitors" value={usage.total.visitors.toLocaleString()} hint={`${usage.total.events.toLocaleString()} events`} />
             </div>
 
             <TenantControls org={org} />
 
-            <div className="grid md:grid-cols-2 gap-6">
-                <div className="card bg-base-200"><div className="card-body">
-                    <h2 className="card-title">Members</h2>
-                    <ul>{members.map((m) => <li key={m.user_id}>{m.email} <span className="badge badge-sm">{m.role}</span></li>)}</ul>
-                </div></div>
-                <div className="card bg-base-200"><div className="card-body">
-                    <h2 className="card-title">Projects</h2>
-                    <ul>{projects.map((p) => <li key={p.id}>{p.name} <span className="text-xs opacity-60">{p.id}</span></li>)}</ul>
-                </div></div>
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <Card>
+                    <CardHeader title="Members" />
+                    <Table>
+                        <THead><tr><TH>Email</TH><TH>Role</TH><TH align="right">Joined</TH></tr></THead>
+                        <TBody>{members.map((m) => (
+                            <TR key={m.user_id}><TD className="text-zinc-900">{m.email}</TD><TD><Badge tone={m.role === 'owner' ? 'brand' : 'neutral'}>{m.role}</Badge></TD><TD numeric>{new Date(m.joined_at).toLocaleDateString()}</TD></TR>
+                        ))}</TBody>
+                    </Table>
+                </Card>
+                <Card>
+                    <CardHeader title="Projects" />
+                    <Table>
+                        <THead><tr><TH>Name</TH><TH>ID</TH></tr></THead>
+                        <TBody>{projects.map((p) => (
+                            <TR key={p.id}><TD className="text-zinc-900">{p.name}</TD><TD><code className="font-mono text-xs">{p.id}</code></TD></TR>
+                        ))}</TBody>
+                    </Table>
+                </Card>
             </div>
 
-            <div className="card bg-base-200"><div className="card-body">
-                <h2 className="card-title">Audit log</h2>
-                <table className="table table-sm">
-                    <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Entity</th></tr></thead>
-                    <tbody>{audit.map((a) => (
-                        <tr key={a.id}><td>{new Date(a.created_at).toLocaleString()}</td><td>{a.actor_id ?? 'system'}</td><td>{a.action}</td><td>{a.entity} {a.entity_id}</td></tr>
-                    ))}</tbody>
-                </table>
-            </div></div>
-        </div>
+            <Card className="mt-6">
+                <CardHeader title="Audit log" description="Latest 50 entries for this organization." />
+                {audit.length === 0 ? <EmptyState title="No entries" /> : (
+                    <Table>
+                        <THead><tr><TH>When</TH><TH>Action</TH><TH>Entity</TH><TH>Actor</TH></tr></THead>
+                        <TBody>{audit.map((a) => (
+                            <TR key={a.id}>
+                                <TD className="whitespace-nowrap">{when(a.created_at)}</TD>
+                                <TD><code className="font-mono text-xs text-zinc-800">{a.action}</code></TD>
+                                <TD>{a.entity} <span className="font-mono text-xs text-zinc-400">{a.entity_id}</span></TD>
+                                <TD className="font-mono text-xs">{a.actor_id ?? 'system'}</TD>
+                            </TR>
+                        ))}</TBody>
+                    </Table>
+                )}
+            </Card>
+        </>
     );
 }

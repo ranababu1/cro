@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { getPlatformAdmin } from '@/lib/platformAdmin';
+import { getAppContext } from '@/lib/appContext';
+import AppShell from '../components/shell/AppShell';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,14 +9,15 @@ export const dynamic = 'force-dynamic';
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
     const admin = await getPlatformAdmin();
     if (!admin) notFound();
+    const ctx = await getAppContext();
     return (
-        <div className="min-h-screen bg-base-100">
-            <div className="navbar bg-base-200 px-4">
-                <Link href="/admin" className="btn btn-ghost text-xl">Platform admin</Link>
-                <span className="ml-auto text-sm opacity-70">{admin.email}</span>
-                <Link href="/dashboard" className="btn btn-ghost btn-sm ml-2">Dashboard</Link>
-            </div>
-            <div className="max-w-7xl mx-auto px-4 py-8">{children}</div>
-        </div>
+        <AppShell
+            user={ctx?.user ?? { name: '', email: admin.email }}
+            projects={ctx?.projects ?? []}
+            currentProjectId={ctx?.current?.id ?? null}
+            isPlatformAdmin
+        >
+            {children}
+        </AppShell>
     );
 }

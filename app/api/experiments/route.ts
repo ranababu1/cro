@@ -5,6 +5,7 @@ import { validateVariationWeights } from '@/lib/assignment';
 import { requireUserContext } from '@/lib/requestAuth';
 import { createExperimentSchema, formatZodError } from '@/lib/validation';
 import { orgIdForProject } from '@/lib/access';
+import { PROJECT_COOKIE } from '@/lib/currentProject';
 
 // GET /api/experiments - List experiments the caller can access
 export async function GET(request: NextRequest) {
@@ -38,7 +39,9 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Exactly one variation must be marked as control' }, { status: 400 });
         }
 
-        const projectId = body.project_id ?? ctx.projectIds[0];
+        // Explicit project_id wins, then the project selected in the app (cookie), then the first project.
+        const selected = request.cookies.get(PROJECT_COOKIE)?.value;
+        const projectId = body.project_id ?? (selected && ctx.projectIds.includes(selected) ? selected : ctx.projectIds[0]);
         if (!projectId || !ctx.projectIds.includes(projectId)) {
             return NextResponse.json({ error: 'Project not found' }, { status: 404 });
         }

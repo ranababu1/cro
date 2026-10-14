@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Card, CardHeader, CardBody, Field, Input, Button, Alert } from '@/app/components/ui';
 
 interface Org {
     id: string; status: 'active' | 'suspended'; plan: string;
@@ -17,50 +18,56 @@ export default function TenantControls({ org }: { org: Org }) {
     const [experiments, setExperiments] = useState(org.monthly_experiment_limit?.toString() ?? '');
     const [reason, setReason] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [saved, setSaved] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
 
-    async function patch(body: Record<string, unknown>) {
+    async function patch(body: Record<string, unknown>, message: string) {
         setBusy(true);
         setError(null);
-        const res = await fetch(`/api/admin/orgs/${org.id}`, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-        });
+        setSaved(null);
+        const res = await fetch(`/api/admin/orgs/${org.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         setBusy(false);
-        if (!res.ok) { setError((await res.json()).error || 'Update failed'); return; }
+        if (!res.ok) return setError((await res.json()).error || 'Update failed');
+        setSaved(message);
         router.refresh();
     }
 
     return (
-        <div className="card bg-base-200"><div className="card-body space-y-4">
-            <h2 className="card-title">Plan and limits</h2>
-            {error && <div className="alert alert-error">{error}</div>}
-            <div className="grid md:grid-cols-3 gap-4">
-                <label className="form-control"><span className="label-text">Plan</span>
-                    <input className="input input-bordered" value={plan} onChange={(e) => setPlan(e.target.value)} /></label>
-                <label className="form-control"><span className="label-text">Monthly visitor limit (blank = unlimited)</span>
-                    <input className="input input-bordered" type="number" min={0} value={visitors} onChange={(e) => setVisitors(e.target.value)} /></label>
-                <label className="form-control"><span className="label-text">Monthly experiment limit (blank = unlimited)</span>
-                    <input className="input input-bordered" type="number" min={0} value={experiments} onChange={(e) => setExperiments(e.target.value)} /></label>
-            </div>
-            <button className="btn btn-primary w-fit" disabled={busy}
-                onClick={() => patch({ plan, monthly_visitor_limit: toLimit(visitors), monthly_experiment_limit: toLimit(experiments) })}>
-                Save plan
-            </button>
-
-            <h2 className="card-title">Status</h2>
-            {org.status === 'active' ? (
-                <div className="flex gap-2 items-end">
-                    <label className="form-control flex-1"><span className="label-text">Reason (shown in audit log)</span>
-                        <input className="input input-bordered" value={reason} onChange={(e) => setReason(e.target.value)} /></label>
-                    <button className="btn btn-error" disabled={busy} onClick={() => {
-                        if (confirm('Suspend this tenant? Their SDK keys and dashboard stop working immediately.')) {
-                            void patch({ status: 'suspended', suspended_reason: reason || null });
-                        }
-                    }}>Suspend tenant</button>
-                </div>
-            ) : (
-                <button className="btn btn-success w-fit" disabled={busy} onClick={() => patch({ status: 'active' })}>Reactivate tenant</button>
-            )}
-        </div></div>
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+            <Card>
+                <CardHeader title="Plan and limits" description="Limits reset each calendar month. Leave blank for unlimited." />
+                <CardBody>
+                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void patch({ plan, monthly_visitor_limit: toLimit(visitors), monthly_experiment_limit: toLimit(experiments) }, 'Plan saved.'); }}>
+                        {error && <Alert tone="danger">{error}</Alert>}
+                        {saved && <Alert tone="success">{saved}</Alert>}
+                        <div className="grid gap-4 sm:grid-cols-3">
+                            <Field label="Plan">{(id) => <Input id={id} required value={plan} onChange={(e) => setPlan(e.target.value)} />}</Field>
+                            <Field label="Visitors per month">{(id) => <Input id={id} type="number" min={0} value={visitors} placeholder="Unlimited" onChange={(e) => setVisitors(e.target.value)} />}</Field>
+                            <Field label="Experiment starts per month">{(id) => <Input id={id} type="number" min={0} value={experiments} placeholder="Unlimited" onChange={(e) => setExperiments(e.target.value)} />}</Field>
+                        </div>
+                        <div className="flex justify-end"><Button type="submit" disabled={busy}>Save plan</Button></div>
+                    </form>
+                </CardBody>
+            </Card>
+            <Card>
+                <CardHeader title="Access" />
+                <CardBody className="space-y-4">
+                    {org.status === 'active' ? (
+                        <>
+                            <p className="text-sm text-zinc-600">Suspending blocks the tenant&apos;s SDK keys, secret keys and dashboard immediately. Data is kept.</p>
+                            <Field label="Reason" hint="Saved in the audit log.">{(id) => <Input id={id} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="For example: unpaid invoice" />}</Field>
+                            <Button variant="danger" className="w-full" disabled={busy} onClick={() => confirm('Suspend this tenant now?') && patch({ status: 'suspended', suspended_reason: reason || null }, 'Tenant suspended.')}>
+                                Suspend tenant
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-sm text-zinc-600">Reactivating restores keys and dashboard access right away.</p>
+                            <Button className="w-full" disabled={busy} onClick={() => patch({ status: 'active' }, 'Tenant reactivated.')}>Reactivate tenant</Button>
+                        </>
+                    )}
+                </CardBody>
+            </Card>
+        </div>
     );
 }
