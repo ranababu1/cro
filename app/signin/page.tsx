@@ -28,7 +28,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             <div className="flex flex-1 items-start justify-center px-4 pt-12 sm:pt-24">
                 <div className="w-full max-w-sm">
                     <div className="rounded-lg border border-zinc-200 bg-white p-8 shadow-card">
-                        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Sign in to CRO</h1>
+                        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Sign in to freeabtest.com</h1>
                         <p className="mt-1 text-sm text-zinc-500">Use your work Google account. A workspace is created on first sign-in.</p>
                         {error && <Alert tone="danger" className="mt-5">{errors[error] ?? errors.Default}</Alert>}
                         <div className="mt-6"><GoogleButton callbackUrl={target} /></div>
