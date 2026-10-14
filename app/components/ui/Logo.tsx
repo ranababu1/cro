@@ -16,11 +16,11 @@ export function LeafMark({ className = 'h-6 w-6' }: { className?: string }) {
     );
 }
 
-export function Logo({ href = '/', size = 'md' }: { href?: string; size?: 'md' | 'lg' }) {
+export function Logo({ href = '/', size = 'md' }: { href?: string; size?: 'md' | 'lg' | 'xl' }) {
     return (
         <Link href={href} className="inline-flex items-center gap-2 font-semibold tracking-tight text-zinc-900">
-            <LeafMark className={size === 'lg' ? 'h-7 w-7' : 'h-6 w-6'} />
-            <span className={size === 'lg' ? 'text-xl' : 'text-[15px]'}>freeabtest<span className="text-zinc-500">.com</span></span>
+            <LeafMark className={size === 'xl' ? 'h-8 w-8 sm:h-10 sm:w-10' : size === 'lg' ? 'h-7 w-7' : 'h-6 w-6'} />
+            <span className={size === 'xl' ? 'text-[22px] sm:text-[28px]' : size === 'lg' ? 'text-xl' : 'text-[15px]'}>freeabtest<span className={size === 'xl' ? 'font-medium text-teal-600' : 'text-zinc-500'}>.com</span></span>
         </Link>
     );
 }

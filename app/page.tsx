@@ -1,350 +1,178 @@
 import Link from 'next/link';
-import { Logo } from './components/ui/Logo';
-import { ButtonLink, Badge, CodeBlock } from './components/ui';
-import { CheckIcon } from './components/shell/icons';
 import { Blobs } from './components/landing/Blobs';
-import { NavMenu } from './components/landing/NavMenu';
 import { DashboardMock } from './components/landing/DashboardMock';
 import { TestIllustration } from './components/landing/TestIllustration';
+import { Arrow, SiteFooter, SiteHeader } from './components/landing/SiteChrome';
 
-const available = [
-    { title: 'A/B and A/B/n tests', body: 'Compare a control with up to 25 variants. Set any traffic split, such as 50/50, 70/30 or 90/10.' },
-    { title: 'Sticky assignment', body: 'Visitors are hashed into a variant, so they see the same version on every visit and every device that shares an ID.' },
-    { title: 'Split URL tests', body: 'Send each variant to its own URL when the change is a whole page rather than an element.' },
-    { title: 'Results you can defend', body: 'Conversion rate, lift and Wilson confidence intervals per variant, with a two-proportion z-test against the control.' },
-    { title: 'Environments and keys', body: 'Separate dev, staging and production data. Public SDK keys for browsers, hashed secret keys for servers.' },
-    { title: 'Audit log', body: 'Every change to an experiment, key or plan is recorded with who made it and when.' },
+// "Works with your stack": only JavaScript and HTML exist today, the rest are marked as coming soon.
+const stack: { name: string; soon?: boolean; icon: React.ReactNode }[] = [
+    { name: 'JavaScript', icon: <span className="flex h-5 w-5 items-end justify-end rounded-[3px] bg-zinc-500 pb-px pr-0.5 text-[8px] font-bold leading-none text-white">JS</span> },
+    { name: 'HTML', icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><path d="M4 2h16l-1.5 17L12 22l-6.5-3zm3.6 5 .3 3h7.9l-.3 3.3-3.5 1-3.5-1-.2-2H5.4l.4 4.3L12 17l6.2-1.7.9-9.3z" /></svg> },
+    { name: 'React', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden><ellipse cx="12" cy="12" rx="10" ry="4" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" /><circle cx="12" cy="12" r="1.6" fill="currentColor" /></svg> },
+    { name: 'Next.js', soon: true, icon: <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-600 text-[10px] font-bold text-white">N</span> },
+    { name: 'WordPress', soon: true, icon: <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-zinc-500 text-[10px] font-bold">W</span> },
+    { name: 'Node.js', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><path d="M12 2 3 7v10l9 5 9-5V7zm0 2.3L19 8v8l-7 3.8L5 16V8z" /></svg> },
+    { name: 'GA4', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><rect x="16" y="3" width="5" height="18" rx="2.5" /><rect x="9.5" y="9" width="5" height="12" rx="2.5" /><circle cx="5.5" cy="18.5" r="2.5" /></svg> },
 ];
 
-const planned = [
-    { phase: 'Phase 1', items: ['Flicker-free snippet with local bucketing', 'URL, device, UTM and browser targeting', 'Click, form, revenue and custom goals', 'Sample ratio mismatch alerts', 'Sample size and duration calculator'] },
-    { phase: 'Phase 2', items: ['Bayesian and sequential analysis', 'Feature flags and percentage rollouts', 'Server SDKs and React/Next.js', 'GA4, GTM, WordPress and webhooks', 'Roles, SSO and scheduled reports'] },
-    { phase: 'Phase 3', items: ['Visual editor', 'Multi-armed bandits and CUPED', 'Edge delivery', 'Warehouse exports', 'AI-assisted test ideas and summaries'] },
-];
-const faqs = [
-    { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID and the platform hashes it together with the experiment ID. The same visitor always lands in the same variant, and raising traffic allocation does not move people who are already in the test.' },
-    { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of the best variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors. Bayesian and sequential methods are on the roadmap.' },
-    { q: 'Will it slow my site down?', a: 'The current SDK is a small script that requests an assignment per experiment. A version that buckets locally from a cached config, with no extra request per visitor and no flicker, is part of Phase 1.' },
-    { q: 'Can I keep test data separate from production?', a: 'Yes. Every project has dev, staging and production environments, each with its own keys. Results can be filtered by environment.' },
-    { q: 'Where is my data stored?', a: 'In your own database. freeabtest.com is self-hostable and uses SQLite locally or a hosted libSQL database such as Turso in production.' },
-    { q: 'Is there a visual editor?', a: 'Not yet. Variants are written in code today. The visual editor is planned for Phase 3.' },
+const steps = [
+    { n: '01', title: 'Create your test', body: 'Set up an A/B test or split test in minutes with a few lines of code.', card: 'bg-[#eef4ff]', badge: 'bg-[#dbe7ff] text-blue-700', icon: 'text-blue-600', d: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z' },
+    { n: '02', title: 'Measure what matters', body: 'Track real user behavior with clear, visual results.', card: 'bg-[#ecf8f3]', badge: 'bg-[#d5f0e5] text-teal-700', icon: 'text-teal-600', d: 'M5 20V14M10 20V9M15 20v-7M20 20V4M3 20h18' },
+    { n: '03', title: 'Ship the winner', body: 'Choose the best variation and roll it out with confidence.', card: 'bg-[#fff8ea]', badge: 'bg-[#fdebc8] text-amber-700', icon: 'text-amber-500', d: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6v4H9z' },
 ];
 
-const snippet = `<script src="https://freeabtest.example.com/sdk.js"></script>
-<script>
-  ABTest.init({
-    apiUrl: 'https://freeabtest.example.com',
-    apiKey: 'cro_pk_prod_...'
-  });
-
-  ABTest.run('exp_pricing_headline', function (variation) {
-    if (variation.variation_name === 'Variant B') {
-      document.querySelector('h1').textContent = 'Plans that grow with your team';
-    }
-  });
-
-  document.querySelector('#start-trial').addEventListener('click', function () {
-    ABTest.trackConversion('exp_pricing_headline', 'start_trial');
-  });
-</script>`;
-
-const menus = {
-    Product: [
-        { href: '#features', title: 'Features', body: 'What works in the current release' },
-        { href: '#how-it-works', title: 'How it works', body: 'From snippet to result in three steps' },
-        { href: '#roadmap', title: 'Roadmap', body: 'What is planned for each phase' },
-    ],
-    'Use cases': [
-        { href: '#test-anything', title: 'Landing pages', body: 'Headlines, copy and calls to action' },
-        { href: '#test-anything', title: 'Pricing pages', body: 'Plans, layout and wording' },
-        { href: '#test-anything', title: 'Split URL tests', body: 'Compare two whole pages' },
-    ],
-    Pricing: [{ href: '#pricing', title: 'Plans', body: 'Intended plan structure (placeholder)' }],
-    Resources: [
-        { href: 'https://github.com/ranababu1/cro#readme', title: 'Documentation', body: 'Setup and SDK reference' },
-        { href: '/demo.html', title: 'Demo page', body: 'See the SDK on a sample page' },
-        { href: '#faq', title: 'FAQ', body: 'Common questions' },
-    ],
-};
-
-const stack = [
-    { name: 'JavaScript', status: 'Available' },
-    { name: 'HTML', status: 'Available' },
-    { name: 'React', status: 'Planned' },
-    { name: 'Next.js', status: 'Planned' },
-    { name: 'WordPress', status: 'Planned' },
-    { name: 'Node.js', status: 'Planned' },
-    { name: 'GA4', status: 'Planned' },
+const testList: { text: string; note?: string }[] = [
+    { text: 'Website & landing pages' },
+    { text: 'Product features' },
+    { text: 'Pricing & plans' },
+    { text: 'Split URL tests' },
+    { text: 'Advanced targeting', note: '(device, location, referral source: coming soon)' },
 ];
 
-const howSteps = [
-    { title: 'Create', body: 'Set up an experiment, write the hypothesis and add your variations.', tone: 'bg-sky-50 ring-sky-100', icon: 'text-sky-600 bg-sky-100', d: 'M12 5v14M5 12h14' },
-    { title: 'Test', body: 'Add a few lines of code. Visitors are split between variations automatically.', tone: 'bg-teal-50 ring-teal-100', icon: 'text-teal-700 bg-teal-100', d: 'M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3' },
-    { title: 'Grow', body: 'Read conversion rates and confidence intervals, then ship the winner.', tone: 'bg-amber-50 ring-amber-100', icon: 'text-amber-700 bg-amber-100', d: 'M4 19 10 13l4 4 6-8M15 9h5v5' },
-];
-
-const testList = [
-    'Headlines, copy and calls to action',
-    'Landing and pricing pages',
-    'Whole-page redirects (split URL tests)',
-    'Any change you can make in JavaScript',
-    'Targeting by URL, device and UTM (coming in Phase 1)',
-];
-
-// Each stat is a product fact checked against the code (public/sdk.js size, validation limits, environments, stats engine).
+// Verified against the code: public/sdk.js gzips to about 2 KB, validation allows 26 variations,
+// each project has dev/staging/prod, and results use 95% Wilson intervals.
 const stats = [
-    { value: 'Under 3 KB', label: 'SDK size, gzipped' },
-    { value: 'Up to 26', label: 'Variations per experiment' },
-    { value: '3', label: 'Environments per project' },
-    { value: '95%', label: 'Wilson confidence intervals' },
+    { value: '<3 KB', label: ['gzipped SDK', 'snippet'] },
+    { value: '26', label: ['variations per', 'experiment'] },
+    { value: '3', label: ['environments', 'per project'] },
+    { value: '95%', label: ['Wilson confidence', 'intervals'] },
 ];
 
-function Section({ id, eyebrow, title, intro, children }: { id?: string; eyebrow: string; title: string; intro?: string; children: React.ReactNode }) {
-    return (
-        <section id={id} className="scroll-mt-20 border-t border-zinc-200 py-20 sm:py-24">
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                <p className="text-sm font-medium text-brand-700">{eyebrow}</p>
-                <h2 className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{title}</h2>
-                {intro && <p className="mt-3 max-w-2xl text-zinc-600">{intro}</p>}
-                <div className="mt-12">{children}</div>
-            </div>
-        </section>
-    );
-}
+const CheckDot = () => (
+    <span className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+        <svg viewBox="0 0 20 20" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 10 3.5 3.5L15 7" /></svg>
+    </span>
+);
 
-function Tick() {
-    return (
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-            <CheckIcon className="h-3 w-3" />
-        </span>
-    );
-}
+const ticks = [
+    { label: 'Free plan', d: 'M13 2 4 14h7l-1 8 9-12h-7z' },
+    { label: 'No credit card required', d: 'M3 6h18v12H3zM3 10h18M7 15h3' },
+    { label: 'Set up in minutes', d: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12l3 3 5-6' },
+];
 
 export default function LandingPage() {
     return (
-        <div className="min-h-screen overflow-x-hidden bg-white text-zinc-900">
-            <header className="sticky top-0 z-40 border-b border-zinc-200/60 bg-white/80 backdrop-blur">
-                <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
-                    <Logo />
-                    <nav className="hidden items-center lg:flex" aria-label="Main">
-                        {Object.entries(menus).map(([label, items]) => <NavMenu key={label} label={label} items={items} />)}
-                    </nav>
-                    <div className="ml-auto flex items-center gap-2 sm:gap-4">
-                        <Link href="/signin" className="hidden text-sm font-medium text-zinc-700 hover:text-zinc-900 sm:block">Log in</Link>
-                        <ButtonLink href="/signin" className="bg-zinc-900 hover:bg-zinc-800">Start for free</ButtonLink>
-                    </div>
-                </div>
-            </header>
+        <div className="min-h-screen overflow-x-hidden bg-[#f8faff] text-zinc-950">
+            <div className="relative isolate">
+                <Blobs variant="hero" />
+                <SiteHeader />
 
-            <main>
-                <section className="relative isolate">
-                    <Blobs variant="hero" />
-                    <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:pb-24 lg:pt-20 [&>*]:min-w-0">
-                        <div>
-                            <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1 text-xs font-medium text-blue-800">
-                                <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                                Free A/B testing for growing teams
-                            </span>
-                            <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight text-zinc-950 sm:text-6xl xl:text-7xl">
-                                Build, test and{' '}
-                                <span className="bg-gradient-to-r from-blue-600 via-sky-500 to-teal-500 bg-clip-text text-transparent">grow faster.</span>
-                            </h1>
-                            <p className="mt-6 max-w-lg text-lg leading-8 text-zinc-600">
-                                Run A/B tests on your website, see which version converts better, and make decisions backed by real statistics. A few lines of code to get started.
-                            </p>
-                            <div className="mt-8 flex flex-wrap gap-3">
-                                <ButtonLink href="/signin" size="lg" className="bg-zinc-900 hover:bg-zinc-800">Start testing for free</ButtonLink>
-                                <ButtonLink href="/demo.html" size="lg" variant="secondary">Try the demo page</ButtonLink>
-                            </div>
-                            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-zinc-600">
-                                {['Free plan', 'Set up in minutes', 'No credit card required'].map((t) => (
-                                    <li key={t} className="flex items-center gap-2"><Tick />{t}</li>
-                                ))}
-                            </ul>
+                {/* Hero */}
+                <section className="mx-auto grid max-w-[1360px] gap-14 px-5 pb-10 pt-6 sm:px-8 lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)] lg:gap-6 lg:px-10 lg:pt-[52px]">
+                    <div className="lg:pt-6">
+                        <span className="inline-flex items-center gap-2 rounded-lg bg-blue-100/70 px-3.5 py-2 text-[13px] font-semibold tracking-[0.02em] text-blue-800">
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-600"><span className="h-1.5 w-1.5 rounded-full bg-white" /></span>
+                            A/B TESTING, MADE SIMPLE
+                        </span>
+                        <h1 className="mt-8 text-[60px] font-bold leading-[0.98] tracking-[-0.04em] text-[#0b1630] sm:text-[80px] xl:text-[96px]">
+                            Build,<br />test and<br />
+                            <span className="bg-gradient-to-r from-blue-600 from-15% via-sky-600 via-45% to-teal-500 to-85% bg-clip-text pb-2 text-transparent">grow faster.</span>
+                        </h1>
+                        <p className="mt-6 max-w-[500px] text-[19px] leading-[1.5] text-zinc-700 sm:text-[21px]">
+                            Run A/B tests, split tests and experiments to understand what converts, improve your product and make data-driven decisions without the complexity.
+                        </p>
+                        <div className="mt-10 flex flex-wrap gap-5">
+                            <Link href="/signin" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-[#0b1630] px-10 text-[18px] font-medium text-white shadow-[0_12px_24px_-12px_rgb(11_22_48/0.6)] hover:bg-[#13224a]">Start testing for free <Arrow /></Link>
+                            <a href="/demo.html" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-white/90 px-6 pr-10 shadow-[0_10px_30px_-12px_rgb(30_64_175/0.25)] ring-1 ring-zinc-100 hover:bg-white">
+                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white"><svg viewBox="0 0 20 20" className="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden><path d="M6 4v12l10-6z" /></svg></span>
+                                <span className="text-left"><span className="block text-[18px] font-medium leading-tight text-zinc-900">See the demo</span><span className="block text-[14px] text-zinc-500">Sample page</span></span>
+                            </a>
                         </div>
-                        <div className="relative">
-                            <DashboardMock />
-                            <div className="pointer-events-none absolute -bottom-14 left-4 hidden items-end gap-1 font-hand text-2xl text-blue-800 sm:flex lg:-left-10" aria-hidden>
-                                <svg viewBox="0 0 60 50" className="h-12 w-14 -rotate-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                    <path d="M6 44C14 30 26 18 50 10" />
-                                    <path d="M40 6l10 4-6 9" />
-                                </svg>
-                                <span className="-rotate-3">See what really works</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6">
-                        <p className="text-center text-sm text-zinc-500">Works with your stack</p>
-                        <ul className="mt-5 flex flex-wrap items-center justify-center gap-3">
-                            {stack.map((s) => (
-                                <li key={s.name} className="flex items-center gap-2 rounded-full border border-zinc-200 bg-white/70 px-4 py-2 text-sm font-semibold text-zinc-500">
-                                    {s.name}
-                                    {s.status !== 'Available' && <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500">{s.status}</span>}
+                        <ul className="mt-14 flex flex-wrap gap-x-9 gap-y-3 text-[14px] text-zinc-800">
+                            {ticks.map((t) => (
+                                <li key={t.label} className="flex items-center gap-2.5">
+                                    <svg viewBox="0 0 24 24" className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={t.d} /></svg>
+                                    {t.label}
                                 </li>
                             ))}
                         </ul>
                     </div>
+                    <div className="relative min-w-0 lg:-mr-12">
+                        <DashboardMock />
+                        <div className="pointer-events-none absolute -bottom-[86px] right-2 hidden items-end font-hand text-[26px] leading-[0.9] text-blue-600 sm:flex" aria-hidden>
+                            <span className="-rotate-[14deg] text-right">Turn more<br />visitors into<br />customers</span>
+                            <svg viewBox="0 0 40 60" className="mb-6 ml-1 h-14 w-9" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 56C26 46 32 28 28 6" /><path d="M20 12l8-8 6 10" /></svg>
+                        </div>
+                    </div>
                 </section>
 
-                <section id="how-it-works" className="scroll-mt-20 py-20 sm:py-24">
-                    <div className="mx-auto max-w-6xl px-4 sm:px-6">
-                        <p className="text-center text-sm font-medium text-blue-700">How it works</p>
-                        <h2 className="mt-2 text-center text-3xl font-bold tracking-tight sm:text-4xl">Simple steps. Real results.</h2>
-                        <div className="mt-12 grid gap-6 md:grid-cols-3">
-                            {howSteps.map((s, i) => (
-                                <div key={s.title} className="relative">
-                                    <div className={`h-full rounded-2xl p-6 ring-1 ${s.tone}`}>
-                                        <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${s.icon}`}>
-                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={s.d} /></svg>
-                                        </span>
-                                        <h3 className="mt-5 text-lg font-semibold">{i + 1}. {s.title}</h3>
-                                        <p className="mt-2 text-sm leading-6 text-zinc-600">{s.body}</p>
+                {/* Works with your stack */}
+                <section className="mx-auto max-w-[1360px] px-5 pb-10 pt-10 sm:px-8 lg:px-10 lg:pt-6">
+                    <p className="text-center text-[12px] font-semibold tracking-[0.2em] text-zinc-500">WORKS WITH YOUR STACK</p>
+                    <ul className="mt-7 flex flex-wrap items-center justify-center gap-x-14 gap-y-5 text-zinc-600">
+                        {stack.map((s) => (
+                            <li key={s.name} className="flex items-center gap-2 text-[19px] font-semibold tracking-tight">
+                                {s.icon}{s.name}
+                                {s.soon && <span className="self-start text-[10px] font-medium uppercase tracking-wide text-zinc-400">soon</span>}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            </div>
+
+            {/* How it works */}
+            <section id="how-it-works" className="scroll-mt-6 bg-white/60 pb-10 pt-10">
+                <div className="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-10">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="lg:pl-2">
+                            <p className="text-[13px] font-semibold tracking-[0.2em] text-blue-600">HOW IT WORKS</p>
+                            <h2 className="mt-5 text-[34px] font-bold leading-[1.12] tracking-[-0.025em] text-[#0b1630] sm:text-[42px]">Go from idea to impact<br className="hidden sm:block" /> in three simple steps.</h2>
+                        </div>
+                        <p className="max-w-[400px] pb-2 text-[18px] leading-[1.5] text-zinc-600 lg:mr-14">No complex setup. A few lines of code. Just create, measure and ship what works.</p>
+                    </div>
+                    <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:items-center lg:gap-5">
+                        {steps.map((s, i) => (
+                            <div key={s.n} className="contents">
+                                <div className={`flex gap-7 rounded-2xl p-5 pb-8 lg:min-h-[196px] ${s.card}`}>
+                                    <span className={`flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-xl text-[17px] font-semibold ${s.badge}`}>{s.n}</span>
+                                    <div className="pt-2">
+                                        <svg viewBox="0 0 24 24" className={`h-10 w-10 ${s.icon}`} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d={s.d} /></svg>
+                                        <h3 className="mt-4 text-[20px] font-semibold tracking-tight text-zinc-950">{s.title}</h3>
+                                        <p className="mt-2 max-w-[290px] text-[16px] leading-[1.6] text-zinc-600">{s.body}</p>
                                     </div>
-                                    {i < howSteps.length - 1 && (
-                                        <span className="absolute -right-5 top-1/2 z-10 hidden -translate-y-1/2 text-zinc-300 md:block" aria-hidden>
-                                            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                                        </span>
-                                    )}
                                 </div>
-                            ))}
-                        </div>
-                        <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_1.2fr] [&>*]:min-w-0">
-                            <p className="text-sm leading-6 text-zinc-600">This is the code for a real test. The SDK is plain JavaScript with no dependencies, and the snippet below is all a page needs.</p>
-                            <CodeBlock label="index.html" tone="dark" code={snippet} />
-                        </div>
-                    </div>
-                </section>
-
-                <section id="test-anything" className="relative isolate scroll-mt-20 overflow-hidden py-20 sm:py-24">
-                    <Blobs variant="band" />
-                    <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 [&>*]:min-w-0">
-                        <TestIllustration />
-                        <div>
-                            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Test anything.<br />Improve everything.</h2>
-                            <p className="mt-4 max-w-md text-zinc-600">Compare versions of a page and let the data decide which one wins.</p>
-                            <ul className="mt-6 space-y-3 text-sm text-zinc-700">
-                                {testList.map((t) => <li key={t} className="flex items-center gap-3"><Tick />{t}</li>)}
-                            </ul>
-                            <ButtonLink href="/signin" size="lg" className="mt-8 bg-zinc-900 hover:bg-zinc-800">Start your first test</ButtonLink>
-                        </div>
-                    </div>
-                    <div className="mx-auto mt-20 max-w-6xl px-4 sm:px-6">
-                        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-200 shadow-card md:grid-cols-4">
-                            {stats.map((s) => (
-                                <div key={s.label} className="flex flex-col-reverse bg-white/90 px-6 py-6 text-center">
-                                    <dt className="mt-1 text-sm text-zinc-500">{s.label}</dt>
-                                    <dd className="text-3xl font-bold tracking-tight text-zinc-900">{s.value}</dd>
-                                </div>
-                            ))}
-                        </dl>
-                    </div>
-                </section>
-
-                <Section id="features" eyebrow="Available today" title="The parts of experimentation that have to be right" intro="Assignment, data separation and statistics come first. Everything here works in the current release.">
-                    <div className="grid gap-px overflow-hidden rounded-lg border border-zinc-200 bg-zinc-200 sm:grid-cols-2 lg:grid-cols-3">
-                        {available.map((f) => (
-                            <div key={f.title} className="bg-white p-6">
-                                <h3 className="text-sm font-semibold text-zinc-900">{f.title}</h3>
-                                <p className="mt-2 text-sm leading-6 text-zinc-600">{f.body}</p>
+                                {i < steps.length - 1 && <span className="hidden text-zinc-500 lg:block" aria-hidden><Arrow /></span>}
                             </div>
                         ))}
-                    </div>
-                </Section>
-                <Section id="roadmap" eyebrow="Roadmap" title="What is coming next" intro="The platform is built in three phases. This is the plan, not a list of shipped features.">
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {planned.map((p) => (
-                            <div key={p.phase} className="rounded-lg border border-zinc-200 p-6">
-                                <Badge tone={p.phase === 'Phase 1' ? 'brand' : 'neutral'}>{p.phase}</Badge>
-                                <ul className="mt-4 space-y-2.5 text-sm text-zinc-600">
-                                    {p.items.map((i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-zinc-400" />{i}</li>)}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-
-                <Section id="pricing" eyebrow="Pricing" title="Plans">
-                    <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                        Placeholder. Pricing has not been set. Tiers and limits below show the intended structure only.
-                    </div>
-                    <div className="grid gap-4 md:grid-cols-3">
-                        {[
-                            { name: 'Free', price: 'TBD', body: 'For trying it out on one site.', items: ['1 project', 'Monthly visitor limit', 'Core A/B and A/B/n tests'] },
-                            { name: 'Team', price: 'TBD', body: 'For teams running tests every week.', items: ['Multiple projects', 'Higher visitor limits', 'Roles and audit log'], highlight: true },
-                            { name: 'Enterprise', price: 'Contact us', body: 'For larger traffic and compliance needs.', items: ['Custom limits', 'SSO', 'Self-hosting support'] },
-                        ].map((t) => (
-                            <div key={t.name} className={`rounded-lg border p-6 ${t.highlight ? 'border-brand-600 ring-1 ring-brand-600' : 'border-zinc-200'}`}>
-                                <h3 className="font-semibold text-zinc-900">{t.name}</h3>
-                                <p className="mt-1 text-sm text-zinc-600">{t.body}</p>
-                                <p className="mt-6 text-2xl font-semibold tracking-tight text-zinc-900">{t.price}</p>
-                                <ul className="mt-6 space-y-2 text-sm text-zinc-600">
-                                    {t.items.map((i) => <li key={i} className="flex gap-2"><CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-zinc-400" />{i}</li>)}
-                                </ul>
-                                <ButtonLink href="/signin" variant={t.highlight ? 'primary' : 'secondary'} className="mt-8 w-full">Get started</ButtonLink>
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-
-                <Section id="faq" eyebrow="FAQ" title="Common questions">
-                    <div className="divide-y divide-zinc-200 border-y border-zinc-200">
-                        {faqs.map((f) => (
-                            <details key={f.q} className="group py-5">
-                                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-zinc-900">
-                                    {f.q}
-                                    <span className="text-zinc-400 transition-transform group-open:rotate-45" aria-hidden>+</span>
-                                </summary>
-                                <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">{f.a}</p>
-                            </details>
-                        ))}
-                    </div>
-                </Section>
-
-                <section className="border-t border-zinc-200 bg-zinc-50">
-                    <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 sm:px-6 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">Run your first experiment this week.</h2>
-                            <p className="mt-2 text-zinc-600">Sign in, create an SDK key and add one script tag.</p>
-                        </div>
-                        <ButtonLink href="/signin" size="lg">Get started</ButtonLink>
-                    </div>
-                </section>
-            </main>
-
-            <footer className="border-t border-zinc-200">
-                <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 text-sm sm:px-6 md:grid-cols-4">
-                    <div className="space-y-3">
-                        <Logo />
-                        <p className="text-zinc-500">Free A/B testing and experimentation platform.</p>
-                    </div>
-                    <div>
-                        <p className="font-medium text-zinc-900">Product</p>
-                        <ul className="mt-3 space-y-2 text-zinc-600">
-                            <li><a href="#features" className="hover:text-zinc-900">Features</a></li>
-                            <li><a href="#roadmap" className="hover:text-zinc-900">Roadmap</a></li>
-                            <li><a href="#pricing" className="hover:text-zinc-900">Pricing</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <p className="font-medium text-zinc-900">Developers</p>
-                        <ul className="mt-3 space-y-2 text-zinc-600">
-                            <li><a href="https://github.com/ranababu1/cro#readme" className="hover:text-zinc-900">Documentation</a></li>
-                            <li><a href="/demo.html" className="hover:text-zinc-900">SDK demo page</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <p className="font-medium text-zinc-900">Account</p>
-                        <ul className="mt-3 space-y-2 text-zinc-600">
-                            <li><Link href="/signin" className="hover:text-zinc-900">Sign in</Link></li>
-                            <li><Link href="/dashboard" className="hover:text-zinc-900">Dashboard</Link></li>
-                        </ul>
                     </div>
                 </div>
-                <div className="border-t border-zinc-200">
-                    <p className="mx-auto max-w-6xl px-4 py-6 text-xs text-zinc-500 sm:px-6">© {new Date().getFullYear()} freeabtest.com</p>
+            </section>
+
+            {/* Test anything */}
+            <section id="test-anything" className="relative isolate scroll-mt-6 overflow-hidden pb-6 pt-4">
+                <Blobs variant="band" />
+                <div className="mx-auto grid max-w-[1360px] items-center gap-12 px-5 sm:px-8 lg:grid-cols-[minmax(0,740px)_minmax(0,1fr)] lg:gap-6 lg:px-10">
+                    <div className="lg:-ml-14"><TestIllustration /></div>
+                    <div>
+                        <span className="inline-block rounded-md bg-blue-100/70 px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] text-blue-700">BUILT FOR REAL GROWTH</span>
+                        <h2 className="mt-5 text-[36px] font-bold leading-[1.1] tracking-[-0.03em] text-[#0b1630] sm:text-[46px]">
+                            Test anything.<br />
+                            <span className="bg-gradient-to-r from-blue-600 via-sky-600 to-teal-500 bg-clip-text text-transparent">Improve everything.</span>
+                        </h2>
+                        <p className="mt-4 max-w-[540px] text-[19px] leading-[1.5] text-zinc-600">From headlines and layouts to pricing and product flows, run experiments across your entire website and product to drive real results.</p>
+                        <ul className="mt-5 space-y-2.5 text-[17px] text-zinc-800">
+                            {testList.map((t) => (
+                                <li key={t.text} className="flex items-start gap-3"><span className="mt-[3px]"><CheckDot /></span><span>{t.text}{t.note && <span className="text-zinc-500"> {t.note}</span>}</span></li>
+                            ))}
+                        </ul>
+                        <Link href="/roadmap" className="mt-8 inline-flex h-[54px] items-center gap-3 rounded-xl bg-[#0b1630] px-8 text-[16px] font-medium text-white hover:bg-[#13224a]">Explore the platform <Arrow /></Link>
+                    </div>
                 </div>
-            </footer>
+            </section>
+
+            {/* Stats strip */}
+            <section className="bg-white" aria-label="Product facts">
+                <dl className="mx-auto grid max-w-[1360px] grid-cols-2 px-5 py-8 sm:px-8 lg:grid-cols-4 lg:px-10 lg:py-9">
+                    {stats.map((s) => (
+                        <div key={s.value} className="flex flex-col-reverse border-l border-zinc-200 py-3 pl-6 lg:pl-10">
+                            <dt className="mt-2 text-[17px] leading-[1.4] text-zinc-500">{s.label[0]}<br />{s.label[1]}</dt>
+                            <dd className="text-[34px] font-bold leading-none tracking-tight text-[#0f5f5a]">{s.value}</dd>
+                        </div>
+                    ))}
+                </dl>
+            </section>
+
+            <SiteFooter />
         </div>
     );
 }
