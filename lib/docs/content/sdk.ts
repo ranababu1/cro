@@ -6,7 +6,7 @@ export const sdk: DocPage = {
     description: 'Install the browser SDK, the full API, single-page apps and how to avoid flicker.',
     group: 'Guides',
     blocks: [
-        { type: 'p', text: 'The SDK is a single dependency-free script, `sdk.js`, served by freeabtest.com. It is about 7.5 KB raw and about 2 KB gzipped. It exposes one global object, `window.ABTest`.' },
+        { type: 'p', text: 'The SDK is a single dependency-free script, `sdk.js`, served by freeabtest.com. The shipped file is about 50 KB raw and about 14 KB gzipped. It exposes one global object, `window.ABTest`.' },
         { type: 'h2', text: 'Install' },
         { type: 'code', label: 'HTML', code: `<script src="https://YOUR-HOST/sdk.js" data-key="YOUR_SDK_KEY" async></script>` },
         { type: 'p', text: 'Put the same tag on the control page and every variation page. The SDK reads the key from `data-key`, matches a running test by the current URL, and handles bucketing, redirects and click goals automatically.' },

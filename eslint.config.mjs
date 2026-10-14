@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Built obfuscated browser SDK (generated from sdk-src/sdk.js):
+    "public/sdk.js",
   ]),
 ]);
 

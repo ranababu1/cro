@@ -1,0 +1,50 @@
+{
+  "source": {
+    "label": "source",
+    "lines": 197,
+    "bytes": 7416,
+    "gzip": 2432
+  },
+  "built": {
+    "label": "built",
+    "lines": 1507,
+    "bytes": 50885,
+    "gzip": 14504
+  },
+  "runs": [
+    {
+      "label": "source",
+      "avgLoadMs": 0.959,
+      "avgBootMs": 0.393,
+      "sample": {
+        "tLoadMs": 2.1689780000000383,
+        "tBootMs": 0.7026779999999917,
+        "hasABTest": true,
+        "action": "expose",
+        "replaced": null,
+        "revealed": true
+      }
+    },
+    {
+      "label": "built",
+      "avgLoadMs": 48.395,
+      "avgBootMs": 1.478,
+      "sample": {
+        "tLoadMs": 44.385450999999875,
+        "tBootMs": 1.5773130000002311,
+        "hasABTest": true,
+        "action": "expose",
+        "replaced": null,
+        "revealed": true
+      }
+    }
+  ],
+  "redirect": {
+    "tLoadMs": 39.76011900000003,
+    "tBootMs": 1.2753899999997884,
+    "hasABTest": true,
+    "action": "redirect",
+    "replaced": "https://example.com/v1",
+    "revealed": true
+  }
+}
