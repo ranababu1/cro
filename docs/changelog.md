@@ -5,7 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
-| pending | 2026-10-15 03:25 IST | fix: migration 0004 (api_keys.key_plaintext) was skipped on existing DBs because its journal timestamp was older than 0001; bumped it, added migration-order test, install API returns a clear error. |
+| d8fc076 | 2026-10-15 03:25 IST | fix: migration 0004 (api_keys.key_plaintext) was skipped on existing DBs because its journal timestamp was older than 0001; bumped it, added migration-order test, install API returns a clear error. |
 | 2db18d1 | 2026-10-15 02:55 IST | fix: auto-create public SDK keys and pre-fill install snippets with https://www.freeabtest.com + real key; Production/Development toggle; store SDK key plaintext (secrets stay hash-only). |
 | pending | 2026-10-15 02:45 IST | fix: auto-redistribute variation weights so they always total 100 when editing one weight in the create-experiment wizard. |
 | pending | 2026-10-15 02:25 IST | fix: replace default Next.js favicon with freeabtest leaf mark (blue-to-teal gradient). Add favicon.ico, apple-touch-icon, app/icon.png, app/apple-icon.png; remove public/next.svg. |
