@@ -4,6 +4,7 @@ import { authOptions } from './auth';
 import { db, type SdkKeyContext } from './db';
 import { apiKeyType, hashApiKey, isWellFormedApiKey } from './apiKeys';
 import { sdkRateLimiter, type RateLimiter } from './rateLimit';
+import { bumpMetric, METRICS, touchUserActivity } from './telemetry';
 
 /** CORS headers for endpoints called from customer websites by the browser SDK. */
 export const SDK_CORS_HEADERS: Record<string, string> = {
@@ -42,15 +43,18 @@ export async function authenticateSdkRequest(
     }
     const limit = limiter.check(`${hashApiKey(key).slice(0, 16)}:${clientIp(request)}`);
     if (!limit.allowed) {
+        void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: sdkJson({ error: 'Rate limit exceeded' }, 429, { 'Retry-After': String(limit.retryAfterSeconds) }) };
     }
     const ctx = await db.authenticateApiKey(key);
     if (!ctx) {
+        void bumpMetric(METRICS.errors, {});
         return { error: sdkJson({ error: 'Unknown or revoked API key' }, 401) };
     }
     if (ctx.orgStatus !== 'active') {
         return { error: sdkJson({ error: 'This account is suspended' }, 403) };
     }
+    void bumpMetric(METRICS.api_key_requests, { orgId: ctx.orgId, projectId: ctx.projectId });
     return { ctx };
 }
 
@@ -83,6 +87,7 @@ export async function getUserContext(request?: NextRequest): Promise<UserContext
     const all = await db.getProjectsForUser(userId);
     // Projects in suspended orgs are invisible, so every scoped query excludes them.
     const projects = all.filter((p) => p.org_status === 'active');
+    void touchUserActivity(userId, 'active');
     return {
         userId,
         projectIds: projects.map((p) => p.id),

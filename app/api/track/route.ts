@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { trackSchema, formatZodError } from '@/lib/validation';
 import { hostFromRequestHeaders, isHostAllowed } from '@/lib/domains';
+import { bumpMetric, METRICS } from '@/lib/telemetry';
 
 const MAX_METADATA_BYTES = 4096;
 
@@ -64,9 +65,18 @@ export async function POST(request: NextRequest) {
             metadata,
         });
 
+        const scope = { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, experimentId: body.experiment_id };
+        if (body.event_type === 'conversion') {
+            await bumpMetric(METRICS.sdk_goal, scope);
+            await bumpMetric(METRICS.conversions, scope);
+        } else {
+            await bumpMetric(METRICS.sdk_exposure, scope);
+        }
+
         return sdkJson({ success: true }, 201);
     } catch (error) {
         console.error('Failed to track event:', error);
+        void bumpMetric(METRICS.errors, {});
         return sdkJson({ error: 'Failed to track event' }, 500);
     }
 }

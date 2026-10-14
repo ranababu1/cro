@@ -6,6 +6,7 @@ import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/request
 import { z } from 'zod';
 import { formatZodError } from '@/lib/validation';
 import { checkVisitorQuota } from '@/lib/quotas';
+import { bumpMetric, METRICS } from '@/lib/telemetry';
 
 const assignBody = z.object({
     experiment_id: z.string().min(1).max(100),
@@ -27,6 +28,9 @@ export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
         if ('error' in auth) return auth.error;
+
+        // Count every assign request; unique_visitors only when a new assignment is stored.
+        void bumpMetric(METRICS.sdk_assign, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
 
         const parsed = assignBody.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
@@ -67,6 +71,7 @@ export async function POST(request: NextRequest) {
             return sdkJson({ ...notAssigned(experimentId), reason: 'quota_exceeded' } satisfies AssignmentResponse);
         }
 
+        await bumpMetric(METRICS.unique_visitors, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, experimentId });
         await db.createAssignment({
             experiment_id: experimentId,
             variation_id: assigned.id,
@@ -83,6 +88,7 @@ export async function POST(request: NextRequest) {
         } satisfies AssignmentResponse);
     } catch (error) {
         console.error('Failed to assign user:', error);
+        void bumpMetric(METRICS.errors, {});
         return sdkJson({ error: 'Failed to assign user' }, 500);
     }
 }

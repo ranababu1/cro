@@ -125,7 +125,7 @@ function UserMenu({ user }: { user: AppShellProps['user'] }) {
 function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; onNavigate?: () => void }) {
     const pathname = usePathname();
     const item = (href: string, label: string, Icon: typeof HomeIcon) => {
-        const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href));
+        const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href) && !(href === '/admin' && pathname.startsWith('/admin/telemetry')));
         return (
             <Link
                 key={href}
@@ -149,6 +149,7 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
                 <>
                     <p className="mt-6 mb-1 px-2.5 text-xs font-medium text-zinc-400">Platform</p>
                     {item('/admin', 'Admin console', ShieldIcon)}
+                    {item('/admin/telemetry', 'Telemetry', ShieldIcon)}
                 </>
             )}
             <div className="mt-auto pb-4">

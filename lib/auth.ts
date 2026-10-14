@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
+import { bumpMetric, METRICS, touchUserActivity, recordProductEvent } from "./telemetry";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -15,12 +16,19 @@ export const authOptions: NextAuthOptions = {
 
             // Store user in database and make sure they have an org, project and environments
             const existingUser = await db.getUserByEmail(user.email);
+            const isSignup = !existingUser;
             const dbUser = existingUser ?? await db.createUser({
                 email: user.email,
                 name: user.name || "",
                 image: user.image || "",
             });
-            await db.ensureWorkspace(dbUser);
+            const ws = await db.ensureWorkspace(dbUser);
+            if (isSignup) {
+                await bumpMetric(METRICS.signups, { userId: dbUser.id, orgId: ws.orgId });
+                await recordProductEvent({ action: 'auth.signup', userId: dbUser.id, orgId: ws.orgId });
+            }
+            await touchUserActivity(dbUser.id, 'login');
+            await recordProductEvent({ action: 'auth.login', userId: dbUser.id, orgId: ws.orgId });
 
             return true;
         },

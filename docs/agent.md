@@ -51,3 +51,7 @@ Plain language, short sentences, no em dashes, no filler.
 
 ## Product docs
 - User-facing docs live at /docs, with content in `lib/docs/content/*.ts`. When a change affects behaviour, limits, the SDK or the API, update the matching docs page in the same PR. Never link to the GitHub README from the product. Public pages (docs, landing, pricing, roadmap) must not reveal internals: framework, database, hosting, env var names, rate limiter details, repo links or the admin console. Keep that in README and docs/*.md. Mark unbuilt features as Coming later with their phase.
+
+
+## Telemetry
+Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dashboard actions in `product_events` (hashed IP). Never expose visitor PII.
