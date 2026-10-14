@@ -48,3 +48,6 @@ A change without these updates is incomplete.
 
 ## Writing style for docs
 Plain language, short sentences, no em dashes, no filler.
+
+## Product docs
+- User-facing docs live at /docs, with content in `lib/docs/content/*.ts`. When a change affects behaviour, limits, the SDK or the API, update the matching docs page in the same PR. Never link to the GitHub README from the product. Mark unbuilt features as Coming later with their phase.

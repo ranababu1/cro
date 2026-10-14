@@ -14,6 +14,8 @@ const menus = {
         { href: '/#test-anything', title: 'Split URL tests', body: 'Compare two whole pages' },
     ],
     Resources: [
+        { href: '/docs', title: 'Documentation', body: 'Guides, SDK and API reference' },
+        { href: '/docs/quick-start', title: 'Quick start', body: 'Your first experiment, step by step' },
         { href: '/demo.html', title: 'Demo page', body: 'The SDK running on a sample page' },
         { href: '/roadmap', title: 'Roadmap', body: 'Planned features by phase' },
         { href: '/pricing#faq', title: 'FAQ', body: 'Common questions' },
@@ -50,6 +52,7 @@ export function SiteFooter() {
                 <nav className="flex flex-wrap gap-x-6 gap-y-2 text-zinc-600 md:ml-10" aria-label="Footer">
                     <Link href="/#how-it-works" className="hover:text-zinc-900">How it works</Link>
                     <Link href="/pricing" className="hover:text-zinc-900">Pricing</Link>
+                    <Link href="/docs" className="hover:text-zinc-900">Docs</Link>
                     <Link href="/roadmap" className="hover:text-zinc-900">Roadmap</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
                     <a href="/demo.html" className="hover:text-zinc-900">Demo page</a>

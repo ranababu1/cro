@@ -1,6 +1,6 @@
 # Current State
 
-As of 2026-10-14 19:25 IST, branch redesign/homepage-v4 (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
+As of 2026-10-14 19:45 IST, branch docs/in-app (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
@@ -17,7 +17,8 @@ users, organizations (with status, suspended_at, suspended_reason, plan, monthly
 experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
 
 ## UI
-- Light, neutral B2B design with a blue primary and teal secondary accent (green kept for status only), branded freeabtest.com (leaf logo). The landing page matches the homepage mockup section by section and contains only: nav, hero with an example-data dashboard mock and handwritten annotation, "Works with your stack" row (only JavaScript and HTML available, the rest marked soon), How it works, Test anything with the layered illustration, a stats strip of verified facts, and a footer. Pricing plus FAQ live at /pricing, features and roadmap at /roadmap. Shared marketing header and footer in app/components/landing/SiteChrome.tsx. See the UI conventions in `docs/agent.md`.
+- Light, neutral B2B design with a blue primary and teal secondary accent (green kept for status only), branded freeabtest.com (leaf logo). The landing page matches the homepage mockup section by section and contains only: nav, hero with an example-data dashboard mock and handwritten annotation, "Works with your stack" row (only JavaScript and HTML available, the rest marked soon), How it works, Test anything with the layered illustration, a stats strip of verified facts, and a footer. Pricing plus FAQ live at /pricing, features and roadmap at /roadmap. Shared marketing header and footer in app/components/landing/SiteChrome.tsx.
+- In-product documentation at /docs (13 pages: introduction, quick start, SDK, experiments, variations, goals, results, choosing a winner, REST API, environments and keys, organizations and admin, self-hosting, troubleshooting and FAQ). Content is data in lib/docs/content/*.ts, rendered by app/docs with a sidebar, on-page TOC, client-side search, copyable code, callouts and SVG diagrams. Linked from the site nav (Resources), footer and app sidebar. Planned features are marked Coming later. tests/docs.test.ts checks links, headings, no em dashes and limits against the code. See the UI conventions in `docs/agent.md`.
 - Marketing page `/`: hero with an example results card (labelled example data), features available today, how it works with the SDK snippet,
   public roadmap by phase, pricing placeholder (clearly marked, no prices), FAQ, footer.
 - Sign-in page `/signin` (Google). next-auth uses it as its sign-in page.

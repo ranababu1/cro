@@ -1,0 +1,35 @@
+import type { DocPage } from '../types';
+
+export const experiments: DocPage = {
+    slug: 'experiments',
+    title: 'Managing experiments',
+    description: 'Creating, editing, starting, pausing and completing experiments, and what each status means.',
+    group: 'Guides',
+    blocks: [
+        { type: 'h2', text: 'Creating an experiment' },
+        { type: 'p', text: 'Go to **Experiments** and choose **New experiment**. You set the name, the hypothesis, the traffic allocation and the variations. New experiments always start as **Draft**. They are created in the project selected in the top bar.' },
+        { type: 'h2', text: 'Statuses' },
+        { type: 'diagram', name: 'statuses', caption: 'Allowed status changes. Completed is final.' },
+        { type: 'table', head: ['Status', 'Visitors assigned?', 'Notes'], rows: [
+            ['Draft', 'No', 'Set up and test your code. Drafts are the only experiments that can be deleted.'],
+            ['Running', 'Yes', 'New visitors are assigned and events are recorded.'],
+            ['Paused', 'No', 'Assign calls return `assigned: false`, so everyone sees your default page. Assignments are kept and resume when you resume.'],
+            ['Completed', 'No', 'Final. Read only, and cannot be restarted. Results stay available.'],
+        ] },
+        { type: 'p', text: 'Use the buttons at the top of the experiment page: **Start experiment** (draft), **Pause** and **Complete** (running), **Resume** and **Complete** (paused). Any other change, such as completed back to running, is rejected.' },
+        { type: 'callout', tone: 'info', text: 'Starting an experiment for the first time sets its start date and counts against your organization\'s monthly experiment limit, if one is set. Resuming a paused experiment does not count again.' },
+        { type: 'h2', text: 'Editing' },
+        { type: 'p', text: 'On the **Settings** tab you can change the name, the description and the traffic allocation. Variations, weights and redirect URLs cannot be changed after the experiment is created. If you need different variations, create a new experiment.' },
+        { type: 'h3', text: 'Changing traffic allocation' },
+        { type: 'p', text: 'Traffic allocation is the share of visitors who enter the experiment. Visitors outside it are not assigned and are not counted. While running:' },
+        { type: 'list', items: [
+            'Raising it adds new visitors. Visitors who were already in keep their variation.',
+            'Lowering it stops some new visitors from entering. Visitors already assigned keep their variation and keep being counted.',
+        ] },
+        { type: 'h2', text: 'Deleting' },
+        { type: 'p', text: 'Only drafts can be deleted, from the experiment header or the Settings tab. Once an experiment has run, complete it instead so its history stays intact.' },
+        { type: 'h2', text: 'Audit log' },
+        { type: 'p', text: 'Every create, update, status change and delete is written to the audit log with who did it and what changed. Platform admins can see the latest 50 entries per organization in the admin console. An audit view for your own team is coming later.' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Scheduling, duplicating experiments and editing variations of drafts are planned. Targeting by URL, device and UTM is part of Phase 1.' },
+    ],
+};

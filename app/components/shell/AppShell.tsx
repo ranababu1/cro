@@ -151,10 +151,10 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
                 </>
             )}
             <div className="mt-auto pb-4">
-                <a href="https://github.com/ranababu1/cro#readme" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                <Link href="/docs" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                     <BookIcon className="h-4 w-4 text-zinc-400" />
                     Documentation
-                </a>
+                </Link>
             </div>
         </nav>
     );
