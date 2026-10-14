@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Field, Alert, CodeBlock } from '@/app/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Field, Alert } from '@/app/components/ui';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
+import { InstallSnippet } from '@/app/components/InstallSnippet';
 
 type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review';
 
@@ -38,7 +39,6 @@ export default function NewExperimentWizard() {
     const [traffic, setTraffic] = useState(100);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
-    const [snippet, setSnippet] = useState('');
     const [newHost, setNewHost] = useState('');
 
     useEffect(() => {
@@ -51,7 +51,6 @@ export default function NewExperimentWizard() {
                 const dashboard = await fetch('/api/experiments');
                 void dashboard;
             } catch { /* ignore */ }
-            setSnippet(`<script src="${window.location.origin}/sdk.js" data-key="YOUR_SDK_KEY" async></script>`);
             // Read plan limit from a small endpoint embedded in domains response later; for now call a helper via experiments create error. Soft-fetch from settings:
             const planRes = await fetch('/api/plan').catch(() => null);
             if (planRes && planRes.ok) {
@@ -285,9 +284,9 @@ export default function NewExperimentWizard() {
                         </CardBody>
                     </Card>
                     <Card>
-                        <CardHeader title="Install" description="One line in the &lt;head&gt; of the control and every variation page." />
+                        <CardHeader title="Install" description="One line in the &lt;head&gt; of the control and every variation page. Your public SDK key is already filled in." />
                         <CardBody>
-                            <CodeBlock label="HTML" code={snippet} />
+                            <InstallSnippet />
                         </CardBody>
                     </Card>
                 </div>

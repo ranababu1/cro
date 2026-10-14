@@ -6,16 +6,14 @@ import Link from 'next/link';
 import type { Experiment, Variation, ExperimentResults } from '@/lib/types';
 import {
     PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, StatusBadge, Badge, Tabs, Table, THead, TBody, TR, TH, TD,
-    Alert, Spinner, CodeBlock, Field, Input, Textarea, Stat, EmptyState, Kbd,
+    Alert, Spinner, Field, Input, Textarea, Stat, EmptyState, Kbd,
 } from '@/app/components/ui';
 import { IntervalChart } from './IntervalChart';
+import { InstallSnippet } from '@/app/components/InstallSnippet';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-');
 const pct = (v: number, digits = 2) => `${(v * 100).toFixed(digits)}%`;
 
-function installSnippet(origin: string) {
-    return `<script src="${origin}/sdk.js" data-key="YOUR_SDK_KEY" async></script>`;
-}
 
 export default function ExperimentDetail() {
     const { id } = useParams<{ id: string }>();
@@ -29,7 +27,6 @@ export default function ExperimentDetail() {
     const [notice, setNotice] = useState('');
     const [tab, setTab] = useState('results');
     const [busy, setBusy] = useState(false);
-    const [origin, setOrigin] = useState('https://your-cro-domain.com');
 
     const load = useCallback(async () => {
         try {
@@ -54,7 +51,6 @@ export default function ExperimentDetail() {
     useEffect(() => {
         // Fetch on mount; state updates happen after the request resolves.
         void load();
-        setOrigin(window.location.origin);
     }, [load]);
 
     useEffect(() => {
@@ -134,7 +130,7 @@ export default function ExperimentDetail() {
             />
 
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} />}
-            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} origin={origin} />}
+            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
@@ -227,7 +223,7 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
     );
 }
 
-function SetupPanel({ variations, goals, origin }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; selector: string; is_primary: boolean }[]; origin: string }) {
+function SetupPanel({ variations, goals }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; selector: string; is_primary: boolean }[] }) {
     return (
         <div className="space-y-6">
             <Card>
@@ -260,12 +256,9 @@ function SetupPanel({ variations, goals, origin }: { experimentId?: string; vari
             </Card>
             )}
             <Card>
-                <CardHeader title="Install" description="One line in the head of the control and every variation page." />
-                <CardBody className="space-y-3">
-                    <CodeBlock label="HTML" code={installSnippet(origin)} />
-                    <p className="text-sm text-zinc-500">
-                        Replace YOUR_SDK_KEY with an SDK key from <Link href="/settings/keys" className="text-brand-700 hover:underline">API keys</Link>. Use the dev key while testing so results stay separate.
-                    </p>
+                <CardHeader title="Install" description="One line in the head of the control and every variation page. Your public SDK key is already filled in." />
+                <CardBody>
+                    <InstallSnippet />
                 </CardBody>
             </Card>
         </div>

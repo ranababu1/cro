@@ -4,6 +4,7 @@ import { getAppContext } from '@/lib/appContext';
 import { db, monthStartIso } from '@/lib/db';
 import { PageHeader, Card, CardHeader, ButtonLink, Stat, StatusBadge, Table, THead, TBody, TR, TH, TD, EmptyState } from '@/app/components/ui';
 import { CheckIcon, PlusIcon, FlaskIcon } from '@/app/components/shell/icons';
+import { InstallSnippet } from '@/app/components/InstallSnippet';
 
 export const metadata: Metadata = { title: 'Overview' };
 
@@ -13,14 +14,15 @@ export default async function Dashboard() {
     const ctx = (await getAppContext())!;
     const project = ctx.current;
     const experiments = project ? await db.getExperiments([project.id]) : [];
+    if (project) await db.ensureProjectSdkKeys(project.id, ctx.user.id);
     const keys = project ? (await db.listApiKeys(project.id)).filter((k) => !k.revoked_at) : [];
     const usage = project ? await db.getOrgUsage(project.org_id, monthStartIso()) : { visitors: 0, events: 0 };
     const count = (s: string) => experiments.filter((e) => e.status === s).length;
 
     const steps = [
-        { done: keys.some((k) => k.type === 'sdk'), title: 'Create an SDK key', body: 'Each environment has its own keys.', href: '/settings/keys', cta: 'Open API keys' },
+        { done: keys.some((k) => k.type === 'sdk' && k.key_plaintext), title: 'SDK key ready', body: 'A production public SDK key is created for you automatically.', href: '/settings/keys', cta: 'View API keys' },
         { done: experiments.length > 0, title: 'Create your first experiment', body: 'Define a control and one or more variants with traffic weights.', href: '/experiments/new', cta: 'New experiment' },
-        { done: experiments.some((e) => e.status !== 'draft'), title: 'Install the snippet and start it', body: 'Add the SDK to your site, then start the experiment to begin assigning visitors.', href: '/experiments', cta: 'View experiments' },
+        { done: experiments.some((e) => e.status !== 'draft'), title: 'Install the snippet and start it', body: 'Copy the pre-filled snippet below onto your site, then start the experiment.', href: '/experiments', cta: 'View experiments' },
     ];
     const allDone = steps.every((s) => s.done);
     const firstName = ctx.user.name.split(' ')[0];
@@ -39,6 +41,13 @@ export default async function Dashboard() {
                 <Stat label="Completed" value={count('completed')} />
                 <Stat label="Visitors this month" value={usage.visitors.toLocaleString()} hint="Across your organization" />
             </div>
+
+            {project && (
+                <Card className="mt-6">
+                    <CardHeader title="Install your snippet" description="Already filled with your production public SDK key. Switch to Development if you want a separate key." />
+                    <div className="px-5 pb-5"><InstallSnippet /></div>
+                </Card>
+            )}
 
             {!allDone && (
                 <Card className="mt-6">

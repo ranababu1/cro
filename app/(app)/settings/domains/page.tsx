@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { PageHeader, Card, CardHeader, CardBody, Button, Input, Field, EmptyState, Alert, CodeBlock } from '@/app/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, Input, Field, EmptyState, Alert } from '@/app/components/ui';
+import { InstallSnippet } from '@/app/components/InstallSnippet';
 
 interface Domain { id: string; host: string; created_at: string }
 
@@ -10,7 +11,6 @@ export default function DomainsPage() {
     const [host, setHost] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
-    const [snippet, setSnippet] = useState('');
 
     async function load() {
         const res = await fetch('/api/domains');
@@ -23,8 +23,6 @@ export default function DomainsPage() {
         (async () => {
             await load();
             if (cancelled) return;
-            const origin = window.location.origin;
-            setSnippet(`<script src="${origin}/sdk.js" data-key="YOUR_SDK_KEY" async></script>`);
         })();
         return () => { cancelled = true; };
     }, []);
@@ -75,10 +73,9 @@ export default function DomainsPage() {
                     </CardBody>
                 </Card>
                 <Card>
-                    <CardHeader title="Install the SDK" description="One line in the &lt;head&gt; of your control page and every variation page." />
+                    <CardHeader title="Install the SDK" description="One line in the &lt;head&gt; of your control page and every variation page. Your public SDK key is already filled in." />
                     <CardBody>
-                        <CodeBlock label="HTML" code={snippet || '<script src="/sdk.js" data-key="YOUR_SDK_KEY" async></script>'} />
-                        <p className="mt-3 text-sm text-zinc-500">Create an SDK key under API keys and replace YOUR_SDK_KEY. The same tag goes on every page in the test.</p>
+                        <InstallSnippet />
                     </CardBody>
                 </Card>
             </div>

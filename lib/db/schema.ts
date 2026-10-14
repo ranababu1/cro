@@ -69,6 +69,8 @@ export const apiKeys = sqliteTable('api_keys', {
     type: text('type', { enum: ['sdk', 'secret'] }).notNull(),
     key_hash: text('key_hash').notNull().unique(),
     prefix: text('prefix').notNull(),
+    // Public SDK keys are stored so install snippets can be pre-filled. Secret keys stay hash-only (null).
+    key_plaintext: text('key_plaintext'),
     label: text('label'),
     created_by: text('created_by').references(() => users.id, { onDelete: 'set null' }),
     created_at: text('created_at').notNull().default(now),

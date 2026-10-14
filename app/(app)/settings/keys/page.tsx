@@ -6,7 +6,7 @@ import { PageHeader, Card, CardHeader, Button, Badge, Table, THead, TBody, TR, T
 interface Env { id: string; key: string; name: string }
 interface Key {
     id: string; environment_id: string; environment_key: string; type: 'sdk' | 'secret';
-    prefix: string; label: string | null; created_at: string; last_used_at: string | null; revoked_at: string | null;
+    prefix: string; key_plaintext?: string | null; label: string | null; created_at: string; last_used_at: string | null; revoked_at: string | null;
 }
 interface ProjectBlock { project: { id: string; name: string } | null; environments: Env[]; keys: Key[] }
 
@@ -50,14 +50,14 @@ export default function ApiKeysPage() {
         <>
             <PageHeader
                 title="API keys"
-                description="SDK keys (cro_pk_) are public and go in your site snippet. Secret keys (cro_sk_) are for server-side calls to the REST API. Never put a secret key in a browser."
+                description="SDK keys (cro_pk_) are public and are filled into your install snippet automatically. Secret keys (cro_sk_) are for server-side calls to the REST API. Never put a secret key in a browser."
             />
             {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
             {created && (
                 <Card className="mb-6 border-emerald-200">
                     <CardHeader
                         title={`New ${created.type === 'sdk' ? 'SDK' : 'secret'} key for ${created.env}`}
-                        description="Copy it now. For security it is stored as a hash and will not be shown again."
+                        description={created.type === 'sdk' ? 'Public SDK keys stay available in your install snippet and below.' : 'Copy it now. Secret keys are stored as a hash and will not be shown again.'}
                         actions={<Button variant="secondary" size="sm" onClick={() => setCreated(null)}>Done</Button>}
                     />
                     <div className="p-5"><CodeBlock label="Key" code={created.key} /></div>
@@ -90,7 +90,7 @@ export default function ApiKeysPage() {
                                             <TBody>
                                                 {keys.map((k) => (
                                                     <TR key={k.id} className={k.revoked_at ? 'text-zinc-400' : ''}>
-                                                        <TD><code className="font-mono text-xs text-zinc-800">{k.prefix}...</code></TD>
+                                                        <TD><code className="font-mono text-xs text-zinc-800">{k.type === 'sdk' && k.key_plaintext ? k.key_plaintext : `${k.prefix}...`}</code></TD>
                                                         <TD>{k.type === 'sdk' ? 'SDK' : 'Secret'}</TD>
                                                         <TD>{when(k.created_at)}</TD>
                                                         <TD>{when(k.last_used_at)}</TD>
