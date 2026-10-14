@@ -1,29 +1,49 @@
 # Current State
 
-As of 2026-10-14 (IST), commit 5c9fc1d on main. Early prototype, not production ready.
+As of 2026-10-14 11:48 IST, branch phase1/foundation (Phase 1 milestone M0). Usable for local development and
+a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
-- Next.js 16 App Router, React 19, TypeScript, Tailwind 4, DaisyUI.
-- Auth: next-auth v4, Google provider only, JWT sessions (`lib/auth.ts`).
-- Database: in-memory store in `lib/db.ts` that pattern-matches SQL strings. Data is lost on restart. `lib/schema.sql` (SQLite/D1) exists but is not used.
-- No tests, no CI, no deployment config. README targets Vercel and Cloudflare D1.
+- Next.js 16 App Router, React 19, TypeScript (strict), Tailwind 4, DaisyUI.
+- Auth: next-auth v4 with Google. Users get an organization, a default project and dev, staging and prod environments on first sign-in.
+- Database: SQLite through libSQL (`@libsql/client`) and Drizzle ORM. Local file `data/cro.db` by default, Turso in production.
+  Schema in `lib/db/schema.ts`, SQL migrations in `drizzle/`, applied automatically on first request (turn off with `DB_AUTO_MIGRATE=false`) or with `npm run db:migrate`.
+- Validation: Zod (`lib/validation.ts`).
+- Tests: Vitest, 54 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes).
+- CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, tests and build on pushes to main and on pull requests.
+
+## Data model
+users, organizations, memberships (owner or member), projects, environments (dev, staging, prod), api_keys,
+experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
 
 ## Features that work
-- Google sign-in; experiments owned by the signed-in user.
-- Create experiments with name, description, traffic allocation and weighted variations (A/B/n), one marked as control.
-- Statuses: draft, running, paused, completed.
-- Deterministic assignment (`lib/assignment.ts`): SHA-256 of experiment and user ID, separate traffic hash, weighted buckets. Served by `POST /api/assign`, which stores assignments.
-- Event tracking via `POST /api/track` (page_view and conversion only).
-- Results (`/api/experiments/[id]/results`): conversion rate, two-proportion z-test, Wilson confidence intervals (`lib/statistics.ts`).
-- Pages: dashboard, new experiment, experiment detail. Demo page `public/demo.html`.
-- Browser SDK: two overlapping vanilla JS files, `public/sdk.js` and `public/ab-sdk.js`, with localStorage visitor ID.
+- Google sign-in with automatic workspace setup.
+- Experiments: create with weighted A/B/n variations and traffic allocation, start, pause, complete, delete drafts.
+  Status transitions are enforced. Only members of the experiment's project can read or change it.
+- API keys: page at `/settings/keys` to create and revoke SDK keys (`cro_pk_<env>_...`) and secret keys (`cro_sk_<env>_...`) per environment.
+  Only SHA-256 hashes are stored; the key is shown once. Last used time is tracked.
+- `POST /api/assign` and `POST /api/track` require an SDK key in `X-API-Key`, reject secret keys, only see experiments in the key's project,
+  record the environment, and are rate limited per key and client IP (default 600 per minute, `RATE_LIMIT_PER_MINUTE`). CORS preflight is supported.
+- Management API (`/api/experiments...`) accepts a session or `Authorization: Bearer cro_sk_...` for reads. Creating experiments needs a session.
+- Results: conversion rate per variation, Wilson confidence intervals, two-proportion z-test, optional `?environment=dev|staging|prod` filter.
+  Conversions count unique converting visitors, so rates cannot exceed 100%.
+- Audit log entries for org creation, experiment create, update, status change and delete, and key create and revoke.
+- Browser SDK `public/sdk.js` (needs `apiKey` in `ABTest.init`). The duplicate `public/ab-sdk.js` was removed.
+
+## Fixes in this milestone
+- Removed the `?userId=` query parameter that let anyone list another user's experiments.
+- Experiment detail, update, delete and results endpoints had no auth. They now require access to the project.
+- Sample size estimate used z = 1.96 for 80% power (should be 0.84), roughly doubling the estimate. Now uses an exact inverse normal.
+- Confidence levels other than 90, 95 and 99% silently fell back to 95%. Any level now works.
+- Variation URLs from the create form were dropped. They are now stored.
 
 ## Known gaps
-- No persistence, orgs, projects, environments or API keys.
-- Track and assign endpoints are unauthenticated, with no rate limit or CORS policy.
-- SDK makes a server call per visitor and has no anti-flicker handling.
-- No targeting, goal definitions, revenue metrics, SRM check or sample size tools.
-- Last commit is marked "wip".
+- Rate limiter is in memory per instance. On Vercel with many instances it needs a shared store (Upstash Redis) to be strict.
+- CORS allows any origin. Per-project domain allowlists come in M2 with the new ingest endpoint.
+- SDK still makes a server call per visitor, has no anti-flicker, no batching or retries. Rebuilt in M1.
+- No targeting, goal definitions, revenue metrics, SRM check, sample size page or CSV export (M1 to M3).
+- No audit log UI, no org or member management UI, roles are owner or member only.
+- Not a monorepo yet; no Playwright tests yet.
 
 ## Next
-See `docs/roadmap.md`, Phase 1 milestone M0.
+`docs/roadmap.md`, Phase 1 milestone M1 (core bucketing package, targeting, datafile, new SDK).

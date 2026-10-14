@@ -1,112 +1,79 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { CreateExperimentRequest } from '@/lib/types';
-import { generateId, validateVariationWeights } from '@/lib/assignment';
+import { generateId } from '@/lib/ids';
+import { validateVariationWeights } from '@/lib/assignment';
+import { getUserContext, unauthorized } from '@/lib/requestAuth';
+import { createExperimentSchema, formatZodError } from '@/lib/validation';
+import { orgIdForProject } from '@/lib/access';
 
-// GET /api/experiments - List experiments for authenticated user
+// GET /api/experiments - List experiments the caller can access
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
-        const { searchParams } = new URL(request.url);
-        const userId = searchParams.get('userId');
-
-        // If userId is provided (for server-side fetching), use it
-        // Otherwise, require authentication
-        if (!userId && !session?.user?.id) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
-        }
-
-        const experiments = await db.getExperiments(userId || session!.user.id);
+        const ctx = await getUserContext(request);
+        if (!ctx) return unauthorized();
+        const experiments = await db.getExperiments(ctx.projectIds);
         return NextResponse.json({ experiments });
     } catch (error) {
         console.error('Failed to fetch experiments:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch experiments' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch experiments' }, { status: 500 });
     }
 }
 
 // POST /api/experiments - Create a new experiment
 export async function POST(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const ctx = await getUserContext(request);
+        if (!ctx) return unauthorized();
 
-        if (!session?.user?.id) {
-            return NextResponse.json(
-                { error: 'Unauthorized' },
-                { status: 401 }
-            );
+        const parsed = createExperimentSchema.safeParse(await request.json().catch(() => null));
+        if (!parsed.success) {
+            return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         }
+        const body = parsed.data;
 
-        const body: CreateExperimentRequest = await request.json();
-
-        // Validate request
-        if (!body.name || !body.variations || body.variations.length < 2) {
-            return NextResponse.json(
-                { error: 'Experiment must have a name and at least 2 variations' },
-                { status: 400 }
-            );
-        }
-
-        // Validate variation weights
         if (!validateVariationWeights(body.variations)) {
-            return NextResponse.json(
-                { error: 'Variation weights must sum to 100' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'Variation weights must sum to 100' }, { status: 400 });
+        }
+        if (body.variations.filter((v) => v.is_control).length !== 1) {
+            return NextResponse.json({ error: 'Exactly one variation must be marked as control' }, { status: 400 });
         }
 
-        // Ensure exactly one control variation
-        const controlCount = body.variations.filter(v => v.is_control).length;
-        if (controlCount !== 1) {
-            return NextResponse.json(
-                { error: 'Exactly one variation must be marked as control' },
-                { status: 400 }
-            );
+        const projectId = body.project_id ?? ctx.projectIds[0];
+        if (!projectId || !ctx.projectIds.includes(projectId)) {
+            return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+        }
+        // Experiments need a human owner. Secret-key callers have none yet.
+        if (!ctx.userId) {
+            return NextResponse.json({ error: 'Creating experiments with a secret key is not supported yet' }, { status: 403 });
         }
 
-        // Create experiment
         const experimentId = generateId('exp');
-        await db.createExperiment({
-            id: experimentId,
-            user_id: session.user.id,
-            name: body.name,
-            description: body.description,
-            status: 'draft',
-            traffic_allocation: body.traffic_allocation || 100,
+        await db.createExperiment(
+            {
+                id: experimentId,
+                project_id: projectId,
+                user_id: ctx.userId,
+                name: body.name,
+                description: body.description,
+                status: 'draft',
+                traffic_allocation: body.traffic_allocation ?? 100,
+            },
+            body.variations,
+        );
+        await db.audit({
+            orgId: await orgIdForProject(projectId),
+            actorId: ctx.userId,
+            entity: 'experiment',
+            entityId: experimentId,
+            action: 'create',
+            diff: body,
         });
-
-        // Create variations
-        for (const variation of body.variations) {
-            const variationId = generateId('var');
-            await db.createVariation({
-                id: variationId,
-                experiment_id: experimentId,
-                name: variation.name,
-                description: variation.description,
-                weight: variation.weight,
-                is_control: variation.is_control,
-            });
-        }
 
         const experiment = await db.getExperiment(experimentId);
         const variations = await db.getVariations(experimentId);
-
-        return NextResponse.json(
-            { experiment, variations },
-            { status: 201 }
-        );
+        return NextResponse.json({ experiment, variations }, { status: 201 });
     } catch (error) {
         console.error('Failed to create experiment:', error);
-        return NextResponse.json(
-            { error: 'Failed to create experiment' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to create experiment' }, { status: 500 });
     }
 }

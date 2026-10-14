@@ -382,12 +382,12 @@ Note on CUPED: listed as Phase 3 because it needs pre-experiment covariate data 
 ## 7. Phase 1 milestones and first issues
 
 M0. Foundation (week 1 to 2)
-1. Convert repo to pnpm monorepo (`apps/web`, `packages/core`, `packages/stats`, `packages/sdk-js`).
-2. Add Vitest, Playwright, GitHub Actions (lint, typecheck, test, build).
-3. Add Postgres + Drizzle, write initial migration from the data model above; delete in-memory `lib/db.ts` and unused `schema.sql`.
-4. Orgs, memberships, projects, environments; keep Google login; scope every query by org.
-5. API keys per environment (SDK key public, secret key hashed), key management UI.
-6. Audit log table and write helper used by all mutations.
+1. Convert repo to pnpm monorepo (`apps/web`, `packages/core`, `packages/stats`, `packages/sdk-js`). Not started. Deferred to the start of M1 so `packages/core` is created together with the new SDK.
+2. Add Vitest, Playwright, GitHub Actions (lint, typecheck, test, build). Done except Playwright, which moves to M1 with the SDK.
+3. Add Postgres + Drizzle, write initial migration from the data model above; delete in-memory `lib/db.ts` and unused `schema.sql`. Done with SQLite/libSQL instead of Postgres so dev needs no hosted DB; production uses Turso. Schema uses portable types so a Postgres port stays cheap.
+4. Orgs, memberships, projects, environments; keep Google login; scope every query by org. Done (scoped by project membership).
+5. API keys per environment (SDK key public, secret key hashed), key management UI. Done. All keys are stored as hashes and shown once.
+6. Audit log table and write helper used by all mutations. Done for experiments, keys and org creation. No audit UI yet.
 
 M1. Core + SDK (week 3 to 5)
 7. `packages/core`: MurmurHash3 bucketing, traffic allocation, weighted variants, shared test vectors; port logic from `lib/assignment.ts`.

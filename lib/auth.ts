@@ -10,18 +10,17 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async signIn({ user, account, profile }) {
+        async signIn({ user }) {
             if (!user.email) return false;
 
-            // Store user in database
+            // Store user in database and make sure they have an org, project and environments
             const existingUser = await db.getUserByEmail(user.email);
-            if (!existingUser) {
-                await db.createUser({
-                    email: user.email,
-                    name: user.name || "",
-                    image: user.image || "",
-                });
-            }
+            const dbUser = existingUser ?? await db.createUser({
+                email: user.email,
+                name: user.name || "",
+                image: user.image || "",
+            });
+            await db.ensureWorkspace(dbUser);
 
             return true;
         },

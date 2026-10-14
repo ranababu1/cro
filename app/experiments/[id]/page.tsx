@@ -19,6 +19,8 @@ export default function ExperimentDetail() {
 
     useEffect(() => {
         fetchData();
+        // fetchData only depends on experimentId
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [experimentId]);
 
     const fetchData = async () => {
@@ -41,8 +43,8 @@ export default function ExperimentDetail() {
                     setResults(resultsData);
                 }
             }
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -62,8 +64,8 @@ export default function ExperimentDetail() {
             }
 
             await fetchData();
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         }
     };
 
@@ -83,8 +85,8 @@ export default function ExperimentDetail() {
             }
 
             router.push('/');
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
         }
     };
 

@@ -94,6 +94,7 @@ export default function Navbar() {
                                 <span>{session.user.email}</span>
                             </li>
                             <li><Link href="/dashboard">Dashboard</Link></li>
+                            <li><Link href="/settings/keys">API Keys</Link></li>
                             <li><button onClick={() => signOut()}>Sign Out</button></li>
                         </ul>
                     </div>

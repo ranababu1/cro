@@ -1,59 +1,18 @@
+import type { InferSelectModel } from 'drizzle-orm';
+import type * as schema from './db/schema';
+
 // Database Types
 
 export type ExperimentStatus = 'draft' | 'running' | 'paused' | 'completed';
 
-export interface User {
-    id: string;
-    email: string;
-    name: string;
-    image?: string;
-    created_at: string;
-}
 
-export interface Experiment {
-    id: string;
-    user_id: string;
-    name: string;
-    description?: string;
-    status: ExperimentStatus;
-    traffic_allocation: number; // percentage 0-100
-    created_at: string;
-    updated_at: string;
-    started_at?: string;
-    ended_at?: string;
-}
-
-export interface Variation {
-    id: string;
-    experiment_id: string;
-    name: string;
-    description?: string;
-    url?: string; // URL to test for this variation
-    weight: number; // percentage 0-100, sum should equal 100 within experiment
-    is_control: boolean;
-    created_at: string;
-}
-
-export interface Assignment {
-    id: string;
-    experiment_id: string;
-    variation_id: string;
-    user_id: string;
-    assigned_at: string;
-}
-
-export type EventType = 'page_view' | 'conversion';
-
-export interface Event {
-    id: string;
-    experiment_id: string;
-    variation_id: string;
-    user_id: string;
-    event_type: EventType;
-    event_name?: string;
-    metadata?: string; // JSON string
-    created_at: string;
-}
+// Row types come from the Drizzle schema so they cannot drift from the database.
+export type User = InferSelectModel<typeof schema.users>;
+export type Experiment = InferSelectModel<typeof schema.experiments>;
+export type Variation = InferSelectModel<typeof schema.variations>;
+export type Assignment = InferSelectModel<typeof schema.assignments>;
+export type Event = InferSelectModel<typeof schema.events>;
+export type EventType = Event['event_type'];
 
 // API Request/Response Types
 
@@ -96,7 +55,7 @@ export interface TrackEventRequest {
     user_id: string;
     event_type: EventType;
     event_name?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 // Statistics Types

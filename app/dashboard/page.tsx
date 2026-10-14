@@ -1,23 +1,14 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { Experiment } from '@/lib/types';
+import { db } from '@/lib/db';
 import Navbar from '../components/Navbar';
 
 async function getExperiments(userId: string): Promise<Experiment[]> {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-        const res = await fetch(`${baseUrl}/api/experiments?userId=${userId}`, {
-            cache: 'no-store',
-        });
-
-        if (!res.ok) {
-            return [];
-        }
-
-        const data = await res.json();
-        return data.experiments || [];
+        const projects = await db.getProjectsForUser(userId);
+        return await db.getExperiments(projects.map((p) => p.id));
     } catch (error) {
         console.error('Failed to fetch experiments:', error);
         return [];
@@ -32,9 +23,9 @@ export default async function Dashboard() {
             <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center gap-4">
                 <h1 className="text-2xl font-bold">Authentication Required</h1>
                 <p className="text-base-content/70">Please sign in to access your dashboard</p>
-                <a href="/api/auth/signin" className="btn btn-primary">
+                <Link href="/api/auth/signin" className="btn btn-primary">
                     Sign In with Google
-                </a>
+                </Link>
             </div>
         );
     }

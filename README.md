@@ -18,7 +18,7 @@ A self-hosted, cost-effective A/B testing platform supporting unlimited A/B/n va
 - **Frontend**: Next.js 16 with App Router
 - **Styling**: Tailwind CSS 4
 - **Hosting**: Vercel (recommended)
-- **Database**: In-memory (development) / Cloudflare D1 (production)
+- **Database**: SQLite via libSQL and Drizzle ORM. Local file in development, Turso (hosted libSQL) in production
 - **Edge Compute**: Cloudflare Workers (optional)
 - **Client SDK**: Vanilla JavaScript
 
@@ -38,13 +38,17 @@ A self-hosted, cost-effective A/B testing platform supporting unlimited A/B/n va
 npm install
 ```
 
-3. Run the development server:
+3. Copy `.env.example` to `.env.local` and fill in the values (Google OAuth client, NEXTAUTH_SECRET).
+   The database defaults to `file:./data/cro.db` and migrations run automatically on first request.
+   You can also run them yourself with `npm run db:migrate`.
+
+4. Run the development server:
 
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) to access the dashboard
+5. Open [http://localhost:3000](http://localhost:3000) to access the dashboard
 
 ## Usage
 
@@ -65,11 +69,12 @@ npm run dev
 Add the SDK to your website:
 
 ```html
-<script src="https://your-domain.com/ab-sdk.js"></script>
+<script src="https://your-domain.com/sdk.js"></script>
 <script>
-  // Initialize SDK
+  // Initialize SDK. Create an SDK key under API Keys in the dashboard.
   ABTest.init({
     apiUrl: 'https://your-domain.com',
+    apiKey: 'cro_pk_prod_...',
     userId: 'optional-user-id' // Will be auto-generated if not provided
   });
 
@@ -139,23 +144,44 @@ The platform uses frequentist statistical methods:
 
 ## Development
 
+### Scripts
+
+- `npm run dev`: development server
+- `npm run build`: production build
+- `npm run lint`: ESLint
+- `npm run typecheck`: TypeScript check
+- `npm test`: unit and integration tests (Vitest)
+- `npm run db:generate`: create a migration after editing `lib/db/schema.ts`
+- `npm run db:migrate`: apply migrations to `DATABASE_URL`
+
 ### Project Structure
 
 ```
 ├── app/
-│   ├── api/              # API routes
+│   ├── api/              # API routes (assign, track, experiments, keys)
+│   ├── dashboard/        # Experiment list
 │   ├── experiments/      # Experiment pages
-│   ├── page.tsx          # Dashboard
-│   └── layout.tsx        # Root layout
+│   └── settings/keys/    # API key management
 ├── lib/
-│   ├── types.ts          # TypeScript types
-│   ├── db.ts             # Database operations
-│   ├── assignment.ts     # Assignment engine
-│   ├── statistics.ts     # Statistical calculations
-│   └── schema.sql        # Database schema
+│   ├── db/               # Drizzle schema, client, data access
+│   ├── assignment.ts     # Bucketing
+│   ├── statistics.ts     # Statistics
+│   ├── apiKeys.ts        # Key generation and hashing
+│   ├── rateLimit.ts      # Rate limiter
+│   └── requestAuth.ts    # Session, secret key and SDK key auth
+├── drizzle/              # SQL migrations
+├── tests/                # Vitest tests
+├── docs/                 # Roadmap, agent guide, changelog, current state
 └── public/
-    └── ab-sdk.js         # Client SDK
+    └── sdk.js            # Client SDK
 ```
+
+### Data model
+
+Each user gets an organization on first sign-in, with a default project and three environments
+(dev, staging, prod). API keys belong to an environment. SDK keys (`cro_pk_...`) authenticate
+`/api/assign` and `/api/track`. Secret keys (`cro_sk_...`) can read the management API with
+`Authorization: Bearer`. Only key hashes are stored.
 
 ## Deployment
 
@@ -166,33 +192,11 @@ The platform uses frequentist statistical methods:
 3. Configure environment variables (if needed)
 4. Deploy
 
-### Cloudflare D1 Setup (Production Database)
+### Production database (Turso)
 
-1. Create a D1 database in Cloudflare dashboard
-2. Run the schema from `lib/schema.sql`
-3. Configure D1 binding in your Workers
-4. Update database connection in `lib/db.ts`
+1. Create a Turso database: `turso db create cro`
+2. Get the URL and a token: `turso db show cro --url` and `turso db tokens create cro`
+3. Set `DATABASE_URL` (libsql://...) and `DATABASE_AUTH_TOKEN` in Vercel
+4. Run `npm run db:migrate` against it, or leave auto migration on
 
-## Cost Optimization
-
-The platform is designed to run within free tiers:
-
-- **Vercel**: Free tier supports ~100K requests/month
-- **Cloudflare Workers**: 100K requests/day on free tier
-- **Cloudflare D1**: 5GB storage, 5M reads/day on free tier
-
-Expected cost at 100K MAU: < $20/month
-
-## Roadmap
-
-- [ ] Cloudflare D1 production database integration
-- [ ] Cloudflare Workers edge deployment
-- [ ] Multi-armed bandit optimization
-- [ ] Advanced user segmentation
-- [ ] Data export (CSV/JSON)
-- [ ] API authentication
-- [ ] Team collaboration features
-
-## License
-
-MIT License
+A local SQLite file does not persist on Vercel, so a hosted database is required there.

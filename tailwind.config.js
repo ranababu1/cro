@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const daisyui = require("daisyui");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
@@ -8,7 +11,7 @@ module.exports = {
     theme: {
         extend: {},
     },
-    plugins: [require("daisyui")],
+    plugins: [daisyui],
     daisyui: {
         themes: [
             {
