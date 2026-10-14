@@ -6,7 +6,7 @@ Repo: ranababu1/cro (main @ 5c9fc1d "Toast added - wip"). Plan only, no repo cha
 
 | Area | What exists | Verdict |
 |---|---|---|
-| Stack | Next.js 16 App Router, React 19, TypeScript, Tailwind 4 + DaisyUI | Keep |
+| Stack | Next.js 16 App Router, React 19, TypeScript, Tailwind 4 (DaisyUI removed in the Oct 2026 redesign) | Keep |
 | Auth | next-auth v4, Google provider only, JWT sessions | Keep for Phase 1, move to Auth.js v5 or Better Auth when adding orgs, SSO, MFA |
 | Database | `lib/db.ts` is an in-memory store that pattern-matches SQL strings. `lib/schema.sql` is a SQLite/D1 schema that is never actually used. Data is lost on restart | Replace. Postgres + Drizzle ORM with migrations |
 | Data model | users, experiments (owned by a single user), variations, assignments, events (page_view/conversion only) | Rework: add orgs, projects, environments, goals, metrics, audiences |

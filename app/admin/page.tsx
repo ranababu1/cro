@@ -1,38 +1,60 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { listTenants } from '@/lib/admin';
+import { PageHeader, Card, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState } from '@/app/components/ui';
 
-const fmt = (n: number | null) => (n === null ? 'Unlimited' : n.toLocaleString());
+export const metadata: Metadata = { title: 'Admin console' };
+
+const limit = (n: number | null) => (n === null ? 'Unlimited' : n.toLocaleString());
 
 export default async function AdminHome() {
     const tenants = await listTenants();
+    const active = tenants.filter((t) => t.org.status === 'active').length;
+    const visitors = tenants.reduce((s, t) => s + t.usage.month.visitors, 0);
+    const events = tenants.reduce((s, t) => s + t.usage.month.events, 0);
+
     return (
-        <div className="space-y-4">
-            <h1 className="text-3xl font-bold">Tenants ({tenants.length})</h1>
-            <div className="overflow-x-auto">
-                <table className="table table-zebra">
-                    <thead>
-                        <tr>
-                            <th>Organization</th><th>Status</th><th>Plan</th><th>Members</th><th>Projects</th>
-                            <th>Experiments (running)</th><th>Visitors this month / limit</th><th>Events this month</th><th>Created</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tenants.map(({ org, members, projects, usage }) => (
-                            <tr key={org.id}>
-                                <td><Link className="link" href={`/admin/orgs/${org.id}`}>{org.name}</Link><div className="text-xs opacity-60">{org.slug}</div></td>
-                                <td><span className={`badge ${org.status === 'active' ? 'badge-success' : 'badge-error'}`}>{org.status}</span></td>
-                                <td>{org.plan}</td>
-                                <td>{members.map((m) => m.email).join(', ')}</td>
-                                <td>{projects.length}</td>
-                                <td>{usage.total.experiments} ({usage.total.running})</td>
-                                <td>{usage.month.visitors.toLocaleString()} / {fmt(org.monthly_visitor_limit)}</td>
-                                <td>{usage.month.events.toLocaleString()}</td>
-                                <td>{new Date(org.created_at).toLocaleDateString()}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <>
+            <PageHeader title="Tenants" description="Every organization on this installation. Visible to platform admins only." />
+            <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <Stat label="Organizations" value={tenants.length} />
+                <Stat label="Active" value={active} hint={`${tenants.length - active} suspended`} />
+                <Stat label="Visitors this month" value={visitors.toLocaleString()} />
+                <Stat label="Events this month" value={events.toLocaleString()} />
             </div>
-        </div>
+            <Card>
+                {tenants.length === 0 ? (
+                    <EmptyState title="No tenants yet" description="Organizations are created when a user signs in for the first time." />
+                ) : (
+                    <Table>
+                        <THead>
+                            <tr>
+                                <TH>Organization</TH><TH>Status</TH><TH>Plan</TH><TH>Members</TH><TH align="right">Projects</TH>
+                                <TH align="right">Experiments</TH><TH align="right">Visitors / limit</TH><TH align="right">Events</TH><TH align="right">Created</TH>
+                            </tr>
+                        </THead>
+                        <TBody>
+                            {tenants.map(({ org, members, projects, usage }) => (
+                                <TR key={org.id}>
+                                    <TD>
+                                        <Link className="font-medium text-zinc-900 hover:underline" href={`/admin/orgs/${org.id}`}>{org.name}</Link>
+                                        <p className="text-xs text-zinc-500">{org.slug}</p>
+                                    </TD>
+                                    <TD><StatusBadge status={org.status} /></TD>
+                                    <TD className="capitalize">{org.plan}</TD>
+                                    <TD className="max-w-[14rem] truncate" title={members.map((m) => m.email).join(', ')}>{members.map((m) => m.email).join(', ')}</TD>
+                                    <TD numeric>{projects.length}</TD>
+                                    <TD numeric>{usage.total.experiments}<span className="text-zinc-400"> ({usage.total.running} running)</span></TD>
+                                    <TD numeric>{usage.month.visitors.toLocaleString()}<span className="text-zinc-400"> / {limit(org.monthly_visitor_limit)}</span></TD>
+                                    <TD numeric>{usage.month.events.toLocaleString()}</TD>
+                                    <TD numeric>{new Date(org.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</TD>
+                                </TR>
+                            ))}
+                        </TBody>
+                    </Table>
+                )}
+            </Card>
+            <p className="mt-3 text-xs text-zinc-500">Usage counts the current calendar month in UTC.</p>
+        </>
     );
 }

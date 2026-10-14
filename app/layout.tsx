@@ -1,35 +1,23 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import AuthProvider from "./components/AuthProvider";
+import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
+import AuthProvider from './components/AuthProvider';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ variable: '--font-inter', subsets: ['latin'], display: 'swap' });
+const mono = JetBrains_Mono({ variable: '--font-mono-face', subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
-  title: "A/B Testing Platform",
-  description: "Enterprise-grade A/B testing platform",
+    title: { default: 'CRO: A/B testing and experimentation', template: '%s · CRO' },
+    description:
+        'Run A/B and A/B/n tests with a small JavaScript SDK, deterministic visitor assignment and statistically sound results.',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" data-theme="dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AuthProvider>{children}</AuthProvider>
-      </body>
-    </html>
-  );
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    return (
+        <html lang="en" className={`${inter.variable} ${mono.variable}`}>
+            <body>
+                <AuthProvider>{children}</AuthProvider>
+            </body>
+        </html>
+    );
 }
