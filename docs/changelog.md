@@ -1,11 +1,11 @@
 # Changelog
 
 Newest first. Times are IST (UTC+5:30). Every change adds a row here (see docs/agent.md).
-For the commit that adds a row, write "pending" as the ID, then fill in the short hash in the next commit.
+For the commit that adds a row, write "a6cdf7f" as the ID, then fill in the short hash in the next commit.
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
-| pending | 2026-10-14 03:40 IST | docs: add roadmap, agent guide, changelog and current state docs |
+| a6cdf7f | 2026-10-14 03:40 IST | docs: add roadmap, agent guide, changelog and current state docs |
 | 5c9fc1d | 2026-01-11 14:30 IST | Toast added - wip |
 | fc520ae | 2026-01-11 10:53 IST | Messaging updated |
 | 51a9e94 | 2026-01-11 00:00 IST | Closing updated |
