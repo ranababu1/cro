@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-15 02:45 IST | fix: auto-redistribute variation weights so they always total 100 when editing one weight in the create-experiment wizard. |
 | pending | 2026-10-15 02:25 IST | fix: replace default Next.js favicon with freeabtest leaf mark (blue-to-teal gradient). Add favicon.ico, apple-touch-icon, app/icon.png, app/apple-icon.png; remove public/next.svg. |
 | pending | 2026-10-15 02:15 IST | build: obfuscate public/sdk.js from sdk-src at build time (javascript-obfuscator: mangled ids, stringArray rc4/base64, control-flow flattening, dead-code injection). Multi-line output ~50 KB / ~1500 lines (~14 KB gzip). Homepage and docs size claims updated. Also add @vercel/analytics on every page via root layout. |
 | e8522cf | 2026-10-14 21:45 IST | feat: platform telemetry in super-admin /admin console. Daily aggregated counters (signups, logins, tests, domains, SDK assign/exposure/goal, visitors, conversions, API keys, errors, rate limits). Overview with DAU/WAU/MAU and trend charts, top users/orgs, drill-downs, date range, CSV export. Product-usage events with hashed IPs only. |

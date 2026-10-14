@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Field, Alert, CodeBlock } from '@/app/components/ui';
+import { evenWeights, redistributeWeights } from '@/lib/weights';
 
 type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review';
 
@@ -20,13 +21,6 @@ const STEPS: { id: Step; label: string }[] = [
     { id: 'review', label: 'Review' },
 ];
 
-function evenWeights(n: number): number[] {
-    const base = Math.floor(10000 / n) / 100;
-    const weights = Array.from({ length: n }, () => base);
-    const sum = weights.reduce((a, b) => a + b, 0);
-    weights[0] += Math.round((100 - sum) * 100) / 100;
-    return weights;
-}
 
 export default function NewExperimentWizard() {
     const router = useRouter();
@@ -52,7 +46,7 @@ export default function NewExperimentWizard() {
             const [dRes] = await Promise.all([fetch('/api/domains'), fetch('/api/keys')]);
             const d = await dRes.json();
             setDomains(d.domains || []);
-            // Plan from admin isn't on keys; default free. Dashboard may expose later — fetch org via a lightweight approach:
+            // Plan from admin isn't on keys; default free. Dashboard may expose later - fetch org via a lightweight approach:
             try {
                 const dashboard = await fetch('/api/experiments');
                 void dashboard;
@@ -74,6 +68,14 @@ export default function NewExperimentWizard() {
     function setWeightsEqual() {
         const w = evenWeights(vars.length);
         setVars((vs) => vs.map((v, i) => ({ ...v, weight: w[i] })));
+    }
+
+    function setWeight(index: number, raw: string) {
+        const value = raw === '' ? 0 : Number(raw);
+        setVars((vs) => {
+            const nextWeights = redistributeWeights(vs.map((v) => v.weight), index, value);
+            return vs.map((v, i) => ({ ...v, weight: nextWeights[i] }));
+        });
     }
 
     function addVariation() {
@@ -227,14 +229,14 @@ export default function NewExperimentWizard() {
                             <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_2fr_6rem_auto]">
                                 <Input aria-label="Name" value={v.name} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
                                 <Input aria-label="URL" type="url" value={v.url} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} placeholder={v.is_control ? controlUrl : 'https://www.example.com/b'} disabled={v.is_control} />
-                                <Input aria-label="Weight" type="number" min={0} max={100} value={v.weight} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, weight: Number(e.target.value) } : x))} />
+                                <Input aria-label="Weight" type="number" min={0} max={100} value={v.weight} onChange={(e) => setWeight(i, e.target.value)} />
                                 <div className="flex items-center gap-2">
                                     {v.is_control ? <span className="text-xs font-medium text-zinc-500">Control</span> : <Button variant="ghost" size="sm" onClick={() => removeVariation(i)}>Remove</Button>}
                                 </div>
                             </div>
                         ))}
                         <Button variant="secondary" size="sm" onClick={setWeightsEqual}>Equal weights</Button>
-                        <p className="text-sm text-zinc-500">Weights must sum to 100. Currently {vars.reduce((a, v) => a + v.weight, 0)}.</p>
+                        <p className="text-sm text-zinc-500">Weights always total 100. Change one and the others adjust automatically.</p>
                     </CardBody>
                 </Card>
             )}
