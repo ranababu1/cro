@@ -11,7 +11,7 @@ describe('api keys', () => {
         expect(apiKeyType(secret.key)).toBe('secret');
     });
 
-    it('stores a hash, not the key, and the prefix hides the secret part', () => {
+    it('hashes the key and exposes a short prefix', () => {
         const k = generateApiKey('sdk', 'staging');
         expect(k.hash).toBe(hashApiKey(k.key));
         expect(k.hash).not.toContain(k.key);

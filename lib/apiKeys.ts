@@ -8,7 +8,8 @@ const KEY_PATTERN = /^cro_(pk|sk)_(dev|staging|prod)_[0-9A-Za-z]{32}$/;
 
 /**
  * Builds a new key. Format: cro_pk_<env>_<32 chars> for SDK keys, cro_sk_<env>_<32 chars> for secret keys.
- * Only the SHA-256 hash is stored. The plaintext is shown to the user once.
+ * Secret keys: only the SHA-256 hash is stored (plaintext shown once).
+ * SDK (public) keys: hash plus plaintext so install snippets can be pre-filled.
  */
 export function generateApiKey(type: ApiKeyType, env: EnvironmentKey): { key: string; hash: string; prefix: string } {
     const bytes = randomBytes(32);

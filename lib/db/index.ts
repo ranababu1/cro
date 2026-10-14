@@ -88,6 +88,7 @@ export const db = {
                 })),
             ),
         ]);
+        await this.ensureProjectSdkKeys(projectId, user.id);
         await this.audit({ orgId, actorId: user.id, entity: 'organization', entityId: orgId, action: 'create' });
         return { orgId, projectId };
     },
@@ -118,6 +119,37 @@ export const db = {
         return (await d.query.environments.findFirst({ where: eq(s.environments.id, environmentId) })) ?? null;
     },
 
+
+    /**
+     * Ensures each of prod and dev has an active public SDK key.
+     * Creates missing keys (and stores plaintext). Safe to call repeatedly.
+     */
+    async ensureProjectSdkKeys(projectId: string, createdBy?: string | null): Promise<void> {
+        const envs = await this.getEnvironments(projectId);
+        const keys = await this.listApiKeys(projectId);
+        for (const envKey of ['prod', 'dev'] as const) {
+            const env = envs.find((e) => e.key === envKey);
+            if (!env) continue;
+            const has = keys.some((k) => k.environment_id === env.id && k.type === 'sdk' && !k.revoked_at && k.key_plaintext);
+            if (has) continue;
+            await this.createApiKey({
+                environmentId: env.id,
+                type: 'sdk',
+                label: 'Default',
+                createdBy: createdBy ?? undefined,
+            });
+        }
+    },
+
+    /** Active SDK plaintext keys for prod/dev (ensures they exist first). */
+    async getInstallSdkKeys(projectId: string, createdBy?: string | null): Promise<{ prod: string | null; dev: string | null }> {
+        await this.ensureProjectSdkKeys(projectId, createdBy);
+        const fresh = await this.listApiKeys(projectId);
+        const pick = (envKey: 'prod' | 'dev') =>
+            fresh.find((k) => k.environment_key === envKey && k.type === 'sdk' && !k.revoked_at && k.key_plaintext)?.key_plaintext ?? null;
+        return { prod: pick('prod'), dev: pick('dev') };
+    },
+
     // API keys
     async createApiKey(input: { environmentId: string; type: ApiKeyType; label?: string; createdBy?: string }) {
         const d = await getDb();
@@ -131,6 +163,7 @@ export const db = {
             type: input.type,
             key_hash: hash,
             prefix,
+            key_plaintext: input.type === 'sdk' ? key : null,
             label: input.label ?? null,
             created_by: input.createdBy ?? null,
         });
@@ -146,6 +179,7 @@ export const db = {
                 environment_key: s.environments.key,
                 type: s.apiKeys.type,
                 prefix: s.apiKeys.prefix,
+                key_plaintext: s.apiKeys.key_plaintext,
                 label: s.apiKeys.label,
                 created_at: s.apiKeys.created_at,
                 last_used_at: s.apiKeys.last_used_at,
