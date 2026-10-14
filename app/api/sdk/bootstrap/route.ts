@@ -98,6 +98,17 @@ export async function POST(request: NextRequest) {
 
         // On control, assigned to a variation: redirect.
         if (onControl && !variation.is_control && variation.url) {
+            // Record the redirect server side so it counts even if the visitor leaves before the variation loads.
+            await db.createEvent({
+                experiment_id: experiment.id,
+                variation_id: variation.id,
+                environment_id: auth.ctx.environmentId,
+                user_id,
+                event_type: 'redirect',
+                event_name: null,
+                goal_id: null,
+                metadata: null,
+            }).catch((err) => console.error('redirect event failed', err));
             return sdkJson({
                 matched: true,
                 action: 'redirect',

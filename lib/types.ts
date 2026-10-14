@@ -105,4 +105,5 @@ export interface ExperimentResults {
     };
     sample_size: number;
     winner?: string;
+    live?: import('./liveStats').LiveStats;
 }

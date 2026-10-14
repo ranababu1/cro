@@ -383,6 +383,52 @@ export const db = {
             .groupBy(s.events.variation_id);
     },
 
+    /** Raw counts behind the live stats view: per variation/event type, per goal/variation, and per day/variation. */
+    async getLiveCounts(experimentId: string, environmentId?: string) {
+        const d = await getDb();
+        const base = environmentId
+            ? and(eq(s.events.experiment_id, experimentId), eq(s.events.environment_id, environmentId))
+            : eq(s.events.experiment_id, experimentId);
+        const byType = await d
+            .select({
+                variation_id: s.events.variation_id,
+                event_type: s.events.event_type,
+                users: sql<number>`count(distinct ${s.events.user_id})`,
+                events: sql<number>`count(*)`,
+            })
+            .from(s.events)
+            .where(base)
+            .groupBy(s.events.variation_id, s.events.event_type);
+        const visitors = await d
+            .select({ variation_id: s.events.variation_id, users: sql<number>`count(distinct ${s.events.user_id})` })
+            .from(s.events)
+            .where(base)
+            .groupBy(s.events.variation_id);
+        const goalRows = await d
+            .select({
+                goal_id: s.events.goal_id,
+                variation_id: s.events.variation_id,
+                users: sql<number>`count(distinct ${s.events.user_id})`,
+            })
+            .from(s.events)
+            .where(and(base, eq(s.events.event_type, 'conversion')))
+            .groupBy(s.events.goal_id, s.events.variation_id);
+        const day = sql<string>`substr(${s.events.created_at}, 1, 10)`;
+        const daily = await d
+            .select({ day, variation_id: s.events.variation_id, users: sql<number>`count(distinct ${s.events.user_id})` })
+            .from(s.events)
+            .where(base)
+            .groupBy(day, s.events.variation_id)
+            .orderBy(day);
+        const num = (n: unknown) => Number(n) || 0;
+        return {
+            byType: byType.map((r) => ({ ...r, users: num(r.users), events: num(r.events) })),
+            visitors: visitors.map((r) => ({ ...r, users: num(r.users) })),
+            goals: goalRows.map((r) => ({ ...r, users: num(r.users) })),
+            daily: daily.map((r) => ({ ...r, users: num(r.users) })),
+        };
+    },
+
     async hasConversion(experimentId: string, userId: string, goalId: string): Promise<boolean> {
         const d = await getDb();
         const row = await d.query.events.findFirst({

@@ -9,6 +9,7 @@ import {
     Alert, Spinner, Field, Input, Textarea, Stat, EmptyState, Kbd,
 } from '@/app/components/ui';
 import { IntervalChart } from './IntervalChart';
+import { LiveStats } from './LiveStats';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-');
@@ -27,6 +28,7 @@ export default function ExperimentDetail() {
     const [notice, setNotice] = useState('');
     const [tab, setTab] = useState('results');
     const [busy, setBusy] = useState(false);
+    const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -37,7 +39,7 @@ export default function ExperimentDetail() {
             setVariations(data.variations);
             if (data.experiment.status !== 'draft') {
                 const r = await fetch(`/api/experiments/${id}/results`);
-                if (r.ok) setResults(await r.json());
+                if (r.ok) { setResults(await r.json()); setUpdatedAt(new Date()); }
             } else {
                 setResults(null);
             }
@@ -52,6 +54,17 @@ export default function ExperimentDetail() {
         // Fetch on mount; state updates happen after the request resolves.
         void load();
     }, [load]);
+
+    useEffect(() => {
+        // Live refresh while the test is running.
+        if (experiment?.status !== 'running') return;
+        const timer = setInterval(async () => {
+            if (document.hidden) return;
+            const r = await fetch(`/api/experiments/${id}/results`).catch(() => null);
+            if (r?.ok) { setResults(await r.json()); setUpdatedAt(new Date()); }
+        }, 30_000);
+        return () => clearInterval(timer);
+    }, [experiment?.status, id]);
 
     useEffect(() => {
         // Drafts have no results, so open on setup.
@@ -129,14 +142,14 @@ export default function ExperimentDetail() {
                 ]}
             />
 
-            {tab === 'results' && <ResultsPanel experiment={experiment} results={results} />}
+            {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
 }
 
-function ResultsPanel({ experiment, results }: { experiment: Experiment; results: ExperimentResults | null }) {
+function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experiment; results: ExperimentResults | null; updatedAt: Date | null }) {
     const goalList = results?.goals || [];
     const primaryGoalId = goalList.find((g) => g.is_primary)?.goal_id || goalList[0]?.goal_id || '';
     const [goalId, setGoalId] = useState<string | null>(null);
@@ -169,6 +182,8 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
 
     return (
         <div className="space-y-6">
+            {results.live && <LiveStats live={results.live} running={experiment.status === 'running'} updatedAt={updatedAt} />}
+            <h2 className="pt-2 text-base font-semibold text-zinc-900">Detailed results</h2>
             {summary}
             {goalList.length > 0 && (
                 <div className="flex flex-wrap gap-2">
