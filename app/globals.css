@@ -10,12 +10,12 @@
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Green accent. 600/700 keep AA contrast with white text. */
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-200: #a7f3d0;
-  --color-brand-500: #10b981;
-  --color-brand-600: #047857;
-  --color-brand-700: #065f46;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
 
   --shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
   --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06);

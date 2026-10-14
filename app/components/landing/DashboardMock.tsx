@@ -22,23 +22,23 @@ function VariantCard({ letter, name, headline, rate, visitors, accent }: { lette
     return (
         <div className="rounded-lg border border-zinc-200 bg-white p-2.5">
             <div className="mb-2 flex items-center gap-1.5">
-                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-semibold ${accent ? 'bg-emerald-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}>{letter}</span>
+                <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-semibold ${accent ? 'bg-teal-600 text-white' : 'bg-zinc-200 text-zinc-700'}`}>{letter}</span>
                 <span className="text-[11px] font-semibold text-zinc-900">{name}</span>
             </div>
             <div className="grid grid-cols-[1fr_auto] gap-2">
-                <div className="flex items-center gap-1.5 rounded-md bg-gradient-to-br from-sky-50 to-emerald-50 p-2">
+                <div className="flex items-center gap-1.5 rounded-md bg-gradient-to-br from-sky-50 to-teal-50 p-2">
                     <div className="min-w-0">
                         <p className="text-[9px] font-semibold leading-tight text-zinc-800">{headline}</p>
                         <span className="mt-1 inline-block rounded bg-zinc-900 px-1.5 py-0.5 text-[7px] text-white">Get started</span>
                     </div>
                     <svg viewBox="0 0 24 18" className="ml-auto h-6 w-8 shrink-0" aria-hidden>
                         <rect width="24" height="18" rx="2" fill="#bae6fd" />
-                        <path d="M2 16l6-7 4 4 3-3 7 6z" fill={accent ? '#059669' : '#38bdf8'} />
+                        <path d="M2 16l6-7 4 4 3-3 7 6z" fill={accent ? '#0d9488' : '#60a5fa'} />
                     </svg>
                 </div>
                 <div className="text-right">
                     <p className="text-[9px] text-zinc-500">Conversion rate</p>
-                    <p className={`text-sm font-semibold tabular-nums ${accent ? 'text-emerald-700' : 'text-zinc-900'}`}>{rate}</p>
+                    <p className={`text-sm font-semibold tabular-nums ${accent ? 'text-teal-700' : 'text-zinc-900'}`}>{rate}</p>
                     <p className="mt-1 text-[9px] text-zinc-500">Visitors</p>
                     <p className="text-[11px] font-semibold text-zinc-900 tabular-nums">{visitors}</p>
                 </div>
@@ -61,7 +61,7 @@ export function DashboardMock() {
                 <aside className="hidden w-28 shrink-0 border-r border-zinc-100 p-2.5 sm:block">
                     <div className="mb-3 flex items-center gap-1"><LeafMark className="h-3.5 w-3.5" /><span className="text-[10px] font-semibold">freeabtest.com</span></div>
                     {['Overview', 'Experiments', 'Audiences', 'Integrations', 'Settings'].map((n, i) => (
-                        <div key={n} className={`mb-0.5 rounded px-1.5 py-1 text-[10px] ${i === 0 ? 'bg-emerald-50 font-medium text-emerald-800' : 'text-zinc-500'}`}>{n}</div>
+                        <div key={n} className={`mb-0.5 rounded px-1.5 py-1 text-[10px] ${i === 0 ? 'bg-blue-50 font-medium text-blue-800' : 'text-zinc-500'}`}>{n}</div>
                     ))}
                 </aside>
                 <div className="min-w-0 flex-1 p-3">
@@ -72,7 +72,7 @@ export function DashboardMock() {
                     </div>
                     <div className="mt-2 flex gap-3 border-b border-zinc-100 text-[10px] text-zinc-500">
                         {['Overview', 'Results', 'Variations', 'Settings'].map((t, i) => (
-                            <span key={t} className={`pb-1.5 ${i === 0 ? 'border-b-2 border-emerald-600 font-medium text-zinc-900' : ''}`}>{t}</span>
+                            <span key={t} className={`pb-1.5 ${i === 0 ? 'border-b-2 border-blue-600 font-medium text-zinc-900' : ''}`}>{t}</span>
                         ))}
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2">
@@ -84,15 +84,15 @@ export function DashboardMock() {
                         <div className="mb-1 flex items-center text-[10px]">
                             <span className="font-medium text-zinc-800">Conversion rate over time</span>
                             <span className="ml-auto flex items-center gap-2 text-zinc-500">
-                                <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />Variation B</span>
-                                <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-sky-400" />Original A</span>
+                                <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-teal-600" />Variation B</span>
+                                <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-blue-400" />Original A</span>
                             </span>
                         </div>
                         <svg viewBox={`0 0 ${W} ${H + 14}`} className="h-auto w-full" role="img" aria-label="Example chart: Variation B conversion rate rises above the original over 30 days">
                             {[0, 0.33, 0.66, 1].map((g) => <line key={g} x1="0" x2={W} y1={g * H} y2={g * H} stroke="#f4f4f5" />)}
-                            <path d={`${path(variation, W, H, max)} L${W},${H} L0,${H} Z`} fill="#10b981" opacity=".08" />
-                            <path d={path(original, W, H, max)} fill="none" stroke="#38bdf8" strokeWidth="1.8" strokeLinejoin="round" />
-                            <path d={path(variation, W, H, max)} fill="none" stroke="#059669" strokeWidth="2" strokeLinejoin="round" />
+                            <path d={`${path(variation, W, H, max)} L${W},${H} L0,${H} Z`} fill="#14b8a6" opacity=".08" />
+                            <path d={path(original, W, H, max)} fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinejoin="round" />
+                            <path d={path(variation, W, H, max)} fill="none" stroke="#0d9488" strokeWidth="2" strokeLinejoin="round" />
                             {['Oct 1', 'Oct 7', 'Oct 14', 'Oct 21', 'Oct 28'].map((d, i) => (
                                 <text key={d} x={(i / 4) * W} y={H + 12} fontSize="8" fill="#a1a1aa" textAnchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'}>{d}</text>
                             ))}

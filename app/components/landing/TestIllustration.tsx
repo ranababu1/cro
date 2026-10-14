@@ -11,7 +11,7 @@ export function TestIllustration() {
                 <span className="mt-3 inline-block rounded bg-zinc-200 px-2 py-1 text-[10px] text-zinc-500">Get started</span>
             </div>
             <div className="absolute left-[22%] top-[10%] w-[62%] rotate-2 rounded-xl border border-zinc-200 bg-white p-5 shadow-pop">
-                <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">Variant B</span>
+                <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-medium text-teal-800 ring-1 ring-teal-200">Variant B</span>
                 <div className="mt-3 grid grid-cols-[1.2fr_1fr] gap-3">
                     <div>
                         <p className="text-lg font-semibold leading-snug text-zinc-900">Turn ideas into real growth</p>
@@ -20,7 +20,7 @@ export function TestIllustration() {
                     <svg viewBox="0 0 80 70" className="h-full w-full" aria-hidden>
                         <rect width="80" height="70" rx="6" fill="#f1f5f9" />
                         <rect x="48" y="10" width="22" height="40" rx="3" fill="#e2e8f0" />
-                        <path d="M14 58c0-12 4-20 10-24M24 34c-6-2-10 2-10 2M24 34c4-6 10-6 10-6M24 40c-6 0-9 4-9 4" stroke="#047857" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                        <path d="M14 58c0-12 4-20 10-24M24 34c-6-2-10 2-10 2M24 34c4-6 10-6 10-6M24 40c-6 0-9 4-9 4" stroke="#0d9488" strokeWidth="2.5" fill="none" strokeLinecap="round" />
                         <rect x="10" y="56" width="22" height="8" rx="2" fill="#cbd5e1" />
                     </svg>
                 </div>
@@ -31,7 +31,7 @@ export function TestIllustration() {
                 <p className="mt-0.5 text-lg font-semibold text-zinc-900 tabular-nums">50 / 50</p>
             </div>
             <div className="absolute bottom-[8%] left-[28%] flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-pop">
-                <svg viewBox="0 0 24 24" className="h-6 w-6 text-emerald-700" aria-hidden><path d="M4 20V14M10 20V9M16 20V12M22 20V5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /></svg>
+                <svg viewBox="0 0 24 24" className="h-6 w-6 text-blue-600" aria-hidden><path d="M4 20V14M10 20V9M16 20V12M22 20V5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" /></svg>
                 <div>
                     <p className="text-sm font-semibold text-zinc-900">95% interval</p>
                     <p className="text-[10px] text-zinc-500">per variation</p>
