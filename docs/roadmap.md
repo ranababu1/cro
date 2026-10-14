@@ -1,0 +1,417 @@
+# CRO A/B Testing Platform: 3-Phase Roadmap
+
+Repo: ranababu1/cro (main @ 5c9fc1d "Toast added - wip"). Plan only, no repo changes made.
+
+## 1. Current state audit
+
+| Area | What exists | Verdict |
+|---|---|---|
+| Stack | Next.js 16 App Router, React 19, TypeScript, Tailwind 4 + DaisyUI | Keep |
+| Auth | next-auth v4, Google provider only, JWT sessions | Keep for Phase 1, move to Auth.js v5 or Better Auth when adding orgs, SSO, MFA |
+| Database | `lib/db.ts` is an in-memory store that pattern-matches SQL strings. `lib/schema.sql` is a SQLite/D1 schema that is never actually used. Data is lost on restart | Replace. Postgres + Drizzle ORM with migrations |
+| Data model | users, experiments (owned by a single user), variations, assignments, events (page_view/conversion only) | Rework: add orgs, projects, environments, goals, metrics, audiences |
+| Assignment | `lib/assignment.ts`: SHA-256 of `experimentId:userId`, separate traffic hash, weighted buckets | Logic is sound, reuse. Switch to MurmurHash3 so the browser SDK can bucket locally with identical results |
+| Assignment API | `/api/assign` does a server round trip and stores every assignment row | Replace with config download + local bucketing; keep server as fallback |
+| SDK | Two overlapping vanilla JS files (`public/sdk.js`, `public/ab-sdk.js`), localStorage visitor ID, promise based `getVariation` | Replace with one typed SDK package. No anti-flicker today |
+| Stats | `lib/statistics.ts`: two-proportion z-test, Wilson CI, lookup table z-scores | Reuse as base; add proper normal CDF/inverse, Welch t-test for revenue, SRM chi-square |
+| Tracking | `/api/track`, single event insert, validates experiment exists | Replace with batched ingestion endpoint and event table designed for volume |
+| UI | dashboard, new experiment, experiment detail pages, navbar, dev toast | Reuse styling and page shells; rebuild forms |
+| Tests | None. No test runner configured | Add Vitest (unit) and Playwright (SDK + UI) |
+| CI/Deploy | No GitHub Actions. README targets Vercel + Cloudflare D1 | Add CI. Vercel for app, Cloudflare/CDN for SDK + config |
+| Security | Track/assign endpoints are unauthenticated and have no API keys, no rate limits, no CORS policy | Must fix in Phase 1 |
+
+Summary: a working demo of the core idea (deterministic bucketing + z-test) with no persistence, no multi-tenancy, no tests, and no production SDK. Roughly 1,500 lines; the hashing and stats modules are worth keeping, most of the rest gets rebuilt.
+
+## 2. Recommended architecture
+
+- Monorepo (pnpm workspaces + Turborepo):
+  - `apps/web`: Next.js dashboard and management REST API.
+  - `apps/ingest`: event ingestion service (Next route handler at first, later a Cloudflare Worker or small Node/Hono service).
+  - `packages/core`: shared, dependency-free TypeScript: hashing, bucketing, targeting rule evaluation, config schema. Used by every SDK and the server so results match everywhere.
+  - `packages/stats`: statistics engine, pure functions, heavily unit tested.
+  - `packages/sdk-js`: browser SDK. `packages/sdk-node`, later `sdk-react`, `sdk-python`, `sdk-java`, `sdk-php`.
+- Database: Postgres (Neon or Supabase) with Drizzle for app data. Events start in a Postgres partitioned table; move to ClickHouse (or Tinybird) in Phase 2 when volume needs it. Design the ingest layer so the switch does not touch SDKs.
+- Config delivery: on publish, compile each environment's running experiments into a JSON "datafile", push to object storage behind a CDN (Cloudflare R2 or Vercel Blob). SDKs fetch it, evaluate locally, no per-visitor server call.
+- Jobs: a queue (Inngest, or pg-boss on Postgres) for stats rollups, scheduled reports, webhooks, retries.
+- Validation: Zod schemas shared between API, UI and datafile.
+- Observability: Sentry for app + SDK errors, basic structured logs.
+
+## 3. Data model sketch
+
+```
+organizations(id, name, slug, plan, created_at)
+memberships(org_id, user_id, role)            -- role: owner/admin/editor/viewer (Phase 1 owner/member only)
+users(id, email, name, image)
+projects(id, org_id, name, domain_allowlist)
+environments(id, project_id, key: dev|staging|prod, sdk_key, datafile_version)
+api_keys(id, project_id, env_id, type: sdk|secret, hash, last_used_at, revoked_at)
+
+experiments(id, project_id, key, name, hypothesis, type: ab|abn|mvt|split_url|redirect|flag_rollout,
+            status: draft|review|scheduled|running|paused|completed|archived,
+            owner_id, tags[], category, traffic_allocation, layer_id, seed,
+            start_at, end_at, primary_metric_id, created_at, updated_at)
+variants(id, experiment_id, key, name, is_control, weight, payload jsonb)   -- payload: js/css/html, redirect url, flag value
+experiment_environments(experiment_id, env_id, enabled, allocation_override)
+audiences(id, project_id, name, rules jsonb)                 -- reusable include/exclude rule tree
+experiment_audiences(experiment_id, audience_id, mode: include|exclude)
+metrics(id, project_id, name, type: binomial|count|revenue|ratio, event_name, filters jsonb,
+        aggregation, attribution_window_hours, direction, is_guardrail)
+experiment_metrics(experiment_id, metric_id, role: primary|secondary|guardrail)
+layers(id, project_id, name)                                 -- Phase 2, mutual exclusion
+feature_flags(id, project_id, key, type, default_value, rules jsonb)  -- Phase 2
+audit_log(id, org_id, actor_id, entity, entity_id, action, diff jsonb, at)
+
+-- event store (Postgres partitioned by day, later ClickHouse)
+exposures(project_id, env_id, experiment_id, variant_id, visitor_id, user_id, ts, ctx jsonb)
+events(project_id, env_id, event_id, event_name, visitor_id, user_id, value, ts, props jsonb, ctx jsonb)
+-- ctx: device, browser, os, country, url, referrer, utm, is_new
+metric_rollups(experiment_id, variant_id, metric_id, day, segment_key, n, sum, sum_sq, conversions)
+```
+
+Key change from today: assignments are not stored per visitor on the server. Assignment is a pure function of (seed, visitor id, config); the SDK sends an exposure event once per session, and analysis joins exposures to events.
+
+## 4. Phase plan
+
+Every feature from the 14-section list appears in exactly one phase.
+
+### Phase 1: Usable MVP
+
+Goal: a team can install one snippet on a real site, run code-based A/B and A/B/n tests safely, and trust the result.
+
+1. Experiment Management
+- Create, edit, pause, resume, archive experiments
+- A/B testing (control vs variant)
+- Split testing with configurable traffic allocation
+- A/B/n testing
+- Redirect testing
+- URL-based split testing (same mechanism as redirect, shipped together)
+- Scheduling with start and end dates
+- Naming, tagging, categorization, ownership
+- Statuses: draft, running, completed, archived (plus paused). Review status lands with approvals in Phase 2
+
+2. Visual Editor: none (Phase 3), but code variants are the Phase 1 authoring path, see section 9 note below. Items from section 2 that are code features are listed here:
+- HTML, CSS and JavaScript injection
+- Code-based variant creation
+- Duplicate and clone variants
+
+3. Traffic Allocation
+- Percentage-based distribution
+- Equal or weighted splits, custom allocation (50/50, 70/30, 90/10)
+- Visitor-level random assignment
+- Persistent assignment across sessions
+- Cookie-based and user-ID-based bucketing
+- Exclude internal traffic (IP list, query param opt-out), bots (UA list), and test users
+- Traffic allocation validation (weights sum to 100, warns if changing a running test)
+
+4. Targeting
+- URL and page-path targeting
+- Query parameter and UTM targeting
+- Device targeting
+- Browser and OS targeting
+- New vs returning visitor
+- Include and exclude rules
+
+5. Goals and Conversion Tracking
+- Primary and secondary goals, multiple goals per experiment
+- Click tracking (CSS selector goals)
+- Form submission tracking
+- Custom event tracking
+- Signup and registration tracking (as named custom events)
+- Purchase and revenue tracking
+- Conversion deduplication (event_id idempotency + once-per-visitor binomial metrics)
+
+6. Statistical Analysis
+- Conversion rate
+- Relative and absolute uplift
+- Confidence intervals
+- Statistical significance testing, frequentist (z-test for proportions, Welch t-test for revenue)
+- Sample-ratio mismatch detection (chi-square on exposures)
+- Sample size calculator, MDE, power, required duration estimate (one calculator, same math)
+- Winner, loser, inconclusive classification
+
+7. Analytics and Reporting
+- Experiment dashboard (near real time, rollups every few minutes)
+- Visitors and unique users per variant
+- Conversion rate comparison
+- Uplift and CI visualization
+- Daily and cumulative trends
+- CSV export
+
+9. SDKs and Integrations
+- JavaScript web SDK
+- REST API (management, secret key auth)
+- Event ingestion API
+
+10. Performance and Reliability
+- Asynchronous script loading
+- Flicker-free rendering (small sync anti-flicker snippet with hard timeout, hides only targeted selectors)
+- CDN-based delivery of SDK and datafile
+- Low-latency variant delivery (local evaluation, no network call per visitor)
+- SPA and client-side navigation support (history API hooks re-evaluate URL targeting)
+- Duplicate event prevention
+- Event delivery retries (batched beacon with localStorage queue)
+
+11. Governance
+- Organization and team management (single role "member" plus owner)
+- API key management (SDK keys and secret keys per environment, rotate, revoke)
+- Environment separation for dev, staging, production
+- Audit logs (basic: who changed what, when; also covers experiment history in section 1)
+
+13. Admin
+- Multi-tenant organization support
+- Projects and environments
+
+Phase 1 exit criteria
+- Real persistence (Postgres) with migrations; no in-memory store anywhere.
+- Snippet installed on at least one real site (for example imraan.in) running a live A/B test for 2 weeks with no visible flicker and SDK under 15 KB gzipped.
+- Same visitor gets the same variant in browser SDK and Node bucketing tests (cross-implementation test vectors).
+- Stats engine verified against known reference values (e.g. scipy outputs) and an A/A test shows no false winner and no SRM.
+- Ingest handles 200 events/sec sustained in a load test without loss.
+- Unit test coverage on `core` and `stats` above 90%; CI runs lint, typecheck, tests on every PR.
+- Every write endpoint authenticated; ingest restricted by SDK key + domain allowlist + rate limit.
+
+### Phase 2: Depth, trust, and integrations
+
+Goal: credible for a team running many tests in parallel, with server-side use, proper governance, and better stats.
+
+1. Experiment Management
+- Multivariate testing (MVT), needs factorial variants and multiple-comparison correction
+- Approval workflows and the review status
+- Experiment history UI on top of the audit log (detailed diffs)
+
+3. Traffic Allocation
+- URL and domain-level traffic splitting
+- Allocation adjustments during an experiment (with re-randomization warnings and safe ramp only)
+- Audience-specific traffic allocation
+- Holdout groups for incremental impact
+- Traffic allocation monitoring (alerts when actual split drifts)
+
+4. Targeting
+- Geographic targeting (CDN geo headers)
+- Logged-in vs anonymous
+- Referrer-based targeting
+- Custom JavaScript conditions
+- User attribute and event-based targeting
+- Custom audience creation and reuse
+- Targeting by experiment, campaign or cohort
+
+5. Goals
+- Add-to-cart and checkout tracking
+- Funnel conversion tracking
+- Micro and macro conversions
+- Revenue per visitor
+- Average order value
+- Custom metric definitions (ratio, count, filtered metrics)
+- Goal attribution windows
+
+6. Statistical Analysis
+- Bayesian analysis (beta-binomial, probability to beat control, expected loss)
+- Sequential testing support (always-valid p-values, mSPRT or group sequential)
+- Multiple-comparison correction for A/B/n and MVT (Holm or Benjamini-Hochberg)
+- Guardrail metric monitoring
+- Early stopping rules (built on sequential testing)
+- Novelty effect detection
+- Results by audience segment
+
+7. Reporting
+- Revenue and engagement metrics views
+- Funnel analysis
+- Device and browser breakdowns
+- Geographic and audience breakdowns
+- Experiment comparison reports
+- PDF reports
+- Scheduled reports by email
+- Shareable reports (signed read-only links)
+- Result summaries and recommendations (rule-based text, AI version in section 12)
+
+8. Personalization and Feature Delivery
+- Feature flags
+- Percentage rollouts
+- Gradual feature releases
+- User and account-level targeting
+- Remote configuration
+- Experiment-driven feature rollouts
+- Mutual exclusion between conflicting experiments
+- Experiment layers and namespaces
+- Server-side experimentation
+- Rule-based content delivery
+
+9. SDKs and Integrations
+- Server SDKs: Node.js, Python, PHP, Java (Node first; others generated from `core` test vectors)
+- React and Next.js integration (provider, hooks, middleware bucketing for SSR)
+- WordPress integration (plugin that injects snippet, configures keys, ecommerce events for WooCommerce)
+- Google Analytics 4 integration (push exposures as events)
+- Google Tag Manager integration (template + dataLayer events)
+- Webhook support
+- Consent management platform integration (Cookiebot, OneTrust, TCF v2)
+
+10. Performance and Reliability
+- Server-side rendering support
+- Caching compatibility (edge-cache-safe variant keys, Vary guidance)
+- Experiment collision detection (same selectors or URLs in two running tests)
+- Script error monitoring (SDK reports variant JS errors, auto-pause on threshold)
+
+11. Governance
+- Role-based access control (owner, admin, editor, viewer)
+- SSO (Google Workspace, SAML/OIDC) and MFA
+- Experiment approval and publishing permissions
+- Experiment access restrictions (per-project permissions)
+- Consent-aware experimentation (no tracking before consent, configurable)
+- PII masking and data minimization (strip query params, hash user IDs)
+- Secure handling of customer identifiers
+- Data retention policies
+
+12. AI basics
+- Explain experiment outcomes in plain language
+- AI-generated experiment reports
+- Guardrails against unsupported statistical conclusions (AI text constrained to computed stats; refuses to call winners the stats engine did not)
+- AI-assisted experiment ideation
+- Prioritize experiments by impact, confidence, effort (ICE scoring with AI suggestions)
+
+13. Admin
+- User and team permissions UI
+- Usage tracking and quotas
+- API usage monitoring
+- Data export and account deletion (needed for GDPR)
+
+Phase 2 exit criteria
+- At least 10 concurrent experiments in one project with layers and no collisions.
+- Node SDK and React/Next integration used in production; WordPress plugin installable.
+- Bayesian and sequential results match reference implementations; sequential A/A simulations keep false positive rate at or below alpha.
+- RBAC and SSO enforced on every endpoint, covered by tests.
+- Consent mode tested with at least one CMP; GDPR export and deletion work end to end.
+- Event store migrated to ClickHouse (or justified decision to stay on Postgres) with dashboards under 2 s at 10M events.
+
+### Phase 3: Visual editor, advanced experimentation, AI-heavy, scale
+
+2. Visual Editor and Variant Creation
+- Visual no-code editor (loads customer page in an iframe via a bookmarklet/extension, records changes as selector-based ops)
+- Edit text, images, buttons, colors, layouts, CSS
+- Drag-and-drop element editing
+- Preview across desktop, tablet, mobile
+- Responsive design validation
+- Change comparison between control and variants
+- Undo and redo
+
+4. Targeting
+- Audience segments based on behavioral history (needs the event store and profile service)
+
+5. Goals
+- Lead quality and qualified lead tracking (needs CRM integration)
+
+6. Statistical Analysis
+- None remaining (all placed in Phases 1 and 2)
+
+8. Personalization
+- Personalized website experiences
+- Audience-specific content variations
+- Persistent control groups (long-lived, cross-experiment)
+
+9. SDKs and Integrations
+- Segment and CDP integrations
+- CRM and marketing automation integrations (HubSpot, Salesforce)
+- E-commerce platform integrations (Shopify app, beyond WooCommerce)
+- Data warehouse exports (BigQuery, Snowflake)
+
+10. Performance and Reliability
+- Edge-based experimentation (Cloudflare Worker / Vercel middleware rewriting HTML)
+- High-availability architecture (multi-region ingest, queue buffering)
+- Performance impact monitoring including Core Web Vitals per variant
+
+12. AI-Powered
+- Generate test hypotheses from analytics data
+- Suggest high-impact pages and opportunities
+- AI-generated copy and CTA variants
+- AI-assisted HTML and CSS changes (inside the visual editor)
+- Automated experiment setup
+- Conversion funnel anomaly detection
+- Recommend follow-up experiments
+- Identify audience segments with differing responses (heterogeneous effect analysis)
+
+13. Admin and Billing
+- Monthly active experiment and visitor limits
+- Event ingestion limits
+- Plan management and billing (Stripe)
+- System health dashboard
+- Operational alerts
+
+14. Advanced Experimentation
+- Bandit experiments and traffic optimization
+- Multi-page and cross-domain experiments
+- Cross-device identity resolution
+- Geo experiments and holdout-based incrementality
+- CUPED or other variance reduction
+- Sequential and adaptive experimentation (adaptive allocation beyond Phase 2 sequential tests)
+- Interleaving experiments for ranking systems
+- Interaction and interference analysis
+- Long-term retention and cohort analysis
+- Incrementality measurement for campaigns
+- Offline conversion imports
+
+Phase 3 exit criteria
+- Non-technical user can build and launch a test in the visual editor without code on 3 real sites.
+- Billing live with enforced quotas.
+- Edge delivery path shows zero flicker and no CWV regression versus control.
+- CUPED shows measurable variance reduction on historical experiments.
+
+Note on CUPED: listed as Phase 3 because it needs pre-experiment covariate data per visitor, which only exists once the event store has history. If the Phase 2 event store lands early, CUPED is a cheap pull-forward.
+
+## 5. Key dependencies
+
+- `packages/core` (hashing, rules, datafile schema) blocks the JS SDK, server SDKs, edge delivery and feature flags. Build it first.
+- Exposure events + event store block every stats and reporting feature. Exposure logging must be right from day one or past data is unusable.
+- Orgs/projects/environments must exist before API keys, RBAC, quotas and billing. Doing tenancy later means a painful migration, so it is in Phase 1.
+- Audit log (Phase 1) is the base for approvals, history UI and compliance.
+- Sequential testing must come before early stopping rules and before AI "call a winner" text.
+- Layers/mutual exclusion come before running many tests at once, and before bandits and holdouts.
+- Consent integration must precede any EU customer go-live.
+- Visual editor depends on the selector-based change ops and SPA support from Phases 1 and 2; AI HTML/CSS and AI copy variants depend on the editor.
+- Behavioral audiences, cross-device identity and segment discovery depend on a profile/identity service built over the event store.
+
+## 6. Key risks
+
+- Flicker and performance: a slow snippet hurts the customer's conversion rate and SEO. Mitigate with size budget, timeout, CDN, and later edge delivery.
+- Statistical correctness: wrong math destroys trust. Mitigate with reference tests, A/A runs, SRM checks surfaced loudly, and sequential methods before encouraging peeking.
+- Peeking: users stop tests early on noise. Show "not enough data" states until sample size reached; Phase 2 sequential testing fixes it properly.
+- Event volume and cost: Postgres will strain. Keep ingest behind an interface and plan the ClickHouse move.
+- Ad blockers and ITP: third-party domains and cookies get blocked. Offer first-party proxy path (customer subdomain or WordPress plugin route) early.
+- Privacy/legal: cookies and tracking need consent in the EU. Ship consent-aware mode before EU users.
+- Scope: the list is the size of Optimizely + LaunchDarkly + Amplitude. Hold the phase lines; Phase 1 should take about 8 to 10 weeks for one or two engineers.
+- Existing code drift: two SDK files and an unused schema already diverge. Delete rather than patch.
+
+## 7. Phase 1 milestones and first issues
+
+M0. Foundation (week 1 to 2)
+1. Convert repo to pnpm monorepo (`apps/web`, `packages/core`, `packages/stats`, `packages/sdk-js`).
+2. Add Vitest, Playwright, GitHub Actions (lint, typecheck, test, build).
+3. Add Postgres + Drizzle, write initial migration from the data model above; delete in-memory `lib/db.ts` and unused `schema.sql`.
+4. Orgs, memberships, projects, environments; keep Google login; scope every query by org.
+5. API keys per environment (SDK key public, secret key hashed), key management UI.
+6. Audit log table and write helper used by all mutations.
+
+M1. Core + SDK (week 3 to 5)
+7. `packages/core`: MurmurHash3 bucketing, traffic allocation, weighted variants, shared test vectors; port logic from `lib/assignment.ts`.
+8. Targeting rule engine: URL/path, query/UTM, device, browser, OS, new/returning, include/exclude.
+9. Datafile compiler + publish to CDN storage on every experiment change.
+10. `sdk-js`: visitor ID (first-party cookie + optional user ID), local evaluation, exposure events, `track()`, batching, retry queue, dedupe IDs, SPA navigation hooks.
+11. Anti-flicker snippet with timeout and selector scoping; code variants (JS/CSS/HTML injection); redirect and split URL handling.
+12. Internal traffic, bot and QA exclusions; forced variant via query param for QA.
+13. Remove `public/sdk.js` and `public/ab-sdk.js`; update `public/demo.html` to the new SDK.
+
+M2. Ingest + stats (week 5 to 7)
+14. Batched ingest endpoint: SDK key auth, domain allowlist, rate limit, Zod validation, idempotency by event_id.
+15. Partitioned exposures/events tables and periodic rollup job.
+16. Metrics model: binomial, count, revenue; click/form/custom/purchase goals; primary and secondary.
+17. `packages/stats`: port z-test and Wilson CI, add exact normal CDF, Welch t-test, absolute/relative uplift with CIs, SRM chi-square, sample size/MDE/power/duration.
+18. Reference tests against scipy outputs; A/A simulation test.
+
+M3. Product UI (week 7 to 9)
+19. Experiment CRUD with statuses, scheduling, tags, owner, clone variant, code editor for variants.
+20. Results page: per-variant visitors, conversions, CR, uplift + CI chart, daily/cumulative trend, SRM banner, winner/loser/inconclusive.
+21. Sample size calculator page.
+22. CSV export.
+23. Install guide page with copy-paste snippet per environment.
+
+M4. Pilot (week 9 to 10)
+24. Load test ingest at 200 events/sec.
+25. Run an A/A test then a real A/B test on a pilot site; fix issues; tag v0.1.0.
