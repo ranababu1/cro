@@ -19,9 +19,10 @@ export function InstallSnippet({ className }: { className?: string }) {
 
     useEffect(() => {
         void (async () => {
-            const res = await fetch('/api/install');
-            if (!res.ok) {
-                setError('Could not load your install snippet.');
+            const res = await fetch('/api/install').catch(() => null);
+            if (!res || !res.ok) {
+                const body = res ? ((await res.json().catch(() => null)) as { error?: string } | null) : null;
+                setError(body?.error || 'Could not load your install snippet.');
                 return;
             }
             const json = (await res.json()) as InstallPayload;
