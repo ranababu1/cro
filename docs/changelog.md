@@ -1,7 +1,7 @@
 # Changelog
 
 Newest first. Times are IST (UTC+5:30). Every change adds a row here (see docs/agent.md).
-For the commit that adds a row, write "a6cdf7f" as the ID, then fill in the short hash in the next commit.
+For the commit that adds a row, write "pending" as the ID, then fill in the short hash in the next commit.
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
