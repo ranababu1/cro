@@ -7,7 +7,7 @@ a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and 
 - Next.js 16 App Router, React 19, TypeScript (strict), Tailwind 4 with an in-house component set (`app/components/ui`). Inter and JetBrains Mono via next/font. DaisyUI removed.
 - Auth: next-auth v4 with Google. Users get an organization, a default project and dev, staging and prod environments on first sign-in.
 - Database: SQLite through libSQL (`@libsql/client`) and Drizzle ORM. Local file `data/cro.db` by default, Turso in production.
-  Schema in `lib/db/schema.ts`, SQL migrations in `drizzle/`, applied automatically on first request (turn off with `DB_AUTO_MIGRATE=false`) or with `npm run db:migrate`.
+  Schema in `lib/db/schema.ts`, SQL migrations in `drizzle/`, applied automatically on first request (turn off with `DB_AUTO_MIGRATE=false`) or with `npm run db:migrate`. Drizzle only applies a migration whose journal `when` is greater than the newest applied one, so new entries must use a timestamp above every earlier entry (enforced by tests/migrations.test.ts).
 - Validation: Zod (`lib/validation.ts`).
 - Tests: Vitest, 67 tests in `tests/` (bucketing, statistics against scipy reference values, API keys, rate limiter, database layer, API routes, platform admin authz, suspension and quotas).
 - CI: GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, tests and build on pushes to main and on pull requests.

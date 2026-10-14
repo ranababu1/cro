@@ -17,7 +17,16 @@ export async function GET(request: NextRequest) {
     const projectId = selected && ctx.projectIds.includes(selected) ? selected : ctx.projectIds[0];
     if (!projectId) return NextResponse.json({ error: 'No project' }, { status: 404 });
 
-    const keys = await db.getInstallSdkKeys(projectId, ctx.userId);
+    let keys: { prod: string | null; dev: string | null };
+    try {
+        keys = await db.getInstallSdkKeys(projectId, ctx.userId);
+    } catch (err) {
+        console.error('install snippet: failed to load SDK keys', err);
+        return NextResponse.json(
+            { error: 'Could not load SDK keys. Open API keys to create one, or try again shortly.' },
+            { status: 500 },
+        );
+    }
     const origin = publicAppOrigin();
     return NextResponse.json({
         origin,
