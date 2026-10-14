@@ -22,6 +22,7 @@ export interface AppShellProps {
 const nav = [
     { href: '/dashboard', label: 'Overview', icon: HomeIcon },
     { href: '/experiments', label: 'Experiments', icon: FlaskIcon },
+    { href: '/settings/domains', label: 'Domains', icon: ShieldIcon },
     { href: '/settings/keys', label: 'API keys', icon: KeyIcon },
 ];
 

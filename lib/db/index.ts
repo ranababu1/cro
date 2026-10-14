@@ -4,7 +4,7 @@ import * as s from './schema';
 import type { EnvironmentKey } from './schema';
 import { generateId } from '../ids';
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
-import type { Experiment, Variation, Assignment, Event, User } from '../types';
+import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 
 export { getDb } from './client';
 
@@ -223,24 +223,34 @@ export const db = {
     },
 
     async createExperiment(
-        experiment: Pick<Experiment, 'id' | 'project_id' | 'user_id' | 'name' | 'status' | 'traffic_allocation'> & { description?: string | null },
+        experiment: Pick<Experiment, 'id' | 'project_id' | 'user_id' | 'name' | 'status' | 'traffic_allocation'> & { description?: string | null; control_url?: string | null },
         variations: Array<Pick<Variation, 'name' | 'weight' | 'is_control'> & { description?: string | null; url?: string | null }>,
+        goals: Array<Pick<Goal, 'name' | 'selector' | 'is_primary'>> = [],
     ): Promise<void> {
         const d = await getDb();
-        await d.batch([
-            d.insert(s.experiments).values({ ...experiment, description: experiment.description ?? null }),
-            d.insert(s.variations).values(
-                variations.map((v) => ({
-                    id: generateId('var'),
+        await d.insert(s.experiments).values({ ...experiment, description: experiment.description ?? null, control_url: experiment.control_url ?? null });
+        await d.insert(s.variations).values(
+            variations.map((v) => ({
+                id: generateId('var'),
+                experiment_id: experiment.id,
+                name: v.name,
+                description: v.description ?? null,
+                url: v.url ?? null,
+                weight: v.weight,
+                is_control: v.is_control,
+            })),
+        );
+        if (goals.length) {
+            await d.insert(s.goals).values(
+                goals.map((g) => ({
+                    id: generateId('gol'),
                     experiment_id: experiment.id,
-                    name: v.name,
-                    description: v.description ?? null,
-                    url: v.url ?? null,
-                    weight: v.weight,
-                    is_control: v.is_control,
+                    name: g.name,
+                    selector: g.selector,
+                    is_primary: g.is_primary,
                 })),
-            ),
-        ]);
+            );
+        }
     },
 
     async updateExperiment(
@@ -288,15 +298,46 @@ export const db = {
             ...e,
             environment_id: e.environment_id ?? null,
             event_name: e.event_name ?? null,
+            goal_id: e.goal_id ?? null,
             metadata: e.metadata ?? null,
         });
     },
 
-    async getEventStats(experimentId: string, environmentId?: string) {
+
+    async getEventStats(experimentId: string, environmentId?: string, goalId?: string | null) {
         const d = await getDb();
-        const where = environmentId
-            ? and(eq(s.events.experiment_id, experimentId), eq(s.events.environment_id, environmentId))
-            : eq(s.events.experiment_id, experimentId);
+        const parts = [eq(s.events.experiment_id, experimentId)];
+        if (environmentId) parts.push(eq(s.events.environment_id, environmentId));
+        if (goalId) {
+            parts.push(eq(s.events.event_type, 'conversion'));
+            parts.push(eq(s.events.goal_id, goalId));
+        }
+        const where = and(...parts);
+        if (goalId) {
+            // Conversions for one goal; visitors still come from any event for the variation.
+            const visitors = await d
+                .select({
+                    variation_id: s.events.variation_id,
+                    total_users: sql<number>`count(distinct ${s.events.user_id})`,
+                })
+                .from(s.events)
+                .where(environmentId ? and(eq(s.events.experiment_id, experimentId), eq(s.events.environment_id, environmentId)) : eq(s.events.experiment_id, experimentId))
+                .groupBy(s.events.variation_id);
+            const conversions = await d
+                .select({
+                    variation_id: s.events.variation_id,
+                    conversions: sql<number>`count(distinct ${s.events.user_id})`,
+                })
+                .from(s.events)
+                .where(where)
+                .groupBy(s.events.variation_id);
+            const convMap = new Map(conversions.map((c) => [c.variation_id, Number(c.conversions)]));
+            return visitors.map((v) => ({
+                variation_id: v.variation_id,
+                total_users: Number(v.total_users) || 0,
+                conversions: convMap.get(v.variation_id) || 0,
+            }));
+        }
         return d
             .select({
                 variation_id: s.events.variation_id,
@@ -307,6 +348,67 @@ export const db = {
             .where(where)
             .groupBy(s.events.variation_id);
     },
+
+    async hasConversion(experimentId: string, userId: string, goalId: string): Promise<boolean> {
+        const d = await getDb();
+        const row = await d.query.events.findFirst({
+            where: and(
+                eq(s.events.experiment_id, experimentId),
+                eq(s.events.user_id, userId),
+                eq(s.events.goal_id, goalId),
+                eq(s.events.event_type, 'conversion'),
+            ),
+        });
+        return !!row;
+    },
+
+    async getGoals(experimentId: string): Promise<Goal[]> {
+        const d = await getDb();
+        return d.select().from(s.goals).where(eq(s.goals.experiment_id, experimentId)).orderBy(desc(s.goals.is_primary), asc(s.goals.created_at));
+    },
+
+    async listDomains(projectId: string): Promise<ProjectDomain[]> {
+        const d = await getDb();
+        return d.select().from(s.projectDomains).where(eq(s.projectDomains.project_id, projectId)).orderBy(asc(s.projectDomains.host));
+    },
+
+    async addDomain(projectId: string, host: string): Promise<ProjectDomain> {
+        const d = await getDb();
+        const id = generateId('dom');
+        await d.insert(s.projectDomains).values({ id, project_id: projectId, host });
+        return (await d.query.projectDomains.findFirst({ where: eq(s.projectDomains.id, id) }))!;
+    },
+
+    async deleteDomain(domainId: string): Promise<void> {
+        const d = await getDb();
+        await d.delete(s.projectDomains).where(eq(s.projectDomains.id, domainId));
+    },
+
+    async getDomainHosts(projectId: string): Promise<string[]> {
+        return (await this.listDomains(projectId)).map((d) => d.host);
+    },
+
+    /** Running experiments for a project whose control or variation URL matches the page URL. */
+    async findExperimentByPageUrl(projectId: string, pageUrl: string): Promise<{ experiment: Experiment; variations: Variation[]; goals: Goal[] } | null> {
+        const { normalizePageUrl, urlsMatch } = await import('../domains');
+        const target = normalizePageUrl(pageUrl);
+        if (!target) return null;
+        const d = await getDb();
+        const experiments = await d
+            .select()
+            .from(s.experiments)
+            .where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
+        for (const experiment of experiments) {
+            const variations = await this.getVariations(experiment.id);
+            const urls = [experiment.control_url, ...variations.map((v) => v.url)].filter(Boolean) as string[];
+            if (urls.some((u) => urlsMatch(u, pageUrl))) {
+                const goals = await this.getGoals(experiment.id);
+                return { experiment, variations, goals };
+            }
+        }
+        return null;
+    },
+
 
     // Tenants, usage and quotas
     async getOrganization(orgId: string) {

@@ -3,8 +3,14 @@ import { db } from '@/lib/db';
 import { AssignmentResponse } from '@/lib/types';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
-import { assignSchema, formatZodError } from '@/lib/validation';
+import { z } from 'zod';
+import { formatZodError } from '@/lib/validation';
 import { checkVisitorQuota } from '@/lib/quotas';
+
+const assignBody = z.object({
+    experiment_id: z.string().min(1).max(100),
+    user_id: z.string().min(1).max(200).regex(/^[\x21-\x7e]+$/),
+});
 
 const notAssigned = (experimentId: string): AssignmentResponse => ({
     experiment_id: experimentId,
@@ -17,30 +23,27 @@ export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
 }
 
-// POST /api/assign - Get or create a visitor's assignment. Requires an SDK key.
 export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
         if ('error' in auth) return auth.error;
 
-        const parsed = assignSchema.safeParse(await request.json().catch(() => null));
+        const parsed = assignBody.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
-        const body = parsed.data;
+        const { experiment_id: experimentId, user_id: userId } = parsed.data;
 
-        const experiment = await db.getExperiment(body.experiment_id);
-        // Experiments from other projects look the same as missing ones.
+        const experiment = await db.getExperiment(experimentId);
         if (!experiment || experiment.project_id !== auth.ctx.projectId) {
             return sdkJson({ error: 'Experiment not found' }, 404);
         }
 
-        const variations = await db.getVariations(body.experiment_id);
-
-        const existing = await db.getAssignment(body.experiment_id, body.user_id);
+        const variations = await db.getVariations(experimentId);
+        const existing = await db.getAssignment(experimentId, userId);
         if (existing) {
             const variation = variations.find((v) => v.id === existing.variation_id);
             if (variation && experiment.status === 'running') {
                 return sdkJson({
-                    experiment_id: body.experiment_id,
+                    experiment_id: experimentId,
                     variation_id: variation.id,
                     variation_name: variation.name,
                     variation_url: variation.url ?? undefined,
@@ -50,30 +53,29 @@ export async function POST(request: NextRequest) {
         }
 
         if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
-            return sdkJson(notAssigned(body.experiment_id));
+            return sdkJson(notAssigned(experimentId));
         }
         if (variations.length === 0) {
             return sdkJson({ error: 'No variations found for this experiment' }, 400);
         }
 
-        const assigned = assignUserToVariation(body.user_id, body.experiment_id, experiment.traffic_allocation, variations);
-        if (!assigned) return sdkJson(notAssigned(body.experiment_id));
+        const assigned = assignUserToVariation(userId, experimentId, experiment.traffic_allocation, variations);
+        if (!assigned) return sdkJson(notAssigned(experimentId));
 
-        // Quota hook: stop enrolling new visitors past the plan's monthly limit.
         const quota = await checkVisitorQuota(auth.ctx.orgId);
         if (!quota.allowed) {
-            return sdkJson({ ...notAssigned(body.experiment_id), reason: 'quota_exceeded' } satisfies AssignmentResponse);
+            return sdkJson({ ...notAssigned(experimentId), reason: 'quota_exceeded' } satisfies AssignmentResponse);
         }
 
         await db.createAssignment({
-            experiment_id: body.experiment_id,
+            experiment_id: experimentId,
             variation_id: assigned.id,
-            user_id: body.user_id,
+            user_id: userId,
             environment_id: auth.ctx.environmentId,
         });
 
         return sdkJson({
-            experiment_id: body.experiment_id,
+            experiment_id: experimentId,
             variation_id: assigned.id,
             variation_name: assigned.name,
             variation_url: assigned.url ?? undefined,

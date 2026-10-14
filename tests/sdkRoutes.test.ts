@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase } from './helpers';
+import { useTempDatabase, seedProjectDomain } from './helpers';
 
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => null) }));
 
@@ -35,6 +35,7 @@ beforeAll(async () => {
     cleanup = useTempDatabase();
     const u1 = await db.createUser({ email: 'one@example.com', name: 'One' });
     const ws1 = await db.ensureWorkspace(u1);
+    await seedProjectDomain(ws1.projectId, 'localhost');
     const env1 = (await db.getEnvironments(ws1.projectId)).find((e) => e.key === 'dev')!;
     sdkKey = (await db.createApiKey({ environmentId: env1.id, type: 'sdk' })).key;
     secretKey = (await db.createApiKey({ environmentId: env1.id, type: 'secret' })).key;
@@ -42,6 +43,7 @@ beforeAll(async () => {
 
     const u2 = await db.createUser({ email: 'two@example.com', name: 'Two' });
     const ws2 = await db.ensureWorkspace(u2);
+    await seedProjectDomain(ws2.projectId, 'localhost');
     const env2 = (await db.getEnvironments(ws2.projectId)).find((e) => e.key === 'prod')!;
     otherProjectKey = (await db.createApiKey({ environmentId: env2.id, type: 'sdk' })).key;
     otherExperimentId = await makeExperiment(ws2.projectId, u2.id, 'running');

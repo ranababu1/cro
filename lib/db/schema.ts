@@ -43,6 +43,13 @@ export const projects = sqliteTable('projects', {
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_projects_org').on(t.org_id)]);
 
+export const projectDomains = sqliteTable('project_domains', {
+    id: text('id').primaryKey(),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    host: text('host').notNull(), // lowercase hostname, no port, e.g. example.com or www.example.com
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [uniqueIndex('uq_project_domains_host').on(t.project_id, t.host), index('idx_project_domains_project').on(t.project_id)]);
+
 export const ENVIRONMENT_KEYS = ['dev', 'staging', 'prod'] as const;
 export type EnvironmentKey = (typeof ENVIRONMENT_KEYS)[number];
 
@@ -74,6 +81,7 @@ export const experiments = sqliteTable('experiments', {
     name: text('name').notNull(),
     description: text('description'),
     status: text('status', { enum: ['draft', 'running', 'paused', 'completed'] }).notNull().default('draft'),
+    control_url: text('control_url'),
     traffic_allocation: integer('traffic_allocation').notNull().default(100),
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),
@@ -99,6 +107,16 @@ export const variations = sqliteTable('variations', {
     check('ck_variations_weight', sql`${t.weight} >= 0 AND ${t.weight} <= 100`),
 ]);
 
+
+export const goals = sqliteTable('goals', {
+    id: text('id').primaryKey(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    selector: text('selector').notNull(), // CSS selector, e.g. #headerCTA or .bodyCTA
+    is_primary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_goals_experiment').on(t.experiment_id)]);
+
 export const assignments = sqliteTable('assignments', {
     id: text('id').primaryKey(),
     experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
@@ -116,6 +134,7 @@ export const events = sqliteTable('events', {
     user_id: text('user_id').notNull(),
     event_type: text('event_type', { enum: ['page_view', 'conversion'] }).notNull(),
     event_name: text('event_name'),
+    goal_id: text('goal_id').references(() => goals.id, { onDelete: 'set null' }),
     metadata: text('metadata'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [

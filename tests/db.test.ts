@@ -58,7 +58,7 @@ describe('database layer', () => {
         expect((await db.getAssignment(id, 'v1'))?.variation_id).toBe(control.id);
 
         for (const [uid, type] of [['v1', 'page_view'], ['v1', 'conversion'], ['v1', 'conversion'], ['v2', 'page_view']] as const) {
-            await db.createEvent({ experiment_id: id, variation_id: control.id, environment_id: null, user_id: uid, event_type: type, event_name: null, metadata: null });
+            await db.createEvent({ experiment_id: id, variation_id: control.id, environment_id: null, user_id: uid, event_type: type, event_name: null, goal_id: null, metadata: null });
         }
         const stats = await db.getEventStats(id);
         expect(stats).toHaveLength(1);

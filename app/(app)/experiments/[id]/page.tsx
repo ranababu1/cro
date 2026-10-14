@@ -13,23 +13,8 @@ import { IntervalChart } from './IntervalChart';
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-');
 const pct = (v: number, digits = 2) => `${(v * 100).toFixed(digits)}%`;
 
-function installSnippet(origin: string, experimentId: string) {
-    return `<script src="${origin}/sdk.js"></script>
-<script>
-  ABTest.init({
-    apiUrl: '${origin}',
-    apiKey: 'cro_pk_prod_...' // SDK key from API keys
-  });
-
-  ABTest.run('${experimentId}', function (variation) {
-    if (variation.assigned) {
-      // Apply the change for variation.variation_name
-    }
-  });
-
-  // Record a conversion, for example on signup
-  // ABTest.trackConversion('${experimentId}', 'signup');
-</script>`;
+function installSnippet(origin: string) {
+    return `<script src="${origin}/sdk.js" data-key="YOUR_SDK_KEY" async></script>`;
 }
 
 export default function ExperimentDetail() {
@@ -37,6 +22,7 @@ export default function ExperimentDetail() {
     const router = useRouter();
     const [experiment, setExperiment] = useState<Experiment | null>(null);
     const [variations, setVariations] = useState<Variation[]>([]);
+    const [goals] = useState<{ id: string; name: string; selector: string; is_primary: boolean }[]>([]);
     const [results, setResults] = useState<ExperimentResults | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -113,8 +99,8 @@ export default function ExperimentDetail() {
     const actions = (
         <>
             {s === 'draft' && <><Button variant="danger" onClick={remove} disabled={busy}>Delete</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment started.')} disabled={busy}>Start experiment</Button></>}
-            {s === 'running' && <><Button variant="secondary" onClick={() => patch({ status: 'paused' }, 'Experiment paused.')} disabled={busy}>Pause</Button><Button variant="secondary" onClick={() => confirm('Complete this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment completed.')} disabled={busy}>Complete</Button></>}
-            {s === 'paused' && <><Button variant="secondary" onClick={() => confirm('Complete this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment completed.')} disabled={busy}>Complete</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment resumed.')} disabled={busy}>Resume</Button></>}
+            {s === 'running' && <><Button variant="secondary" onClick={() => patch({ status: 'paused' }, 'Experiment paused.')} disabled={busy}>Pause</Button><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button></>}
+            {s === 'paused' && <><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment resumed.')} disabled={busy}>Resume</Button></>}
         </>
     );
 
@@ -148,24 +134,31 @@ export default function ExperimentDetail() {
             />
 
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} />}
-            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} origin={origin} />}
+            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} origin={origin} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
 }
 
 function ResultsPanel({ experiment, results }: { experiment: Experiment; results: ExperimentResults | null }) {
+    const goalList = results?.goals || [];
+    const primaryGoalId = goalList.find((g) => g.is_primary)?.goal_id || goalList[0]?.goal_id || '';
+    const [goalId, setGoalId] = useState<string | null>(null);
+    const selectedGoalId = goalId || primaryGoalId;
+
     if (experiment.status === 'draft') {
         return <Card><EmptyState title="No results yet" description="Results appear once the experiment is started and visitors are assigned." /></Card>;
     }
     if (!results) return <Card><EmptyState title="Results are not available" /></Card>;
 
-    // Control first, then variants in their configured order.
-    const rows = [...results.variations].sort((a, b) => Number(b.is_control) - Number(a.is_control));
+    const activeGoal = goalList.find((g) => g.goal_id === selectedGoalId) || goalList[0];
+    const sourceVariations = activeGoal?.variations || results.variations;
+    const rows = [...sourceVariations].sort((a, b) => Number(b.is_control) - Number(a.is_control));
     const control = rows.find((v) => v.is_control);
-    const sig = results.statistical_significance;
-    const winner = results.variations.find((v) => v.variation_id === results.winner);
-    const perArmMin = Math.min(...results.variations.map((v) => v.total_users));
+    const sig = activeGoal?.statistical_significance || results.statistical_significance;
+    const winnerId = activeGoal?.winner || results.winner;
+    const winner = sourceVariations.find((v) => v.variation_id === winnerId);
+    const perArmMin = Math.min(...sourceVariations.map((v) => v.total_users));
 
     let summary: React.ReactNode;
     if (perArmMin < 100) {
@@ -181,6 +174,15 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
     return (
         <div className="space-y-6">
             {summary}
+            {goalList.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    {goalList.map((g) => (
+                        <button key={g.goal_id} type="button" onClick={() => setGoalId(g.goal_id)} className={`rounded-full px-3 py-1 text-sm font-medium ${g.goal_id === activeGoal?.goal_id ? 'bg-brand-600 text-white' : 'bg-zinc-100 text-zinc-700'}`}>
+                            {g.goal_name}{g.is_primary ? ' · Primary' : ''}
+                        </button>
+                    ))}
+                </div>
+            )}
             <Card>
                 <CardHeader title="Conversion rate by variation" description="Unique visitors who converted, divided by unique visitors assigned." />
                 <Table>
@@ -196,7 +198,7 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
                                         <span className="flex items-center gap-2 font-medium text-zinc-900">
                                             {v.variation_name}
                                             {v.is_control && <Badge>Control</Badge>}
-                                            {v.variation_id === results.winner && <Badge tone="success">Leading</Badge>}
+                                            {v.variation_id === winnerId && <Badge tone="success">Leading</Badge>}
                                         </span>
                                     </TD>
                                     <TD numeric>{v.total_users.toLocaleString()}</TD>
@@ -216,7 +218,7 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
             </Card>
             <Card>
                 <CardHeader title="Confidence intervals" />
-                <CardBody><IntervalChart rows={rows} winner={results.winner} /></CardBody>
+                <CardBody><IntervalChart rows={rows} winner={winnerId} /></CardBody>
             </Card>
             <p className="text-xs text-zinc-500">
                 Method: two-proportion z-test of the best variant against the control, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
@@ -225,7 +227,7 @@ function ResultsPanel({ experiment, results }: { experiment: Experiment; results
     );
 }
 
-function SetupPanel({ experimentId, variations, origin }: { experimentId: string; variations: Variation[]; origin: string }) {
+function SetupPanel({ variations, goals, origin }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; selector: string; is_primary: boolean }[]; origin: string }) {
     return (
         <div className="space-y-6">
             <Card>
@@ -246,12 +248,23 @@ function SetupPanel({ experimentId, variations, origin }: { experimentId: string
                     </TBody>
                 </Table>
             </Card>
+            {goals.length > 0 && (
             <Card>
-                <CardHeader title="Install" description={<>Add this to every page in the experiment. Experiment ID: <Kbd>{experimentId}</Kbd></>} />
+                <CardHeader title="Goals" description="Click goals tracked by CSS selector." />
+                <Table>
+                    <THead><tr><TH>Name</TH><TH>Selector</TH><TH>Primary</TH></tr></THead>
+                    <TBody>{goals.map((g) => (
+                        <TR key={g.id}><TD className="font-medium">{g.name}</TD><TD><Kbd>{g.selector}</Kbd></TD><TD>{g.is_primary ? 'Yes' : ''}</TD></TR>
+                    ))}</TBody>
+                </Table>
+            </Card>
+            )}
+            <Card>
+                <CardHeader title="Install" description="One line in the head of the control and every variation page." />
                 <CardBody className="space-y-3">
-                    <CodeBlock label="HTML" code={installSnippet(origin, experimentId)} />
+                    <CodeBlock label="HTML" code={installSnippet(origin)} />
                     <p className="text-sm text-zinc-500">
-                        Replace the key with an SDK key from <Link href="/settings/keys" className="text-brand-700 hover:underline">API keys</Link>. Use the dev key while testing so results stay separate.
+                        Replace YOUR_SDK_KEY with an SDK key from <Link href="/settings/keys" className="text-brand-700 hover:underline">API keys</Link>. Use the dev key while testing so results stay separate.
                     </p>
                 </CardBody>
             </Card>
