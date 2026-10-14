@@ -18,7 +18,7 @@ export const environments: DocPage = {
             ['Safe to expose?', 'Yes', 'No'],
         ] },
         { type: 'h2', text: 'Creating and revoking keys' },
-        { type: 'p', text: 'Open **API keys** in the sidebar. Each environment has **New SDK key** and **New secret key** buttons. The full key is shown once, right after you create it. Only a SHA-256 hash is stored, so nobody, including platform admins, can see it later. The list shows each key\'s prefix, creation date, last use and status.' },
+        { type: 'p', text: 'Open **API keys** in the sidebar. Each environment has **New SDK key** and **New secret key** buttons. The full key is shown once, right after you create it. It is not stored in readable form, so nobody can see it again later. The list shows each key\'s prefix, creation date, last use and status.' },
         { type: 'p', text: 'Choose **Revoke** to disable a key. Anything using it gets `401` on the next request. Revoking cannot be undone.' },
         { type: 'h3', text: 'Rotating a key' },
         { type: 'list', ordered: true, items: [

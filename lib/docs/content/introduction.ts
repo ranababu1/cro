@@ -37,7 +37,7 @@ export const introduction: DocPage = {
             'Page view and conversion tracking with optional event names and metadata.',
             'Results with conversion rate, lift, Wilson 95% intervals and a two-proportion z-test.',
             'Separate dev, staging and prod environments, each with its own keys.',
-            'An audit log of changes, and a platform admin console for operators.',
+            'An audit log of every change to experiments and keys.',
         ] },
         { type: 'h2', text: 'What is coming later' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1: flicker-free snippet with local bucketing, URL, device and UTM targeting, click and form goals, sample ratio mismatch alerts, a sample size calculator. Phase 2: Bayesian and sequential statistics, feature flags, server SDKs, React and Next.js packages, GA4, GTM and WordPress integrations. Phase 3: visual editor, multi-armed bandits, CUPED, edge delivery.' },
