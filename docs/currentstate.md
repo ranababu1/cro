@@ -1,6 +1,6 @@
 # Current State
 
-As of 2026-10-14 21:45 IST, branch build/sdk-obfuscation (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
+As of 2026-10-14 21:45 IST, branch fix/favicon (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
 ## Stack
