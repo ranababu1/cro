@@ -138,3 +138,42 @@ describe('blog content', () => {
         expect(buildRss([parsePost('x.md', '---\ntitle: "A <b>&"\ndate: 2026-01-01\n---\nbody')])).not.toContain('<b>');
     });
 });
+
+/**
+ * freeabtest.com is a hosted-only service and is never self-hostable or open source. Non-blog pages
+ * (home, pricing, FAQ, docs, roadmap, metadata and OpenGraph in the root layout, header and footer)
+ * must not offer or imply a self-hosted or open-source option, and must not contrast "hosted" with
+ * self-hosting. Blog posts are exempt because they may describe competitors that self-host.
+ */
+const HOSTING_FORBIDDEN: RegExp[] = [
+    /self[- ]?host/i, /self[- ]?managed/i, /self[- ]?install/i, /open[- ]?source/i, /\bOSS\b/, /on[- ]?prem/i,
+    /\bhosted\b/i, /\bhost (it|your own)\b/i, /your own (server|infrastructure|cloud)/i, /run it yourself/i, /source code/i,
+];
+
+describe('hosted-only copy on non-blog pages', () => {
+    const files = [...publicFiles, 'app/layout.tsx', 'public/demo.html'];
+
+    it('page sources, metadata and chrome never imply self-hosting or open source', () => {
+        for (const f of files) {
+            const src = fs.readFileSync(path.join(root, f), 'utf8');
+            for (const re of HOSTING_FORBIDDEN) expect(src, `${f} matches ${re}`).not.toMatch(re);
+        }
+    });
+
+    it('docs pages and search index never imply self-hosting or open source', () => {
+        for (const p of docPages) {
+            const text = [p.title, p.description, ...p.blocks.map(blockText)].join('\n');
+            for (const re of HOSTING_FORBIDDEN) expect(text, `${p.slug} matches ${re}`).not.toMatch(re);
+        }
+        const index = JSON.stringify(buildSearchIndex());
+        for (const re of HOSTING_FORBIDDEN) expect(index, `search index matches ${re}`).not.toMatch(re);
+    });
+
+    it('catches the phrasing it is meant to block', () => {
+        const hit = (t: string) => HOSTING_FORBIDDEN.some((re) => re.test(t));
+        expect(hit('Developers who want hosted, code-first testing')).toBe(true);
+        expect(hit('A self-hosted platform')).toBe(true);
+        expect(hit('Open source and free')).toBe(true);
+        expect(hit('Developers who want code-first testing')).toBe(false);
+    });
+});
