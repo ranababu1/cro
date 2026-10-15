@@ -64,6 +64,20 @@
         }
     }
 
+    // New vs returning: a visitor is returning when their first visit was in an earlier browser session.
+    function visitorType() {
+        try {
+            var cached = sessionStorage.getItem('ab_visitor');
+            if (cached === 'new' || cached === 'returning') return cached;
+            var type = localStorage.getItem('ab_first_seen') ? 'returning' : 'new';
+            if (type === 'new') localStorage.setItem('ab_first_seen', String(Date.now()));
+            sessionStorage.setItem('ab_visitor', type);
+            return type;
+        } catch {
+            return 'new';
+        }
+    }
+
     function send(path, body, keepalive) {
         var url = config.apiUrl + path;
         var payload = JSON.stringify(body);
@@ -141,7 +155,7 @@
             return Promise.resolve({ matched: false, action: 'none' });
         }
         hide();
-        return send('/api/sdk/bootstrap', { url: window.location.href, user_id: getUserId() })
+        return send('/api/sdk/bootstrap', { url: window.location.href, user_id: getUserId(), referrer: document.referrer || '', visitor: visitorType() })
             .then(function (res) {
                 var data = res.body || { matched: false, action: 'none' };
                 if (!res.ok) {

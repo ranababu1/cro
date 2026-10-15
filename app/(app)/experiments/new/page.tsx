@@ -7,6 +7,8 @@ import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Fiel
 import { GOAL_TYPES, GOAL_TYPE_LABELS, describeGoal, type GoalType, type PageMatchType } from '@/lib/goals';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
+import { TargetingFields } from '@/app/components/TargetingFields';
+import { describeTargeting, type Targeting } from '@/lib/targeting';
 
 type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review';
 
@@ -41,6 +43,7 @@ export default function NewExperimentWizard() {
     ]);
     const [goals, setGoals] = useState<GoalDraft[]>([{ name: 'Primary CTA click', type: 'click', selector: '#headerCTA', match_type: 'equals', is_primary: true }]);
     const [traffic, setTraffic] = useState(100);
+    const [targeting, setTargeting] = useState<Targeting>({});
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const [newHost, setNewHost] = useState('');
@@ -117,6 +120,7 @@ export default function NewExperimentWizard() {
             name: name || 'Untitled test',
             control_url: controlUrl,
             traffic_allocation: traffic,
+            targeting,
             variations: vars,
             goals,
         };
@@ -283,10 +287,11 @@ export default function NewExperimentWizard() {
             {step === 'traffic' && (
                 <Card>
                     <CardHeader title="Traffic" description="Share of visitors who enter the test. The rest see the control page and are not counted." />
-                    <CardBody>
+                    <CardBody className="space-y-6">
                         <Field label={`Traffic allocation: ${traffic}%`}>
                             {(id) => <input id={id} type="range" min={0} max={100} step={5} value={traffic} onChange={(e) => setTraffic(Number(e.target.value))} className="w-full accent-brand-600" />}
                         </Field>
+                        <TargetingFields value={targeting} onChange={setTargeting} />
                     </CardBody>
                 </Card>
             )}
@@ -301,6 +306,7 @@ export default function NewExperimentWizard() {
                             <p><span className="font-medium text-zinc-900">Variations:</span> {vars.filter((v) => !v.is_control).map((v) => `${v.name} (${v.weight}%) → ${v.url}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Goals:</span> {goals.map((g) => `${g.name} (${GOAL_TYPE_LABELS[g.type]}: ${describeGoal(g)})${g.is_primary ? ' (primary)' : ''}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Traffic:</span> {traffic}%</p>
+                            <p><span className="font-medium text-zinc-900">Who can enter:</span> {describeTargeting(targeting)}</p>
                         </CardBody>
                     </Card>
                     <Card>

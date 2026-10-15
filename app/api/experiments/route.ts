@@ -8,6 +8,7 @@ import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { maxVariationUrlsForPlan, upgradeHintForVariations } from '@/lib/plans';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
+import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 export async function GET(request: NextRequest) {
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
                 status: 'draft',
                 traffic_allocation: body.traffic_allocation ?? 100,
                 control_url: normalizePageUrl(body.control_url),
+                targeting: serializeTargeting(body.targeting),
             },
             body.variations.map((v) => ({ ...v, url: normalizePageUrl(v.url) })),
             body.goals,

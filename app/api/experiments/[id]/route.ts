@@ -5,6 +5,7 @@ import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
 import { checkExperimentStartQuota } from '@/lib/quotas';
+import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 type Params = { params: Promise<{ id: string }> };
@@ -46,7 +47,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
         const parsed = updateExperimentSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-        const updates: Parameters<typeof db.updateExperiment>[1] = { ...parsed.data };
+        const { targeting, ...rest } = parsed.data;
+        const updates: Parameters<typeof db.updateExperiment>[1] = { ...rest };
+        // Targeting applies to new visitors only; people already in the test keep their version.
+        if (targeting !== undefined) updates.targeting = serializeTargeting(targeting);
 
         if (updates.status && updates.status !== experiment.status) {
             if (!VALID_TRANSITIONS[experiment.status].includes(updates.status)) {

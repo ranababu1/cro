@@ -6,7 +6,7 @@ Internal numbering below follows the approved plan, where "Phase 1" = public Pha
 
 ## Status of the approved Phase 1 (public Phase 2)
 - [x] Page reach, form submit and custom event goals
-- [ ] Targeting: device, UTM, referrer, new vs returning
+- [x] Targeting: device, UTM, referrer, new vs returning
 - [ ] Edit running tests safely (weights, pause variation, add goal)
 - [ ] Sample ratio mismatch warning
 - [ ] Public share links for results
