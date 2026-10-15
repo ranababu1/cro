@@ -126,10 +126,10 @@ describe.each([
         btn.click();
         await new Promise((r) => setTimeout(r, 20));
         const trackCalls = page.fetchMock.mock.calls.filter((c) => String(c[0]).includes('/api/track'));
-        const conversions = trackCalls.filter((c) => {
+        const conversions = trackCalls.flatMap((c) => {
             const body = JSON.parse(String(c[1]?.body || '{}'));
-            return body.event_type === 'conversion' && body.goal_id === 'gol_1';
-        });
+            return (body.events || [body]) as Array<{ event_type: string; goal_id?: string }>;
+        }).filter((e) => e.event_type === 'conversion' && e.goal_id === 'gol_1');
         expect(conversions.length).toBe(1);
     });
 });

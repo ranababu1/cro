@@ -107,6 +107,9 @@ export const trackSchema = z.object({
     metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
+/** Batched events from the SDK (sendBeacon). */
+export const trackBatchSchema = z.object({ events: z.array(trackSchema).min(1).max(50) });
+
 export const createApiKeySchema = z.object({
     environment_id: id,
     type: z.enum(['sdk', 'secret']),

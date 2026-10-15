@@ -42,6 +42,8 @@ function obfuscate(deadCodeThreshold) {
             '^JSON$',
             '^Promise$',
             '^setTimeout$',
+            '^Blob$',
+            '^encodeURIComponent$',
             '^clearTimeout$',
         ],
         stringArray: true,

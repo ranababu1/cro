@@ -2,9 +2,11 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
-import { trackSchema, formatZodError } from '@/lib/validation';
+import { trackSchema, trackBatchSchema, formatZodError } from '@/lib/validation';
 import { hostFromRequestHeaders, isHostAllowed } from '@/lib/domains';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
+import type { Event } from '@/lib/types';
+import type { z } from 'zod';
 
 const MAX_METADATA_BYTES = 4096;
 
@@ -12,6 +14,39 @@ export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
 }
 
+type TrackBody = z.infer<typeof trackSchema>;
+type Outcome = { status: number; body: Record<string, unknown>; event?: Omit<Event, 'id' | 'created_at'> };
+
+async function check(body: TrackBody, projectId: string, environmentId: string, seen: Set<string>): Promise<Outcome> {
+    const metadata = body.metadata ? JSON.stringify(body.metadata) : null;
+    if (metadata && metadata.length > MAX_METADATA_BYTES) return { status: 400, body: { error: `metadata must be under ${MAX_METADATA_BYTES} bytes` } };
+    const config = await db.getExperimentConfig(body.experiment_id);
+    if (!config || config.experiment.project_id !== projectId) return { status: 404, body: { error: 'Experiment not found' } };
+    if (!config.variations.some((v) => v.id === body.variation_id)) return { status: 404, body: { error: 'Variation not found' } };
+    if (body.event_type === 'conversion' && body.goal_id) {
+        if (!config.goals.some((g) => g.id === body.goal_id)) return { status: 404, body: { error: 'Goal not found' } };
+        // Dedupe: one conversion per visitor per goal (also within one batch).
+        const key = `${body.experiment_id}:${body.user_id}:${body.goal_id}`;
+        if (seen.has(key) || (await db.hasConversion(body.experiment_id, body.user_id, body.goal_id))) return { status: 200, body: { success: true, deduped: true } };
+        seen.add(key);
+    }
+    return {
+        status: 201,
+        body: { success: true },
+        event: {
+            experiment_id: body.experiment_id,
+            variation_id: body.variation_id,
+            environment_id: environmentId,
+            user_id: body.user_id,
+            event_type: body.event_type,
+            event_name: body.event_name ?? null,
+            goal_id: body.goal_id ?? null,
+            metadata,
+        },
+    };
+}
+
+/** Accepts one event, or { events: [...] } from the SDK's batched sendBeacon. Batches insert in one statement. */
 export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
@@ -19,63 +54,41 @@ export async function POST(request: NextRequest) {
 
         const hosts = await db.getDomainHosts(auth.ctx.projectId);
         const reqHost = hostFromRequestHeaders(request.headers.get('origin'), request.headers.get('referer'));
-        if (hosts.length === 0 || (reqHost && !isHostAllowed(reqHost, hosts))) {
-            // Also allow when Origin is missing but we still have a key (server tests); still require domains configured.
-            if (hosts.length === 0) return sdkJson({ error: 'No domains registered for this project' }, 403);
-            if (reqHost && !isHostAllowed(reqHost, hosts)) return sdkJson({ error: 'Domain not allowed' }, 403);
-        }
+        if (hosts.length === 0) return sdkJson({ error: 'No domains registered for this project' }, 403);
+        if (reqHost && !isHostAllowed(reqHost, hosts)) return sdkJson({ error: 'Domain not allowed' }, 403);
 
         if ((await getPageviewStatus(auth.ctx.orgId)).paused) return sdkJson({ success: true, paused: true }, 202);
-        const parsed = trackSchema.safeParse(await request.json().catch(() => null));
-        if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
-        const body = parsed.data;
-
-        const metadata = body.metadata ? JSON.stringify(body.metadata) : null;
-        if (metadata && metadata.length > MAX_METADATA_BYTES) {
-            return sdkJson({ error: `metadata must be under ${MAX_METADATA_BYTES} bytes` }, 400);
-        }
-
-        const experiment = await db.getExperiment(body.experiment_id);
-        if (!experiment || experiment.project_id !== auth.ctx.projectId) {
-            return sdkJson({ error: 'Experiment not found' }, 404);
-        }
-
-        const variations = await db.getVariations(body.experiment_id);
-        if (!variations.some((v) => v.id === body.variation_id)) {
-            return sdkJson({ error: 'Variation not found' }, 404);
-        }
-
-        if (body.event_type === 'conversion' && body.goal_id) {
-            const goals = await db.getGoals(body.experiment_id);
-            if (!goals.some((g) => g.id === body.goal_id)) {
-                return sdkJson({ error: 'Goal not found' }, 404);
-            }
-            // Dedupe: one conversion per visitor per goal.
-            if (await db.hasConversion(body.experiment_id, body.user_id, body.goal_id)) {
-                return sdkJson({ success: true, deduped: true }, 200);
-            }
-        }
-
-        await db.createEvent({
-            experiment_id: body.experiment_id,
-            variation_id: body.variation_id,
-            environment_id: auth.ctx.environmentId,
-            user_id: body.user_id,
-            event_type: body.event_type,
-            event_name: body.event_name ?? null,
-            goal_id: body.goal_id ?? null,
-            metadata,
-        });
-
-        const scope = { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, experimentId: body.experiment_id };
-        if (body.event_type === 'conversion') {
-            await bumpMetric(METRICS.sdk_goal, scope);
-            await bumpMetric(METRICS.conversions, scope);
+        const raw = await request.json().catch(() => null);
+        const isBatch = !!raw && typeof raw === 'object' && Array.isArray((raw as { events?: unknown }).events);
+        let items: TrackBody[];
+        if (isBatch) {
+            const parsed = trackBatchSchema.safeParse(raw);
+            if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
+            items = parsed.data.events;
         } else {
-            await bumpMetric(METRICS.sdk_exposure, scope);
+            const parsed = trackSchema.safeParse(raw);
+            if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
+            items = [parsed.data];
         }
 
-        return sdkJson({ success: true }, 201);
+        const seen = new Set<string>();
+        const outcomes: Outcome[] = [];
+        for (const item of items) outcomes.push(await check(item, auth.ctx.projectId, auth.ctx.environmentId, seen));
+        const events = outcomes.flatMap((o) => (o.event ? [o.event] : []));
+        await db.createEvents(events);
+
+        for (const e of events) {
+            const scope = { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, experimentId: e.experiment_id };
+            if (e.event_type === 'conversion') {
+                await bumpMetric(METRICS.sdk_goal, scope);
+                await bumpMetric(METRICS.conversions, scope);
+            } else {
+                await bumpMetric(METRICS.sdk_exposure, scope);
+            }
+        }
+
+        if (!isBatch) return sdkJson(outcomes[0].body, outcomes[0].status);
+        return sdkJson({ success: true, accepted: events.length, results: outcomes.map((o) => ({ status: o.status, ...o.body })) }, 200);
     } catch (error) {
         console.error('Failed to track event:', error);
         void bumpMetric(METRICS.errors, {});

@@ -152,6 +152,8 @@ export const events = sqliteTable('events', {
 }, (t) => [
     index('idx_events_experiment_type').on(t.experiment_id, t.event_type),
     index('idx_events_variation').on(t.variation_id),
+    index('idx_events_experiment_user').on(t.experiment_id, t.user_id, t.created_at),
+    index('idx_events_experiment_created').on(t.experiment_id, t.created_at),
 ]);
 
 export const auditLog = sqliteTable('audit_log', {
@@ -211,4 +213,33 @@ export const usageMonthly = sqliteTable('usage_monthly', {
     org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
     month: text('month').notNull(),
     pageviews: integer('pageviews').notNull().default(0),
+    // Distinct visitors enrolled this month, kept in step with org_visitors_monthly.
+    visitors: integer('visitors').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.org_id, t.month] })]);
+
+/** One row per visitor per org per month. Inserting tells us whether the visitor is new this month. */
+export const orgVisitorsMonthly = sqliteTable('org_visitors_monthly', {
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(),
+    user_id: text('user_id').notNull(),
+}, (t) => [primaryKey({ columns: [t.org_id, t.month, t.user_id] })]);
+
+/**
+ * Daily results rollups for closed UTC days. scope is an environment id or '*' for all environments.
+ * bucket: 'v' any event, 't:<event_type>', 'g:<goal_id>' (conversions), 'd' distinct users that day.
+ * For v, t and g buckets, users counts visitors first seen in that bucket on that day, so sums over days are exact distinct counts.
+ */
+export const experimentStatsDaily = sqliteTable('experiment_stats_daily', {
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    scope: text('scope').notNull(),
+    variation_id: text('variation_id').notNull(),
+    day: text('day').notNull(),
+    bucket: text('bucket').notNull(),
+    users: integer('users').notNull().default(0),
+    events: integer('events').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.scope, t.variation_id, t.day, t.bucket] })]);
+
+export const rollupState = sqliteTable('rollup_state', {
+    experiment_id: text('experiment_id').primaryKey().references(() => experiments.id, { onDelete: 'cascade' }),
+    rolled_through: text('rolled_through').notNull(),
+});
