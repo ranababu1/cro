@@ -121,3 +121,6 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Routes: /blog (index, newest first), /blog/[slug] (static, dynamicParams off), /blog/rss.xml (static RSS), /sitemap.xml (core pages plus posts).
 - Posts are dated from frontmatter; a post with a future date still publishes on deploy (no scheduling).
 - tests/publicContent.test.ts checks blog frontmatter, sort order, JSON-LD validity, sanitizing, internal terms and em dashes.
+
+## Public copy rules (2026-10-15)
+- tests/publicCopyMatchesApp.test.ts checks pricing, cards, docs and homepage numbers against lib/plans.ts, bans old variant counts and Bayesian/sequential promises, and requires every pricing Coming soon phase tag to point at a roadmap phase that is not Done.

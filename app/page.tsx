@@ -26,7 +26,7 @@ const testList: { text: string; note?: string }[] = [
     { text: 'Product features' },
     { text: 'Pricing & plans' },
     { text: 'Split URL tests' },
-    { text: 'Advanced targeting', note: '(device, location, referral source: coming soon)' },
+    { text: 'Targeting by device, UTM and referrer' },
 ];
 
 // Verified against the built public/sdk.js (from sdk-src via npm run sdk:build): gzip is about 14504 bytes.

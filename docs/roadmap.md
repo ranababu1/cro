@@ -12,6 +12,8 @@ Special friend allowances in /admin (15 Oct 2026).
 
 Free tier limits and 50 variations on paid plans (15 Oct 2026).
 
+Public pricing, docs and roadmap aligned with enforced limits; Phase 2 marked Done publicly (15 Oct 2026).
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
