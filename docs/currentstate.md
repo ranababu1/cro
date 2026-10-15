@@ -132,3 +132,6 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - bootstrap, assign, track, sdk/event and capture require Origin or Referer on a registered domain; development keys also accept localhost. Missing headers are refused.
 - Abuse attempts are audited as abuse:* (origin logs throttled per org and host hourly) and listed with the ledger at /admin/abuse.
 - No backfill: tests started before this change are not on the ledger.
+
+## Install once copy
+- lib/installCopy.ts INSTALL_ONCE is shown under every InstallSnippet (dashboard, domains, new test wizard, experiment page) and in Quick start and Install guides.
