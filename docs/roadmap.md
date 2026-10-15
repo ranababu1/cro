@@ -4,7 +4,7 @@ Internal. The public /roadmap page shows phase names, features and status only (
 Public numbering: Phase 1 A/B testing core (done), Phase 2 more goals and targeting (in progress), Phase 3 heatmaps, Phase 4 recordings, funnels and visual editor, Phase 5 engagement extras.
 Internal numbering below follows the approved plan, where "Phase 1" = public Phase 2. Scaling work: see docs/scaling.md.
 
-## Status of the approved Phase 1 (public Phase 2)
+## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
 - [x] Edit running tests safely (weights, pause variation, add goal)

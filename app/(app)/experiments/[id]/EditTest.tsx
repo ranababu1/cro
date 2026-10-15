@@ -77,7 +77,6 @@ export function EditTest({ experimentId, variations, targeting, onSaved }: { exp
             </Card>
 
             <Card>
-                <CardHeader title="Who can enter" />
                 <CardBody className="space-y-4">
                     <TargetingFields value={aud} onChange={setAud} />
                     <div className="flex justify-end">
