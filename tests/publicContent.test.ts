@@ -17,7 +17,7 @@ const FORBIDDEN: RegExp[] = [
 
 const root = path.join(__dirname, '..');
 const publicFiles = [
-    'app/page.tsx', 'app/pricing/page.tsx', 'app/roadmap/page.tsx',
+    'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/roadmap/page.tsx',
     ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
@@ -79,8 +79,9 @@ describe('roadmap stays high level', () => {
         }
     });
 
-    it('only the roadmap page talks about phases', () => {
-        for (const f of publicFiles.filter((f) => f !== 'app/roadmap/page.tsx')) {
+    // The pricing page may tag coming-soon features with their phase ("Coming soon, Phase N"). No timelines either way.
+    it('only the roadmap and pricing pages talk about phases', () => {
+        for (const f of publicFiles.filter((f) => f !== 'app/roadmap/page.tsx' && f !== 'app/pricing/page.tsx')) {
             const src = fs.readFileSync(path.join(root, f), 'utf8');
             expect(src, f).not.toMatch(/Phase \d/);
         }
