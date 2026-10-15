@@ -1,3 +1,4 @@
+import { INSTALL_ONCE } from '@/lib/installCopy';
 import type { DocPage } from '../types';
 
 export const installGuides: DocPage = {
@@ -6,6 +7,7 @@ export const installGuides: DocPage = {
     description: 'Add the snippet through Google Tag Manager or on a WordPress site, without editing theme files by hand.',
     group: 'Getting started',
     blocks: [
+        { type: 'p', text: INSTALL_ONCE.replace('<head>', '`<head>`') },
         { type: 'p', text: 'The snippet is one script tag. Copy it from the app (the key is already filled in) and add it to the `<head>` of your control page, every variation page and any page used by a page visit or custom event goal. If you can edit your HTML directly, do that. Otherwise use one of the guides below.' },
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
         { type: 'h2', text: 'Google Tag Manager', id: 'gtm' },

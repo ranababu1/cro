@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CodeBlock } from '@/app/components/ui';
 import { installSnippetHtml } from '@/lib/publicOrigin';
+import { INSTALL_ONCE } from '@/lib/installCopy';
 
 type EnvChoice = 'prod' | 'dev';
 
@@ -65,6 +66,7 @@ export function InstallSnippet({ className }: { className?: string }) {
             <p className="mt-3 text-sm text-zinc-500">
                 Paste this into the &lt;head&gt; of your control page and every variation page. The key is already filled in.
             </p>
+            <p className="mt-1 text-sm text-zinc-600" data-testid="install-once">{INSTALL_ONCE}</p>
         </div>
     );
 }

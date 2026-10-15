@@ -1,3 +1,4 @@
+import { INSTALL_ONCE } from '@/lib/installCopy';
 import type { DocPage } from '../types';
 
 export const quickStart: DocPage = {
@@ -25,6 +26,7 @@ export const quickStart: DocPage = {
         { type: 'p', text: 'When you are signed in, the app shows a ready-to-copy snippet with `https://www.freeabtest.com` and your real public key. No paste step.' },
         { type: 'p', text: 'Put this single line in the `<head>` of the control page and every variation page. Copy it from the app so your key is already in it. Using Google Tag Manager or WordPress? See [Install guides](/docs/install-guides).' },
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
+        { type: 'p', text: INSTALL_ONCE.replace('<head>', '`<head>`') },
         { type: 'p', text: 'That is the only install step. The SDK matches the test by URL, buckets visitors, redirects variation traffic without flicker, records page views, and listens for your click goals.' },
         { type: 'h2', text: '6. Start the test', id: 'start' },
         { type: 'p', text: 'On the review step choose **Start test**, or open the draft and choose **Start experiment**. You can pause, resume and stop from the experiment page.' },
