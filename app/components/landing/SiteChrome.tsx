@@ -33,6 +33,7 @@ export function SiteHeader() {
                     <NavMenu label="Product" items={menus.Product} />
                     <NavMenu label="Use cases" items={menus['Use cases']} />
                     <Link href="/pricing" className="rounded-md px-3 py-2 text-[16px] text-zinc-700 hover:text-zinc-950">Pricing</Link>
+                    <Link href="/blog" className="rounded-md px-3 py-2 text-[16px] text-zinc-700 hover:text-zinc-950">Blog</Link>
                     <NavMenu label="Resources" items={menus.Resources} />
                 </nav>
                 <div className="ml-auto flex items-center gap-4 sm:gap-10 lg:ml-0">
@@ -53,6 +54,7 @@ export function SiteFooter() {
                     <Link href="/#how-it-works" className="hover:text-zinc-900">How it works</Link>
                     <Link href="/pricing" className="hover:text-zinc-900">Pricing</Link>
                     <Link href="/docs" className="hover:text-zinc-900">Docs</Link>
+                    <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
                     <Link href="/roadmap" className="hover:text-zinc-900">Roadmap</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
                     <a href="/demo.html" className="hover:text-zinc-900">Demo page</a>
