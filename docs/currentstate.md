@@ -107,3 +107,11 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 ## Special friends (2026-10-15)
 - `organizations.special_friend` and `custom_allowances` (JSON, `lib/allowances.ts` zod schema, migration 0011). Admin only: PUT `/api/admin/orgs/[id]/allowances`, panel on /admin/orgs/[id], badge and `?filter=special` on /admin. Audited as `admin:special_friend` with before and after.
 - Precedence in `computeEntitlements`: admin member (everything, no caps) > special friend allowance (each set field) > plan. Pageview cap, visitor quota and max variations now come from `limits`. Active experiments, projects and seats are stored and exposed in `limits`; enforcement for them lands with the free-tier limits. `flags` is reserved for future feature flags.
+
+## Blog (2026-10-15)
+
+- File-based markdown blog. Posts live in content/blog/*.md; adding a post only needs a new .md file (slug from frontmatter, else filename).
+- lib/blog.ts parses frontmatter, renders markdown with marked and sanitizes it with sanitize-html (no scripts, event handlers or javascript: links). JSON-LD from article_schema and faq_schema is parsed, re-serialised and escaped before injection.
+- Routes: /blog (index, newest first), /blog/[slug] (static, dynamicParams off), /blog/rss.xml (static RSS), /sitemap.xml (core pages plus posts).
+- Posts are dated from frontmatter; a post with a future date still publishes on deploy (no scheduling).
+- tests/publicContent.test.ts checks blog frontmatter, sort order, JSON-LD validity, sanitizing, internal terms and em dashes.

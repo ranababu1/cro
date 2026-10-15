@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { blockText, buildSearchIndex, docPages } from '@/lib/docs';
+import { buildRss, getAllPosts, ldJson, parsePost, renderMarkdown } from '@/lib/blog';
 
 /**
  * Public pages must not reveal how the service is built or run. Internal setup lives in README and docs/*.md only.
@@ -21,6 +22,7 @@ const publicFiles = [
     ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
+    'app/blog/page.tsx', 'app/blog/[slug]/page.tsx', 'lib/blog.ts',
 ];
 
 describe('public content hides internals', () => {
@@ -89,5 +91,50 @@ describe('roadmap stays high level', () => {
             const text = [p.title, p.description, ...p.blocks.map(blockText)].join('\n');
             expect(text, p.slug).not.toMatch(/Phase \d/);
         }
+    });
+});
+
+/**
+ * Blog posts may name competitors and their features (for example a competitor's self-hosted option),
+ * but must never reveal our own stack, data store, hosting or admin surface.
+ */
+const BLOG_FORBIDDEN = FORBIDDEN.filter((re) => !/self/.test(re.source));
+
+describe('blog content', () => {
+    const posts = getAllPosts();
+
+    it('every post has a title, description, date, slug and valid JSON-LD', () => {
+        expect(posts.length).toBeGreaterThan(0);
+        for (const p of posts) {
+            expect(p.title, p.slug).toBeTruthy();
+            expect(p.description, p.slug).toBeTruthy();
+            expect(p.date, p.slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+            expect(p.slug).toMatch(/^[a-z0-9-]+$/);
+            if (p.articleSchema) expect(JSON.parse(p.articleSchema)['@type']).toBe('BlogPosting');
+            if (p.faqSchema) expect(JSON.parse(p.faqSchema)['@type']).toBe('FAQPage');
+        }
+        expect(new Set(posts.map((p) => p.slug)).size).toBe(posts.length);
+    });
+
+    it('posts are sorted newest first', () => {
+        const dates = posts.map((p) => p.date);
+        expect([...dates].sort().reverse()).toEqual(dates);
+    });
+
+    it('posts contain no internal terms or em dashes', () => {
+        for (const p of posts) {
+            const text = [p.title, p.description, p.markdown, p.articleSchema ?? '', p.faqSchema ?? ''].join('\n');
+            for (const re of BLOG_FORBIDDEN) expect(text, `${p.slug} matches ${re}`).not.toMatch(re);
+            expect(text, `${p.slug} has an em dash`).not.toMatch(/\u2014/);
+        }
+    });
+
+    it('sanitizes markdown HTML and escapes JSON-LD', () => {
+        const html = renderMarkdown('hi <script>alert(1)</script> <img src=x onerror=alert(1)> [x](javascript:alert(1))');
+        expect(html).not.toMatch(/<script|onerror|javascript:/i);
+        const ld = ldJson(JSON.stringify({ a: '</script><script>alert(1)</script>' }));
+        expect(ld).not.toContain('<');
+        expect(JSON.parse(ld).a).toBe('</script><script>alert(1)</script>');
+        expect(buildRss([parsePost('x.md', '---\ntitle: "A <b>&"\ndate: 2026-01-01\n---\nbody')])).not.toContain('<b>');
     });
 });
