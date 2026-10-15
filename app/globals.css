@@ -82,3 +82,13 @@
 .blog-prose th { background: #eff6ff; color: #0b1630; font-weight: 600; text-align: left; }
 .blog-prose th, .blog-prose td { border: 1px solid #e4e4e7; padding: .6rem .8rem; vertical-align: top; }
 .blog-prose code { background: #f0fdfa; color: #0f766e; border-radius: 4px; padding: .1rem .35rem; font-size: .9em; }
+
+/* Mobile menus: subtle entrance, none when reduced motion is requested */
+@media (prefers-reduced-motion: no-preference) {
+  .mnav-fade { animation: mnav-fade .18s ease-out; }
+  .mnav-slide { animation: mnav-slide .2s ease-out; }
+  .drawer-slide { animation: drawer-slide .2s ease-out; }
+}
+@keyframes mnav-fade { from { opacity: 0; } }
+@keyframes mnav-slide { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes drawer-slide { from { transform: translateX(-100%); } }
