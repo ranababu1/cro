@@ -5,7 +5,7 @@ import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { z } from 'zod';
 import { formatZodError } from '@/lib/validation';
-import { checkVisitorQuota } from '@/lib/quotas';
+import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 
 const assignBody = z.object({
@@ -73,12 +73,12 @@ export async function POST(request: NextRequest) {
         }
 
         await bumpMetric(METRICS.unique_visitors, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, experimentId });
-        await db.createAssignment({
+        if (await db.createAssignment({
             experiment_id: experimentId,
             variation_id: assigned.id,
             user_id: userId,
             environment_id: auth.ctx.environmentId,
-        });
+        })) await recordNewVisitor(auth.ctx.orgId, userId);
 
         return sdkJson({
             experiment_id: experimentId,

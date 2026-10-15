@@ -4,7 +4,7 @@ import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/request
 import { bootstrapSchema, formatZodError } from '@/lib/validation';
 import { hostFromRequestHeaders, isHostAllowed, normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
-import { checkVisitorQuota } from '@/lib/quotas';
+import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { recordGoalHits } from '@/lib/goalHits';
@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
             if (!assigned) {
                 return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'outside_traffic', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);
             }
-            await db.createAssignment({
+            if (await db.createAssignment({
                 experiment_id: experiment.id,
                 variation_id: assigned.id,
                 user_id,
                 environment_id: auth.ctx.environmentId,
-            });
+            })) await recordNewVisitor(auth.ctx.orgId, user_id);
             variation = assigned;
             assignment = { id: '', experiment_id: experiment.id, variation_id: assigned.id, user_id, environment_id: auth.ctx.environmentId, assigned_at: '' };
         }

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { after } from 'next/server';
 import { db } from './db';
 import { generateId } from './ids';
 
@@ -50,6 +51,50 @@ interface BumpOpts {
     by?: number;
 }
 
+/**
+ * Counter increments are buffered in memory and written in one batch: after the response is sent
+ * (Next.js after()) or, outside a request, within FLUSH_MS. Repeated bumps of the same row merge
+ * into one upsert. Set TELEMETRY_SYNC=1 to write immediately (tests).
+ */
+const FLUSH_MS = 2000;
+type Row = { day: string; scope_type: ScopeType; scope_id: string; metric: string; value: number };
+const buffer = new Map<string, Row>();
+let timer: ReturnType<typeof setTimeout> | null = null;
+let scheduledAfter = false;
+
+export function pendingTelemetry(): number {
+    return buffer.size;
+}
+
+export async function flushTelemetry(): Promise<void> {
+    scheduledAfter = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (!buffer.size) return;
+    const rows = [...buffer.values()];
+    buffer.clear();
+    try {
+        await db.bumpTelemetryBatch(rows);
+    } catch (err) {
+        console.error('telemetry flush failed', err);
+    }
+}
+
+function scheduleFlush(): void {
+    if (!scheduledAfter) {
+        try {
+            after(flushTelemetry);
+            scheduledAfter = true;
+            return;
+        } catch {
+            // Not inside a request: fall back to a timer.
+        }
+    }
+    if (!timer && !scheduledAfter) {
+        timer = setTimeout(() => { timer = null; void flushTelemetry(); }, FLUSH_MS);
+        (timer as { unref?: () => void }).unref?.();
+    }
+}
+
 /** Increment daily counters for platform and optional org/user/project/experiment scopes. */
 export async function bumpMetric(metric: MetricName, opts: BumpOpts = {}): Promise<void> {
     const day = opts.day ?? utcDay();
@@ -59,7 +104,14 @@ export async function bumpMetric(metric: MetricName, opts: BumpOpts = {}): Promi
     if (opts.userId) scopes.push({ type: 'user', id: opts.userId });
     if (opts.projectId) scopes.push({ type: 'project', id: opts.projectId });
     if (opts.experimentId) scopes.push({ type: 'experiment', id: opts.experimentId });
-    await Promise.all(scopes.map((s) => db.bumpTelemetry(day, s.type, s.id, metric, by)));
+    for (const sc of scopes) {
+        const key = `${day}|${sc.type}|${sc.id}|${metric}`;
+        const cur = buffer.get(key);
+        if (cur) cur.value += by;
+        else buffer.set(key, { day, scope_type: sc.type, scope_id: sc.id, metric, value: by });
+    }
+    if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
+    scheduleFlush();
 }
 
 interface ProductEventInput {

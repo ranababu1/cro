@@ -59,6 +59,8 @@ SDK: about 14.5 KB gzipped, served as a static file from the Vercel CDN, so deli
 
 ## Fixes in order
 
+Status 15 Oct 2026: fixes 1 to 5 are done (see docs/currentstate.md, Scaling fixes).
+
 1. Cache config (low effort, big win). Cache key lookup, domains and running experiment config in function memory for 30 to 60 seconds, invalidated on edit. Cuts 5 to 7 reads per request.
 2. Usage counters instead of scans. Keep a monthly counter row per org (visitors, pageviews) updated with an upsert, and check quota against it with a short cache. Phase 1 pageview quotas will be built this way.
 3. Rollup tables for results. Daily `experiment_stats_daily (experiment, variation, goal, env, day, visitors, conversions)` maintained on insert or by a cron every few minutes. Results read rollups plus today's raw rows. Distinct visitor counting via first-seen markers (the assignments table already gives one row per visitor per experiment).

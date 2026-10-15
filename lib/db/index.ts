@@ -3,6 +3,8 @@ import { getDb } from './client';
 import * as s from './schema';
 import type { EnvironmentKey } from './schema';
 import { generateId } from '../ids';
+import { cached, clearConfigCache } from '../configCache';
+import { rolledEventStats, rolledLiveCounts } from '../rollups';
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 
@@ -203,6 +205,7 @@ export const db = {
     },
 
     async revokeApiKey(keyId: string): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         await d.update(s.apiKeys).set({ revoked_at: nowIso() }).where(and(eq(s.apiKeys.id, keyId), isNull(s.apiKeys.revoked_at)));
     },
@@ -210,7 +213,7 @@ export const db = {
     /** Looks up an active key by its plaintext value. Returns null for unknown or revoked keys. */
     async authenticateApiKey(plaintext: string): Promise<SdkKeyContext | null> {
         const d = await getDb();
-        const rows = await d
+        const rows = await cached(`key:${hashApiKey(plaintext)}`, () => d
             .select({
                 keyId: s.apiKeys.id,
                 type: s.apiKeys.type,
@@ -227,12 +230,14 @@ export const db = {
             .innerJoin(s.projects, eq(s.projects.id, s.environments.project_id))
             .innerJoin(s.organizations, eq(s.organizations.id, s.projects.org_id))
             .where(eq(s.apiKeys.key_hash, hashApiKey(plaintext)))
-            .limit(1);
+            .limit(1));
         const row = rows[0];
         if (!row || row.revokedAt) return null;
         // Write last_used_at at most once a minute per key to keep hot paths cheap.
         if (!row.lastUsedAt || Date.now() - Date.parse(row.lastUsedAt) > 60_000) {
-            await d.update(s.apiKeys).set({ last_used_at: nowIso() }).where(eq(s.apiKeys.id, row.keyId));
+            const at = nowIso();
+            row.lastUsedAt = at;
+            await d.update(s.apiKeys).set({ last_used_at: at }).where(eq(s.apiKeys.id, row.keyId));
         }
         return {
             keyId: row.keyId,
@@ -262,6 +267,7 @@ export const db = {
         variations: Array<Pick<Variation, 'name' | 'weight' | 'is_control'> & { description?: string | null; url?: string | null }>,
         goals: Array<Pick<Goal, 'name' | 'selector' | 'is_primary'> & { type?: Goal['type']; match_type?: Goal['match_type'] }> = [],
     ): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         await d.insert(s.experiments).values({ ...experiment, description: experiment.description ?? null, control_url: experiment.control_url ?? null });
         await d.insert(s.variations).values(
@@ -294,11 +300,13 @@ export const db = {
         id: string,
         updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at'>>,
     ): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         await d.update(s.experiments).set({ ...updates, updated_at: nowIso() }).where(eq(s.experiments.id, id));
     },
 
     async deleteExperiment(id: string): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         await d.delete(s.experiments).where(eq(s.experiments.id, id));
     },
@@ -311,6 +319,7 @@ export const db = {
 
     /** Updates weights and paused flags of existing variations in one batch. */
     async updateVariationAllocation(experimentId: string, rows: Array<{ id: string; weight: number; paused: boolean }>): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         for (const r of rows) {
             await d.update(s.variations).set({ weight: r.weight, paused: r.paused }).where(and(eq(s.variations.id, r.id), eq(s.variations.experiment_id, experimentId)));
@@ -319,6 +328,7 @@ export const db = {
     },
 
     async addGoal(experimentId: string, g: Pick<Goal, 'name' | 'selector' | 'is_primary' | 'type' | 'match_type'>): Promise<Goal> {
+        clearConfigCache();
         const d = await getDb();
         const id = generateId('gol');
         if (g.is_primary) await d.update(s.goals).set({ is_primary: false }).where(eq(s.goals.experiment_id, experimentId));
@@ -346,15 +356,32 @@ export const db = {
         return new Map(rows.map((r) => [r.variation_id, Number(r.n)]));
     },
 
-    async createAssignment(a: { experiment_id: string; variation_id: string; user_id: string; environment_id?: string | null }): Promise<void> {
+    /** Returns true when a new assignment row was written. */
+    async createAssignment(a: { experiment_id: string; variation_id: string; user_id: string; environment_id?: string | null }): Promise<boolean> {
         const d = await getDb();
-        await d
+        const rows = await d
             .insert(s.assignments)
             .values({ id: generateId('asn'), ...a, environment_id: a.environment_id ?? null })
-            .onConflictDoNothing();
+            .onConflictDoNothing()
+            .returning({ id: s.assignments.id });
+        return rows.length > 0;
     },
 
     // Events
+    /** Inserts many events in one statement. */
+    async createEvents(list: Array<Omit<Event, 'id' | 'created_at'>>): Promise<void> {
+        if (!list.length) return;
+        const d = await getDb();
+        await d.insert(s.events).values(list.map((e) => ({
+            id: generateId('evt'),
+            ...e,
+            environment_id: e.environment_id ?? null,
+            event_name: e.event_name ?? null,
+            goal_id: e.goal_id ?? null,
+            metadata: e.metadata ?? null,
+        })));
+    },
+
     async createEvent(e: Omit<Event, 'id' | 'created_at'>): Promise<void> {
         const d = await getDb();
         await d.insert(s.events).values({
@@ -368,7 +395,13 @@ export const db = {
     },
 
 
+    /** Results counts from daily rollups plus today's raw events. Matches getEventStatsRaw exactly. */
     async getEventStats(experimentId: string, environmentId?: string, goalId?: string | null) {
+        return rolledEventStats(experimentId, environmentId, goalId);
+    },
+
+    /** Reference query over raw events. Kept for tests and as a fallback. */
+    async getEventStatsRaw(experimentId: string, environmentId?: string, goalId?: string | null) {
         const d = await getDb();
         const parts = [eq(s.events.experiment_id, experimentId)];
         if (environmentId) parts.push(eq(s.events.environment_id, environmentId));
@@ -415,6 +448,11 @@ export const db = {
 
     /** Raw counts behind the live stats view: per variation/event type, per goal/variation, and per day/variation. */
     async getLiveCounts(experimentId: string, environmentId?: string) {
+        return rolledLiveCounts(experimentId, environmentId);
+    },
+
+    /** Reference query over raw events. Kept for tests and as a fallback. */
+    async getLiveCountsRaw(experimentId: string, environmentId?: string) {
         const d = await getDb();
         const base = environmentId
             ? and(eq(s.events.experiment_id, experimentId), eq(s.events.environment_id, environmentId))
@@ -474,11 +512,27 @@ export const db = {
 
     /** Running experiments in a project with their goals, for page-visit and custom-event goal matching. */
     async getRunningExperimentGoals(projectId: string): Promise<Array<{ experiment: Experiment; goals: Goal[] }>> {
-        const d = await getDb();
-        const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
-        const out: Array<{ experiment: Experiment; goals: Goal[] }> = [];
-        for (const experiment of experiments) out.push({ experiment, goals: await this.getGoals(experiment.id) });
-        return out;
+        return (await this.getRunningConfig(projectId)).map(({ experiment, goals }) => ({ experiment, goals }));
+    },
+
+    /** Running experiments with variations and goals, cached briefly for the SDK hot path. */
+    async getRunningConfig(projectId: string): Promise<Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }>> {
+        return cached(`run:${projectId}`, async () => {
+            const d = await getDb();
+            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
+            const out: Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }> = [];
+            for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id), goals: await this.getGoals(experiment.id) });
+            return out;
+        });
+    },
+
+    /** Experiment, variations and goals for the track endpoint, cached briefly. */
+    async getExperimentConfig(experimentId: string): Promise<{ experiment: Experiment; variations: Variation[]; goals: Goal[] } | null> {
+        return cached(`exp:${experimentId}`, async () => {
+            const experiment = await this.getExperiment(experimentId);
+            if (!experiment) return null;
+            return { experiment, variations: await this.getVariations(experimentId), goals: await this.getGoals(experimentId) };
+        });
     },
 
     // Share links
@@ -525,6 +579,7 @@ export const db = {
     },
 
     async addDomain(projectId: string, host: string): Promise<ProjectDomain> {
+        clearConfigCache();
         const d = await getDb();
         const id = generateId('dom');
         await d.insert(s.projectDomains).values({ id, project_id: projectId, host });
@@ -532,12 +587,13 @@ export const db = {
     },
 
     async deleteDomain(domainId: string): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         await d.delete(s.projectDomains).where(eq(s.projectDomains.id, domainId));
     },
 
     async getDomainHosts(projectId: string): Promise<string[]> {
-        return (await this.listDomains(projectId)).map((d) => d.host);
+        return cached(`dom:${projectId}`, async () => (await this.listDomains(projectId)).map((d) => d.host));
     },
 
     /** Running experiments for a project whose control or variation URL matches the page URL. */
@@ -545,16 +601,9 @@ export const db = {
         const { normalizePageUrl, urlsMatch } = await import('../domains');
         const target = normalizePageUrl(pageUrl);
         if (!target) return null;
-        const d = await getDb();
-        const experiments = await d
-            .select()
-            .from(s.experiments)
-            .where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
-        for (const experiment of experiments) {
-            const variations = await this.getVariations(experiment.id);
+        for (const { experiment, variations, goals } of await this.getRunningConfig(projectId)) {
             const urls = [experiment.control_url, ...variations.map((v) => v.url)].filter(Boolean) as string[];
             if (urls.some((u) => urlsMatch(u, pageUrl))) {
-                const goals = await this.getGoals(experiment.id);
                 return { experiment, variations, goals };
             }
         }
@@ -569,6 +618,7 @@ export const db = {
     },
 
     async updateOrganization(orgId: string, update: OrgUpdate): Promise<void> {
+        clearConfigCache();
         const d = await getDb();
         const values: Partial<typeof s.organizations.$inferInsert> = { ...update };
         if (update.status === 'suspended') values.suspended_at = nowIso();
@@ -631,6 +681,24 @@ export const db = {
             .onConflictDoUpdate({ target: [s.usageMonthly.org_id, s.usageMonthly.month], set: { pageviews: sql`${s.usageMonthly.pageviews} + ${by}` } });
     },
 
+    /** Marks a visitor as seen this month. Returns true (and bumps the counter) the first time only. */
+    async addMonthlyVisitor(orgId: string, month: string, userId: string): Promise<boolean> {
+        const d = await getDb();
+        const rows = await d.insert(s.orgVisitorsMonthly).values({ org_id: orgId, month, user_id: userId }).onConflictDoNothing().returning({ u: s.orgVisitorsMonthly.user_id });
+        if (!rows.length) return false;
+        await d
+            .insert(s.usageMonthly)
+            .values({ org_id: orgId, month, pageviews: 0, visitors: 1 })
+            .onConflictDoUpdate({ target: [s.usageMonthly.org_id, s.usageMonthly.month], set: { visitors: sql`${s.usageMonthly.visitors} + 1` } });
+        return true;
+    },
+
+    async getMonthlyVisitors(orgId: string, month: string): Promise<number> {
+        const d = await getDb();
+        const row = await d.query.usageMonthly.findFirst({ where: and(eq(s.usageMonthly.org_id, orgId), eq(s.usageMonthly.month, month)) });
+        return row?.visitors ?? 0;
+    },
+
     async getOrgMembers(orgId: string) {
         const d = await getDb();
         return d
@@ -674,6 +742,20 @@ export const db = {
                 target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
                 set: { value: sql`${s.telemetryDaily.value} + ${by}` },
             });
+    },
+
+    /** Applies many counter increments in one round trip. */
+    async bumpTelemetryBatch(rows: Array<{ day: string; scope_type: 'platform' | 'org' | 'user' | 'project' | 'experiment'; scope_id: string; metric: string; value: number }>): Promise<void> {
+        if (!rows.length) return;
+        const d = await getDb();
+        const stmts = rows.map((r) => d
+            .insert(s.telemetryDaily)
+            .values(r)
+            .onConflictDoUpdate({
+                target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
+                set: { value: sql`${s.telemetryDaily.value} + ${r.value}` },
+            }));
+        await d.batch(stmts as unknown as [typeof stmts[number], ...typeof stmts]);
     },
 
     async getTelemetryRange(opts: {

@@ -93,16 +93,43 @@
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, body: j }; }); });
     }
 
-    function track(experimentId, variationId, eventType, goalId, eventName) {
-        return send('/api/track', {
-            experiment_id: experimentId,
-            variation_id: variationId,
-            user_id: getUserId(),
-            event_type: eventType,
-            goal_id: goalId,
-            event_name: eventName,
-        }, eventType === 'conversion');
+    // Events are queued and sent together: page views within BATCH_MS, conversions right away,
+    // and anything left when the page is hidden goes out with navigator.sendBeacon.
+    var BATCH_MS = 1000;
+    var MAX_BATCH = 50;
+    var queue = [];
+    var flushTimer = null;
+
+    function flush(useBeacon) {
+        if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+        if (!queue.length) return Promise.resolve();
+        var batch = queue.splice(0, MAX_BATCH);
+        var body = { events: batch };
+        var sent = false;
+        if (useBeacon && navigator.sendBeacon) {
+            try {
+                var url = config.apiUrl + '/api/track?key=' + encodeURIComponent(config.apiKey);
+                sent = navigator.sendBeacon(url, new Blob([JSON.stringify(body)], { type: 'text/plain' }));
+            } catch { sent = false; }
+        }
+        var p = sent ? Promise.resolve() : send('/api/track', body, true).catch(function () { return {}; });
+        if (queue.length) return p.then(function () { return flush(useBeacon); });
+        return p;
     }
+
+    function track(experimentId, variationId, eventType, goalId, eventName) {
+        var ev = { experiment_id: experimentId, variation_id: variationId, user_id: getUserId(), event_type: eventType };
+        if (goalId) ev.goal_id = goalId;
+        if (eventName) ev.event_name = eventName;
+        queue.push(ev);
+        if (eventType === 'conversion' || queue.length >= MAX_BATCH) return flush(false);
+        if (!flushTimer) flushTimer = setTimeout(function () { flush(false); }, BATCH_MS);
+        return Promise.resolve();
+    }
+
+    function onHide() { flush(true); }
+    window.addEventListener('pagehide', onHide);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') onHide(); });
 
     function bindGoals(data) {
         if (goalsBound || !data.goals || !data.goals.length || !data.variation_id) return;

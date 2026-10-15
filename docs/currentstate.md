@@ -92,3 +92,10 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Share links: share_links table (0008), /api/experiments/[id]/share (GET/POST/DELETE), public page app/share/[token] using lib/shareView.ts. Covered by publicContent tests.
 - Install guides doc page (lib/docs/content/installGuides.ts): GTM and WordPress.
 - Pageview quotas (lib/pageviewQuota.ts): usage_monthly counter + organizations.monthly_pageview_limit (0009). Free 25k, paid 500k (lib/plans.ts). Paused at cap (bootstrap reason quota_paused; track/event 202 paused). Platform admin members unlimited. Overview usage card (app/components/PageviewUsage.tsx), admin cap field.
+
+## Scaling fixes (2026-10-15)
+- Config cache: `lib/configCache.ts`, 45 s TTL per instance for key lookups, domain hosts, running test config and track config. Any write through `lib/db` clears the instance cache; other instances refresh within the TTL (so a revoked key can work for up to 45 s on other instances).
+- Visitor quota: `usage_monthly.visitors` counter plus `org_visitors_monthly` (org, month, visitor) first-seen rows, backfilled from assignments in migration 0010. `checkVisitorQuota` reads one row, cached 10 s.
+- Results: `lib/rollups.ts`. `experiment_stats_daily` holds closed UTC days per scope (env id or *) and bucket (v any event, t:type, g:goal, d daily distinct). Visitors count on their first-seen day, so sums equal raw distinct counts. `rollup_state` tracks the last closed day. Rollups run lazily on read (this is also the backfill). Raw reference queries remain as `db.getEventStatsRaw` and `db.getLiveCountsRaw`; tests assert equality. Caveat: deleting a goal after its days are rolled up keeps the old goal rows in history.
+- Telemetry: `bumpMetric` buffers and flushes in one batch via Next.js `after()` (timer fallback). `TELEMETRY_SYNC=1` writes immediately (tests).
+- SDK: events queued, page views sent within 1 s, conversions immediately, rest via sendBeacon (text/plain, key in query) on page hide. `/api/track` accepts `{ events: [...] }` (max 50) and inserts in one statement.
