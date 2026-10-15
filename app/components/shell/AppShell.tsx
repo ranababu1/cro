@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useOverlay } from '../overlay';
 import { Logo } from '../ui/Logo';
 import { cn } from '../ui/cn';
 import { setProjectCookie } from '@/lib/currentProject';
@@ -164,6 +165,10 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
 
 export default function AppShell({ user, projects, currentProjectId, isPlatformAdmin, children }: AppShellProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const closeDrawer = useCallback(() => setMobileOpen(false), []);
+    const drawer = useRef<HTMLElement>(null);
+    const drawerTrigger = useRef<HTMLButtonElement>(null);
+    useOverlay(mobileOpen, closeDrawer, drawer, drawerTrigger);
     return (
         <div className="min-h-screen bg-zinc-50/50">
             {/* Desktop sidebar */}
@@ -177,11 +182,11 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
             {/* Mobile drawer */}
             {mobileOpen && (
                 <div className="fixed inset-0 z-40 lg:hidden">
-                    <div className="absolute inset-0 bg-zinc-900/30" onClick={() => setMobileOpen(false)} />
-                    <aside className="absolute inset-y-0 left-0 flex w-64 flex-col bg-white shadow-pop">
+                    <div aria-hidden data-overlay-backdrop onClick={closeDrawer} className="mnav-fade absolute inset-0 bg-zinc-900/30" />
+                    <aside ref={drawer} id="app-drawer" role="dialog" aria-modal="true" aria-label="Navigation" className="drawer-slide absolute inset-y-0 left-0 flex w-64 max-w-[85vw] flex-col overflow-y-auto bg-white shadow-pop">
                         <div className="flex h-14 items-center justify-between px-5">
                             <Logo href="/dashboard" />
-                            <button aria-label="Close menu" onClick={() => setMobileOpen(false)} className="rounded p-1 text-zinc-500 hover:bg-zinc-100">
+                            <button type="button" aria-label="Close menu" onClick={() => setMobileOpen(false)} className="rounded p-1 text-zinc-500 hover:bg-zinc-100">
                                 <XIcon />
                             </button>
                         </div>
@@ -192,7 +197,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
 
             <div className="lg:pl-60">
                 <header className="sticky top-0 z-10 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white px-4 sm:px-6">
-                    <button aria-label="Open menu" onClick={() => setMobileOpen(true)} className="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 lg:hidden">
+                    <button ref={drawerTrigger} type="button" aria-label="Open menu" aria-expanded={mobileOpen} aria-controls="app-drawer" onClick={() => setMobileOpen(true)} className="rounded p-1.5 text-zinc-600 hover:bg-zinc-100 lg:hidden">
                         <MenuIcon className="h-5 w-5" />
                     </button>
                     <ProjectSwitcher projects={projects} currentProjectId={currentProjectId} />
