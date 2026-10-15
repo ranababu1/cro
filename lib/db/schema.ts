@@ -30,6 +30,9 @@ export const organizations = sqliteTable('organizations', {
     monthly_experiment_limit: integer('monthly_experiment_limit'),
     // Tracked pageviews per month. null = plan default, -1 = unlimited. See lib/pageviewQuota.ts.
     monthly_pageview_limit: integer('monthly_pageview_limit'),
+    // Special friend: custom allowances (JSON, see lib/allowances.ts) override the plan. Admin only, never shown to tenants.
+    special_friend: integer('special_friend', { mode: 'boolean' }).notNull().default(false),
+    custom_allowances: text('custom_allowances'),
     created_at: text('created_at').notNull().default(now),
 });
 

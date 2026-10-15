@@ -78,6 +78,13 @@
       "when": 1791971100000,
       "tag": "0010_scaling_rollups",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1791971200000,
+      "tag": "0011_special_friend",
+      "breakpoints": true
     }
   ]
 }

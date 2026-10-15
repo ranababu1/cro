@@ -6,7 +6,8 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { createExperimentSchema, formatZodError } from '@/lib/validation';
 import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
-import { maxVariationUrlsForPlan, upgradeHintForVariations } from '@/lib/plans';
+import { upgradeHintForVariations } from '@/lib/plans';
+import { getOrgEntitlements } from '@/lib/entitlements';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
@@ -55,9 +56,9 @@ export async function POST(request: NextRequest) {
 
         const orgId = await orgIdForProject(projectId);
         const org = await db.getOrganization(orgId);
-        const maxVars = maxVariationUrlsForPlan(org?.plan);
+        const maxVars = (await getOrgEntitlements(orgId)).limits.maxVariations;
         const nonControl = body.variations.filter((v) => !v.is_control);
-        if (nonControl.length > maxVars) {
+        if (maxVars !== null && nonControl.length > maxVars) {
             return NextResponse.json(
                 { error: `Your plan allows up to ${maxVars} variation${maxVars === 1 ? '' : 's'}. ${upgradeHintForVariations(org?.plan)}`.trim() },
                 { status: 403 },

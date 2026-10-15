@@ -63,7 +63,7 @@ export default function NewExperimentWizard() {
             if (planRes && planRes.ok) {
                 const p = await planRes.json();
                 setPlan(p.plan || 'free');
-                setMaxVars(p.max_variations || 1);
+                setMaxVars(p.max_variations === null ? 25 : p.max_variations || 1);
             }
         })();
     }, []);

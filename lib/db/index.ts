@@ -39,6 +39,8 @@ export interface OrgUpdate {
     monthly_visitor_limit?: number | null;
     monthly_experiment_limit?: number | null;
     monthly_pageview_limit?: number | null;
+    special_friend?: boolean;
+    custom_allowances?: string | null;
 }
 
 /** First instant of the current calendar month in UTC, as an ISO string. */

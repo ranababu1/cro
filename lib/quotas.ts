@@ -1,5 +1,6 @@
 import { db, monthStartIso } from './db';
 import { currentMonth } from './pageviewQuota';
+import { getOrgEntitlements } from './entitlements';
 
 /**
  * Basic plan quota checks. Limits live on the organization (null = unlimited) and reset each calendar month (UTC).
@@ -13,8 +14,7 @@ export interface QuotaCheck {
 
 /** New visitors are not enrolled once the org has used its monthly visitor limit. Existing visitors keep their variant. */
 export async function checkVisitorQuota(orgId: string): Promise<QuotaCheck> {
-    const org = await db.getOrganization(orgId);
-    const limit = org?.monthly_visitor_limit ?? null;
+    const limit = (await getOrgEntitlements(orgId)).limits.monthlyVisitors;
     if (limit === null) return { allowed: true, limit, used: 0 };
     const month = currentMonth();
     const hit = visitorCache.get(orgId);
