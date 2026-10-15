@@ -20,16 +20,31 @@ function json(v: unknown): string | undefined {
     return JSON.stringify(typeof v === 'string' ? JSON.parse(v) : v);
 }
 
+/** BlogPosting JSON-LD built from frontmatter, used when a post has no article_schema. */
+export function defaultArticleSchema(p: { slug: string; title: string; description: string; date: string; updated: string; author: string; keywords: string[] }) {
+    const url = `${SITE_URL}/blog/${p.slug}`;
+    return {
+        '@context': 'https://schema.org', '@type': 'BlogPosting',
+        headline: p.title, description: p.description, url, mainEntityOfPage: url,
+        datePublished: p.date, dateModified: p.updated || p.date,
+        author: { '@type': 'Person', name: p.author.split(',')[0].trim() || 'Imraan' },
+        publisher: { '@type': 'Organization', name: 'freeabtest.com', url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-512.png` } },
+        ...(p.keywords.length ? { keywords: p.keywords.join(', ') } : {}),
+    };
+}
+
 export function parsePost(file: string, raw: string): Post {
     const { data, content } = matter(raw);
     const slug = String(data.slug || path.basename(file, '.md'));
     const words = content.split(/\s+/).filter(Boolean).length;
-    return {
+    const base = {
         slug, title: String(data.title), description: String(data.meta_description ?? data.description ?? ''),
-        date: iso(data.date), updated: iso(data.updated ?? data.date), author: String(data.author ?? 'freeabtest.com'),
+        date: iso(data.date), updated: iso(data.updated ?? data.date), author: String(data.author ?? 'Imraan'),
         keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
-        readingMinutes: Math.max(1, Math.round(words / 220)), markdown: content,
-        articleSchema: json(data.article_schema), faqSchema: json(data.faq_schema),
+    };
+    return {
+        ...base, readingMinutes: Math.max(1, Math.round(words / 220)), markdown: content,
+        articleSchema: json(data.article_schema) ?? JSON.stringify(defaultArticleSchema(base)), faqSchema: json(data.faq_schema),
     };
 }
 
