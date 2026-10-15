@@ -177,3 +177,27 @@ describe('hosted-only copy on non-blog pages', () => {
         expect(hit('Developers who want code-first testing')).toBe(false);
     });
 });
+
+describe('BlogPosting JSON-LD', () => {
+    it('is built from frontmatter when article_schema is missing', () => {
+        const p = parsePost('x.md', '---\ntitle: "T"\nmeta_description: "D"\nslug: my-post\ndate: 2026-10-01\nupdated: 2026-10-02\nauthor: "Imraan, freeabtest.com"\nkeywords: [a, b]\n---\nbody');
+        const ld = JSON.parse(p.articleSchema!);
+        expect(ld).toMatchObject({
+            '@type': 'BlogPosting', headline: 'T', description: 'D', mainEntityOfPage: 'https://www.freeabtest.com/blog/my-post',
+            datePublished: '2026-10-01', dateModified: '2026-10-02', author: { '@type': 'Person', name: 'Imraan' },
+            publisher: { '@type': 'Organization', name: 'freeabtest.com', logo: { url: 'https://www.freeabtest.com/icon-512.png' } }, keywords: 'a, b',
+        });
+    });
+
+    it('keeps article_schema from frontmatter when present', () => {
+        const p = parsePost('x.md', '---\ntitle: "T"\ndate: 2026-10-01\narticle_schema: |\n  {"@type": "BlogPosting", "headline": "Custom"}\n---\nbody');
+        expect(JSON.parse(p.articleSchema!).headline).toBe('Custom');
+    });
+
+    it('every published post has both BlogPosting and FAQPage JSON-LD', () => {
+        for (const p of getAllPosts()) {
+            expect(JSON.parse(p.articleSchema!)['@type'], p.slug).toBe('BlogPosting');
+            if (p.faqSchema) expect(JSON.parse(p.faqSchema)['@type']).toBe('FAQPage');
+        }
+    });
+});

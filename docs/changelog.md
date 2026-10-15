@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-15 15:24 IST | feat: blog posts without article_schema get BlogPosting JSON-LD built from frontmatter (title, description, URL, dates, author Person Imraan, publisher freeabtest.com with logo, keywords). article_schema still wins when present. 3 new tests. |
 | pending | 2026-10-15 15:18 IST | content: republish blog post 01 (approved rewrite), copied as-is: same slug, now compares freeabtest.com with Convert, Crazy Egg, Kameleoon, Unbounce, VWO, Optimizely and AB Tasty. |
 | pending | 2026-10-15 15:15 IST | test: hosted-only copy guard. tests/publicContent.test.ts blocks self-host, self-managed, open source, on-prem and "hosted" phrasing on non-blog pages (home, pricing and FAQ, roadmap, docs and search index, root layout metadata and OG, header and footer, share page, demo page). Blog posts stay exempt for competitor mentions. Audit found no such copy on those pages, so no copy changed. README still says "A self-hosted..." (left as is, flagged). |
 | pending | 2026-10-15 15:02 IST | content: republish blog post 01 from source, copied as-is: revenue goals line now says they are not available today (use a custom event); freeabtest.com no longer described as hosted. |
