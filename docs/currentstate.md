@@ -119,6 +119,7 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - File-based markdown blog. Posts live in content/blog/*.md; adding a post only needs a new .md file (slug from frontmatter, else filename).
 - lib/blog.ts parses frontmatter, renders markdown with marked and sanitizes it with sanitize-html (no scripts, event handlers or javascript: links). JSON-LD from article_schema and faq_schema is parsed, re-serialised and escaped before injection.
 - Routes: /blog (index, newest first), /blog/[slug] (static, dynamicParams off), /blog/rss.xml (static RSS), /sitemap.xml (core pages plus posts).
+- Optional `category` frontmatter; if missing it is derived from keywords (Tools, Statistics) or defaults to Guides. FAQ section ("## Frequently asked questions", **Question?** then answer) renders as an accordion; tests check it matches faq_schema.
 - Posts are dated from frontmatter; a post with a future date still publishes on deploy (no scheduling).
 - tests/publicContent.test.ts checks blog frontmatter, sort order, JSON-LD validity, sanitizing, internal terms and em dashes.
 
