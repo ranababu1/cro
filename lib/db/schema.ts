@@ -193,3 +193,13 @@ export const productEvents = sqliteTable('product_events', {
     index('idx_product_events_user').on(t.user_id, t.occurred_at),
     index('idx_product_events_org').on(t.org_id, t.occurred_at),
 ]);
+
+/** Read-only public links to an experiment's results. Revoking sets revoked_at. */
+export const shareLinks = sqliteTable('share_links', {
+    id: text('id').primaryKey(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    token: text('token').notNull(), // random, 32 bytes base64url; grants read-only access to results only
+    created_by: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    created_at: text('created_at').notNull().default(now),
+    revoked_at: text('revoked_at'),
+}, (t) => [uniqueIndex('uq_share_links_token').on(t.token), index('idx_share_links_experiment').on(t.experiment_id)]);

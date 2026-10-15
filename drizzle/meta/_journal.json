@@ -57,6 +57,13 @@
       "when": 1791970800000,
       "tag": "0007_variation_paused",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1791970900000,
+      "tag": "0008_share_links",
+      "breakpoints": true
     }
   ]
 }

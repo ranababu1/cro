@@ -9,7 +9,7 @@ Internal numbering below follows the approved plan, where "Phase 1" = public Pha
 - [x] Targeting: device, UTM, referrer, new vs returning
 - [x] Edit running tests safely (weights, pause variation, add goal)
 - [x] Sample ratio mismatch warning
-- [ ] Public share links for results
+- [x] Public share links for results
 - [ ] GTM and WordPress install guides
 - [ ] Monthly pageview quotas that pause collection at the cap
 
