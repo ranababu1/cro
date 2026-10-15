@@ -1,141 +1,143 @@
 ---
 title: "Best free A/B testing tools in 2026, compared honestly"
-meta_description: "Six A/B testing tools with free plans or trials, checked on each vendor's own pricing page in October 2026: limits, catches, and who each one suits."
+meta_description: "A free-forever A/B testing plan at freeabtest.com versus VWO, Convert, Optimizely, Crazy Egg and other paid tools. Prices checked 15 Oct 2026."
 slug: best-free-ab-testing-tools
 date: 2026-10-15
 updated: 2026-10-15
 author: "Imraan, freeabtest.com"
-prices_checked: 2026-10-15
-keywords: ["free a/b testing tool", "free ab testing software", "free split testing tool", "ab testing tools comparison", "google optimize alternative free"]
-article_schema: |
-  {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": "Best free A/B testing tools in 2026, compared honestly",
-    "datePublished": "2026-10-15",
-    "dateModified": "2026-10-15",
-    "mainEntityOfPage": "https://www.freeabtest.com/blog/best-free-ab-testing-tools",
-    "author": {"@type": "Person", "name": "Imraan"},
-    "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
-  }
+keywords:
+  - free a/b testing tool
+  - free ab testing software
+  - free split testing tool
+  - ab testing tools comparison
+  - affordable a/b testing
+schema_suggestions:
+  - BlogPosting
+  - FAQPage
+  - ItemList
 faq_schema: |
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
-      {"@type": "Question", "name": "What is the best free A/B testing tool?",
-       "acceptedAnswer": {"@type": "Answer", "text": "It depends on who runs the tests. For non-technical teams that need a visual editor, Mida's free Sandbox plan is the strongest option we checked. For developers with a data warehouse, GrowthBook is free to self-host. For product teams already using PostHog, its experiments are free up to 1 million feature flag requests a month. freeabtest.com suits developers who want code-first testing and plain statistics with no warehouse setup."}},
-      {"@type": "Question", "name": "Is there a free replacement for Google Optimize?",
-       "acceptedAnswer": {"@type": "Answer", "text": "Google Optimize shut down in September 2023 and has no direct replacement from Google. Tools with a permanent free plan in October 2026 include Mida, GrowthBook, PostHog and freeabtest.com. VWO, Convert and Optimizely do not offer a permanent free plan on their pricing pages."}},
+      {"@type": "Question", "name": "What is the best free A/B testing tool in 2026?",
+       "acceptedAnswer": {"@type": "Answer", "text": "For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. Enterprise platforms such as VWO, Optimizely and AB Tasty publish no permanent free plan on their pricing pages."}},
       {"@type": "Question", "name": "Does VWO have a free plan?",
        "acceptedAnswer": {"@type": "Answer", "text": "VWO's pricing page, checked on 15 October 2026, lists Growth, Pro and Enterprise plans with a demo request and no published price. It does not list a free plan."}},
-      {"@type": "Question", "name": "What is a monthly tested user (MTU)?",
-       "acceptedAnswer": {"@type": "Answer", "text": "A monthly tested user is a unique visitor who is included in at least one running experiment during a month. Visitors to pages without a test do not count, and a visitor in several tests usually counts once."}},
-      {"@type": "Question", "name": "Can I run a real A/B test on a free plan?",
-       "acceptedAnswer": {"@type": "Answer", "text": "Yes, if your traffic is high enough. The limit that usually stops small sites is not the plan, it is sample size. A site with a 3% conversion rate needs about 13,900 visitors per variant to detect a 20% relative lift at 95% confidence and 80% power."}}
+      {"@type": "Question", "name": "How much does Convert Experiences cost?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Convert Experiences Growth starts at $399 per month billed monthly, or $299 per month billed annually, for 100,000 monthly tested users. Pro starts at $599 monthly or $420 billed annually. Enterprise is quote only. Convert offers a 15-day free trial with no card."}},
+      {"@type": "Question", "name": "Is Crazy Egg free for A/B testing?",
+       "acceptedAnswer": {"@type": "Answer", "text": "Crazy Egg's Starter plan at $29 a month billed annually does not include A/B testing. Plans with A/B testing start at Plus, $99 a month billed annually, with a 30-day free trial. There is no month-to-month option on the published pricing page."}},
+      {"@type": "Question", "name": "What does freeabtest.com include for free?",
+       "acceptedAnswer": {"@type": "Answer", "text": "The free-forever plan includes 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests over the life of the account, 1 project, and a control plus 1 variation. Goals for page visits, clicks, form submits and custom events are included, along with targeting, SRM alerts and Wilson intervals. There is no visual editor yet."}},
+      {"@type": "Question", "name": "What is a monthly tested user?",
+       "acceptedAnswer": {"@type": "Answer", "text": "A monthly tested user (or tested visitor) is a unique visitor who is assigned to at least one running experiment in a calendar month. Visitors to pages without a test do not count, and a visitor in several tests usually counts once."}}
     ]
   }
 ---
 
-By Imraan, freeabtest.com. Published 15 October 2026. Every price and limit below was checked on the vendor's own pricing page on 15 October 2026.
+By Imraan, freeabtest.com. Published 15 October 2026. Updated 15 October 2026. Every price and limit below was checked on the vendor's own pricing page on 15 October 2026.
 
-The best free A/B testing tool for most small websites in 2026 is the one whose free plan matches how you build: Mida if you need a visual editor, GrowthBook if you have a data warehouse and an engineer, PostHog if you already use it for analytics, and freeabtest.com if you want a code-first tool with plain statistics. VWO, Convert and Optimizely do not offer a permanent free plan; Convert offers a 15-day trial.
+The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
 
-We make one of the tools on this list, so read this with that in mind. We have tried to make the comparison useful even if you never sign up with us, and we say where other tools do things we don't.
+We make freeabtest.com, so read this with that in mind. We have tried to make the comparison useful even if you never sign up with us, and we say where other tools do things we don't. This article compares freeabtest.com with platforms that cost more, or that are a weaker fit for developers and small teams who want plain A/B tests.
 
-## What counts as "free" here?
+## What "free" means here
 
-A tool counts as free on this list only if its own pricing page offers a plan that costs $0 with no end date. A free trial is not a free plan. We list trial-only tools separately because many "free A/B testing tools" articles mix the two.
+A tool counts as free on this list only if its own pricing page offers a plan that costs $0 with no end date. A free trial is not a free plan. Several vendors below sell a trial and then a paid subscription only.
 
-Three numbers decide whether a free plan is useful:
+Three numbers decide whether a free or cheap plan is useful:
 
 - **Tested traffic.** How many visitors a month can be put into experiments. Most vendors call these monthly tested users (MTU): unique visitors included in at least one running test.
 - **Concurrent tests.** How many experiments can run at once.
 - **Variations.** How many versions you can compare in one test. Two (control plus one challenger) is enough for most small sites, because every extra variation needs more traffic.
 
-## The free plans compared
+## The plans compared
 
-| Tool | Free plan (as listed on vendor page) | Main catch | Paid starts at | Best for |
+Prices are what each vendor published on 15 October 2026. Where a page only offers a demo or a sales conversation, we write "quote only".
+
+| Tool | Free or trial | Published paid entry (A/B) | Main catch | Best for |
 |---|---|---|---|---|
-| [Mida](https://www.mida.so/pricing) | Sandbox: 100,000 MTU, 3 live tests, 2 variations (control plus variant), 60-day data retention, 50,000 tracked events a day | Only 3 live tests and one challenger per test | Growth from $224/month billed annually (at 50,000 MTU) | Marketers who want a visual editor |
-| [GrowthBook](https://www.growthbook.io/pricing) | Cloud Starter: up to 3 users, 1 project, unlimited experiments and traffic. Self-hosted: free | Visual editor and split URL tests are Pro only. Analysis needs a data warehouse or their managed one (1M events a month on Starter) | Pro $40 per seat per month | Engineering teams with a warehouse |
-| [PostHog](https://posthog.com/pricing) | 1M feature flag requests a month (experiments are billed with flags), plus 1M analytics events, 1 project, 1-year retention, unlimited team members | Usage stops at the free limit unless you add a card; experiments sit inside a large analytics product | Pay as you go above the free allowance | Product teams already on PostHog |
-| [freeabtest.com](https://freeabtest.com/pricing) | Free plan: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, 1 project, control plus 1 variation. Page, click, form and custom event goals, targeting, SRM alerts | Small traffic cap and one test at a time on Free. No visual editor yet | $10/month ([pricing](https://freeabtest.com/pricing)) | Developers who want code-first testing |
+| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, control plus 1 variation | Starter $10/month (250,000 visitors, 20 experiments); Growth $50/month (1,000,000, unlimited experiments) | No visual editor yet. Free plan is one test at a time | Developers who want code-first testing and plain statistics |
+| Convert Experiences | 15-day free trial, no card | Growth $399/month monthly or $299/month billed annually for 100,000 MTU | Starts near $300 a month even on annual billing | Teams that want a visual editor and published prices |
+| Crazy Egg | 30-day free trial | Plus $99/month billed annually (A/B starts here; 150,000 tracked pageviews) | Starter at $29 has no A/B. All plans billed annually | Marketers who want heatmaps and recordings with A/B |
+| Kameleoon (PBX Starter) | 30-day free trial, up to 3 experiments, no card | From $495/month for up to 10 experiments and 50,000 tested visitors | Entry paid plan is nearly 50× freeabtest Starter | Teams buying prompt-based experimentation |
+| Unbounce | 14-day free trial, no card | Experiment $149/month (A/B on landing pages; up to 30,000 visitors) | A/B is for Unbounce-hosted landing pages, not your whole site. Build at $99 has no A/B | Landing-page marketers |
+| VWO | No free plan listed | Quote only (Growth, Pro, Enterprise; demo request) | No public price | Teams that need a full experimentation suite and a sales process |
+| Optimizely | No free plan listed | Quote only (custom packaging) | No public price | Large enterprises |
+| AB Tasty | No self-serve free plan | Quote only (custom proposal by traffic and modules) | No public price; access is through their commercial team | Mid-market and enterprise CRO programs |
 
-Trial only, no permanent free plan:
+Yearly billing on freeabtest.com gets 2 months free (Starter $100/year, Growth $500/year). None of the quote-only vendors published a self-serve price we could check.
 
-| Tool | What the pricing page shows | Price |
-|---|---|---|
-| [Convert](https://www.convert.com/pricing/) | 15-day free trial, no card required | Growth $399/month monthly or $299/month billed annually, for 100,000 tested users a month |
-| [VWO](https://vwo.com/pricing/) | Growth, Pro and Enterprise, each with "Schedule a Demo" | Not published |
-| [Optimizely](https://www.optimizely.com/pricing/) | "Request a demo" | Not published |
+## freeabtest.com: free forever, then $10 or $50
 
-## Mida: the most generous free plan for non-developers
-
-Mida's Sandbox plan gives 100,000 monthly tested users, which is the highest free traffic allowance we found. It includes a visual editor, so someone who does not write code can change a headline or a button and launch a test.
-
-The limits are on test count, not traffic. Sandbox runs 3 live tests per project, and each test has 2 variations: your original and one challenger. Data is kept for 60 days. Event tracking is capped at 50,000 events a day, though pageviews do not count toward that cap, according to Mida's FAQ.
-
-Choose Mida if you are a marketer replacing Google Optimize and you mostly test copy and layout. Skip it if you want to compare three or four headlines at once on the free plan.
-
-## GrowthBook: free and open source, if you have the setup
-
-GrowthBook's cloud Starter plan is free for up to 3 users and 1 project, with unlimited experiments, feature flags and traffic. The self-hosted version is free with unlimited users. That is a very generous offer, and GrowthBook's statistics are strong, with Bayesian and frequentist engines on the free tier.
-
-The catch is setup. GrowthBook is warehouse-native: it analyzes data that lives in your warehouse (BigQuery, Snowflake, Redshift and others). If you don't have one, GrowthBook offers a managed warehouse with 1 million events a month on Starter. Also, two features small sites often want, the visual editor and split URL tests, are Pro features at $40 per seat per month.
-
-Choose GrowthBook if you have an engineer and either a warehouse or the patience to set up event tracking. It is also the right choice if you want to self-host for privacy reasons.
-
-## PostHog: free experiments inside an analytics suite
-
-PostHog does not sell A/B testing on its own. Experiments are part of its product suite and are billed as feature flag requests. The first 1 million flag requests each month are free, alongside 1 million analytics events and 5,000 session recordings. The free plan includes unlimited team members, 1 project and 1 year of data retention.
-
-PostHog states on its pricing page that 97% of companies use it for free. On the free plan, usage stops at the limit, so you can't be billed by surprise. If you add a card, you pay per request above the free allowance and can set a billing limit per product.
-
-Choose PostHog if you already use it for product analytics, or you want analytics, replays and experiments in one place. It is more than you need if all you want is a single landing page test.
-
-## freeabtest.com: code-first, plain statistics
-
-This is our product, so here is what it does today and what it doesn't.
+This is our product, so here is what it does today and what it doesn't. Facts below match our [pricing](https://www.freeabtest.com/pricing) page on 15 October 2026.
 
 What works now:
 
-- A/B tests and split URL tests, set up with a JavaScript snippet of about 14 KB gzipped (the docs also include install guides for Google Tag Manager and WordPress)
+- A/B tests and split URL tests, set up with a JavaScript snippet of about 14 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
 - Sticky assignment: each visitor ID is hashed with the experiment ID, so the same visitor always sees the same variant
-- Page visit, click (by CSS selector, for example `#headerCTA`), form submit and custom event goals, plus conversions you send from your own code
+- Page visit, click (by CSS selector), form submit and custom event goals, plus conversions you send from your own code
 - Targeting by device, UTM, referrer and new or returning visitors
-- Sample ratio mismatch alerts, so you hear when the traffic split looks broken
-- Safe edits to running tests, and shareable results links
-- Revenue goals are not available today. To measure paid conversions, track the purchase as a custom event
-- Results with conversion rate, lift, a Wilson 95% interval for each variation, and a two-proportion z-test of each variation against the control
+- Sample ratio mismatch alerts, safe edits to running tests, and shareable results links
+- Results with conversion rate, lift, a Wilson 95% interval for each variation, and a two-proportion z-test of each variation against the control. Significance is only tested once every variant has at least 100 visitors
 - Live stats while a test runs
 - Separate dev, staging and production environments, an audit log, and a REST API
-- Free plan: 10,000 tested visitors a month and 300 a day, 1 running test at a time, 10 tests in total, 1 project, and a control plus 1 variation (a classic A/B test)
-- Paid plans: up to 50 variations. Starter is $10 a month for 250,000 tested visitors and 20 active experiments; Growth is $50 a month for 1,000,000 and unlimited experiments ([pricing](https://freeabtest.com/pricing))
+- Free plan: 10,000 tested visitors a month and 300 a day, 1 running test at a time, 10 tests in total, 1 project, 1 team seat, and a control plus 1 variation
+- Paid plans: up to 50 variations. Starter is $10 a month for 250,000 tested visitors, 20 active experiments, 3 projects and 5 seats. Growth is $50 a month for 1,000,000 visitors, unlimited active experiments, 10 projects and 15 seats. Enterprise is custom
+- Over the limit: new visitors see the control and are not counted. We never upgrade you or bill you automatically
 
-What is not built yet, and is listed on our [roadmap](https://freeabtest.com/roadmap):
+What is not built yet (and we are clear about it):
 
-- Heatmaps (Phase 3) and session recordings (Phase 4), which will be on paid plans only
-- Funnels and a visual editor (Phase 4). Today you build variations as pages or in code.
-- A WordPress plugin (Phase 5). Today WordPress sites install the snippet by following the docs guide.
+- No visual editor. Today you build variations as pages or in code. A visual editor is planned for Phase 4 on Growth and Enterprise only
+- Heatmaps (Phase 3) and session recordings (Phase 4) are planned for paid plans only
+- Funnels and auto-shift traffic to the winner (Phase 4)
+- A WordPress plugin (Phase 5). Today WordPress sites install the snippet from the docs guide
+- Revenue goals are not available today. To measure a paid conversion, track the purchase as a custom event
 
-Choose freeabtest.com if you can paste a script tag, you want testing with no warehouse, and you want results you can explain to someone else. Be clear on the Free limits: 300 tested visitors a day is enough to learn the tool and to test big changes on a small page, but a plain A/B test that needs 27,828 visitors would take about 93 days at that cap. Paid plans remove that bottleneck. If you need a visual editor today, or more free traffic, Mida is a better fit.
+Choose freeabtest.com if you can paste a script tag, you want results you can explain, and you do not want to start at $99 to $495 a month. If you need a point-and-click visual editor today, Convert, Crazy Egg or Unbounce (for landing pages) will fit better, at a higher price.
 
-## The trial-only tools
+## Convert Experiences: published prices, from $299 a month
 
-**Convert** publishes its prices, which is less common than it should be. Growth is $399 a month on monthly billing or $299 a month billed annually, for 100,000 tested users a month. The trial lasts 15 days and does not need a card. Convert's own FAQ says it may not be worth it for low-traffic sites yet, which is an honest answer we agree with.
+Convert is unusual among the larger tools: it publishes prices. Growth is $399 a month on monthly billing, or $299 a month billed annually, for 100,000 monthly tested users. Pro is $599 monthly or $420 billed annually. Enterprise is quote only and annual only. The trial lasts 15 days and does not need a card. Convert's own FAQ says the product may not be worth it for low-traffic sites yet, which is an honest answer we agree with.
 
-**VWO** lists Growth, Pro and Enterprise plans on its pricing page, each with a "Schedule a Demo" button and no public price. Growth includes a visual editor, unlimited experiments and variations, and multi-arm bandits. Third-party sites report VWO's old free Starter plan is being discontinued; VWO's own page does not list a free plan.
+Convert includes a visual editor, split URL tests, heatmaps and SRM checks on Growth. That is more surface area than freeabtest.com has today. The tradeoff is price: Convert's cheapest annual plan is about 30× freeabtest Starter, and about 6× freeabtest Growth, before you go past 100,000 MTU.
 
-**Optimizely** asks you to request a demo and does not publish prices. It is built for large teams with large budgets.
+## Crazy Egg: A/B starts at $99 a month, billed yearly
 
-## How do I pick the right free A/B testing tool?
+Crazy Egg's pricing page lists Starter at $29, Plus at $99, Pro at $249 and Enterprise at $599, all per month and billed annually, with a 30-day free trial. A/B testing, CTAs and error tracking start on Plus, not on Starter. Plus includes 150,000 tracked pageviews a month and unlimited A/B tests. Pro adds targeting by country, UTMs and conversions.
+
+Crazy Egg is strongest if you want heatmaps and session recordings in the same product as A/B tests. freeabtest.com does not ship heatmaps or recordings yet. If all you need is a clean A/B split and statistics, you are paying for a larger analytics suite.
+
+## Kameleoon: from $495 a month on PBX Starter
+
+Kameleoon's plans page lists a 30-day PBX Starter free trial (up to 3 experiments, no card) and PBX Starter from $495 a month for up to 10 experiments and 50,000 tested visitors. Enterprise is custom, with unlimited experiments and traffic. PBX is prompt-based experimentation: you describe changes in natural language rather than using a classic visual editor only.
+
+At $495 a month for 50,000 tested visitors, Kameleoon Starter costs more per month than freeabtest Growth while covering half the tested-visitor allowance of freeabtest Starter. That can be fair if you want their prompt workflow, sequential testing and enterprise modules. It is a weak fit if your budget is under $100 a month.
+
+## Unbounce: A/B on landing pages from $149 a month
+
+Unbounce is a landing page builder first. A/B testing appears on the Experiment plan at $149 a month (or $112 a month billed annually), with unlimited A/B testing, up to 30,000 visitors, confidence intervals and manual traffic allocation. The Build plan at $99 a month does not include A/B. There is a 14-day free trial with no card.
+
+Use Unbounce when the pages you test live inside Unbounce. It is not a general site-wide A/B tool for an existing SaaS app or marketing site you already host elsewhere. freeabtest.com runs on any site where you can paste a snippet.
+
+## VWO, Optimizely and AB Tasty: quote only
+
+**VWO** lists Growth, Pro and Enterprise for web experimentation, each with a "Schedule a Demo" button and no public price. Growth includes a visual editor, unlimited experiments and variations, and multi-arm bandits. The pricing page does not list a free plan.
+
+**Optimizely** states that every plan is individually packaged and asks you to describe your needs so they can create a plan. No self-serve price appears on the pricing page.
+
+**AB Tasty** states that pricing is custom, based on traffic volume, domains, modules and implementation scope, with no fixed plans on the pricing page. Their documentation also says platform access is created by their commercial team, not through a public signup.
+
+These three are built for teams that already have a CRO budget and a procurement process. They are usually stronger on visual editing, personalization, governance and support SLAs. They are a poor match if you want to start a first test this afternoon without a sales call.
+
+## How do I pick an affordable A/B testing tool?
 
 Answer three questions in order.
 
-**1. Who will build the variations?** If nobody on the team writes code, you need a visual editor. Of the free plans, that means Mida. If a developer will build variations, every tool on the list works.
+**1. Do you need a visual editor today?** If yes, look at Convert, Crazy Egg or Unbounce (landing pages), and budget from about $99 to $399 a month. If a developer will build variations, freeabtest.com works today without that editor.
 
-**2. Where will your data live?** If you have a warehouse and want analysis there, GrowthBook is designed for it. If you want the tool to store and analyze the data for you, Mida, PostHog and freeabtest.com do that.
+**2. Can you start without a sales call?** freeabtest.com, Convert, Crazy Egg, Kameleoon (PBX trial) and Unbounce publish a path you can start yourself. VWO, Optimizely and AB Tasty are quote only.
 
 **3. How much traffic do you actually have?** This matters more than any plan limit. Here is how many visitors per variant a test needs at a 3% baseline conversion rate, 95% confidence and 80% power (calculated with the standard two-proportion formula):
 
@@ -146,31 +148,34 @@ Answer three questions in order.
 | 30% (3.0% to 3.9%) | 6,455 | 12,910 |
 | 50% (3.0% to 4.5%) | 2,518 | 5,036 |
 
-If you get 10,000 visitors a week to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take most of a year. No free plan fixes that. We explain the math in our upcoming guide to how long to run an A/B test, and what to do about it in our upcoming guide to A/B testing with low traffic.
+If you get 10,000 visitors a week to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take most of a year. No free plan fixes that. Paying Convert $299 a month does not shrink the sample size; it only buys you a different editor and feature set.
 
-## What to check before you sign up
+## What to check before you pay
 
-- **What counts as a tested user.** Most tools count a visitor once a month no matter how many tests they enter. Check, because some count per test.
-- **What happens at the limit.** PostHog's free plan stops at the limit. Mida and Convert describe their limits on their pricing pages. Know the behavior before a traffic spike.
-- **Script weight and flicker.** Client-side tools change the page after it loads. Mida lists a 15 KB compressed script; ours is about 14 KB gzipped. Heavier scripts slow pages, and slow variants lose tests for reasons unrelated to the idea.
-- **Data retention.** Mida keeps free-plan data for 60 days and PostHog for 1 year on its free plan. If you want to look back at old tests, export results.
+- **What counts as a tested user.** Most tools count a visitor once a month no matter how many tests they enter. Check, because some count per test or use pageviews (Crazy Egg) instead of tested users.
+- **What happens at the limit.** freeabtest.com stops counting new visitors and shows the control. Convert lets you buy extra MTU packs. Crazy Egg pauses heatmaps and A/B collection until the next month. Know the behavior before a traffic spike.
+- **Trial vs free forever.** A 14 or 30 day trial ends. A free-forever plan does not. If you are still learning sample size math, a trial clock works against you.
+- **Annual lock-in.** Crazy Egg's published plans are billed annually. Convert and Unbounce discount annual billing but still offer monthly. freeabtest.com offers both.
 - **Statistics you can explain.** If a tool says "95% chance to win", find out what that means. You will have to defend the result to someone.
 
 ## Frequently asked questions
 
-**What is the best free A/B testing tool?**
-It depends on who runs the tests. Mida's free plan is the strongest for non-technical teams that need a visual editor. GrowthBook is the strongest for developers with a data warehouse. PostHog suits teams already using it. freeabtest.com suits developers who want code-first testing and plain statistics without a warehouse.
-
-**Is there a free replacement for Google Optimize?**
-Google Optimize shut down in September 2023, and Google did not release a direct replacement. Tools with a permanent free plan in October 2026 include Mida, GrowthBook, PostHog and freeabtest.com.
+**What is the best free A/B testing tool in 2026?**
+For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan, then Starter at $10 and Growth at $50. VWO, Optimizely and AB Tasty do not publish a permanent free plan.
 
 **Does VWO have a free plan?**
-VWO's pricing page, checked on 15 October 2026, lists Growth, Pro and Enterprise plans with a demo request and no published price. It does not list a free plan.
+VWO's pricing page, checked on 15 October 2026, lists Growth, Pro and Enterprise with a demo request and no published price. It does not list a free plan.
 
-**What is a monthly tested user (MTU)?**
-A unique visitor included in at least one running experiment during a month. Visitors to pages without a test don't count, and a visitor in several tests usually counts once.
+**How much does Convert Experiences cost?**
+Growth starts at $399 per month billed monthly, or $299 per month billed annually, for 100,000 monthly tested users. Pro starts at $599 monthly or $420 billed annually. Enterprise is quote only. There is a 15-day free trial with no card.
 
-**Can I run a real A/B test on a free plan?**
-Yes, if your traffic is high enough. The usual blocker for small sites is sample size, not the plan. At a 3% conversion rate you need about 13,900 visitors per variant to detect a 20% relative lift at 95% confidence and 80% power.
+**Is Crazy Egg free for A/B testing?**
+No. Starter at $29 a month billed annually does not include A/B testing. Plans with A/B start at Plus, $99 a month billed annually. There is a 30-day free trial.
 
-If you are unsure, start with the free plan that matches who builds your variations, run one test on your highest-traffic page, and check the sample size before you launch. Prices and limits change often, so we will recheck this page every month and update the date at the top.
+**What does freeabtest.com include for free?**
+10,000 tested visitors a month (up to 300 a day), 1 running test, 10 tests lifetime, 1 project, control plus 1 variation, page/click/form/custom goals, targeting, SRM alerts and Wilson intervals. There is no visual editor yet. Details are on our [pricing](https://www.freeabtest.com/pricing) page.
+
+**What is a monthly tested user?**
+A unique visitor ID assigned to at least one running experiment in a calendar month. Pages without a running test do not count. One visitor in three tests usually counts once.
+
+If your next step is a single landing page or homepage test and you can ship a variation in HTML or a second URL, start on the free plan, run one experiment properly, and upgrade only when the 10,000 visitor cap or the one-test limit gets in the way. Paying for a visual editor and a large enterprise suite is the right move later, not before you have finished a first honest test.
