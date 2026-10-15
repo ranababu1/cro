@@ -5,7 +5,7 @@ Public numbering: Phase 1 A/B testing core (done), Phase 2 more goals and target
 Internal numbering below follows the approved plan, where "Phase 1" = public Phase 2. Scaling work: see docs/scaling.md.
 
 ## Status of the approved Phase 1 (public Phase 2)
-- [ ] Page reach, form submit and custom event goals
+- [x] Page reach, form submit and custom event goals
 - [ ] Targeting: device, UTM, referrer, new vs returning
 - [ ] Edit running tests safely (weights, pause variation, add goal)
 - [ ] Sample ratio mismatch warning

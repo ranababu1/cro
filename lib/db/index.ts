@@ -259,7 +259,7 @@ export const db = {
     async createExperiment(
         experiment: Pick<Experiment, 'id' | 'project_id' | 'user_id' | 'name' | 'status' | 'traffic_allocation'> & { description?: string | null; control_url?: string | null },
         variations: Array<Pick<Variation, 'name' | 'weight' | 'is_control'> & { description?: string | null; url?: string | null }>,
-        goals: Array<Pick<Goal, 'name' | 'selector' | 'is_primary'>> = [],
+        goals: Array<Pick<Goal, 'name' | 'selector' | 'is_primary'> & { type?: Goal['type']; match_type?: Goal['match_type'] }> = [],
     ): Promise<void> {
         const d = await getDb();
         await d.insert(s.experiments).values({ ...experiment, description: experiment.description ?? null, control_url: experiment.control_url ?? null });
@@ -281,6 +281,8 @@ export const db = {
                     experiment_id: experiment.id,
                     name: g.name,
                     selector: g.selector,
+                    type: g.type ?? 'click',
+                    match_type: g.match_type ?? null,
                     is_primary: g.is_primary,
                 })),
             );
@@ -440,6 +442,15 @@ export const db = {
             ),
         });
         return !!row;
+    },
+
+    /** Running experiments in a project with their goals, for page-visit and custom-event goal matching. */
+    async getRunningExperimentGoals(projectId: string): Promise<Array<{ experiment: Experiment; goals: Goal[] }>> {
+        const d = await getDb();
+        const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
+        const out: Array<{ experiment: Experiment; goals: Goal[] }> = [];
+        for (const experiment of experiments) out.push({ experiment, goals: await this.getGoals(experiment.id) });
+        return out;
     },
 
     async getGoals(experimentId: string): Promise<Goal[]> {

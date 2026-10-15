@@ -1,3 +1,4 @@
+import { describeGoal } from './goals';
 /**
  * Live stats for a running experiment: visitors, redirects, goal clicks by
  * variation, conversion rates with Wilson 95% intervals, uplift vs control
@@ -65,7 +66,7 @@ export interface LiveStats {
 }
 
 interface VariationIn { id: string; name: string; is_control: boolean; url?: string | null }
-interface GoalIn { id: string; name: string; selector: string; is_primary: boolean }
+interface GoalIn { id: string; name: string; selector: string; type?: string | null; match_type?: string | null; is_primary: boolean }
 
 /** Relative uplift interval from Newcombe's hybrid score method (built on Wilson intervals). */
 export function upliftInterval(ctlClicks: number, ctlN: number, varClicks: number, varN: number) {
@@ -155,7 +156,7 @@ export function buildLiveStats(variations: VariationIn[], goals: GoalIn[], count
         return {
             goal_id: g.id,
             name: g.name,
-            selector: g.selector,
+            selector: describeGoal(g),
             is_primary: !!g.is_primary,
             total_clicks: arms.reduce((s, a) => s + a.clicks, 0),
             rank: 0,

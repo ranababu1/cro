@@ -36,6 +36,13 @@
       "when": 1791970532314,
       "tag": "0004_sdk_key_plaintext",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1791970600000,
+      "tag": "0005_goal_types",
+      "breakpoints": true
     }
   ]
 }

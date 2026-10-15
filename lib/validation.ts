@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EVENT_NAME_RE, isValidRegex } from './goals';
 
 // Forms send empty strings for blank optional fields.
 const blankToUndefined = (v: unknown) => (v === '' ? undefined : v);
@@ -13,6 +14,30 @@ const cssSelector = z
     .min(1)
     .max(300)
     .refine((s) => !/[<>]/.test(s), 'selector must be a CSS selector');
+
+export const goalSchema = z
+    .object({
+        name: z.string().trim().min(1).max(200),
+        type: z.enum(['click', 'form', 'page', 'event']).default('click'),
+        selector: z.string().trim().min(1).max(500),
+        match_type: z.preprocess(blankToUndefined, z.enum(['equals', 'contains', 'regex']).optional()),
+        is_primary: z.boolean(),
+    })
+    .superRefine((g, ctx) => {
+        if (g.type === 'click' || g.type === 'form') {
+            if (!cssSelector.safeParse(g.selector).success) ctx.addIssue({ code: 'custom', path: ['selector'], message: 'selector must be a CSS selector' });
+        } else if (g.type === 'page') {
+            if (g.match_type === 'regex' && (!isValidRegex(g.selector) || g.selector.length > 300)) ctx.addIssue({ code: 'custom', path: ['selector'], message: 'URL pattern is not a valid regular expression' });
+        } else if (!EVENT_NAME_RE.test(g.selector)) {
+            ctx.addIssue({ code: 'custom', path: ['selector'], message: 'event name may use letters, numbers, _ . : - only' });
+        }
+    })
+    .transform((g) => ({ ...g, match_type: g.type === 'page' ? (g.match_type ?? 'equals') : null }));
+
+export const customEventSchema = z.object({
+    user_id: visitorId,
+    event_name: z.string().regex(EVENT_NAME_RE),
+});
 
 export const createDomainSchema = z.object({
     host: z.string().trim().min(1).max(253),
@@ -37,14 +62,8 @@ export const createExperimentSchema = z.object({
         .min(2, 'Experiment must have a control and at least one variation')
         .max(20), // soft cap; plan limit enforced in the route
     goals: z
-        .array(
-            z.object({
-                name: z.string().trim().min(1).max(200),
-                selector: cssSelector,
-                is_primary: z.boolean(),
-            }),
-        )
-        .min(1, 'Add at least one click goal')
+        .array(goalSchema)
+        .min(1, 'Add at least one goal')
         .max(20),
 });
 

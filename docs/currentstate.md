@@ -83,3 +83,6 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## Next
 `docs/roadmap.md`, Phase 1 milestone M1 (core bucketing package, targeting, datafile, new SDK).
+
+## Goals, targeting and test management (Oct 2026)
+- Goal types (lib/goals.ts): click and form (CSS selector, bound in the SDK), page visit (equals / contains / regex) and custom event (`ABTest.track('name')` -> POST /api/sdk/event). Page and event goals are matched server side in lib/goalHits.ts for visitors with an assignment; one conversion per visitor per goal. Public roadmap /roadmap shows five phases at a high level only. Internal scaling notes: docs/scaling.md.
