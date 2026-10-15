@@ -3,6 +3,7 @@
 import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { describeTargeting, parseTargeting } from '@/lib/targeting';
 import { EditTest } from './EditTest';
+import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -188,6 +189,7 @@ function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experime
 
     return (
         <div className="space-y-6">
+            <SrmWarning srm={results.srm} />
             {results.live && <LiveStats live={results.live} running={experiment.status === 'running'} updatedAt={updatedAt} />}
             <h2 className="pt-2 text-base font-semibold text-zinc-900">Detailed results</h2>
             {summary}
