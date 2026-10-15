@@ -480,6 +480,39 @@ export const db = {
         return out;
     },
 
+    // Share links
+    async getActiveShareLink(experimentId: string) {
+        const d = await getDb();
+        return (await d.query.shareLinks.findFirst({ where: and(eq(s.shareLinks.experiment_id, experimentId), isNull(s.shareLinks.revoked_at)) })) ?? null;
+    },
+
+    async createShareLink(experimentId: string, createdBy: string | null) {
+        const d = await getDb();
+        const { randomBytes } = await import('node:crypto');
+        const row = { id: generateId('shr'), experiment_id: experimentId, token: randomBytes(32).toString('base64url'), created_by: createdBy };
+        await d.insert(s.shareLinks).values(row);
+        return (await d.query.shareLinks.findFirst({ where: eq(s.shareLinks.id, row.id) }))!;
+    },
+
+    async revokeShareLinks(experimentId: string): Promise<void> {
+        const d = await getDb();
+        await d.update(s.shareLinks).set({ revoked_at: nowIso() }).where(and(eq(s.shareLinks.experiment_id, experimentId), isNull(s.shareLinks.revoked_at)));
+    },
+
+    /** Experiment for an active share token, or null. Suspended orgs never resolve. */
+    async getSharedExperiment(token: string): Promise<Experiment | null> {
+        if (!token || token.length < 20 || token.length > 100) return null;
+        const d = await getDb();
+        const link = await d.query.shareLinks.findFirst({ where: and(eq(s.shareLinks.token, token), isNull(s.shareLinks.revoked_at)) });
+        if (!link) return null;
+        const experiment = await this.getExperiment(link.experiment_id);
+        if (!experiment) return null;
+        const project = await this.getProject(experiment.project_id);
+        const org = project ? await this.getOrganization(project.org_id) : null;
+        if (!org || org.status !== 'active') return null;
+        return experiment;
+    },
+
     async getGoals(experimentId: string): Promise<Goal[]> {
         const d = await getDb();
         return d.select().from(s.goals).where(eq(s.goals.experiment_id, experimentId)).orderBy(desc(s.goals.is_primary), asc(s.goals.created_at));

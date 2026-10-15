@@ -20,7 +20,7 @@ const publicFiles = [
     'app/page.tsx', 'app/pricing/page.tsx', 'app/roadmap/page.tsx',
     ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
-    'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx',
+    'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
 ];
 
 describe('public content hides internals', () => {
