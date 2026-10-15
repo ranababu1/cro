@@ -1,3 +1,4 @@
+import { profileGate } from '@/lib/profileGate';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateId } from '@/lib/ids';
@@ -29,6 +30,8 @@ export async function POST(request: NextRequest) {
     try {
         const ctx = await requireUserContext(request);
         if (ctx instanceof NextResponse) return ctx;
+        const gate = await profileGate(ctx);
+        if (gate) return gate;
 
         const parsed = createExperimentSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) {

@@ -99,6 +99,13 @@
       "when": 1791971400000,
       "tag": "0013_domain_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1791971500000,
+      "tag": "0014_user_profile",
+      "breakpoints": true
     }
   ]
 }

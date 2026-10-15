@@ -1,3 +1,4 @@
+import { profileGate } from '@/lib/profileGate';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
@@ -64,6 +65,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
                 );
             }
             if (updates.status === 'running') {
+                const gate = await profileGate(ctx);
+                if (gate) return gate;
                 // Plan limits: running tests at a time on every start or resume; lifetime and monthly limits on first start.
                 const firstStart = !experiment.started_at;
                 const quota = await checkExperimentStartQuota(await orgIdForProject(experiment.project_id), firstStart);

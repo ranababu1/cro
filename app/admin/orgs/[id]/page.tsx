@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getTenantSummary } from '@/lib/admin';
 import { db } from '@/lib/db';
-import { PageHeader, Card, CardHeader, StatusBadge, Badge, Table, THead, TBody, TR, TH, TD, Stat, Alert, EmptyState } from '@/app/components/ui';
+import { PageHeader, Card, CardHeader, StatusBadge, Badge, Table, THead, TBody, TR, TH, TD, Stat, Alert, EmptyState, ButtonLink, CardBody } from '@/app/components/ui';
 import TenantControls from './TenantControls';
 import SpecialFriendPanel from './SpecialFriendPanel';
 import { parseAllowances } from '@/lib/allowances';
@@ -42,6 +42,28 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
 
             <TenantControls org={org} />
             <SpecialFriendPanel orgId={org.id} specialFriend={org.special_friend} allowances={parseAllowances(org.custom_allowances)} />
+
+            <Card className="mt-6">
+                <CardHeader title="Member profiles" actions={<ButtonLink href="/api/admin/profiles" variant="secondary" size="sm" prefetch={false}>Export all profiles (CSV)</ButtonLink>} />
+                <CardBody>
+                    <div className="grid gap-4 md:grid-cols-2" data-testid="member-profiles">
+                        {members.map((m) => (
+                            <dl key={m.user_id} className="grid grid-cols-[9rem_1fr] gap-x-3 gap-y-1 rounded-lg border border-zinc-200 p-3 text-sm">
+                                <dt className="col-span-2 mb-1 font-medium text-zinc-900">{m.email}</dt>
+                                {([
+                                    ['Name', [m.first_name, m.last_name].filter(Boolean).join(' ')],
+                                    ['Country', m.country], ['Phone', m.phone], ['Company or website', m.company], ['Job role', m.job_role],
+                                    ['Company size', m.company_size], ['Heard about us', m.heard_from], ['Primary goal', m.primary_goal],
+                                    ['Marketing emails', m.marketing_opt_in ? 'Opted in' : 'No'],
+                                    ['Profile', m.profile_completed_at ? `Completed ${new Date(m.profile_completed_at).toLocaleDateString()}` : 'Not completed'],
+                                ] as const).map(([k, v]) => (
+                                    <div key={k} className="contents"><dt className="text-zinc-500">{k}</dt><dd className="text-zinc-800">{v || '-'}</dd></div>
+                                ))}
+                            </dl>
+                        ))}
+                    </div>
+                </CardBody>
+            </Card>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
                 <Card>

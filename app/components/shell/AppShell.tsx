@@ -8,7 +8,7 @@ import { useOverlay } from '../overlay';
 import { Logo } from '../ui/Logo';
 import { cn } from '../ui/cn';
 import { setProjectCookie } from '@/lib/currentProject';
-import { HomeIcon, FlaskIcon, KeyIcon, ShieldIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
+import { HomeIcon, FlaskIcon, KeyIcon, ShieldIcon, UserIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
 
 interface ShellProject { id: string; name: string; org_id: string; org_name: string }
 
@@ -25,6 +25,7 @@ const nav = [
     { href: '/experiments', label: 'Experiments', icon: FlaskIcon },
     { href: '/settings/domains', label: 'Domains', icon: ShieldIcon },
     { href: '/settings/keys', label: 'API keys', icon: KeyIcon },
+    { href: '/settings/profile', label: 'Profile', icon: UserIcon },
 ];
 
 function useClickOutside(onOutside: () => void) {

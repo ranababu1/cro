@@ -135,3 +135,11 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## Install once copy
 - lib/installCopy.ts INSTALL_ONCE is shown under every InstallSnippet (dashboard, domains, new test wizard, experiment page) and in Quick start and Install guides.
+
+## Profile onboarding
+- users gains first_name, last_name, country (ISO 3166), phone (E.164 via libphonenumber-js), company, job_role, company_size, heard_from, primary_goal, marketing_opt_in (default false), profile_completed_at, onboarding_pending, profile_prompt_dismissed_at (migration 0014).
+- New Google sign-ups get first and last name prefilled and onboarding_pending; the (app) layout redirects them to /onboarding until they save or skip. Existing users see a dismissable banner.
+- lib/profile.ts: zod schema (strips markup and control characters, select whitelists), safeNext for return paths, CSV cells guarded against formula injection.
+- lib/profileGate.ts: POST /api/experiments and PATCH to running return 403 profile_incomplete until first name, last name and country are set. Platform admins and the super admin are exempt; secret-key calls pass when an org member has a completed profile.
+- /settings/profile (sidebar Profile), /api/profile GET/PUT, /api/profile/skip, /api/profile/dismiss. Admin org page shows member profiles; /api/admin/profiles exports CSV.
+- tests/setup.ts gives test users a completed profile by default (pass first_name: null for none).

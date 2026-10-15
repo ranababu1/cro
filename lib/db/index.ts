@@ -55,10 +55,13 @@ export const db = {
         return (await d.query.users.findFirst({ where: eq(s.users.email, email) })) ?? null;
     },
 
-    async createUser(data: { email: string; name: string; image?: string | null }): Promise<User> {
+    async createUser(data: { email: string; name: string; image?: string | null; first_name?: string | null; last_name?: string | null; onboarding_pending?: boolean }): Promise<User> {
         const d = await getDb();
         const id = generateId('usr');
-        await d.insert(s.users).values({ id, email: data.email, name: data.name, image: data.image ?? null });
+        await d.insert(s.users).values({
+            id, email: data.email, name: data.name, image: data.image ?? null,
+            first_name: data.first_name ?? null, last_name: data.last_name ?? null, onboarding_pending: data.onboarding_pending ?? false,
+        });
         return (await d.query.users.findFirst({ where: eq(s.users.id, id) }))!;
     },
 
@@ -735,7 +738,12 @@ export const db = {
     async getOrgMembers(orgId: string) {
         const d = await getDb();
         return d
-            .select({ user_id: s.users.id, email: s.users.email, name: s.users.name, role: s.memberships.role, joined_at: s.memberships.created_at })
+            .select({
+                user_id: s.users.id, email: s.users.email, name: s.users.name, role: s.memberships.role, joined_at: s.memberships.created_at,
+                first_name: s.users.first_name, last_name: s.users.last_name, country: s.users.country, phone: s.users.phone, company: s.users.company,
+                job_role: s.users.job_role, company_size: s.users.company_size, heard_from: s.users.heard_from, primary_goal: s.users.primary_goal,
+                marketing_opt_in: s.users.marketing_opt_in, profile_completed_at: s.users.profile_completed_at,
+            })
             .from(s.memberships)
             .innerJoin(s.users, eq(s.users.id, s.memberships.user_id))
             .where(eq(s.memberships.org_id, orgId))
@@ -764,6 +772,30 @@ export const db = {
     async getAuditLog(orgId: string, limit = 50) {
         const d = await getDb();
         return d.select().from(s.auditLog).where(eq(s.auditLog.org_id, orgId)).orderBy(desc(s.auditLog.created_at)).limit(limit);
+    },
+    async updateUserProfile(id: string, p: import('../profile').ProfileInput) {
+        const d = await getDb();
+        const nowIso = new Date().toISOString();
+        await d.update(s.users).set({ ...p, profile_completed_at: nowIso, onboarding_pending: false }).where(eq(s.users.id, id));
+    },
+    async skipOnboarding(id: string) {
+        const d = await getDb();
+        await d.update(s.users).set({ onboarding_pending: false }).where(eq(s.users.id, id));
+    },
+    async dismissProfilePrompt(id: string) {
+        const d = await getDb();
+        await d.update(s.users).set({ profile_prompt_dismissed_at: new Date().toISOString() }).where(eq(s.users.id, id));
+    },
+    /** All users with their first org, for the admin profile export. */
+    async listUserProfiles() {
+        const d = await getDb();
+        const rows = await d.select({ user: s.users, org_id: s.memberships.org_id, org_name: s.organizations.name, plan: s.organizations.plan })
+            .from(s.users)
+            .leftJoin(s.memberships, eq(s.memberships.user_id, s.users.id))
+            .leftJoin(s.organizations, eq(s.organizations.id, s.memberships.org_id))
+            .orderBy(asc(s.users.created_at));
+        const seen = new Set<string>();
+        return rows.filter((r) => (seen.has(r.user.id) ? false : (seen.add(r.user.id), true)));
     },
     async getAbuseLog(limit = 200) {
         const d = await getDb();

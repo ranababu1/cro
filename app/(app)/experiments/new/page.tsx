@@ -1,4 +1,6 @@
 'use client';
+import { ProfileRequired } from '@/app/components/profile/ProfileRequired';
+import { PROFILE_REQUIRED_MESSAGE } from '@/lib/profile';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -45,6 +47,10 @@ export default function NewExperimentWizard() {
     const [traffic, setTraffic] = useState(100);
     const [targeting, setTargeting] = useState<Targeting>({});
     const [error, setError] = useState('');
+    const [profileMissing, setProfileMissing] = useState(false);
+    useEffect(() => {
+        fetch('/api/profile').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.complete === false) setProfileMissing(true); }).catch(() => undefined);
+    }, []);
     const [busy, setBusy] = useState(false);
     const [newHost, setNewHost] = useState('');
 
@@ -189,7 +195,8 @@ export default function NewExperimentWizard() {
                 ))}
             </ol>
 
-            {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
+            {(profileMissing || error === PROFILE_REQUIRED_MESSAGE) && <ProfileRequired next="/experiments/new" className="mb-4" />}
+            {error && error !== PROFILE_REQUIRED_MESSAGE && <Alert tone="danger" className="mb-4">{error}</Alert>}
 
             {step === 'domain' && (
                 <Card>
