@@ -106,6 +106,7 @@ What works now:
 - Targeting by device, UTM, referrer and new or returning visitors
 - Sample ratio mismatch alerts, so you hear when the traffic split looks broken
 - Safe edits to running tests, and shareable results links
+- Revenue goals are not available today. To measure paid conversions, track the purchase as a custom event
 - Results with conversion rate, lift, a Wilson 95% interval for each variation, and a two-proportion z-test of each variation against the control
 - Live stats while a test runs
 - Separate dev, staging and production environments, an audit log, and a REST API
@@ -114,7 +115,6 @@ What works now:
 
 What is not built yet, and is listed on our [roadmap](https://freeabtest.com/roadmap):
 
-- Revenue goals (coming)
 - Heatmaps (Phase 3) and session recordings (Phase 4), which will be on paid plans only
 - Funnels and a visual editor (Phase 4). Today you build variations as pages or in code.
 - A WordPress plugin (Phase 5). Today WordPress sites install the snippet by following the docs guide.
