@@ -67,7 +67,7 @@ describe('roadmap stays high level', () => {
     it('lists five phases with a status each', () => {
         for (let i = 1; i <= 5; i++) expect(roadmapSrc).toContain(`phase: 'Phase ${i}'`);
         expect(roadmapSrc).toMatch(/status: 'Done'/);
-        expect(roadmapSrc).toMatch(/status: 'In progress'/);
+        expect(roadmapSrc).toMatch(/status: 'Planned'/);
     });
 
     it('roadmap and other public pages show no timelines, competitors or scaling details', () => {

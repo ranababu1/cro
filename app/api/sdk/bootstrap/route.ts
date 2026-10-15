@@ -4,6 +4,7 @@ import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/request
 import { bootstrapSchema, formatZodError } from '@/lib/validation';
 import { normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { checkSdkOrigin } from '@/lib/sdkOrigin';
+import { heatmapSampleRate, isSampled } from '@/lib/heatmaps';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
@@ -45,8 +46,13 @@ export async function POST(request: NextRequest) {
         }
 
         // Heavy capture (heatmaps) is offered only to entitled orgs; free orgs never get a capture config.
-        const capture = (await canUseFeature(auth.ctx.orgId, 'heatmaps')) ? { heatmaps: true } : undefined;
-        const reply = (b: BootstrapResponse) => sdkJson(capture ? { ...b, capture } : b);
+        // Sampling is per visitor and experiment, so the capture module only loads for sampled sessions.
+        const entitled = await canUseFeature(auth.ctx.orgId, 'heatmaps');
+        const reply = (b: BootstrapResponse) => {
+            if (!entitled || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
+            const rate = heatmapSampleRate();
+            return sdkJson({ ...b, capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } });
+        };
 
         // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.
         await recordGoalHits({ orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, environmentId: auth.ctx.environmentId, userId: user_id, url })

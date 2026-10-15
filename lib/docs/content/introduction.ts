@@ -40,6 +40,6 @@ export const introduction: DocPage = {
             'An audit log of every change to experiments and keys.',
         ] },
         { type: 'h2', text: 'What is coming later' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Heatmaps, session recordings, funnels and a visual editor are on the [roadmap](/roadmap).' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Session recordings, funnels and a visual editor are on the [roadmap](/roadmap). Heatmaps are live on paid plans.' },
     ],
 };

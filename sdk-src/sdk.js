@@ -175,6 +175,19 @@
         }
     }
 
+    // Heatmap capture is a separate module, loaded only when the server says this session is sampled
+    // on a paid plan. It records clicks and scroll depth, never keystrokes or field values.
+    var heatLoaded = false;
+    function loadHeatmaps(data) {
+        if (heatLoaded) return;
+        heatLoaded = true;
+        window.__ABTestHeat = { apiUrl: config.apiUrl, apiKey: config.apiKey, experiment_id: data.experiment_id, variation_id: data.variation_id };
+        var sc = document.createElement('script');
+        sc.src = config.apiUrl + '/heatmap.js';
+        sc.async = true;
+        (document.head || document.documentElement).appendChild(sc);
+    }
+
     function bootstrap() {
         if (!config.apiUrl || !config.apiKey) {
             console.error('[ABTest] Missing apiUrl or data-key');
@@ -198,6 +211,7 @@
                     assignmentCache[data.experiment_id] = data;
                     track(data.experiment_id, data.variation_id, 'page_view');
                     bindGoals(data);
+                    if (data.capture && data.capture.heatmaps) loadHeatmaps(data);
                 }
                 return data;
             })
