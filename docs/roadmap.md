@@ -6,6 +6,8 @@ Internal numbering below follows the approved plan, where "Phase 1" = public Pha
 
 Scaling fixes 1 to 5 from docs/scaling.md shipped 15 Oct 2026 (config cache, visitor counters, results rollups, batched telemetry, SDK batching).
 
+Heavy features (heatmaps, recordings, raw capture) are paid only via lib/entitlements.ts (15 Oct 2026).
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

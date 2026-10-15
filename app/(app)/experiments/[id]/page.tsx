@@ -4,6 +4,7 @@ import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { describeTargeting, parseTargeting } from '@/lib/targeting';
 import { EditTest } from './EditTest';
 import { ShareResults } from './ShareResults';
+import { HeatmapsPanel } from './HeatmapsPanel';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -144,6 +145,7 @@ export default function ExperimentDetail() {
                 items={[
                     { id: 'results', label: 'Results' },
                     { id: 'setup', label: 'Setup' },
+                    { id: 'heatmaps', label: 'Heatmaps' },
                     ...(experiment.status !== 'completed' ? [{ id: 'edit', label: 'Edit test' }] : []),
                     { id: 'settings', label: 'Settings' },
                 ]}
@@ -151,6 +153,7 @@ export default function ExperimentDetail() {
 
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
+            {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
             {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} targeting={experiment.targeting} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}

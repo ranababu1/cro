@@ -44,6 +44,8 @@ const comingSoon: { name: string; p: number; tier: number }[] = [
     { name: 'Feature flags', p: 2, tier: 2 },
     { name: 'Scheduled reports', p: 2, tier: 2 },
     { name: 'Roles', p: 2, tier: 2 },
+    { name: 'Heatmaps (click, scroll, confetti, overlay)', p: 3, tier: 1 },
+    { name: 'Session recordings', p: 4, tier: 1 },
     { name: 'Visual editor', p: 3, tier: 2 },
     { name: 'Bandits and CUPED', p: 3, tier: 2 },
     { name: 'SSO', p: 2, tier: 3 },
@@ -110,7 +112,7 @@ export default function PricingPage() {
                             </tbody>
                         </table>
                     </div>
-                    <p className="mt-4 text-sm text-zinc-600">Coming soon means planned, not shipped. See the <Link href="/roadmap" className="font-medium text-blue-600 hover:underline">roadmap</Link> for details. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
+                    <p className="mt-4 text-sm text-zinc-600">Heatmaps and session recordings are on paid plans only (Starter and up). Coming soon means planned, not shipped. See the <Link href="/roadmap" className="font-medium text-blue-600 hover:underline">roadmap</Link> for details. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
                 </section>
 
                 <section className="mt-16 rounded-2xl border border-teal-200 bg-teal-50/60 p-7">

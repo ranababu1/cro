@@ -99,3 +99,7 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Results: `lib/rollups.ts`. `experiment_stats_daily` holds closed UTC days per scope (env id or *) and bucket (v any event, t:type, g:goal, d daily distinct). Visitors count on their first-seen day, so sums equal raw distinct counts. `rollup_state` tracks the last closed day. Rollups run lazily on read (this is also the backfill). Raw reference queries remain as `db.getEventStatsRaw` and `db.getLiveCountsRaw`; tests assert equality. Caveat: deleting a goal after its days are rolled up keeps the old goal rows in history.
 - Telemetry: `bumpMetric` buffers and flushes in one batch via Next.js `after()` (timer fallback). `TELEMETRY_SYNC=1` writes immediately (tests).
 - SDK: events queued, page views sent within 1 s, conversions immediately, rest via sendBeacon (text/plain, key in query) on page hide. `/api/track` accepts `{ events: [...] }` (max 50) and inserts in one statement.
+
+## Entitlements (2026-10-15)
+- `lib/entitlements.ts`: `computeEntitlements` (pure), `getOrgEntitlements` (30 s cache), `canUseFeature`. HEAVY_FEATURES = heatmaps, recordings, raw_capture; add every future heavy or raw-capture feature there. Rule: plan != free, or an org member who is a platform admin or imrn.dev@gmail.com (unlimited, no caps).
+- Enforced on the server: bootstrap includes `capture` only for entitled orgs, `/api/capture` returns 403 otherwise. `/api/plan` returns `features` for the UI. Free plans see an upgrade note on the experiment Heatmaps tab.
