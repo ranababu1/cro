@@ -91,3 +91,4 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - SRM: sampleRatioMismatch in lib/statistics.ts, srm field in results (lib/results.ts buildExperimentResults), warning component app/components/SrmWarning.tsx.
 - Share links: share_links table (0008), /api/experiments/[id]/share (GET/POST/DELETE), public page app/share/[token] using lib/shareView.ts. Covered by publicContent tests.
 - Install guides doc page (lib/docs/content/installGuides.ts): GTM and WordPress.
+- Pageview quotas (lib/pageviewQuota.ts): usage_monthly counter + organizations.monthly_pageview_limit (0009). Free 25k, paid 500k (lib/plans.ts). Paused at cap (bootstrap reason quota_paused; track/event 202 paused). Platform admin members unlimited. Overview usage card (app/components/PageviewUsage.tsx), admin cap field.

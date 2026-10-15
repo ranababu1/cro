@@ -1,3 +1,4 @@
+import { clearPageviewCache } from '@/lib/pageviewQuota';
 import { NextRequest, NextResponse } from 'next/server';
 import { requirePlatformAdmin } from '@/lib/platformAdmin';
 import { getTenantSummary } from '@/lib/admin';
@@ -30,12 +31,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const update = parsed.data;
 
     await db.updateOrganization(id, update);
+    clearPageviewCache();
 
     const before = {
         status: org.status,
         plan: org.plan,
         monthly_visitor_limit: org.monthly_visitor_limit,
         monthly_experiment_limit: org.monthly_experiment_limit,
+        monthly_pageview_limit: org.monthly_pageview_limit,
     };
     let action = 'admin:update';
     if (update.status && update.status !== org.status) action = update.status === 'suspended' ? 'admin:suspend' : 'admin:reactivate';

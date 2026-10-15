@@ -127,6 +127,8 @@ export const adminUpdateOrgSchema = z
         plan: z.string().trim().min(1).max(50),
         monthly_visitor_limit: limit,
         monthly_experiment_limit: limit,
+        // null = plan default, -1 = unlimited
+        monthly_pageview_limit: z.number().int().min(-1).max(1_000_000_000).nullable(),
     })
     .partial()
     .strict()

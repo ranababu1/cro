@@ -5,6 +5,8 @@ import { db, monthStartIso } from '@/lib/db';
 import { PageHeader, Card, CardHeader, ButtonLink, Stat, StatusBadge, Table, THead, TBody, TR, TH, TD, EmptyState } from '@/app/components/ui';
 import { CheckIcon, PlusIcon, FlaskIcon } from '@/app/components/shell/icons';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
+import { PageviewUsage } from '@/app/components/PageviewUsage';
+import { getPageviewStatus } from '@/lib/pageviewQuota';
 
 export const metadata: Metadata = { title: 'Overview' };
 
@@ -17,6 +19,8 @@ export default async function Dashboard() {
     if (project) await db.ensureProjectSdkKeys(project.id, ctx.user.id);
     const keys = project ? (await db.listApiKeys(project.id)).filter((k) => !k.revoked_at) : [];
     const usage = project ? await db.getOrgUsage(project.org_id, monthStartIso()) : { visitors: 0, events: 0 };
+    const pageviews = project ? await getPageviewStatus(project.org_id, { fresh: true }) : null;
+    const org = project ? await db.getOrganization(project.org_id) : null;
     const count = (s: string) => experiments.filter((e) => e.status === s).length;
 
     const steps = [
@@ -41,6 +45,8 @@ export default async function Dashboard() {
                 <Stat label="Completed" value={count('completed')} />
                 <Stat label="Visitors this month" value={usage.visitors.toLocaleString()} hint="Across your organization" />
             </div>
+
+            {pageviews && <PageviewUsage status={pageviews} plan={org?.plan || 'free'} />}
 
             {project && (
                 <Card className="mt-6">
