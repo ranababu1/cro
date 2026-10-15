@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { EVENT_NAME_RE, isValidRegex } from './goals';
+import { targetingSchema } from './targeting';
 
 // Forms send empty strings for blank optional fields.
 const blankToUndefined = (v: unknown) => (v === '' ? undefined : v);
@@ -49,6 +50,7 @@ export const createExperimentSchema = z.object({
     project_id: id.optional(),
     control_url: z.string().url().max(2000),
     traffic_allocation: z.number().int().min(0).max(100).optional(),
+    targeting: targetingSchema.optional(),
     variations: z
         .array(
             z.object({
@@ -73,6 +75,7 @@ export const updateExperimentSchema = z
         description: z.string().max(2000),
         status: z.enum(['draft', 'running', 'paused', 'completed']),
         traffic_allocation: z.number().int().min(0).max(100),
+        targeting: targetingSchema,
     })
     .partial()
     .strict();
@@ -86,6 +89,8 @@ export const assignSchema = z.object({
 export const bootstrapSchema = z.object({
     url: z.string().url().max(2000),
     user_id: visitorId,
+    referrer: z.string().max(2000).optional(),
+    visitor: z.enum(['new', 'returning']).optional(),
 });
 
 export const trackSchema = z.object({

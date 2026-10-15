@@ -87,6 +87,7 @@ export const experiments = sqliteTable('experiments', {
     status: text('status', { enum: ['draft', 'running', 'paused', 'completed'] }).notNull().default('draft'),
     control_url: text('control_url'),
     traffic_allocation: integer('traffic_allocation').notNull().default(100),
+    targeting: text('targeting'), // JSON audience rules, see lib/targeting.ts. null = everyone
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),
     started_at: text('started_at'),

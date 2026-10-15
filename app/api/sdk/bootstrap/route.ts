@@ -8,6 +8,7 @@ import { checkVisitorQuota } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { recordGoalHits } from '@/lib/goalHits';
+import { failedRule, parseTargeting } from '@/lib/targeting';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
         // Server-side / same-origin tools may omit Origin; still require a registered domain list and a matching URL host.
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
-        const { url, user_id } = parsed.data;
+        const { url, user_id, referrer, visitor } = parsed.data;
         const page = normalizePageUrl(url);
         if (!page) return sdkJson({ error: 'Invalid url' }, 400);
 
@@ -65,6 +66,15 @@ export async function POST(request: NextRequest) {
         let variation = assignment ? variations.find((v) => v.id === assignment!.variation_id) : null;
 
         if (!assignment) {
+            const failed = failedRule(parseTargeting(experiment.targeting), {
+                url,
+                userAgent: request.headers.get('user-agent'),
+                referrer: referrer ?? null,
+                visitorType: visitor ?? null,
+            });
+            if (failed) {
+                return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'not_targeted', control_url: controlUrl || undefined } satisfies BootstrapResponse);
+            }
             const quota = await checkVisitorQuota(auth.ctx.orgId);
             if (!quota.allowed) {
                 return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);

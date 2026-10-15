@@ -1,6 +1,7 @@
 'use client';
 
 import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
+import { describeTargeting, parseTargeting } from '@/lib/targeting';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -22,7 +23,7 @@ export default function ExperimentDetail() {
     const router = useRouter();
     const [experiment, setExperiment] = useState<Experiment | null>(null);
     const [variations, setVariations] = useState<Variation[]>([]);
-    const [goals] = useState<{ id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[]>([]);
+    const [goals, setGoals] = useState<{ id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[]>([]);
     const [results, setResults] = useState<ExperimentResults | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -38,6 +39,7 @@ export default function ExperimentDetail() {
             const data = await res.json();
             setExperiment(data.experiment);
             setVariations(data.variations);
+            setGoals(data.goals || []);
             if (data.experiment.status !== 'draft') {
                 const r = await fetch(`/api/experiments/${id}/results`);
                 if (r.ok) { setResults(await r.json()); setUpdatedAt(new Date()); }
@@ -144,7 +146,7 @@ export default function ExperimentDetail() {
             />
 
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} />}
-            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} />}
+            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
@@ -239,9 +241,13 @@ function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experime
     );
 }
 
-function SetupPanel({ variations, goals }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
+function SetupPanel({ variations, goals, targeting }: { targeting?: string | null; experimentId?: string; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
     return (
         <div className="space-y-6">
+            <Card>
+                <CardHeader title="Who can enter" description="Checked before a new visitor joins. People already in the test keep their version." />
+                <CardBody className="text-sm text-zinc-700">{describeTargeting(parseTargeting(targeting))}</CardBody>
+            </Card>
             <Card>
                 <CardHeader title="Variations" description="Weights split the visitors who enter the experiment." />
                 <Table>

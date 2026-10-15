@@ -8,6 +8,15 @@ export const experiments: DocPage = {
     blocks: [
         { type: 'h2', text: 'Creating an experiment' },
         { type: 'p', text: 'Go to **Experiments** and choose **New experiment**. You set the name, the hypothesis, the traffic allocation and the variations. New experiments always start as **Draft**. They are created in the project selected in the top bar.' },
+        { type: 'h2', text: 'Targeting', id: 'targeting' },
+        { type: 'p', text: 'In the **Traffic** step, **Who can enter** limits a test to certain visitors. Leave it empty to include everyone. All rules you set must match.' },
+        { type: 'table', head: ['Rule', 'How it works'], rows: [
+            ['Devices', 'Desktop, mobile or tablet, based on the browser. None selected means all devices.'],
+            ['utm_source, utm_medium, utm_campaign', 'The value in the page address must equal what you enter. Case does not matter.'],
+            ['Referrer contains', 'The page the visitor came from must contain this text, such as `facebook.com`.'],
+            ['New or returning', 'New means this is the visitor\'s first browser session on your site. Returning means they visited in an earlier session.'],
+        ] },
+        { type: 'p', text: 'Visitors who do not match see the control page and are not counted. Rules are checked only when a visitor first joins, so people already in the test keep their version if you change the rules later.' },
         { type: 'h2', text: 'Statuses' },
         { type: 'diagram', name: 'statuses', caption: 'Allowed status changes. Completed is final.' },
         { type: 'table', head: ['Status', 'Visitors assigned?', 'Notes'], rows: [
