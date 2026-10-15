@@ -1,3 +1,92 @@
+# Roadmap (approved 15 Oct 2026)
+
+Internal. The public /roadmap page shows phase names, features and status only (no timelines, approach, competitors or scaling).
+Public numbering: Phase 1 A/B testing core (done), Phase 2 more goals and targeting (in progress), Phase 3 heatmaps, Phase 4 recordings, funnels and visual editor, Phase 5 engagement extras.
+Internal numbering below follows the approved plan, where "Phase 1" = public Phase 2. Scaling work: see docs/scaling.md.
+
+## Status of the approved Phase 1 (public Phase 2)
+- [ ] Page reach, form submit and custom event goals
+- [ ] Targeting: device, UTM, referrer, new vs returning
+- [ ] Edit running tests safely (weights, pause variation, add goal)
+- [ ] Sample ratio mismatch warning
+- [ ] Public share links for results
+- [ ] GTM and WordPress install guides
+- [ ] Monthly pageview quotas that pause collection at the cap
+
+## Approved phases
+
+### Phase 1: Finish A/B testing to Crazy Egg level (about 2 to 3 weeks)
+Scope:
+- New goal types: page reach (URL equals/contains/regex), form submit (selector), custom event (`fab.track('name')`).
+- Targeting per test: device type, UTM params, referrer, new vs returning, URL query. Evaluated in the SDK before bucketing.
+- Edit while running: change weights, pause a variant, add a goal.
+- Sample ratio mismatch warning in Results.
+- Public share link for results (signed read-only token, revocable).
+- Install guides for GTM and WordPress (manual header) in /docs.
+- Quotas by tracked pageviews per month, pause collection at cap (no overage), shown in settings and admin.
+Technical approach: all in the existing SDK and event ingest. Targeting rules stored as JSON on the experiment and shipped in the config the SDK already loads. No new tables except share tokens.
+
+### Phase 2: Heatmaps and light analytics (about 4 to 5 weeks)
+Scope:
+- SDK capture module, off unless a heatmap or test is active for that URL: clicks (x/y relative to the clicked element plus a stable CSS selector path, page width bucket), max scroll depth per pageview, rage clicks (3+ clicks in 1s within 30px), dead clicks (no navigation or DOM change after click).
+- Reports: List (element, clicks, %, CSV), Click map, Scroll map, Confetti, Overlay. Device split desktop/tablet/mobile.
+- Heatmaps auto-created for each variant of a running test.
+- Filters: date, device, source/UTM, converted yes/no.
+- Per-heatmap sampling rate and stop rules (days or visits), like Crazy Egg's 60 days / 25,000 visits default.
+- Light web analytics: pageviews, unique visitors, top pages, sources, devices, country (from Vercel geo header).
+- GA4 push: dataLayer event with experiment and variant.
+Technical approach:
+- Rendering: show the real page in a sandboxed iframe inside the dashboard and paint clicks on a canvas over it, mapping by selector so layout changes and responsive widths still line up. For pages that cannot be framed, fall back to a DOM snapshot the SDK sends once per heatmap per device (HTML plus inlined CSS links, size capped). This avoids building a screenshot service or a browser extension.
+- Storage: raw clicks are the cost. Batch in the SDK (send every 5s or on pagehide via sendBeacon), keep raw click rows 30 days on free, and roll up into an aggregate table keyed by heatmap, device, selector and a 1% grid cell. Scroll depth stored as a histogram (10 buckets) per day. Rough math: 1 click row about 60 bytes; 100k pageviews with 3 clicks each is about 18 MB raw per month, which fits Turso free limits for early users. Default sampling on free plan to keep writes under the free tier's monthly row-write limit, and cap heatmaps per plan.
+- Ingest stays a Vercel route; move to an edge route with batched inserts to keep function invocations low.
+- Privacy: never capture text content of inputs, only element selectors and positions; IPs hashed as today.
+
+### Phase 3: Recordings, funnels and visual editor (about 6 to 8 weeks)
+Scope:
+- Session recordings with replay player, filters (converted, page, device, rage click), links from heatmap dots and test results.
+- Funnels built from existing goals: per step visitors, drop-off, trend.
+- Visual editor tests (from the existing roadmap): text, image, link, hide, move, custom CSS/JS, device preview.
+- Multi-armed bandit split option.
+- Heatmap compare side by side.
+Technical approach:
+- Recordings use the open source rrweb library loaded lazily only for sampled sessions, so the base SDK stays small.
+- Privacy: mask all input values and elements marked `data-fab-mask` by default, block password and card fields entirely, honor Do Not Track and a consent flag, configurable retention.
+- Storage: recordings are too large for Turso. Store compressed chunks in object storage (Cloudflare R2 free tier 10 GB, or Vercel Blob) and keep only metadata in Turso. Expect roughly 100 to 300 KB per compressed session, so 1,000 recordings is about 0.2 GB. Hard caps per plan (Crazy Egg gives 50 to 10,000 per month).
+- Visual editor: the SDK applies a list of DOM changes before paint using the same anti-flicker hide it uses today.
+- Bandit: Thompson sampling run on a schedule (Vercel cron) that rewrites weights.
+
+### Phase 4: Engagement tools and extras (about 4 to 6 weeks, pick per demand)
+Scope:
+- JavaScript error tracking: window.onerror and unhandledrejection, grouped by message and stack, linked to recordings.
+- Popup CTAs: bar, popup, button with page/device/time/exit-intent triggers and click rate.
+- Surveys: small template set (NPS, one question, open text), triggers, link to recording.
+- WordPress plugin that injects the snippet.
+- Export of heatmap data as JSON for use in any AI tool.
+Technical approach: each is a lazy-loaded SDK module fetched only when the project has one active, so sites that only run tests do not pay the weight.
+
+## 5. Skip or defer, and why
+- AI analysis summaries: needs a paid model and per-report cost; JSON export gives most of the value for free. Revisit later.
+- Live view and Astro map: fun but low value, and real-time push costs money on Vercel.
+- Ad pixel and ecommerce goals: many platform-specific integrations; custom event goal covers it.
+- Shopify, Wix, Squarespace, Drupal, Joomla, Magento, Segment apps: maintenance load; GTM plus manual header covers nearly all sites.
+- Page Camera browser extension: replaced by DOM snapshot from the SDK.
+- SAML SSO: only matters for enterprise buyers; Google login is enough for now.
+- 50+ survey templates and AI sentiment: start with 3 templates.
+
+## 6. Risks
+- Free tier limits on Turso writes and Vercel invocations once heatmaps run. Sampling, batching and roll-ups are required, not optional.
+- Recordings and DOM snapshots carry privacy risk. Masking on by default, and a DPA and privacy page before launch.
+- SDK size: capture, recordings, surveys must be separate lazy modules; the base file stays as is.
+- Public pages must not describe internals (R2, rrweb, Turso) per our existing rule.
+
+## 7. Decision needed from Imran
+Approve the phase order (A/B finish, then heatmaps, then recordings and editor, then CTAs, surveys and errors), or reorder. On approval, Phase 1 starts and docs/roadmap.md gets updated in the repo.
+
+
+---
+
+# Previous plan (superseded, kept for history)
+
 ## Shipped
 - Platform telemetry for super-admins (/admin/telemetry): daily aggregates, charts, drill-downs, CSV.
 - URL split flow with domains, click goals, plan variation limits (free 1 / paid 10), and automatic SDK.

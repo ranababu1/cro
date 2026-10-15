@@ -11,7 +11,7 @@ export const sdk: DocPage = {
         { type: 'p', text: 'When you are signed in, Overview, Domains, and each experiment Setup tab show a pre-filled snippet with your public SDK key and `https://www.freeabtest.com`. Copy it as-is. Use the Production / Development toggle to swap keys; you do not paste a key yourself.' },
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
         { type: 'p', text: 'Put the same tag on the control page and every variation page. The SDK reads the key from `data-key`, matches a running test by the current URL, and handles bucketing, redirects and click goals automatically.' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'An npm package, React and Next.js helpers and server SDKs are planned for Phase 2. Today, load the script tag as shown.' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'An npm package and server SDKs are planned. Today, load the script tag as shown.' },
         { type: 'h2', text: 'init(options)', id: 'init' },
         { type: 'p', text: 'Call once per page before anything else. It stores the configuration and makes no network request.' },
         { type: 'table', head: ['Option', 'Required', 'Description'], rows: [
@@ -81,7 +81,6 @@ export const sdk: DocPage = {
     reveal();
   });
 </script>` },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1 adds a flicker-free snippet that downloads the experiment config once and buckets visitors locally, with no request per visitor.' },
         { type: 'h2', text: 'Rate limits and errors', id: 'errors' },
         { type: 'p', text: 'Requests are limited per SDK key and client IP. All SDK methods catch errors and log them to the console with an `[ABTest]` prefix, so a failure never breaks your page.' },
     ],

@@ -8,10 +8,10 @@ export const metadata: Metadata = { title: 'Pricing' };
 const faqs = [
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID and the platform hashes it together with the experiment ID. The same visitor always lands in the same variant, and raising traffic allocation does not move people who are already in the test.' },
     { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of the best variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors. Bayesian and sequential methods are on the roadmap.' },
-    { q: 'Will it slow my site down?', a: 'The current SDK is a small script that requests an assignment per experiment. A version that buckets locally from a cached config, with no extra request per visitor and no flicker, is part of Phase 1.' },
+    { q: 'Will it slow my site down?', a: 'The SDK is a small script that loads asynchronously and makes one request per page. Pages are hidden for at most a fraction of a second while the variation is chosen, so visitors do not see a flash of the wrong version.' },
     { q: 'Can I keep test data separate from production?', a: 'Yes. Every project has dev, staging and production environments, each with its own keys. Results can be filtered by environment.' },
     { q: 'Where is my data stored?', a: 'In our secure database. Data from each organization is kept separate, and test data in dev and staging is kept apart from production.' },
-    { q: 'Is there a visual editor?', a: 'Not yet. Variants are written in code today. The visual editor is planned for Phase 3.' },
+    { q: 'Is there a visual editor?', a: 'Not yet. Each variation is its own page URL today. A visual editor is on the roadmap.' },
 ];
 
 const tiers = [

@@ -7,7 +7,7 @@ export const introduction: DocPage = {
     group: 'Getting started',
     blocks: [
         { type: 'p', text: 'freeabtest.com is an A/B testing platform. You create an experiment with two or more variations, add a small JavaScript snippet to your site, and the platform splits visitors between the variations. It records who saw what and who converted, and tells you whether the difference is real or likely noise.' },
-        { type: 'p', text: 'These docs describe what the product does today. Features that are planned but not built yet are marked **Coming later** with the phase they belong to.' },
+        { type: 'p', text: 'These docs describe what the product does today. Features that are planned but not built yet are marked **Coming later**. See the [roadmap](/roadmap) for the bigger picture.' },
         { type: 'callout', tone: 'info', title: 'New here?', text: 'Follow the [Quick start](/docs/quick-start). It takes you from sign in to reading your first result in about fifteen minutes.' },
         { type: 'h2', text: 'How it works' },
         { type: 'diagram', name: 'flow', caption: 'The SDK asks for an assignment, applies the variation, and reports page views and conversions. The dashboard reads the same data.' },
@@ -40,6 +40,6 @@ export const introduction: DocPage = {
             'An audit log of every change to experiments and keys.',
         ] },
         { type: 'h2', text: 'What is coming later' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1: flicker-free snippet with local bucketing, URL, device and UTM targeting, click and form goals, sample ratio mismatch alerts, a sample size calculator. Phase 2: Bayesian and sequential statistics, feature flags, server SDKs, React and Next.js packages, GA4, GTM and WordPress integrations. Phase 3: visual editor, multi-armed bandits, CUPED, edge delivery.' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Heatmaps, session recordings, funnels and a visual editor are on the [roadmap](/roadmap).' },
     ],
 };

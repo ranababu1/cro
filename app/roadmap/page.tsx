@@ -5,19 +5,25 @@ import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
 export const metadata: Metadata = { title: 'Features and roadmap' };
 
 const available = [
-    { title: 'A/B and A/B/n tests', body: 'Compare a control with up to 25 variants. Set any traffic split, such as 50/50, 70/30 or 90/10.' },
-    { title: 'Sticky assignment', body: 'Visitors are hashed into a variant, so they see the same version on every visit and every device that shares an ID.' },
-    { title: 'Split URL tests', body: 'Send each variant to its own URL when the change is a whole page rather than an element.' },
-    { title: 'Results you can defend', body: 'Conversion rate, lift and Wilson confidence intervals per variant, with a two-proportion z-test against the control.' },
-    { title: 'Environments and keys', body: 'Separate dev, staging and production data. Public SDK keys for browsers, hashed secret keys for servers.' },
-    { title: 'Audit log', body: 'Every change to an experiment, key or plan is recorded with who made it and when.' },
+    { title: 'A/B and split URL tests', body: 'Compare a control page with one variation on the free plan, or up to 10 on paid plans. Set any traffic split, such as 50/50, 70/30 or 90/10.' },
+    { title: 'Sticky assignment', body: 'Visitors are hashed into a variation, so they see the same version on every visit.' },
+    { title: 'Click goals', body: 'Count clicks on any element by CSS selector, such as #headerCTA or .bodyCTA.' },
+    { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
+    { title: 'Live stats', body: 'Visitors, redirects and goal clicks update while the test runs, with a plain answer on who is ahead.' },
+    { title: 'Environments and keys', body: 'Separate development and production data, with the install snippet filled in for you.' },
 ];
 
-const planned = [
-    { phase: 'Phase 1', items: ['Flicker-free snippet with local bucketing', 'URL, device, UTM and browser targeting', 'Click, form, revenue and custom goals', 'Sample ratio mismatch alerts', 'Sample size and duration calculator'] },
-    { phase: 'Phase 2', items: ['Bayesian and sequential analysis', 'Feature flags and percentage rollouts', 'Server SDKs and React/Next.js', 'GA4, GTM, WordPress and webhooks', 'Roles, SSO and scheduled reports'] },
-    { phase: 'Phase 3', items: ['Visual editor', 'Multi-armed bandits and CUPED', 'Edge delivery', 'Warehouse exports', 'AI-assisted test ideas and summaries'] },
+type PhaseStatus = 'Done' | 'In progress' | 'Planned';
+
+const phases: { phase: string; name: string; status: PhaseStatus; items: string[] }[] = [
+    { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Live stats while a test runs', 'One-line install'] },
+    { phase: 'Phase 2', name: 'More goals and targeting', status: 'In progress', items: ['Page visit, form submit and custom event goals', 'Targeting by device, UTM, referrer and new or returning visitors', 'Edit running tests safely', 'Sample ratio mismatch warning', 'Shareable results links', 'Google Tag Manager and WordPress guides'] },
+    { phase: 'Phase 3', name: 'Heatmaps', status: 'Planned', items: ['Click, scroll and confetti heatmaps', 'Heatmaps per variation', 'Rage and dead click detection', 'Traffic overview'] },
+    { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'Planned', items: ['Session recordings with privacy masking', 'Funnels built from your goals', 'Visual editor', 'Auto-shift traffic to the winner'] },
+    { phase: 'Phase 5', name: 'Engagement extras', status: 'Planned', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking', 'WordPress plugin'] },
 ];
+
+const tone: Record<PhaseStatus, 'success' | 'brand' | 'neutral'> = { Done: 'success', 'In progress': 'brand', Planned: 'neutral' };
 
 export default function RoadmapPage() {
     return (
@@ -35,12 +41,16 @@ export default function RoadmapPage() {
                         </div>
                     ))}
                 </div>
-                <h2 className="mt-20 text-[30px] font-bold tracking-tight text-[#0b1630]">What is coming next</h2>
-                <p className="mt-2 text-zinc-600">The platform is built in three phases. This is the plan, not a list of shipped features.</p>
-                <div className="mt-6 grid gap-5 md:grid-cols-3">
-                    {planned.map((p) => (
+                <h2 className="mt-20 text-[30px] font-bold tracking-tight text-[#0b1630]">Roadmap</h2>
+                <p className="mt-2 text-zinc-600">The product grows in five phases. Planned items are not available yet.</p>
+                <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+                    {phases.map((p) => (
                         <div key={p.phase} className="rounded-2xl border border-zinc-200 bg-white p-6">
-                            <Badge tone={p.phase === 'Phase 1' ? 'brand' : 'neutral'}>{p.phase}</Badge>
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-[13px] font-semibold text-blue-600">{p.phase}</span>
+                                <Badge tone={tone[p.status]}>{p.status}</Badge>
+                            </div>
+                            <h3 className="mt-2 text-lg font-semibold text-[#0b1630]">{p.name}</h3>
                             <ul className="mt-4 space-y-2.5 text-sm text-zinc-600">
                                 {p.items.map((i) => <li key={i} className="flex gap-2"><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-zinc-400" />{i}</li>)}
                             </ul>

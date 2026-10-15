@@ -33,6 +33,5 @@ export const goals: DocPage = {
         { type: 'p', text: 'This works because the visitor already has an assignment on the server. `getVariation` returns the same variation without creating a new one.' },
         { type: 'h3', text: 'From your server' },
         { type: 'p', text: 'You can send the same event from a backend with `POST /api/track` and an SDK key, as long as you know the visitor ID and variation ID. See the [REST API](/docs/rest-api#track).' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Phase 1 adds named goals defined in the dashboard (click, form, page visit, custom), multiple goals per experiment, a primary metric and revenue metrics.' },
     ],
 };
