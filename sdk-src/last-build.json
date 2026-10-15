@@ -2,9 +2,9 @@
   "source": "/workspace/cro/sdk-src/sdk.js",
   "out": "/workspace/cro/public/sdk.js",
   "deadCodeInjectionThreshold": 0.4,
-  "lines": 2610,
-  "bytes": 90296,
-  "gzip": 23303,
+  "lines": 2596,
+  "bytes": 89508,
+  "gzip": 23122,
   "selfDefending": false,
   "selfDefendingNote": "Disabled because javascript-obfuscator forces compact:true when selfDefending is on, which prevents the multi-line page-length target."
 }

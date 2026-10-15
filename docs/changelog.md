@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-15 19:43 IST | Goals work like a list: each goal has a name and one CSS selector. Add up to 50 goals per test one at a time, reorder them, pick the primary goal and remove ones you no longer need. Results and live stats show numbers for each named goal. Selector lists such as "#a, #b" are now refused for new goals; existing goals keep working. The SDK checks only the goals that have not fired yet. |
 | pending | 2026-10-15 19:23 IST | Dark mode for the signed-in app (Light, Dark, System toggle in the top bar, saved in localStorage, set before paint so no flash). Marketing pages stay light. Charts and heatmap grid follow the theme. |
 | pending | 2026-10-15 19:04 IST | In-app links to the docs and pricing (sidebar Documentation, See plans) open in a new tab with rel=noopener noreferrer; test guards future links. |
 | pending | 2026-10-15 16:40 IST | Heatmaps (paid only): SDK loads /heatmap.js only for sampled sessions on paid plans; clicks (normalized selector, position), scroll depth, rage and dead clicks; batched beacon ingest into daily rollups plus 30-day raw points; click, scroll, confetti, overlay and element list reports per variation and device. Pricing, roadmap (Phase 3 Done) and docs updated; WordPress plugin moved to available on pricing. |

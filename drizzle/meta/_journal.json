@@ -113,6 +113,13 @@
       "when": 1791971600000,
       "tag": "0015_heatmaps",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1791971700000,
+      "tag": "0016_goal_position",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EVENT_NAME_RE, isValidRegex } from './goals';
+import { EVENT_NAME_RE, isValidRegex, checkGoalSelector, MAX_GOALS } from './goals';
 import { targetingSchema } from './targeting';
 
 // Forms send empty strings for blank optional fields.
@@ -9,16 +9,9 @@ const id = z.string().min(1).max(100);
 // Visitor ids come from browsers. Keep them bounded and printable.
 const visitorId = z.string().min(1).max(200).regex(/^[\x21-\x7e]+$/, 'user_id must be printable ASCII without spaces');
 
-const cssSelector = z
-    .string()
-    .trim()
-    .min(1)
-    .max(300)
-    .refine((s) => !/[<>]/.test(s), 'selector must be a CSS selector');
-
 export const goalSchema = z
     .object({
-        name: z.string().trim().min(1).max(200),
+        name: z.string().trim().min(1, 'Goal name is required').max(200),
         type: z.enum(['click', 'form', 'page', 'event']).default('click'),
         selector: z.string().trim().min(1).max(500),
         match_type: z.preprocess(blankToUndefined, z.enum(['equals', 'contains', 'regex']).optional()),
@@ -26,7 +19,8 @@ export const goalSchema = z
     })
     .superRefine((g, ctx) => {
         if (g.type === 'click' || g.type === 'form') {
-            if (!cssSelector.safeParse(g.selector).success) ctx.addIssue({ code: 'custom', path: ['selector'], message: 'selector must be a CSS selector' });
+            const problem = checkGoalSelector(g.selector);
+            if (problem) ctx.addIssue({ code: 'custom', path: ['selector'], message: problem });
         } else if (g.type === 'page') {
             if (g.match_type === 'regex' && (!isValidRegex(g.selector) || g.selector.length > 300)) ctx.addIssue({ code: 'custom', path: ['selector'], message: 'URL pattern is not a valid regular expression' });
         } else if (!EVENT_NAME_RE.test(g.selector)) {
@@ -66,7 +60,8 @@ export const createExperimentSchema = z.object({
     goals: z
         .array(goalSchema)
         .min(1, 'Add at least one goal')
-        .max(20),
+        .max(MAX_GOALS, `A test can have up to ${MAX_GOALS} goals`)
+        .refine((gs) => gs.filter((g) => g.is_primary).length <= 1, 'Only one goal can be primary'),
 });
 
 export const updateExperimentSchema = z
