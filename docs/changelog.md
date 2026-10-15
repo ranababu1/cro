@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-15 19:23 IST | Dark mode for the signed-in app (Light, Dark, System toggle in the top bar, saved in localStorage, set before paint so no flash). Marketing pages stay light. Charts and heatmap grid follow the theme. |
 | pending | 2026-10-15 19:04 IST | In-app links to the docs and pricing (sidebar Documentation, See plans) open in a new tab with rel=noopener noreferrer; test guards future links. |
 | pending | 2026-10-15 16:40 IST | Heatmaps (paid only): SDK loads /heatmap.js only for sampled sessions on paid plans; clicks (normalized selector, position), scroll depth, rage and dead clicks; batched beacon ingest into daily rollups plus 30-day raw points; click, scroll, confetti, overlay and element list reports per variation and device. Pricing, roadmap (Phase 3 Done) and docs updated; WordPress plugin moved to available on pricing. |
 | pending | 2026-10-15 16:19 IST | WordPress plugin FreeABTest 1.0.0: settings page (key paste or one-click connect prefill, Production/Development, on/off), snippet early in wp_head, uninstall cleanup, multisite safe. Signed-in download at /api/downloads/wordpress (signed-out visitors redirected to /wordpress note), /wordpress page, docs steps, dashboard card, PHPCS job in CI. |

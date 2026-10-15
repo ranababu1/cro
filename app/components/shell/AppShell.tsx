@@ -6,6 +6,7 @@ import { signOut } from 'next-auth/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOverlay } from '../overlay';
 import { Logo } from '../ui/Logo';
+import { ThemeToggle } from './ThemeToggle';
 import { cn } from '../ui/cn';
 import { setProjectCookie } from '@/lib/currentProject';
 import { HomeIcon, FlaskIcon, KeyIcon, ShieldIcon, UserIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
@@ -172,7 +173,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
     const drawerTrigger = useRef<HTMLButtonElement>(null);
     useOverlay(mobileOpen, closeDrawer, drawer, drawerTrigger);
     return (
-        <div className="min-h-screen bg-zinc-50/50">
+        <div className="app-scope min-h-screen bg-zinc-50">
             {/* Desktop sidebar */}
             <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-zinc-200 bg-white lg:flex">
                 <div className="flex h-14 items-center px-5">
@@ -203,7 +204,8 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                         <MenuIcon className="h-5 w-5" />
                     </button>
                     <ProjectSwitcher projects={projects} currentProjectId={currentProjectId} />
-                    <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-3">
+                        <ThemeToggle />
                         <UserMenu user={user} />
                     </div>
                 </header>

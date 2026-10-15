@@ -19,7 +19,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
     const next = safeNext((await searchParams).next);
     if (!user.onboarding_pending || isProfileComplete(user)) redirect(next);
     return (
-        <div className="min-h-screen bg-zinc-50 px-4 py-10">
+        <div className="app-scope min-h-screen bg-zinc-50 px-4 py-10">
             <div className="mx-auto max-w-2xl">
                 <Logo />
                 <h1 className="mt-8 text-2xl font-semibold text-zinc-900">Welcome! Tell us a little about you</h1>
