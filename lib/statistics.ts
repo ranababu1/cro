@@ -235,3 +235,63 @@ export function hasSufficientSampleSize(
 ): boolean {
     return sampleSize >= minimumRequired;
 }
+
+/** Natural log of the gamma function (Lanczos approximation). */
+function logGamma(z: number): number {
+    const g = 7;
+    const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - logGamma(1 - z);
+    z -= 1;
+    let x = c[0];
+    for (let i = 1; i < g + 2; i++) x += c[i] / (z + i);
+    const t = z + g + 0.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+}
+
+/** Upper regularized incomplete gamma Q(a, x), used for chi-square p-values. */
+function upperGammaQ(a: number, x: number): number {
+    if (x <= 0) return 1;
+    if (x < a + 1) {
+        let sum = 1 / a, term = sum;
+        for (let n = 1; n < 500; n++) { term *= x / (a + n); sum += term; if (Math.abs(term) < Math.abs(sum) * 1e-14) break; }
+        return Math.max(0, 1 - sum * Math.exp(-x + a * Math.log(x) - logGamma(a)));
+    }
+    let b = x + 1 - a, c = 1 / 1e-300, d = 1 / b, h = d;
+    for (let i = 1; i < 500; i++) {
+        const an = -i * (i - a);
+        b += 2;
+        d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+        c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+        d = 1 / d;
+        const del = d * c;
+        h *= del;
+        if (Math.abs(del - 1) < 1e-14) break;
+    }
+    return Math.min(1, Math.exp(-x + a * Math.log(x) - logGamma(a)) * h);
+}
+
+/** p-value of a chi-square statistic with df degrees of freedom. */
+export function chiSquarePValue(stat: number, df: number): number {
+    if (df <= 0) return 1;
+    return upperGammaQ(df / 2, stat / 2);
+}
+
+export const SRM_P_THRESHOLD = 0.001;
+export const SRM_MIN_VISITORS = 100;
+
+/**
+ * Sample ratio mismatch: chi-square goodness of fit of observed visitors per variation
+ * against the configured weights. Flags a mismatch when p < 0.001 with at least 100 visitors.
+ */
+export function sampleRatioMismatch(observed: number[], weights: number[]): { p_value: number; chi_square: number; mismatch: boolean; total: number } {
+    const total = observed.reduce((a, b) => a + b, 0);
+    const wsum = weights.reduce((a, b) => a + b, 0);
+    if (total === 0 || wsum <= 0 || observed.length < 2) return { p_value: 1, chi_square: 0, mismatch: false, total };
+    let chi = 0;
+    for (let i = 0; i < observed.length; i++) {
+        const exp = (total * weights[i]) / wsum;
+        if (exp > 0) chi += ((observed[i] - exp) ** 2) / exp;
+    }
+    const p = chiSquarePValue(chi, observed.length - 1);
+    return { p_value: p, chi_square: chi, mismatch: total >= SRM_MIN_VISITORS && p < SRM_P_THRESHOLD, total };
+}

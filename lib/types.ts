@@ -108,5 +108,12 @@ export interface ExperimentResults {
     };
     sample_size: number;
     winner?: string;
+    srm?: {
+        p_value: number;
+        chi_square: number;
+        mismatch: boolean;
+        total: number;
+        variations: { variation_id: string; variation_name: string; observed: number; expected_share: number }[];
+    };
     live?: import('./liveStats').LiveStats;
 }

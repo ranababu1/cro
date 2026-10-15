@@ -335,6 +335,16 @@ export const db = {
         );
     },
 
+    /** Enrolled visitors per variation. */
+    async getAssignmentCounts(experimentId: string, environmentId?: string): Promise<Map<string, number>> {
+        const d = await getDb();
+        const where = environmentId
+            ? and(eq(s.assignments.experiment_id, experimentId), eq(s.assignments.environment_id, environmentId))
+            : eq(s.assignments.experiment_id, experimentId);
+        const rows = await d.select({ variation_id: s.assignments.variation_id, n: count() }).from(s.assignments).where(where).groupBy(s.assignments.variation_id);
+        return new Map(rows.map((r) => [r.variation_id, Number(r.n)]));
+    },
+
     async createAssignment(a: { experiment_id: string; variation_id: string; user_id: string; environment_id?: string | null }): Promise<void> {
         const d = await getDb();
         await d
