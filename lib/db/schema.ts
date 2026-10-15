@@ -14,6 +14,21 @@ export const users = sqliteTable('users', {
     created_at: text('created_at').notNull().default(now),
     last_active_at: text('last_active_at'),
     last_login_at: text('last_login_at'),
+    // Profile (onboarding and Settings > Profile). first_name, last_name and country are required to create or start tests.
+    first_name: text('first_name'),
+    last_name: text('last_name'),
+    country: text('country'),
+    phone: text('phone'),
+    company: text('company'),
+    job_role: text('job_role'),
+    company_size: text('company_size'),
+    heard_from: text('heard_from'),
+    primary_goal: text('primary_goal'),
+    marketing_opt_in: integer('marketing_opt_in', { mode: 'boolean' }).notNull().default(false),
+    profile_completed_at: text('profile_completed_at'),
+    // Set for users who sign up after onboarding shipped; they see /onboarding before the dashboard.
+    onboarding_pending: integer('onboarding_pending', { mode: 'boolean' }).notNull().default(false),
+    profile_prompt_dismissed_at: text('profile_prompt_dismissed_at'),
 });
 
 export const organizations = sqliteTable('organizations', {

@@ -21,7 +21,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
             <PageHeader
                 title="Tenants"
                 description="Every organization on this installation. Visible to platform admins only."
-                actions={<div className="flex gap-2"><ButtonLink href="/admin/abuse" variant="secondary" size="sm">Abuse and domains</ButtonLink><ButtonLink href="/admin/telemetry" variant="secondary" size="sm">Platform telemetry</ButtonLink></div>}
+                actions={<div className="flex gap-2"><ButtonLink href="/api/admin/profiles" variant="secondary" size="sm" prefetch={false}>Export profiles (CSV)</ButtonLink><ButtonLink href="/admin/abuse" variant="secondary" size="sm">Abuse and domains</ButtonLink><ButtonLink href="/admin/telemetry" variant="secondary" size="sm">Platform telemetry</ButtonLink></div>}
             />
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Organizations" value={tenants.length} />

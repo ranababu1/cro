@@ -8,5 +8,6 @@ export default defineConfig({
         include: ['tests/**/*.test.ts'],
         fileParallelism: false,
         env: { TELEMETRY_SYNC: '1' },
+        setupFiles: ['tests/setup.ts'],
     },
 });

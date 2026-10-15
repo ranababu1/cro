@@ -32,6 +32,8 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Starting an experiment says the monthly limit is reached' },
         { type: 'p', text: 'Your organization\'s plan has a monthly experiment start limit. Resuming paused experiments still works. Contact support to raise the limit.' },
         { type: 'h2', text: 'FAQ' },
+        { type: 'h3', text: 'Why do I see "Complete your profile to create experiments"?' },
+        { type: 'p', text: 'Creating or starting a test needs your first name, last name and country. Open **Profile** in the sidebar, fill them in and save, and you go straight back to where you were. Everything else on the profile is optional, and the dashboard, docs and settings work without it.' },
         { type: 'h3', text: 'Do I need to write code?' },
         { type: 'p', text: 'A few lines. You add the snippet and write the change for each variation in JavaScript. A visual editor is on the [roadmap](/roadmap).' },
         { type: 'h3', text: 'Will it slow my site down?' },
