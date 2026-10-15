@@ -5,6 +5,7 @@ import { db, monthStartIso } from '@/lib/db';
 import { PageHeader, Card, CardHeader, ButtonLink, Stat, StatusBadge, Table, THead, TBody, TR, TH, TD, EmptyState } from '@/app/components/ui';
 import { CheckIcon, PlusIcon, FlaskIcon } from '@/app/components/shell/icons';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
+import { WordPressCard } from '@/app/components/WordPressCard';
 import { PageviewUsage } from '@/app/components/PageviewUsage';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { PlanUsage, type UsageRow } from '@/app/components/PlanUsage';
@@ -69,7 +70,7 @@ export default async function Dashboard() {
             {project && (
                 <Card className="mt-6">
                     <CardHeader title="Install your snippet" description="Already filled with your production public SDK key. Switch to Development if you want a separate key." />
-                    <div className="px-5 pb-5"><InstallSnippet /></div>
+                    <div className="px-5 pb-5"><InstallSnippet /><WordPressCard /></div>
                 </Card>
             )}
 
