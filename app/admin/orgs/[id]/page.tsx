@@ -4,6 +4,7 @@ import { getTenantSummary } from '@/lib/admin';
 import { db } from '@/lib/db';
 import { PageHeader, Card, CardHeader, StatusBadge, Badge, Table, THead, TBody, TR, TH, TD, Stat, Alert, EmptyState } from '@/app/components/ui';
 import TenantControls from './TenantControls';
+import { getPageviewStatus } from '@/lib/pageviewQuota';
 
 const when = (iso: string) => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
 
@@ -13,6 +14,7 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
     if (!tenant) notFound();
     const audit = await db.getAuditLog(id, 50);
     const { org, members, projects, usage } = tenant;
+    const pv = await getPageviewStatus(id, { fresh: true });
 
     return (
         <>
@@ -26,7 +28,8 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
                     {org.suspended_reason || 'No reason recorded.'} {org.suspended_at && `Since ${when(org.suspended_at)}.`} SDK keys, secret keys and the dashboard are blocked.
                 </Alert>
             )}
-            <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+                <Stat label="Pageviews this month" value={pv.used.toLocaleString()} hint={pv.limit === null ? 'Unlimited' : `${pv.paused ? 'Paused at cap. ' : ''}Cap ${pv.limit.toLocaleString()}`} />
                 <Stat label="Visitors this month" value={usage.month.visitors.toLocaleString()} hint={org.monthly_visitor_limit === null ? 'No limit' : `Limit ${org.monthly_visitor_limit.toLocaleString()}`} />
                 <Stat label="Events this month" value={usage.month.events.toLocaleString()} />
                 <Stat label="Experiments" value={usage.total.experiments} hint={`${usage.total.running} running`} />

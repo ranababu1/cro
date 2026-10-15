@@ -4,6 +4,7 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { maxVariationUrlsForPlan } from '@/lib/plans';
+import { getPageviewStatus } from '@/lib/pageviewQuota';
 
 export async function GET(request: NextRequest) {
     const ctx = await requireUserContext(request);
@@ -11,7 +12,9 @@ export async function GET(request: NextRequest) {
     const selected = request.cookies.get(PROJECT_COOKIE)?.value;
     const projectId = selected && ctx.projectIds.includes(selected) ? selected : ctx.projectIds[0];
     if (!projectId) return NextResponse.json({ plan: 'free', max_variations: 1 });
-    const org = await db.getOrganization(await orgIdForProject(projectId));
+    const orgId = await orgIdForProject(projectId);
+    const org = await db.getOrganization(orgId);
     const plan = org?.plan || 'free';
-    return NextResponse.json({ plan, max_variations: maxVariationUrlsForPlan(plan) });
+    const pv = await getPageviewStatus(orgId, { fresh: true });
+    return NextResponse.json({ plan, max_variations: maxVariationUrlsForPlan(plan), pageviews: { used: pv.used, limit: pv.limit, paused: pv.paused } });
 }

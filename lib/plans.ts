@@ -19,3 +19,13 @@ export function upgradeHintForVariations(plan: string | null | undefined): strin
     if (isPaidPlan(plan)) return '';
     return `The free plan allows ${FREE_MAX_VARIATIONS} variation. Upgrade to add up to ${PAID_MAX_VARIATIONS}.`;
 }
+
+/** Tracked pageviews per month included in each plan. A pageview is a page load on a page that is part of a running test. */
+export const FREE_MONTHLY_PAGEVIEWS = 25_000;
+export const PAID_MONTHLY_PAGEVIEWS = 500_000;
+/** Stored in organizations.monthly_pageview_limit to mean no cap. */
+export const UNLIMITED = -1;
+
+export function planMonthlyPageviews(plan: string | null | undefined): number {
+    return isPaidPlan(plan) ? PAID_MONTHLY_PAGEVIEWS : FREE_MONTHLY_PAGEVIEWS;
+}

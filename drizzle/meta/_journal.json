@@ -64,6 +64,13 @@
       "when": 1791970900000,
       "tag": "0008_share_links",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1791971000000,
+      "tag": "0009_pageview_quota",
+      "breakpoints": true
     }
   ]
 }

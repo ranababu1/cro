@@ -28,6 +28,8 @@ export const organizations = sqliteTable('organizations', {
     // null means unlimited
     monthly_visitor_limit: integer('monthly_visitor_limit'),
     monthly_experiment_limit: integer('monthly_experiment_limit'),
+    // Tracked pageviews per month. null = plan default, -1 = unlimited. See lib/pageviewQuota.ts.
+    monthly_pageview_limit: integer('monthly_pageview_limit'),
     created_at: text('created_at').notNull().default(now),
 });
 
@@ -203,3 +205,10 @@ export const shareLinks = sqliteTable('share_links', {
     created_at: text('created_at').notNull().default(now),
     revoked_at: text('revoked_at'),
 }, (t) => [uniqueIndex('uq_share_links_token').on(t.token), index('idx_share_links_experiment').on(t.experiment_id)]);
+
+/** Monthly usage counters per organization (month = YYYY-MM UTC). Cheap to read for quota checks. */
+export const usageMonthly = sqliteTable('usage_monthly', {
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(),
+    pageviews: integer('pageviews').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.org_id, t.month] })]);

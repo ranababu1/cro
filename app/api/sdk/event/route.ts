@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
+import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { customEventSchema, formatZodError } from '@/lib/validation';
 import { hostFromRequestHeaders, isHostAllowed } from '@/lib/domains';
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
         const reqHost = hostFromRequestHeaders(request.headers.get('origin'), request.headers.get('referer'));
         if (hosts.length === 0) return sdkJson({ error: 'No domains registered for this project' }, 403);
         if (reqHost && !isHostAllowed(reqHost, hosts)) return sdkJson({ error: 'Domain not allowed' }, 403);
+        if ((await getPageviewStatus(auth.ctx.orgId)).paused) return sdkJson({ success: true, paused: true }, 202);
         const parsed = customEventSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
         const recorded = await recordGoalHits({

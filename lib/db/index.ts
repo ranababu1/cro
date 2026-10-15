@@ -36,6 +36,7 @@ export interface OrgUpdate {
     plan?: string;
     monthly_visitor_limit?: number | null;
     monthly_experiment_limit?: number | null;
+    monthly_pageview_limit?: number | null;
 }
 
 /** First instant of the current calendar month in UTC, as an ISO string. */
@@ -614,6 +615,20 @@ export const db = {
     async listOrganizations() {
         const d = await getDb();
         return d.select().from(s.organizations).orderBy(desc(s.organizations.created_at));
+    },
+
+    async getMonthlyPageviews(orgId: string, month: string): Promise<number> {
+        const d = await getDb();
+        const row = await d.query.usageMonthly.findFirst({ where: and(eq(s.usageMonthly.org_id, orgId), eq(s.usageMonthly.month, month)) });
+        return row?.pageviews ?? 0;
+    },
+
+    async addMonthlyPageviews(orgId: string, month: string, by = 1): Promise<void> {
+        const d = await getDb();
+        await d
+            .insert(s.usageMonthly)
+            .values({ org_id: orgId, month, pageviews: by })
+            .onConflictDoUpdate({ target: [s.usageMonthly.org_id, s.usageMonthly.month], set: { pageviews: sql`${s.usageMonthly.pageviews} + ${by}` } });
     },
 
     async getOrgMembers(orgId: string) {

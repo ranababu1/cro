@@ -11,7 +11,7 @@ Internal numbering below follows the approved plan, where "Phase 1" = public Pha
 - [x] Sample ratio mismatch warning
 - [x] Public share links for results
 - [x] GTM and WordPress install guides
-- [ ] Monthly pageview quotas that pause collection at the cap
+- [x] Monthly pageview quotas that pause collection at the cap
 
 ## Approved phases
 

@@ -9,6 +9,7 @@ import type { BootstrapResponse } from '@/lib/types';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
+import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -43,6 +44,11 @@ export async function POST(request: NextRequest) {
             return sdkJson({ matched: false, action: 'none', reason: 'domain_not_allowed' } satisfies BootstrapResponse);
         }
 
+        // Monthly pageview cap reached: pause collection. Visitors see the original page.
+        if ((await getPageviewStatus(auth.ctx.orgId)).paused) {
+            return sdkJson({ matched: false, action: 'none', reason: 'quota_paused' } satisfies BootstrapResponse);
+        }
+
         // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.
         await recordGoalHits({ orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, environmentId: auth.ctx.environmentId, userId: user_id, url })
             .catch((err) => console.error('page goal failed', err));
@@ -57,6 +63,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Only click and form goals run in the browser. Page and event goals are matched on the server.
+        await countPageview(auth.ctx.orgId);
+
         const goalPayload = goals.filter((g) => g.type === 'click' || g.type === 'form').map((g) => ({ id: g.id, name: g.name, type: g.type, selector: g.selector, is_primary: g.is_primary }));
         const controlUrl = experiment.control_url || variations.find((v) => v.is_control)?.url || '';
         const onControl = !!(controlUrl && urlsMatch(controlUrl, url));
