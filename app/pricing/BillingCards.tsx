@@ -13,7 +13,7 @@ const tiers: Tier[] = [
 ];
 
 const highlights: Record<string, string[]> = {
-    Free: ['10,000 tested visitors a month (300 a day)', '1 running test, 10 tests total', 'Control plus 1 variation', '1 project'],
+    Free: ['10,000 tested visitors a month (300 a day)', '1 running test, 10 tests total', 'Control plus 1 variation', '1 project on 1 domain'],
     Starter: ['250,000 tested visitors a month', '20 active experiments', '3 projects', '5 team seats'],
     Growth: ['1,000,000 tested visitors a month', 'Unlimited active experiments', '10 projects', '15 team seats'],
     Enterprise: ['Custom tested visitors', 'Unlimited active experiments', 'Custom projects', 'Unlimited team seats'],

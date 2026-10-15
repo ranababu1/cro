@@ -255,3 +255,15 @@ export const rollupState = sqliteTable('rollup_state', {
     experiment_id: text('experiment_id').primaryKey().references(() => experiments.id, { onDelete: 'cascade' }),
     rolled_through: text('rolled_through').notNull(),
 });
+
+/**
+ * Free-tier usage per registrable domain (eTLD+1), across all orgs. Survives org and domain deletion.
+ * org_id is the free org currently holding the domain (null when released). experiments_used never decreases.
+ */
+export const domainLedger = sqliteTable('domain_ledger', {
+    domain: text('domain').primaryKey(),
+    org_id: text('org_id').references(() => organizations.id, { onDelete: 'set null' }),
+    claimed_at: text('claimed_at'),
+    experiments_used: integer('experiments_used').notNull().default(0),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_domain_ledger_org').on(t.org_id)]);

@@ -29,7 +29,7 @@ const as = (who: keyof typeof users | null) => {
 const r = (method: string, url: string, body?: unknown, headers: Record<string, string> = {}) =>
     new NextRequest(`http://localhost${url}`, {
         method,
-        headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '2.2.2.2', ...headers },
+        headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '2.2.2.2', Origin: 'https://shop.example.com', ...headers },
         body: body === undefined ? undefined : JSON.stringify(body),
     });
 const p = (id: string) => ({ params: Promise.resolve({ id }) });
@@ -43,6 +43,7 @@ beforeAll(async () => {
         orgs[k] = (await db.ensureWorkspace(u)).orgId;
     }
     const projectId = (await db.getProjectsForUser(users.tenant.id))[0].id;
+    await db.addDomain(projectId, 'shop.example.com');
     const env = (await db.getEnvironments(projectId)).find((e) => e.key === 'prod')!;
     tenantKey = (await db.createApiKey({ environmentId: env.id, type: 'sdk' })).key;
     tenantSecret = (await db.createApiKey({ environmentId: env.id, type: 'secret' })).key;

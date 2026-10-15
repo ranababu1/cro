@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
+import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { AssignmentResponse } from '@/lib/types';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
 
         // Count every assign request; unique_visitors only when a new assignment is stored.
         void bumpMetric(METRICS.sdk_assign, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
+
+        const origin = await checkSdkOrigin(request, auth.ctx);
+        if (!origin.ok) return sdkJson({ error: origin.message }, 403);
 
         const parsed = assignBody.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);

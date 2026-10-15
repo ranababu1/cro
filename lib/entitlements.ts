@@ -1,7 +1,7 @@
 import { db } from './db';
 import {
     isPaidPlan, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
-    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_PROJECTS,
+    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_PROJECTS, FREE_DOMAINS,
 } from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
 import { cached } from './configCache';
@@ -31,6 +31,8 @@ export interface Limits {
     activeExperiments: number | null;
     projects: number | null;
     seats: number | null;
+    /** Registered domains across the org (localhost not counted). */
+    domains: number | null;
 }
 
 export interface Entitlements {
@@ -41,6 +43,8 @@ export interface Entitlements {
     features: Record<HeavyFeature, boolean>;
     limits: Limits;
     flags: Record<string, boolean>;
+    /** Free-tier anti-abuse rules (domain ledger) apply. False for paid, special friends and admins. */
+    freeTierRules: boolean;
 }
 
 export interface OrgForEntitlements {
@@ -69,6 +73,7 @@ function planLimits(org: OrgForEntitlements | null): Limits {
         activeExperiments: free ? FREE_RUNNING_EXPERIMENTS : null,
         projects: free ? FREE_PROJECTS : null,
         seats: null,
+        domains: free ? FREE_DOMAINS : null,
     };
 }
 
@@ -83,6 +88,7 @@ function applyAllowances(limits: Limits, a: Allowances): Limits {
         activeExperiments: pick(a.active_experiments, limits.activeExperiments),
         projects: pick(a.projects, limits.projects),
         seats: pick(a.seats, limits.seats),
+        domains: pick(a.domains, limits.domains),
     };
 }
 
@@ -96,8 +102,9 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         return {
             plan, paid, unlimited, specialFriend,
             features: Object.fromEntries(HEAVY_FEATURES.map((f) => [f, true])) as Record<HeavyFeature, boolean>,
-            limits: { monthlyVisitors: null, dailyVisitors: null, lifetimeExperiments: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null },
+            limits: { monthlyVisitors: null, dailyVisitors: null, lifetimeExperiments: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null, domains: null },
             flags: {},
+            freeTierRules: false,
         };
     }
     const features = Object.fromEntries(HEAVY_FEATURES.map((f) => [f, paid])) as Record<HeavyFeature, boolean>;
@@ -112,7 +119,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         limits = applyAllowances(limits, a);
         flags = a.flags ?? {};
     }
-    return { plan, paid, unlimited, specialFriend, features, limits, flags };
+    return { plan, paid, unlimited, specialFriend, features, limits, flags, freeTierRules: !paid && !specialFriend };
 }
 
 /** Entitlements for an org, cached briefly (cleared on any org write through lib/db). */

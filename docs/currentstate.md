@@ -124,3 +124,11 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## Public copy rules (2026-10-15)
 - tests/publicCopyMatchesApp.test.ts checks pricing, cards, docs and homepage numbers against lib/plans.ts, bans old variant counts and Bayesian/sequential promises, and requires every pricing Coming soon phase tag to point at a roadmap phase that is not Done.
+
+## Free-tier domain rules
+- Free orgs (not paid, not special friends, not admins) get 1 registered domain; localhost does not count. Special friends can override via allowances.domains.
+- Global ledger domain_ledger keyed on eTLD+1 (tldts, public suffix list). First free claim wins; removing a domain releases the claim but keeps experiments_used.
+- A first start of a free test on a domain whose ledger count is 10 is refused; a domain with 10 used tests cannot be added by another free org.
+- bootstrap, assign, track, sdk/event and capture require Origin or Referer on a registered domain; development keys also accept localhost. Missing headers are refused.
+- Abuse attempts are audited as abuse:* (origin logs throttled per org and host hourly) and listed with the ledger at /admin/abuse.
+- No backfill: tests started before this change are not on the ledger.

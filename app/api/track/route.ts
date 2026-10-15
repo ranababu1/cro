@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { trackSchema, trackBatchSchema, formatZodError } from '@/lib/validation';
-import { hostFromRequestHeaders, isHostAllowed } from '@/lib/domains';
+import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import type { Event } from '@/lib/types';
 import type { z } from 'zod';
@@ -52,10 +52,8 @@ export async function POST(request: NextRequest) {
         const auth = await authenticateSdkRequest(request);
         if ('error' in auth) return auth.error;
 
-        const hosts = await db.getDomainHosts(auth.ctx.projectId);
-        const reqHost = hostFromRequestHeaders(request.headers.get('origin'), request.headers.get('referer'));
-        if (hosts.length === 0) return sdkJson({ error: 'No domains registered for this project' }, 403);
-        if (reqHost && !isHostAllowed(reqHost, hosts)) return sdkJson({ error: 'Domain not allowed' }, 403);
+        const origin = await checkSdkOrigin(request, auth.ctx);
+        if (!origin.ok) return sdkJson({ error: origin.message }, 403);
 
         if ((await getPageviewStatus(auth.ctx.orgId)).paused) return sdkJson({ success: true, paused: true }, 202);
         const raw = await request.json().catch(() => null);

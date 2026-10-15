@@ -10,7 +10,7 @@ export const quickStart: DocPage = {
         { type: 'h2', text: '1. Sign in', id: 'workspace' },
         { type: 'p', text: 'Go to [Sign in](/signin) and continue with Google. An organization and default project are created for you.' },
         { type: 'h2', text: '2. Add your domain', id: 'domain' },
-        { type: 'p', text: 'Open **Domains** and add the hostname of your site, for example `www.example.com`. The SDK only accepts traffic from registered domains.' },
+        { type: 'p', text: 'Open **Domains** and add the hostname of your site, for example `www.example.com`. The SDK only accepts traffic from registered domains, checked against the Origin or Referer of the page. Development keys also work on localhost.' },
         { type: 'h2', text: '3. Your SDK key is ready', id: 'api-key' },
         { type: 'p', text: 'A production public SDK key is created for your project automatically. The install snippet in the app is already filled in. Use the Production / Development toggle on the snippet if you want a separate development key.' },
         { type: 'h2', text: '4. Create a test', id: 'create' },

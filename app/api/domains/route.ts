@@ -4,6 +4,9 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { createDomainSchema, formatZodError } from '@/lib/validation';
 import { normalizeHost } from '@/lib/domains';
 import { orgIdForProject } from '@/lib/access';
+import { getOrgEntitlements } from '@/lib/entitlements';
+import { claimDomain, countOrgDomains, isLocalHost } from '@/lib/domainLedger';
+import { logAbuse } from '@/lib/abuse';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
@@ -33,8 +36,22 @@ export async function POST(request: NextRequest) {
     if (existing.some((d) => d.host === host)) {
         return NextResponse.json({ error: 'That domain is already added' }, { status: 400 });
     }
-    const domain = await db.addDomain(projectId, host);
     const orgId = await orgIdForProject(projectId);
+    const ent = await getOrgEntitlements(orgId);
+    if (!isLocalHost(host)) {
+        if (ent.limits.domains !== null && (await countOrgDomains(orgId)) >= ent.limits.domains) {
+            await logAbuse(orgId, 'domain_limit', { host }, ctx.userId);
+            return NextResponse.json({ error: `Your plan includes ${ent.limits.domains} domain${ent.limits.domains === 1 ? '' : 's'}. Remove the current one or upgrade to add more. localhost is always allowed for development.`, reason: 'domain_limit' }, { status: 403 });
+        }
+        if (ent.freeTierRules) {
+            const claim = await claimDomain(orgId, host);
+            if (!claim.ok) {
+                await logAbuse(orgId, claim.reason, { host, domain: claim.domain }, ctx.userId);
+                return NextResponse.json({ error: claim.message, reason: claim.reason }, { status: 403 });
+            }
+        }
+    }
+    const domain = await db.addDomain(projectId, host);
     await db.audit({ orgId, actorId: ctx.userId, entity: 'domain', entityId: domain.id, action: 'create', diff: { host } });
     await bumpMetric(METRICS.domains_added, { userId: ctx.userId, orgId, projectId });
     await recordProductEvent({ action: 'domain.add', userId: ctx.userId, orgId, projectId, ip: clientIpFromHeaders(request.headers), meta: { host } });

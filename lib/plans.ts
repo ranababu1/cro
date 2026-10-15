@@ -12,6 +12,8 @@ export const FREE_DAILY_VISITORS = 300;
 export const FREE_RUNNING_EXPERIMENTS = 1;
 export const FREE_LIFETIME_EXPERIMENTS = 10;
 export const FREE_PROJECTS = 1;
+/** Free tier: registered domains per account (localhost for development does not count). */
+export const FREE_DOMAINS = 1;
 
 export function isPaidPlan(plan: string | null | undefined): boolean {
     const p = (plan || 'free').toLowerCase();

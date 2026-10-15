@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count } from 'drizzle-orm';
+import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
 import { getDb } from './client';
 import * as s from './schema';
 import type { EnvironmentKey } from './schema';
@@ -764,6 +764,10 @@ export const db = {
     async getAuditLog(orgId: string, limit = 50) {
         const d = await getDb();
         return d.select().from(s.auditLog).where(eq(s.auditLog.org_id, orgId)).orderBy(desc(s.auditLog.created_at)).limit(limit);
+    },
+    async getAbuseLog(limit = 200) {
+        const d = await getDb();
+        return d.select().from(s.auditLog).where(like(s.auditLog.action, 'abuse:%')).orderBy(desc(s.auditLog.created_at)).limit(limit);
     },
     // Platform telemetry
     async bumpTelemetry(day: string, scopeType: 'platform' | 'org' | 'user' | 'project' | 'experiment', scopeId: string, metric: string, by = 1): Promise<void> {

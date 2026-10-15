@@ -17,7 +17,7 @@ let experimentId: string;
 let otherExperimentId: string;
 
 function req(path: string, body: unknown, key?: string, ip = '1.1.1.1') {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json', 'x-forwarded-for': ip };
+    const headers: Record<string, string> = { 'Content-Type': 'application/json', 'x-forwarded-for': ip, Origin: 'http://localhost' };
     if (key) headers['X-API-Key'] = key;
     return new NextRequest(`http://localhost${path}`, { method: 'POST', headers, body: JSON.stringify(body) });
 }

@@ -5,6 +5,9 @@ import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
 import { checkExperimentStartQuota, quotaMessage } from '@/lib/quotas';
+import { getOrgEntitlements } from '@/lib/entitlements';
+import { checkDomainTests, countDomainTest } from '@/lib/domainLedger';
+import { logAbuse } from '@/lib/abuse';
 import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
@@ -49,6 +52,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const { targeting, ...rest } = parsed.data;
         const updates: Parameters<typeof db.updateExperiment>[1] = { ...rest };
+        let countDomain: string | null = null;
         // Targeting applies to new visitors only; people already in the test keep their version.
         if (targeting !== undefined) updates.targeting = serializeTargeting(targeting);
 
@@ -66,13 +70,28 @@ export async function PATCH(request: NextRequest, { params }: Params) {
                 if (!quota.allowed) {
                     return NextResponse.json({ error: quotaMessage(quota), reason: quota.reason }, { status: 403 });
                 }
-                if (firstStart) updates.started_at = new Date().toISOString();
+                if (firstStart) {
+                    const orgId = await orgIdForProject(experiment.project_id);
+                    if ((await getOrgEntitlements(orgId)).freeTierRules) {
+                        const dom = await checkDomainTests(experiment.control_url);
+                        if (!dom.ok) {
+                            await logAbuse(orgId, 'domain_exhausted', { domain: dom.domain, experiment: id }, ctx.userId);
+                            return NextResponse.json({ error: dom.message, reason: 'domain_exhausted' }, { status: 403 });
+                        }
+                        countDomain = dom.domain;
+                    }
+                    updates.started_at = new Date().toISOString();
+                }
             }
             if (updates.status === 'completed' && !experiment.ended_at) updates.ended_at = new Date().toISOString();
         }
 
         await db.updateExperiment(id, updates);
-        if (updates.started_at) await db.incrementExperimentsStarted(await orgIdForProject(experiment.project_id));
+        if (updates.started_at) {
+            const orgId = await orgIdForProject(experiment.project_id);
+            await db.incrementExperimentsStarted(orgId);
+            if (countDomain) await countDomainTest(countDomain, orgId);
+        }
         if (updates.status === 'running' && experiment.status !== 'running') {
             const orgId = await orgIdForProject(experiment.project_id);
             await bumpMetric(METRICS.tests_started, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { orgIdForProject } from '@/lib/access';
+import { releaseDomainIfUnused } from '@/lib/domainLedger';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -15,7 +16,10 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         const domain = domains.find((d) => d.id === id);
         if (domain) {
             await db.deleteDomain(id);
-            await db.audit({ orgId: await orgIdForProject(projectId), actorId: ctx.userId, entity: 'domain', entityId: id, action: 'delete', diff: { host: domain.host } });
+            const orgId = await orgIdForProject(projectId);
+            // Free claims are released so the domain can move; its used free tests stay on the ledger.
+            await releaseDomainIfUnused(orgId, domain.host);
+            await db.audit({ orgId, actorId: ctx.userId, entity: 'domain', entityId: id, action: 'delete', diff: { host: domain.host } });
             return NextResponse.json({ ok: true });
         }
     }
