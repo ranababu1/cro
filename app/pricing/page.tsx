@@ -18,7 +18,7 @@ const limits: [string, string, string, string, string][] = [
     ['Variations per experiment', 'Control plus 1 (A/B only)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
     ['Projects', '1', '3', '10', 'Custom'],
     ['Environments per project', '3 (dev, staging, production)', '3', '3', 'Custom'],
-    ['Team seats', '3', '5', '15', 'Unlimited'],
+    ['Team seats', '1', '5', '15', 'Unlimited'],
     ['Data retention', '6 months', '12 months', '24 months', 'Custom'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
     ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
@@ -26,48 +26,39 @@ const limits: [string, string, string, string, string][] = [
 ];
 
 const availableToday = [
-    'A/B tests (A/B/n on paid plans)', 'Split URL tests', 'Sticky assignment', 'Wilson intervals with a z-test against the control',
+    'A/B and split URL tests', 'Flicker-free snippet', 'Sticky assignment', 'Targeting by device, UTM, referrer and new or returning visitors',
+    'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
+    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
-// tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise)
+// tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise).
+// p must match the phase that lists the item on the public /roadmap.
 const comingSoon: { name: string; p: number; tier: number }[] = [
-    { name: 'Flicker-free snippet', p: 1, tier: 0 },
-    { name: 'URL, device, UTM and browser targeting', p: 1, tier: 0 },
-    { name: 'Click, form and custom goals', p: 1, tier: 0 },
-    { name: 'Sample ratio mismatch alerts', p: 1, tier: 0 },
-    { name: 'Sample size calculator', p: 1, tier: 0 },
-    { name: 'Revenue goals', p: 1, tier: 1 },
-    { name: 'React, Next.js and server SDKs', p: 2, tier: 1 },
-    { name: 'GA4, GTM and WordPress', p: 2, tier: 1 },
-    { name: 'Webhooks', p: 2, tier: 1 },
-    { name: 'Bayesian and sequential analysis', p: 2, tier: 2 },
-    { name: 'Feature flags', p: 2, tier: 2 },
-    { name: 'Scheduled reports', p: 2, tier: 2 },
-    { name: 'Roles', p: 2, tier: 2 },
     { name: 'Heatmaps (click, scroll, confetti, overlay)', p: 3, tier: 1 },
+    { name: 'Rage and dead click detection', p: 3, tier: 1 },
     { name: 'Session recordings', p: 4, tier: 1 },
-    { name: 'Visual editor', p: 3, tier: 2 },
-    { name: 'Bandits and CUPED', p: 3, tier: 2 },
-    { name: 'SSO', p: 2, tier: 3 },
-    { name: 'Edge delivery', p: 3, tier: 3 },
-    { name: 'Warehouse exports', p: 3, tier: 3 },
+    { name: 'Funnels', p: 4, tier: 1 },
+    { name: 'Revenue goals', p: 4, tier: 1 },
+    { name: 'Visual editor', p: 4, tier: 2 },
+    { name: 'Auto-shift traffic to the winner', p: 4, tier: 2 },
+    { name: 'WordPress plugin', p: 5, tier: 0 },
 ];
 
 const faqs = [
     { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests in total, 1 project, and A/B tests with a control plus 1 variation, for as long as you use it.' },
     { q: 'What counts as a tested visitor?', a: 'A unique visitor ID that gets assigned to at least one running experiment in a calendar month. Pages without a running test don\'t count. One visitor in three tests counts once.' },
-    { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t counted or added to results. Visitors already in a test keep their variant. On the free plan this applies past 10,000 tested visitors in a month or 300 in a day. We email you at 80% and 100%. We never upgrade you or bill you automatically.' },
+    { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t counted or added to results. Visitors already in a test keep their variant. On the free plan this applies past 10,000 tested visitors in a month or 300 in a day. We never upgrade you or bill you automatically.' },
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID, and we hash it together with the experiment ID. The same visitor always lands in the same variant. Raising traffic allocation doesn\'t move people who are already in the test.' },
-    { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of each variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors. Bayesian and sequential analysis are planned for Phase 2. They aren\'t available yet.' },
+    { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of each variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors.' },
     { q: 'Are the coming soon features included in my price?', a: 'When a feature ships, it\'s included in the plan listed for it at no extra cost. Until then it\'s marked coming soon. Don\'t buy a plan for a feature that isn\'t built yet.' },
     { q: 'Can I change or cancel my plan?', a: 'Yes, anytime. Upgrades apply right away. Downgrades and cancellations take effect at the end of the billing period. Your data is kept for your plan\'s retention period.' },
     { q: 'What happens to my data after the retention period?', a: 'Raw events older than your retention window are deleted. Experiment summaries (final results and the winner you chose) are kept while your account is active.' },
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
     { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
-    { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. Plain JavaScript and HTML work today. React, Next.js, WordPress, Node and GA4 are coming soon.' },
-    { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA, or SSO (coming soon).' },
+    { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. A WordPress plugin is planned.' },
+    { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA.' },
 ];
 
 const faqJsonLd = {
@@ -122,7 +113,7 @@ export default function PricingPage() {
                     <ul className="mt-4 space-y-2 text-sm text-zinc-700">
                         <li>Pay yearly and get 2 months free: Starter $100/yr (about $8.33/mo), Growth $500/yr.</li>
                         <li>You&apos;re never billed or upgraded automatically. Once you&apos;re over your limit, new visitors see the control and aren&apos;t counted.</li>
-                        <li>We email you at 80% and 100% of your monthly tested visitors.</li>
+                        <li>Your usage and limits are always shown on the Overview page.</li>
                     </ul>
                 </section>
 
