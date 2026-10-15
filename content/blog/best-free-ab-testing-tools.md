@@ -2,8 +2,8 @@
 title: "Best free A/B testing tools in 2026, compared honestly"
 meta_description: "Six A/B testing tools with free plans or trials, checked on each vendor's own pricing page in October 2026: limits, catches, and who each one suits."
 slug: best-free-ab-testing-tools
-date: 2026-10-17
-updated: 2026-10-17
+date: 2026-10-15
+updated: 2026-10-15
 author: "Imraan, freeabtest.com"
 prices_checked: 2026-10-15
 keywords: ["free a/b testing tool", "free ab testing software", "free split testing tool", "ab testing tools comparison", "google optimize alternative free"]
@@ -12,8 +12,8 @@ article_schema: |
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": "Best free A/B testing tools in 2026, compared honestly",
-    "datePublished": "2026-10-17",
-    "dateModified": "2026-10-17",
+    "datePublished": "2026-10-15",
+    "dateModified": "2026-10-15",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/best-free-ab-testing-tools",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -37,7 +37,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Every price and limit below was checked on the vendor's own pricing page on 15 October 2026.
+By Imraan, freeabtest.com. Published 15 October 2026. Every price and limit below was checked on the vendor's own pricing page on 15 October 2026.
 
 The best free A/B testing tool for most small websites in 2026 is the one whose free plan matches how you build: Mida if you need a visual editor, GrowthBook if you have a data warehouse and an engineer, PostHog if you already use it for analytics, and freeabtest.com if you want a hosted, code-first tool with plain statistics. VWO, Convert and Optimizely do not offer a permanent free plan; Convert offers a 15-day trial.
 
@@ -60,7 +60,7 @@ Three numbers decide whether a free plan is useful:
 | [Mida](https://www.mida.so/pricing) | Sandbox: 100,000 MTU, 3 live tests, 2 variations (control plus variant), 60-day data retention, 50,000 tracked events a day | Only 3 live tests and one challenger per test | Growth from $224/month billed annually (at 50,000 MTU) | Marketers who want a visual editor |
 | [GrowthBook](https://www.growthbook.io/pricing) | Cloud Starter: up to 3 users, 1 project, unlimited experiments and traffic. Self-hosted: free | Visual editor and split URL tests are Pro only. Analysis needs a data warehouse or their managed one (1M events a month on Starter) | Pro $40 per seat per month | Engineering teams with a warehouse |
 | [PostHog](https://posthog.com/pricing) | 1M feature flag requests a month (experiments are billed with flags), plus 1M analytics events, 1 project, 1-year retention, unlimited team members | Usage stops at the free limit unless you add a card; experiments sit inside a large analytics product | Pay as you go above the free allowance | Product teams already on PostHog |
-| [freeabtest.com](https://freeabtest.com/pricing) | Free plan: A/B tests with 1 variation, split URL tests, Wilson intervals and z-test results, dev/staging/production environments, REST API | JavaScript and HTML only today. No visual editor yet. Targeting and goal types are still on the roadmap | $10/month ([pricing](https://freeabtest.com/pricing)) | Developers who want hosted, code-first testing |
+| [freeabtest.com](https://freeabtest.com/pricing) | Free plan: A/B tests with 1 variation, split URL tests, Wilson intervals and z-test results, dev/staging/production environments, REST API | Code-first: no visual editor yet. Click goals only today; form and custom event goals and targeting are still in progress | $10/month ([pricing](https://freeabtest.com/pricing)) | Developers who want hosted, code-first testing |
 
 Trial only, no permanent free plan:
 
@@ -100,18 +100,20 @@ This is our product, so here is what it does today and what it doesn't.
 
 What works now:
 
-- A/B tests and split URL tests, set up with a JavaScript snippet of about 14 KB gzipped
+- A/B tests and split URL tests, set up with a JavaScript snippet of about 14 KB gzipped (the docs also include install guides for Google Tag Manager and WordPress)
 - Sticky assignment: each visitor ID is hashed with the experiment ID, so the same visitor always sees the same variant
-- Results with conversion rate, lift, a Wilson score interval for each variant, and a two-proportion z-test of the best variant against the control
+- Click goals by CSS selector (for example `#headerCTA`), plus conversions you send from your own code
+- Results with conversion rate, lift, a Wilson 95% interval for each variation, and a two-proportion z-test of each variation against the control
+- Live stats while a test runs
 - Separate dev, staging and production environments, an audit log, and a REST API
 - Free plan: 1 variation per test (a classic A/B test). Paid plans: up to 50 variations
 
 What is not built yet, and is listed on our [roadmap](https://freeabtest.com/roadmap):
 
-- A visual editor (Phase 3). Today you write variations in code.
-- Integrations beyond JavaScript and HTML. React, Next.js, WordPress, Node.js and GA4 are planned.
-- Targeting by URL, device, UTM and browser; click, form and revenue goals; sample ratio mismatch alerts (Phase 1)
-- Bayesian and sequential analysis (Phase 2)
+- Page visit, form submit and custom event goals; targeting by device, UTM, referrer and new or returning visitors; a sample ratio mismatch warning (Phase 2, in progress)
+- Heatmaps (Phase 3)
+- Session recordings, funnels and a visual editor (Phase 4). Today you build variations as pages or in code.
+- A WordPress plugin (Phase 5). Today WordPress sites install the snippet by following the docs guide.
 
 Choose freeabtest.com if you can paste a script tag, you want a hosted tool with no warehouse, and you want results you can explain to someone else. If you need a visual editor today, Mida is a better fit.
 
@@ -140,7 +142,7 @@ Answer three questions in order.
 | 30% (3.0% to 3.9%) | 6,455 | 12,910 |
 | 50% (3.0% to 4.5%) | 2,518 | 5,036 |
 
-If you get 10,000 visitors a month to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take most of a year. No free plan fixes that. We explain the math in [how long to run an A/B test](/blog/how-long-to-run-an-ab-test) and what to do about it in [A/B testing with low traffic](/blog/ab-testing-low-traffic).
+If you get 10,000 visitors a month to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take most of a year. No free plan fixes that. We explain the math in our upcoming guide to how long to run an A/B test, and what to do about it in our upcoming guide to A/B testing with low traffic.
 
 ## What to check before you sign up
 
