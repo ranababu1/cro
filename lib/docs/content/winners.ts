@@ -24,7 +24,7 @@ export const winners: DocPage = {
         ] },
         { type: 'h3', text: 'A gradual rollout today' },
         { type: 'p', text: 'There are no feature flags yet. If you want to keep showing the winner through the SDK for a while, leave the experiment running and keep the winning code in your callback, but remember the control share still sees the old version. Weights cannot be changed after creation, so you cannot move a running test to 100%.' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Feature flags with percentage rollouts are planned for Phase 2, and a one-click "ship winner" flow will build on them.' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'A one-click "ship winner" flow is planned.' },
         { type: 'h2', text: 'When the control wins' },
         { type: 'p', text: 'Complete the experiment, remove the variant code and keep your page as it is. A losing variant is a result too: you avoided shipping a change that would have hurt.' },
     ],
