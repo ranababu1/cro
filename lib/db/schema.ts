@@ -106,6 +106,8 @@ export const variations = sqliteTable('variations', {
     url: text('url'),
     weight: integer('weight').notNull(),
     is_control: integer('is_control', { mode: 'boolean' }).notNull().default(false),
+    // Paused variations get no new visitors. Visitors already assigned keep their version.
+    paused: integer('paused', { mode: 'boolean' }).notNull().default(false),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [
     index('idx_variations_experiment').on(t.experiment_id),

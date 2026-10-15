@@ -80,6 +80,10 @@ export const updateExperimentSchema = z
     .partial()
     .strict();
 
+export const allocationSchema = z.object({
+    variations: z.array(z.object({ id, weight: z.number().int().min(0).max(100), paused: z.boolean().default(false) })).min(2).max(21),
+});
+
 export const assignSchema = z.object({
     experiment_id: id.optional(),
     url: z.string().url().max(2000).optional(),

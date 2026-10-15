@@ -63,7 +63,8 @@ export async function POST(request: NextRequest) {
             return sdkJson({ error: 'No variations found for this experiment' }, 400);
         }
 
-        const assigned = assignUserToVariation(userId, experimentId, experiment.traffic_allocation, variations);
+        const active = variations.filter((v) => !v.paused && v.weight > 0);
+        const assigned = active.length ? assignUserToVariation(userId, experimentId, experiment.traffic_allocation, active) : null;
         if (!assigned) return sdkJson(notAssigned(experimentId));
 
         const quota = await checkVisitorQuota(auth.ctx.orgId);

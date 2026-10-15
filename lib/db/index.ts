@@ -308,6 +308,23 @@ export const db = {
         return d.select().from(s.variations).where(eq(s.variations.experiment_id, experimentId)).orderBy(asc(s.variations.created_at), asc(s.variations.id));
     },
 
+    /** Updates weights and paused flags of existing variations in one batch. */
+    async updateVariationAllocation(experimentId: string, rows: Array<{ id: string; weight: number; paused: boolean }>): Promise<void> {
+        const d = await getDb();
+        for (const r of rows) {
+            await d.update(s.variations).set({ weight: r.weight, paused: r.paused }).where(and(eq(s.variations.id, r.id), eq(s.variations.experiment_id, experimentId)));
+        }
+        await d.update(s.experiments).set({ updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
+    },
+
+    async addGoal(experimentId: string, g: Pick<Goal, 'name' | 'selector' | 'is_primary' | 'type' | 'match_type'>): Promise<Goal> {
+        const d = await getDb();
+        const id = generateId('gol');
+        if (g.is_primary) await d.update(s.goals).set({ is_primary: false }).where(eq(s.goals.experiment_id, experimentId));
+        await d.insert(s.goals).values({ id, experiment_id: experimentId, ...g });
+        return (await d.query.goals.findFirst({ where: eq(s.goals.id, id) }))!;
+    },
+
     // Assignments
     async getAssignment(experimentId: string, userId: string): Promise<Assignment | null> {
         const d = await getDb();

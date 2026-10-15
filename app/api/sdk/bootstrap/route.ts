@@ -79,7 +79,8 @@ export async function POST(request: NextRequest) {
             if (!quota.allowed) {
                 return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);
             }
-            const assigned = assignUserToVariation(user_id, experiment.id, experiment.traffic_allocation, variations);
+            const active = variations.filter((v) => !v.paused && v.weight > 0);
+            const assigned = active.length ? assignUserToVariation(user_id, experiment.id, experiment.traffic_allocation, active) : null;
             if (!assigned) {
                 return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'outside_traffic', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);
             }
