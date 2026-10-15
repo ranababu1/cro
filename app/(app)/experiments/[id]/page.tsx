@@ -2,6 +2,7 @@
 
 import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { describeTargeting, parseTargeting } from '@/lib/targeting';
+import { EditTest } from './EditTest';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -141,12 +142,14 @@ export default function ExperimentDetail() {
                 items={[
                     { id: 'results', label: 'Results' },
                     { id: 'setup', label: 'Setup' },
+                    ...(experiment.status !== 'completed' ? [{ id: 'edit', label: 'Edit test' }] : []),
                     { id: 'settings', label: 'Settings' },
                 ]}
             />
 
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
+            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} targeting={experiment.targeting} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
@@ -256,7 +259,7 @@ function SetupPanel({ variations, goals, targeting }: { targeting?: string | nul
                         {variations.map((v) => (
                             <TR key={v.id}>
                                 <TD>
-                                    <span className="flex items-center gap-2 font-medium text-zinc-900">{v.name}{v.is_control && <Badge>Control</Badge>}</span>
+                                    <span className="flex items-center gap-2 font-medium text-zinc-900">{v.name}{v.is_control && <Badge>Control</Badge>}{v.paused && <Badge tone="warning">Paused</Badge>}</span>
                                     {v.description && <p className="text-xs text-zinc-500">{v.description}</p>}
                                 </TD>
                                 <TD className="max-w-xs truncate">{v.url ? <a href={v.url} target="_blank" rel="noreferrer" className="text-brand-700 hover:underline">{v.url}</a> : <span className="text-zinc-400">None</span>}</TD>

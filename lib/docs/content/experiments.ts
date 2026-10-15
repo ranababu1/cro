@@ -28,7 +28,14 @@ export const experiments: DocPage = {
         { type: 'p', text: 'Use the buttons at the top of the experiment page: **Start experiment** (draft), **Pause** and **Complete** (running), **Resume** and **Complete** (paused). Any other change, such as completed back to running, is rejected.' },
         { type: 'callout', tone: 'info', text: 'Starting an experiment for the first time sets its start date and counts against your organization\'s monthly experiment limit, if one is set. Resuming a paused experiment does not count again.' },
         { type: 'h2', text: 'Editing' },
-        { type: 'p', text: 'On the **Settings** tab you can change the name, the description and the traffic allocation. Variations, weights and redirect URLs cannot be changed after the experiment is created. If you need different variations, create a new experiment.' },
+        { type: 'p', text: 'On the **Settings** tab you can change the name, the description and the traffic allocation. The **Edit test** tab lets you make safe changes, even while the test runs:' },
+        { type: 'list', items: [
+            '**Traffic split.** Change the weights. Active weights always total 100.',
+            '**Pause a variation.** It gets no new visitors. The control cannot be paused, and at least one variation must stay on.',
+            '**Who can enter.** Change the audience rules.',
+            '**Add a goal.** It counts from the moment you add it. You can make it the primary goal.',
+        ] },
+        { type: 'p', text: 'Every change applies to new visitors only. People already in the test keep their version, so your results stay clean. Variation URLs cannot be changed and variations cannot be added or removed after creation. If you need different pages, create a new test.' },
         { type: 'h3', text: 'Changing traffic allocation' },
         { type: 'p', text: 'Traffic allocation is the share of visitors who enter the experiment. Visitors outside it are not assigned and are not counted. While running:' },
         { type: 'list', items: [
