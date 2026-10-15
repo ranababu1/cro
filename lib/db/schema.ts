@@ -146,8 +146,10 @@ export const goals = sqliteTable('goals', {
     type: text('type', { enum: ['click', 'form', 'page', 'event'] }).notNull().default('click'),
     match_type: text('match_type', { enum: ['equals', 'contains', 'regex'] }),
     is_primary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
+    // Display and evaluation order, 0-based. Set on create and by reorder.
+    position: integer('position').notNull().default(0),
     created_at: text('created_at').notNull().default(now),
-}, (t) => [index('idx_goals_experiment').on(t.experiment_id)]);
+}, (t) => [index('idx_goals_experiment').on(t.experiment_id), index('idx_goals_experiment_position').on(t.experiment_id, t.position)]);
 
 export const assignments = sqliteTable('assignments', {
     id: text('id').primaryKey(),

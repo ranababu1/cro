@@ -52,11 +52,11 @@ export async function buildExperimentResults(experiment: Experiment, environment
 
     // Overall / primary goal metrics (visitors from any event; conversions from primary or all)
     const primary = goals.find((g) => g.is_primary) || goals[0];
-    const overallStats = primary
-        ? await db.getEventStats(experiment.id, environmentId, primary.id)
-        : await db.getEventStats(experiment.id, environmentId);
+    // One rollup read for the whole test and every named goal.
+    const byGoal = await db.getEventStatsByGoal(experiment.id, environmentId, goals.map((g) => g.id));
+    const overallStats = byGoal.get(primary ? primary.id : '') ?? [];
     // Visitors should count assignments/exposures, not only converters (refresh visitors from all events)
-    const visitorStats = await db.getEventStats(experiment.id, environmentId);
+    const visitorStats = byGoal.get('') ?? [];
     const visitorMap = new Map(visitorStats.map((v) => [v.variation_id, Number(v.total_users)]));
     const overallWithVisitors = overallStats.map((s) => ({
         ...s,
@@ -67,7 +67,7 @@ export async function buildExperimentResults(experiment: Experiment, environment
 
     const goalResults: GoalResults[] = [];
     for (const goal of goals) {
-        const stats = await db.getEventStats(experiment.id, environmentId, goal.id);
+        const stats = byGoal.get(goal.id) ?? [];
         const withVisitors = stats.map((s) => ({
             ...s,
             total_users: visitorMap.get(s.variation_id) ?? Number(s.total_users),

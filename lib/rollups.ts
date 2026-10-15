@@ -140,6 +140,22 @@ export async function rolledEventStats(experimentId: string, environmentId?: str
         }));
 }
 
+/**
+ * Stats for the whole test (key '') and for every goal in one pass over the buckets, so results with
+ * many goals cost the same few queries as results with one.
+ */
+export async function rolledEventStatsByGoal(experimentId: string, environmentId: string | undefined, goalIds: string[], now = new Date()) {
+    const { rows } = await bucketTotals(experimentId, environmentId, now);
+    const visitors = rows.filter((r) => r.bucket === 'v' && r.users > 0);
+    const conv = new Map(rows.map((r) => [`${r.variation_id}|${r.bucket}`, r.users]));
+    const out = new Map<string, { variation_id: string; total_users: number; conversions: number }[]>();
+    for (const key of ['', ...goalIds]) {
+        const bucket = key ? `g:${key}` : 't:conversion';
+        out.set(key, visitors.map((v) => ({ variation_id: v.variation_id, total_users: v.users, conversions: conv.get(`${v.variation_id}|${bucket}`) ?? 0 })));
+    }
+    return out;
+}
+
 /** Same shape and numbers as the raw-event query in db.getLiveCounts. */
 export async function rolledLiveCounts(experimentId: string, environmentId?: string, now = new Date()): Promise<LiveCounts> {
     const { rows, today, scope } = await bucketTotals(experimentId, environmentId, now);

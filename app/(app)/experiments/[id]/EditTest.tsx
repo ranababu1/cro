@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardBody, Button, Input, Alert, Badge } from '@/app/components/ui';
 import { TargetingFields } from '@/app/components/TargetingFields';
-import { GOAL_TYPES, GOAL_TYPE_LABELS, type GoalType, type PageMatchType } from '@/lib/goals';
+import { GOAL_TYPES, GOAL_TYPE_LABELS, MAX_GOALS, checkGoalSelector, describeGoal, type GoalType, type PageMatchType } from '@/lib/goals';
 import { parseTargeting, type Targeting } from '@/lib/targeting';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import type { Variation } from '@/lib/types';
@@ -17,12 +17,32 @@ async function send(url: string, method: string, body: unknown): Promise<{ ok: b
 }
 
 /** Safe edits for a draft, running or paused test: split, pausing variations, audience and new goals. */
-export function EditTest({ experimentId, variations, targeting, onSaved }: { experimentId: string; variations: Variation[]; targeting: string | null; onSaved: () => void }) {
+type GoalRow = { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean };
+
+export function EditTest({ experimentId, variations, goals = [], targeting, onSaved }: { experimentId: string; variations: Variation[]; goals?: GoalRow[]; targeting: string | null; onSaved: () => void }) {
     const [rows, setRows] = useState(variations.map((v) => ({ id: v.id, name: v.name, is_control: v.is_control, weight: v.weight, paused: !!v.paused })));
     const [aud, setAud] = useState<Targeting>(parseTargeting(targeting));
     const [goal, setGoal] = useState({ name: '', type: 'click' as GoalType, selector: '', match_type: 'equals' as PageMatchType, is_primary: false });
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
+    const [list, setList] = useState<GoalRow[]>(goals);
+    const selectorProblem = (goal.type === 'click' || goal.type === 'form') && goal.selector.trim() ? checkGoalSelector(goal.selector) : null;
+
+    async function goalsCall(method: string, body: unknown, done: string, query = '') {
+        return run(async () => {
+            const res = await send(`/api/experiments/${experimentId}/goals${query}`, method, body);
+            if (res.ok && Array.isArray(res.data.goals)) setList(res.data.goals as GoalRow[]);
+            return res;
+        }, done);
+    }
+    function move(i: number, dir: -1 | 1) {
+        const j = i + dir;
+        if (j < 0 || j >= list.length) return;
+        const next = [...list];
+        [next[i], next[j]] = [next[j], next[i]];
+        setList(next);
+        void goalsCall('PATCH', { order: next.map((g) => g.id) }, 'Goal order saved.');
+    }
 
     const active = rows.map((r, i) => ({ r, i })).filter((x) => !x.r.paused);
     const total = active.reduce((a, x) => a + x.r.weight, 0);
@@ -86,7 +106,26 @@ export function EditTest({ experimentId, variations, targeting, onSaved }: { exp
             </Card>
 
             <Card>
-                <CardHeader title="Add a goal" description="New goals count from the moment you add them." />
+                <CardHeader title="Goals" description={`${list.length} of ${MAX_GOALS} goals. Each goal has its own numbers in results.`} />
+                <CardBody className="space-y-2">
+                    {list.map((g, i) => (
+                        <div key={g.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-zinc-200 p-3" data-testid="goal-row">
+                            <span className="w-6 text-sm text-zinc-500">{i + 1}.</span>
+                            <span className="min-w-0 flex-1">
+                                <span className="block text-sm font-medium text-zinc-900">{g.name}{g.is_primary && <Badge className="ml-2">Primary</Badge>}</span>
+                                <span className="block truncate font-mono text-xs text-zinc-500">{GOAL_TYPE_LABELS[(g.type || 'click') as GoalType]}: {describeGoal(g)}</span>
+                            </span>
+                            <Button variant="ghost" size="sm" aria-label={`Move ${g.name} up`} disabled={busy || i === 0} onClick={() => move(i, -1)}>↑</Button>
+                            <Button variant="ghost" size="sm" aria-label={`Move ${g.name} down`} disabled={busy || i === list.length - 1} onClick={() => move(i, 1)}>↓</Button>
+                            {!g.is_primary && <Button variant="ghost" size="sm" disabled={busy} onClick={() => void goalsCall('PATCH', { primary: g.id }, 'Primary goal changed.')}>Make primary</Button>}
+                            <Button variant="ghost" size="sm" disabled={busy || list.length <= 1} onClick={() => { if (window.confirm(`Remove the goal "${g.name}"? Its numbers stop showing in results.`)) void goalsCall('DELETE', {}, 'Goal removed.', `?goal=${encodeURIComponent(g.id)}`); }}>Remove</Button>
+                        </div>
+                    ))}
+                </CardBody>
+            </Card>
+
+            <Card>
+                <CardHeader title="Add a goal" description="One name and one CSS selector per goal. New goals count from the moment you add them." />
                 <CardBody className="space-y-3">
                     <div className="grid gap-3 sm:grid-cols-[1fr_9rem_auto_1.4fr]">
                         <Input aria-label="Goal name" placeholder="Pricing click" value={goal.name} onChange={(e) => setGoal({ ...goal, name: e.target.value })} />
@@ -102,10 +141,11 @@ export function EditTest({ experimentId, variations, targeting, onSaved }: { exp
                         ) : <span className="hidden sm:block" />}
                         <Input aria-label="Goal target" placeholder={PLACEHOLDER[goal.type]} value={goal.selector} onChange={(e) => setGoal({ ...goal, selector: e.target.value })} />
                     </div>
+                    {selectorProblem && <p className="text-sm text-red-600">{selectorProblem}</p>}
                     <div className="flex items-center justify-between">
                         <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-brand-600" checked={goal.is_primary} onChange={(e) => setGoal({ ...goal, is_primary: e.target.checked })} /> Make this the primary goal</label>
-                        <Button disabled={busy || !goal.name || !goal.selector} onClick={async () => {
-                            if (await run(() => send(`/api/experiments/${experimentId}/goals`, 'POST', goal), 'Goal added.')) setGoal({ ...goal, name: '', selector: '', is_primary: false });
+                        <Button disabled={busy || !goal.name.trim() || !goal.selector.trim() || !!selectorProblem || list.length >= MAX_GOALS} onClick={async () => {
+                            if (await goalsCall('POST', goal, 'Goal added.')) setGoal({ ...goal, name: '', selector: '', is_primary: false });
                         }}>Add goal</Button>
                     </div>
                 </CardBody>
