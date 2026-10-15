@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { bootstrapSchema, formatZodError } from '@/lib/validation';
-import { hostFromRequestHeaders, isHostAllowed, normalizePageUrl, urlsMatch } from '@/lib/domains';
+import { normalizePageUrl, urlsMatch } from '@/lib/domains';
+import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
@@ -26,23 +27,16 @@ export async function POST(request: NextRequest) {
         if ('error' in auth) return auth.error;
         void bumpMetric(METRICS.sdk_bootstrap, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
 
-        const hosts = await db.getDomainHosts(auth.ctx.projectId);
-        const reqHost = hostFromRequestHeaders(request.headers.get('origin'), request.headers.get('referer'));
-        // Server-side / same-origin tools may omit Origin; still require a registered domain list and a matching URL host.
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
         const { url, user_id, referrer, visitor } = parsed.data;
         const page = normalizePageUrl(url);
         if (!page) return sdkJson({ error: 'Invalid url' }, 400);
 
-        let pageHost: string | null = null;
-        try { pageHost = new URL(url).hostname.toLowerCase(); } catch { /* ignore */ }
-        if (hosts.length === 0) {
-            return sdkJson({ matched: false, action: 'none', reason: 'no_domains' } satisfies BootstrapResponse);
-        }
-        const allowed = isHostAllowed(reqHost, hosts) || isHostAllowed(pageHost, hosts);
-        if (!allowed) {
-            return sdkJson({ matched: false, action: 'none', reason: 'domain_not_allowed' } satisfies BootstrapResponse);
+        // The SDK only runs on registered domains (Origin or Referer; localhost for development keys).
+        const origin = await checkSdkOrigin(request, auth.ctx);
+        if (!origin.ok) {
+            return sdkJson({ matched: false, action: 'none', reason: origin.reason } satisfies BootstrapResponse);
         }
 
         // Monthly pageview cap reached: pause collection. Visitors see the original page.

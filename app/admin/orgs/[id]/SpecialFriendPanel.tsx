@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardBody, Field, Input, Button, Alert } from '@/app/components/ui';
 import type { Allowances } from '@/lib/allowances';
 
-type NumKey = 'monthly_visitors' | 'daily_visitors' | 'lifetime_experiments' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats';
+type NumKey = 'monthly_visitors' | 'daily_visitors' | 'lifetime_experiments' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats' | 'domains';
 const NUM_FIELDS: { key: NumKey; label: string }[] = [
     { key: 'monthly_visitors', label: 'Tested visitors per month' },
     { key: 'daily_visitors', label: 'Tested visitors per day' },
@@ -15,6 +15,7 @@ const NUM_FIELDS: { key: NumKey; label: string }[] = [
     { key: 'active_experiments', label: 'Active experiments' },
     { key: 'projects', label: 'Projects' },
     { key: 'seats', label: 'Seats' },
+    { key: 'domains', label: 'Domains' },
 ];
 type Toggle = 'plan' | 'on' | 'off';
 

@@ -18,6 +18,7 @@ export const allowancesSchema = z.object({
     active_experiments: cap,
     projects: cap,
     seats: cap,
+    domains: cap,
     flags: z.record(z.string().regex(/^[a-z][a-z0-9_]{0,40}$/), z.boolean()).optional(),
 }).strict();
 

@@ -46,7 +46,7 @@ export default function DomainsPage() {
 
     return (
         <div>
-            <PageHeader title="Domains" description="Register the sites where your tests run. The SDK only accepts events from these domains." />
+            <PageHeader title="Domains" description="Register the sites where your tests run. The SDK only accepts events from these domains. The free plan includes one domain, and subdomains count as the same domain. localhost always works with your development key." />
             {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
             <div className="grid gap-6 lg:grid-cols-2">
                 <Card>

@@ -46,7 +46,7 @@ const comingSoon: { name: string; p: number; tier: number }[] = [
 ];
 
 const faqs = [
-    { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests in total, 1 project, and A/B tests with a control plus 1 variation, for as long as you use it.' },
+    { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests in total, 1 project on 1 domain, and A/B tests with a control plus 1 variation, for as long as you use it.' },
     { q: 'What counts as a tested visitor?', a: 'A unique visitor ID that gets assigned to at least one running experiment in a calendar month. Pages without a running test don\'t count. One visitor in three tests counts once.' },
     { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t counted or added to results. Visitors already in a test keep their variant. On the free plan this applies past 10,000 tested visitors in a month or 300 in a day. We never upgrade you or bill you automatically.' },
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID, and we hash it together with the experiment ID. The same visitor always lands in the same variant. Raising traffic allocation doesn\'t move people who are already in the test.' },
