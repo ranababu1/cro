@@ -24,7 +24,7 @@ faq_schema: |
     "@type": "FAQPage",
     "mainEntity": [
       {"@type": "Question", "name": "What is the best free A/B testing tool?",
-       "acceptedAnswer": {"@type": "Answer", "text": "It depends on who runs the tests. For non-technical teams that need a visual editor, Mida's free Sandbox plan is the strongest option we checked. For developers with a data warehouse, GrowthBook is free to self-host. For product teams already using PostHog, its experiments are free up to 1 million feature flag requests a month. freeabtest.com suits developers who want a hosted tool and plain statistics with no warehouse setup."}},
+       "acceptedAnswer": {"@type": "Answer", "text": "It depends on who runs the tests. For non-technical teams that need a visual editor, Mida's free Sandbox plan is the strongest option we checked. For developers with a data warehouse, GrowthBook is free to self-host. For product teams already using PostHog, its experiments are free up to 1 million feature flag requests a month. freeabtest.com suits developers who want code-first testing and plain statistics with no warehouse setup."}},
       {"@type": "Question", "name": "Is there a free replacement for Google Optimize?",
        "acceptedAnswer": {"@type": "Answer", "text": "Google Optimize shut down in September 2023 and has no direct replacement from Google. Tools with a permanent free plan in October 2026 include Mida, GrowthBook, PostHog and freeabtest.com. VWO, Convert and Optimizely do not offer a permanent free plan on their pricing pages."}},
       {"@type": "Question", "name": "Does VWO have a free plan?",
@@ -39,7 +39,7 @@ faq_schema: |
 
 By Imraan, freeabtest.com. Published 15 October 2026. Every price and limit below was checked on the vendor's own pricing page on 15 October 2026.
 
-The best free A/B testing tool for most small websites in 2026 is the one whose free plan matches how you build: Mida if you need a visual editor, GrowthBook if you have a data warehouse and an engineer, PostHog if you already use it for analytics, and freeabtest.com if you want a hosted, code-first tool with plain statistics. VWO, Convert and Optimizely do not offer a permanent free plan; Convert offers a 15-day trial.
+The best free A/B testing tool for most small websites in 2026 is the one whose free plan matches how you build: Mida if you need a visual editor, GrowthBook if you have a data warehouse and an engineer, PostHog if you already use it for analytics, and freeabtest.com if you want a code-first tool with plain statistics. VWO, Convert and Optimizely do not offer a permanent free plan; Convert offers a 15-day trial.
 
 We make one of the tools on this list, so read this with that in mind. We have tried to make the comparison useful even if you never sign up with us, and we say where other tools do things we don't.
 
@@ -60,7 +60,7 @@ Three numbers decide whether a free plan is useful:
 | [Mida](https://www.mida.so/pricing) | Sandbox: 100,000 MTU, 3 live tests, 2 variations (control plus variant), 60-day data retention, 50,000 tracked events a day | Only 3 live tests and one challenger per test | Growth from $224/month billed annually (at 50,000 MTU) | Marketers who want a visual editor |
 | [GrowthBook](https://www.growthbook.io/pricing) | Cloud Starter: up to 3 users, 1 project, unlimited experiments and traffic. Self-hosted: free | Visual editor and split URL tests are Pro only. Analysis needs a data warehouse or their managed one (1M events a month on Starter) | Pro $40 per seat per month | Engineering teams with a warehouse |
 | [PostHog](https://posthog.com/pricing) | 1M feature flag requests a month (experiments are billed with flags), plus 1M analytics events, 1 project, 1-year retention, unlimited team members | Usage stops at the free limit unless you add a card; experiments sit inside a large analytics product | Pay as you go above the free allowance | Product teams already on PostHog |
-| [freeabtest.com](https://freeabtest.com/pricing) | Free plan: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, 1 project, control plus 1 variation. Page, click, form and custom event goals, targeting, SRM alerts | Small traffic cap and one test at a time on Free. No visual editor yet | $10/month ([pricing](https://freeabtest.com/pricing)) | Developers who want hosted, code-first testing |
+| [freeabtest.com](https://freeabtest.com/pricing) | Free plan: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, 1 project, control plus 1 variation. Page, click, form and custom event goals, targeting, SRM alerts | Small traffic cap and one test at a time on Free. No visual editor yet | $10/month ([pricing](https://freeabtest.com/pricing)) | Developers who want code-first testing |
 
 Trial only, no permanent free plan:
 
@@ -94,7 +94,7 @@ PostHog states on its pricing page that 97% of companies use it for free. On the
 
 Choose PostHog if you already use it for product analytics, or you want analytics, replays and experiments in one place. It is more than you need if all you want is a single landing page test.
 
-## freeabtest.com: hosted, code-first, plain statistics
+## freeabtest.com: code-first, plain statistics
 
 This is our product, so here is what it does today and what it doesn't.
 
@@ -106,6 +106,7 @@ What works now:
 - Targeting by device, UTM, referrer and new or returning visitors
 - Sample ratio mismatch alerts, so you hear when the traffic split looks broken
 - Safe edits to running tests, and shareable results links
+- Revenue goals are not available today. To measure paid conversions, track the purchase as a custom event
 - Results with conversion rate, lift, a Wilson 95% interval for each variation, and a two-proportion z-test of each variation against the control
 - Live stats while a test runs
 - Separate dev, staging and production environments, an audit log, and a REST API
@@ -114,12 +115,11 @@ What works now:
 
 What is not built yet, and is listed on our [roadmap](https://freeabtest.com/roadmap):
 
-- Revenue goals (coming)
 - Heatmaps (Phase 3) and session recordings (Phase 4), which will be on paid plans only
 - Funnels and a visual editor (Phase 4). Today you build variations as pages or in code.
 - A WordPress plugin (Phase 5). Today WordPress sites install the snippet by following the docs guide.
 
-Choose freeabtest.com if you can paste a script tag, you want a hosted tool with no warehouse, and you want results you can explain to someone else. Be clear on the Free limits: 300 tested visitors a day is enough to learn the tool and to test big changes on a small page, but a plain A/B test that needs 27,828 visitors would take about 93 days at that cap. Paid plans remove that bottleneck. If you need a visual editor today, or more free traffic, Mida is a better fit.
+Choose freeabtest.com if you can paste a script tag, you want testing with no warehouse, and you want results you can explain to someone else. Be clear on the Free limits: 300 tested visitors a day is enough to learn the tool and to test big changes on a small page, but a plain A/B test that needs 27,828 visitors would take about 93 days at that cap. Paid plans remove that bottleneck. If you need a visual editor today, or more free traffic, Mida is a better fit.
 
 ## The trial-only tools
 
@@ -159,7 +159,7 @@ If you get 10,000 visitors a week to the page you want to test, you can detect a
 ## Frequently asked questions
 
 **What is the best free A/B testing tool?**
-It depends on who runs the tests. Mida's free plan is the strongest for non-technical teams that need a visual editor. GrowthBook is the strongest for developers with a data warehouse. PostHog suits teams already using it. freeabtest.com suits developers who want a hosted tool and plain statistics without a warehouse.
+It depends on who runs the tests. Mida's free plan is the strongest for non-technical teams that need a visual editor. GrowthBook is the strongest for developers with a data warehouse. PostHog suits teams already using it. freeabtest.com suits developers who want code-first testing and plain statistics without a warehouse.
 
 **Is there a free replacement for Google Optimize?**
 Google Optimize shut down in September 2023, and Google did not release a direct replacement. Tools with a permanent free plan in October 2026 include Mida, GrowthBook, PostHog and freeabtest.com.
