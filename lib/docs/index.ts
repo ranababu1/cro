@@ -1,6 +1,7 @@
 import type { Block, DocPage } from './types';
 import { introduction } from './content/introduction';
 import { quickStart } from './content/quickStart';
+import { installGuides } from './content/installGuides';
 import { sdk } from './content/sdk';
 import { experiments } from './content/experiments';
 import { variations } from './content/variations';
@@ -16,7 +17,7 @@ export type { Block, DocPage } from './types';
 
 /** Reading order. The sidebar groups pages by `group` in this order. */
 export const docPages: DocPage[] = [
-    introduction, quickStart, sdk, experiments, variations, goals, results, winners, restApi, environments, organizations, troubleshooting,
+    introduction, quickStart, installGuides, sdk, experiments, variations, goals, results, winners, restApi, environments, organizations, troubleshooting,
 ];
 
 export function getDocPage(slug: string): DocPage | undefined {

@@ -90,3 +90,4 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Edit running tests (Edit test tab, app/(app)/experiments/[id]/EditTest.tsx): weights and pause via PATCH /api/experiments/[id]/variations (lib/allocation.ts), add goal via POST /api/experiments/[id]/goals, audience via PATCH targeting. variations.paused (0007) excluded from new assignments.
 - SRM: sampleRatioMismatch in lib/statistics.ts, srm field in results (lib/results.ts buildExperimentResults), warning component app/components/SrmWarning.tsx.
 - Share links: share_links table (0008), /api/experiments/[id]/share (GET/POST/DELETE), public page app/share/[token] using lib/shareView.ts. Covered by publicContent tests.
+- Install guides doc page (lib/docs/content/installGuides.ts): GTM and WordPress.

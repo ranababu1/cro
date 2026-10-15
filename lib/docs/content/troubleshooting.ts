@@ -43,7 +43,7 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Where is my data stored?' },
         { type: 'p', text: 'In our secure database. Each organization\'s data is kept separate, and each environment\'s results are kept apart.' },
         { type: 'h3', text: 'Is there a WordPress plugin, GA4 integration or React package?' },
-        { type: 'p', text: 'Not yet. The script tag works on any site today, including WordPress and Google Tag Manager.' },
+        { type: 'p', text: 'Not yet. The script tag works on any site today. See [Install guides](/docs/install-guides) for Google Tag Manager and WordPress.' },
         { type: 'h3', text: 'Is it really free?' },
         { type: 'p', text: 'There is a free plan and no billing system yet. Pricing for larger plans has not been set.' },
     ],
