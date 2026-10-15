@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono, Caveat } from 'next/font/google';
 import './globals.css';
+import { themeInitScript } from '@/lib/theme';
 import AuthProvider from './components/AuthProvider';
 import { Analytics } from '@vercel/analytics/next';
 
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="en" className={`${inter.variable} ${mono.variable} ${hand.variable}`}>
+        <html lang="en" className={`${inter.variable} ${mono.variable} ${hand.variable}`} suppressHydrationWarning>
+            <head>
+                <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+            </head>
             <body>
                 <AuthProvider>{children}</AuthProvider>
                 <Analytics />

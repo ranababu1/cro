@@ -147,7 +147,7 @@ function HeatView({ data, view, width }: { data: Report; view: View; width: numb
                     <div className="relative origin-top-left" style={{ width, height, transform: `scale(${scale})` }} data-testid={`heat-${view}`}>
                         {view === 'overlay' && url
                             ? <iframe src={url} title="Page preview" className="pointer-events-none absolute inset-0 h-full w-full bg-white" sandbox="" loading="lazy" />
-                            : <div className="absolute inset-0 bg-[linear-gradient(#e4e4e7_1px,transparent_1px)] bg-[size:100%_100px]" />}
+                            : <div className="absolute inset-0 bg-[linear-gradient(var(--color-zinc-200)_1px,transparent_1px)] bg-[size:100%_100px]" />}
                         {layer}
                     </div>
                 </div>

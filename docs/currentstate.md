@@ -158,3 +158,8 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## In-app links to public pages
 - Links from the signed-in app to /docs, /pricing, /roadmap, /blog or /wordpress use target=_blank and rel=noopener noreferrer (tests/inAppLinks.test.ts).
+
+## App dark mode
+- lib/theme.ts themeInitScript runs in the root layout head and sets html[data-theme] from localStorage fabt-theme (light, dark or system via prefers-color-scheme).
+- Only .app-scope (AppShell, so app and admin, plus onboarding) reacts: globals.css remaps the zinc and tint palette variables and fixes white surfaces, dark chips and links. Marketing pages have no .app-scope and stay light.
+- ThemeToggle (top bar) uses useSyncExternalStore with a system default on the server, so there is no hydration mismatch. Chart grid and labels use theme classes.

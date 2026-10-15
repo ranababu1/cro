@@ -92,3 +92,79 @@
 @keyframes mnav-fade { from { opacity: 0; } }
 @keyframes mnav-slide { from { opacity: 0; transform: translateY(-8px); } }
 @keyframes drawer-slide { from { transform: translateX(-100%); } }
+
+/*
+ * Dark theme for the signed-in app only. html[data-theme] is set before paint by lib/theme.ts;
+ * only .app-scope (AppShell, onboarding) reacts, so marketing pages stay light.
+ * Palette variables are remapped so existing utility classes adapt; pairs that would invert badly
+ * (dark buttons with white text, white surfaces) get explicit rules.
+ */
+html[data-theme='dark'] .app-scope {
+  color-scheme: dark;
+  --surface: #17171c;
+  --color-zinc-50: #0f0f13;
+  --color-zinc-100: #1f1f25;
+  --color-zinc-200: #2c2c34;
+  --color-zinc-300: #3d3d46;
+  --color-zinc-400: #8f8f99;
+  --color-zinc-500: #a5a5ae;
+  --color-zinc-600: #c2c2ca;
+  --color-zinc-700: #d6d6dc;
+  --color-zinc-800: #e6e6ea;
+  --color-zinc-900: #f4f4f6;
+  --color-zinc-950: #fafafa;
+  --color-blue-50: rgb(59 130 246 / 0.14);
+  --color-blue-100: rgb(59 130 246 / 0.24);
+  --color-blue-200: rgb(59 130 246 / 0.35);
+  --color-brand-50: rgb(59 130 246 / 0.14);
+  --color-brand-100: rgb(59 130 246 / 0.24);
+  --color-brand-200: rgb(59 130 246 / 0.35);
+  --color-sky-50: rgb(14 165 233 / 0.12);
+  --color-sky-200: rgb(14 165 233 / 0.35);
+  --color-sky-800: #a5dcf7;
+  --color-sky-900: #c9ebfb;
+  --color-emerald-50: rgb(16 185 129 / 0.12);
+  --color-emerald-100: rgb(16 185 129 / 0.2);
+  --color-emerald-200: rgb(16 185 129 / 0.35);
+  --color-emerald-700: #6ee7b7;
+  --color-emerald-800: #a7f3d0;
+  --color-emerald-900: #d1fae5;
+  --color-amber-50: rgb(245 158 11 / 0.12);
+  --color-amber-100: rgb(245 158 11 / 0.2);
+  --color-amber-200: rgb(245 158 11 / 0.35);
+  --color-amber-700: #fcd34d;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+  --color-red-50: rgb(239 68 68 / 0.12);
+  --color-red-100: rgb(239 68 68 / 0.2);
+  --color-red-200: rgb(239 68 68 / 0.35);
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-red-800: #fecaca;
+  --color-red-900: #fee2e2;
+  --color-teal-50: rgb(20 184 166 / 0.12);
+  --color-violet-50: rgb(139 92 246 / 0.14);
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-pop: 0 12px 24px -6px rgb(0 0 0 / 0.6);
+  background-color: var(--color-zinc-50);
+  color: var(--color-zinc-900);
+}
+html[data-theme='dark'] .app-scope .bg-white { background-color: var(--surface); }
+html[data-theme='dark'] .app-scope .text-blue-700,
+html[data-theme='dark'] .app-scope .text-blue-600,
+html[data-theme='dark'] .app-scope .text-brand-700 { color: #93b4fd; }
+/* Solid dark chips (active toggles, primary dark buttons) become light chips with dark text. */
+html[data-theme='dark'] .app-scope .bg-zinc-900,
+html[data-theme='dark'] .app-scope .bg-zinc-800 { background-color: #e6e6ea; color: #0f0f13; }
+html[data-theme='dark'] .app-scope .bg-zinc-900 *,
+html[data-theme='dark'] .app-scope .bg-zinc-800 * { color: inherit; }
+/* Solid colour buttons keep white text and strong backgrounds. */
+html[data-theme='dark'] .app-scope .bg-blue-600,
+html[data-theme='dark'] .app-scope .bg-brand-600 { color: #fff; }
+html[data-theme='dark'] .app-scope .bg-red-600 { background-color: #dc2626; color: #fff; }
+html[data-theme='dark'] .app-scope input,
+html[data-theme='dark'] .app-scope select,
+html[data-theme='dark'] .app-scope textarea { background-color: #121217; color: var(--color-zinc-900); }
+html[data-theme='dark'] .app-scope input::placeholder { color: #7c7c86; }
+html[data-theme='dark'] .app-scope pre,
+html[data-theme='dark'] .app-scope code { color: var(--color-zinc-800); }
