@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
             if (failed) {
                 return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'not_targeted', control_url: controlUrl || undefined });
             }
-            const quota = await checkVisitorQuota(auth.ctx.orgId);
+            const quota = await checkVisitorQuota(auth.ctx.orgId, user_id);
             if (!quota.allowed) {
                 return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined });
             }

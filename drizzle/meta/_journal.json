@@ -85,6 +85,13 @@
       "when": 1791971200000,
       "tag": "0011_special_friend",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1791971300000,
+      "tag": "0012_free_tier_limits",
+      "breakpoints": true
     }
   ]
 }

@@ -63,7 +63,7 @@ export default function NewExperimentWizard() {
             if (planRes && planRes.ok) {
                 const p = await planRes.json();
                 setPlan(p.plan || 'free');
-                setMaxVars(p.max_variations === null ? 25 : p.max_variations || 1);
+                setMaxVars(p.max_variations === null ? 50 : p.max_variations || 1);
             }
         })();
     }, []);
@@ -225,12 +225,12 @@ export default function NewExperimentWizard() {
                 <Card>
                     <CardHeader
                         title="Variation URLs"
-                        description={`Free plan: 1 variation. Paid plans: up to ${maxVars === 1 ? 10 : maxVars}. Your plan: ${plan} (max ${maxVars}).`}
+                        description={`Free plan: A/B only, a control plus 1 variation. Paid plans: up to 50. Your plan allows ${maxVars}.`}
                         actions={<Button variant="secondary" size="sm" onClick={addVariation} disabled={nonControlCount >= maxVars}>Add variation</Button>}
                     />
                     <CardBody className="space-y-4">
                         {nonControlCount >= maxVars && plan === 'free' && (
-                            <Alert tone="info" title="Upgrade to add more variations">The free plan allows 1 variation. Paid plans allow up to 10.</Alert>
+                            <Alert tone="info" title="Upgrade to add more variations">The free plan is A/B only: a control plus 1 variation. Paid plans allow up to 50.</Alert>
                         )}
                         {vars.map((v, i) => (
                             <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_2fr_6rem_auto]">

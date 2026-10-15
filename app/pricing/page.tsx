@@ -5,16 +5,17 @@ import { BillingCards } from './BillingCards';
 
 export const metadata: Metadata = {
     title: 'Pricing',
-    description: 'Start free with 50,000 tested visitors a month. Starter $10/mo, Growth $50/mo, Enterprise custom. No per-seat fees, no surprise bills.',
+    description: 'Start free with 10,000 tested visitors a month. Starter $10/mo, Growth $50/mo, Enterprise custom. No per-seat fees, no surprise bills.',
 };
 
 const plans = ['Free', 'Starter', 'Growth', 'Enterprise'];
 
 const limits: [string, string, string, string, string][] = [
     ['Who it\'s for', 'Trying it out and side projects', 'One growing site', 'Teams testing every week', 'High traffic and compliance needs'],
-    ['Monthly tested visitors', '50,000', '250,000', '1,000,000', 'Custom'],
-    ['Active experiments', '5', '20', 'Unlimited', 'Unlimited'],
-    ['Variants per experiment', 'Up to 26 (control + 25)', 'Up to 26 (control + 25)', 'Up to 26 (control + 25)', 'Up to 26 (control + 25)'],
+    ['Monthly tested visitors', '10,000 (up to 300 a day)', '250,000', '1,000,000', 'Custom'],
+    ['Running experiments at a time', '1', '20', 'Unlimited', 'Unlimited'],
+    ['Total experiments', '10 over the life of the account', 'Unlimited', 'Unlimited', 'Unlimited'],
+    ['Variations per experiment', 'Control plus 1 (A/B only)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
     ['Projects', '1', '3', '10', 'Custom'],
     ['Environments per project', '3 (dev, staging, production)', '3', '3', 'Custom'],
     ['Team seats', '3', '5', '15', 'Unlimited'],
@@ -25,7 +26,7 @@ const limits: [string, string, string, string, string][] = [
 ];
 
 const availableToday = [
-    'A/B and A/B/n tests', 'Split URL tests', 'Sticky assignment', 'Wilson intervals with a z-test against the control',
+    'A/B tests (A/B/n on paid plans)', 'Split URL tests', 'Sticky assignment', 'Wilson intervals with a z-test against the control',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
@@ -54,15 +55,16 @@ const comingSoon: { name: string; p: number; tier: number }[] = [
 ];
 
 const faqs = [
-    { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. 50,000 tested visitors a month, 5 active experiments and 3 seats, for as long as you use it.' },
+    { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests in total, 1 project, and A/B tests with a control plus 1 variation, for as long as you use it.' },
     { q: 'What counts as a tested visitor?', a: 'A unique visitor ID that gets assigned to at least one running experiment in a calendar month. Pages without a running test don\'t count. One visitor in three tests counts once.' },
-    { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t added to results. Visitors already in a test keep their variant. We email you at 80% and 100%. We never upgrade you or bill you automatically.' },
+    { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t counted or added to results. Visitors already in a test keep their variant. On the free plan this applies past 10,000 tested visitors in a month or 300 in a day. We email you at 80% and 100%. We never upgrade you or bill you automatically.' },
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID, and we hash it together with the experiment ID. The same visitor always lands in the same variant. Raising traffic allocation doesn\'t move people who are already in the test.' },
     { q: 'Which statistics do you use?', a: 'Today: a two-proportion z-test of each variant against the control, and Wilson score intervals for each conversion rate. Significance is only tested once every variant has at least 100 visitors. Bayesian and sequential analysis are planned for Phase 2. They aren\'t available yet.' },
     { q: 'Are the coming soon features included in my price?', a: 'When a feature ships, it\'s included in the plan listed for it at no extra cost. Until then it\'s marked coming soon. Don\'t buy a plan for a feature that isn\'t built yet.' },
     { q: 'Can I change or cancel my plan?', a: 'Yes, anytime. Upgrades apply right away. Downgrades and cancellations take effect at the end of the billing period. Your data is kept for your plan\'s retention period.' },
     { q: 'What happens to my data after the retention period?', a: 'Raw events older than your retention window are deleted. Experiment summaries (final results and the winner you chose) are kept while your account is active.' },
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
+    { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
     { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. Plain JavaScript and HTML work today. React, Next.js, WordPress, Node and GA4 are coming soon.' },
     { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA, or SSO (coming soon).' },
@@ -85,7 +87,7 @@ export default function PricingPage() {
             <main className="mx-auto max-w-[1200px] px-5 pb-20 pt-10 sm:px-8">
                 <p className="text-[13px] font-semibold tracking-[0.2em] text-blue-600">PRICING</p>
                 <h1 className="mt-4 max-w-3xl text-[40px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[52px]">Simple plans. A free tier you can actually use.</h1>
-                <p className="mt-4 max-w-2xl text-lg text-zinc-600">Start free with 50,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
+                <p className="mt-4 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
 
                 <BillingCards />
 

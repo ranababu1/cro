@@ -4,7 +4,7 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
-import { checkExperimentStartQuota } from '@/lib/quotas';
+import { checkExperimentStartQuota, quotaMessage } from '@/lib/quotas';
 import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
@@ -59,21 +59,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
                     { status: 400 },
                 );
             }
-            if (updates.status === 'running' && !experiment.started_at) {
-                // Quota hook: first start counts against the plan's monthly experiment limit.
-                const quota = await checkExperimentStartQuota(await orgIdForProject(experiment.project_id));
+            if (updates.status === 'running') {
+                // Plan limits: running tests at a time on every start or resume; lifetime and monthly limits on first start.
+                const firstStart = !experiment.started_at;
+                const quota = await checkExperimentStartQuota(await orgIdForProject(experiment.project_id), firstStart);
                 if (!quota.allowed) {
-                    return NextResponse.json(
-                        { error: `Monthly experiment limit reached (${quota.used} of ${quota.limit}). Contact support to upgrade.` },
-                        { status: 403 },
-                    );
+                    return NextResponse.json({ error: quotaMessage(quota), reason: quota.reason }, { status: 403 });
                 }
-                updates.started_at = new Date().toISOString();
+                if (firstStart) updates.started_at = new Date().toISOString();
             }
             if (updates.status === 'completed' && !experiment.ended_at) updates.ended_at = new Date().toISOString();
         }
 
         await db.updateExperiment(id, updates);
+        if (updates.started_at) await db.incrementExperimentsStarted(await orgIdForProject(experiment.project_id));
         if (updates.status === 'running' && experiment.status !== 'running') {
             const orgId = await orgIdForProject(experiment.project_id);
             await bumpMetric(METRICS.tests_started, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });

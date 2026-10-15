@@ -30,10 +30,10 @@ const testList: { text: string; note?: string }[] = [
 ];
 
 // Verified against the built public/sdk.js (from sdk-src via npm run sdk:build): gzip is about 14504 bytes.
-// Validation allows 26 variations, each project has dev/staging/prod, results use 95% Wilson intervals.
+// Paid plans allow a control plus 50 variations, each project has dev/staging/prod, results use 95% Wilson intervals.
 const stats = [
     { value: '~14 KB', label: ['gzipped SDK', 'snippet'] },
-    { value: '26', label: ['variations per', 'experiment'] },
+    { value: '50', label: ['variations per test', 'on paid plans'] },
     { value: '3', label: ['environments', 'per project'] },
     { value: '95%', label: ['Wilson confidence', 'intervals'] },
 ];

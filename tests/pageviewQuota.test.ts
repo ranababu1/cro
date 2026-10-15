@@ -18,6 +18,7 @@ import { GET as plan } from '@/app/api/plan/route';
 describe('effective limit', () => {
     it('uses plan default, override, unlimited and admin exemption', () => {
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: null }, false)).toBe(FREE_MONTHLY_PAGEVIEWS);
+        expect(FREE_MONTHLY_PAGEVIEWS).toBeNull();
         expect(effectivePageviewLimit({ plan: 'team', monthly_pageview_limit: null }, false)).toBe(PAID_MONTHLY_PAGEVIEWS);
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: 5 }, false)).toBe(5);
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: -1 }, false)).toBeNull();

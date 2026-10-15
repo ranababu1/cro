@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         const assigned = active.length ? assignUserToVariation(userId, experimentId, experiment.traffic_allocation, active) : null;
         if (!assigned) return sdkJson(notAssigned(experimentId));
 
-        const quota = await checkVisitorQuota(auth.ctx.orgId);
+        const quota = await checkVisitorQuota(auth.ctx.orgId, userId);
         if (!quota.allowed) {
             return sdkJson({ ...notAssigned(experimentId), reason: 'quota_exceeded' } satisfies AssignmentResponse);
         }

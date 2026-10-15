@@ -62,7 +62,7 @@ export const createExperimentSchema = z.object({
             }),
         )
         .min(2, 'Experiment must have a control and at least one variation')
-        .max(20), // soft cap; plan limit enforced in the route
+        .max(60), // soft cap; plan limit (control plus 50 on paid) enforced in the route via lib/entitlements.ts
     goals: z
         .array(goalSchema)
         .min(1, 'Add at least one goal')
@@ -81,7 +81,7 @@ export const updateExperimentSchema = z
     .strict();
 
 export const allocationSchema = z.object({
-    variations: z.array(z.object({ id, weight: z.number().int().min(0).max(100), paused: z.boolean().default(false) })).min(2).max(21),
+    variations: z.array(z.object({ id, weight: z.number().int().min(0).max(100), paused: z.boolean().default(false) })).min(2).max(51),
 });
 
 export const assignSchema = z.object({

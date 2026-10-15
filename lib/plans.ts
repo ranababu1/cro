@@ -1,9 +1,17 @@
 /**
- * Plan limits that the product enforces. Free allows one variation URL beside the control;
- * any non-free plan (team, enterprise, paid) allows up to ten.
+ * Plan defaults. Effective limits (with admin bypass and special friend overrides) come from
+ * lib/entitlements.ts; read them there, not here.
+ * Free: A/B only (control plus 1 variation). Paid: control plus up to 50.
  */
 export const FREE_MAX_VARIATIONS = 1;
-export const PAID_MAX_VARIATIONS = 10;
+export const PAID_MAX_VARIATIONS = 50;
+/** Free tier: tested visitors (new visitors enrolled in a test). */
+export const FREE_MONTHLY_VISITORS = 10_000;
+export const FREE_DAILY_VISITORS = 300;
+/** Free tier: concurrently running experiments, experiments started over the account's lifetime, projects. */
+export const FREE_RUNNING_EXPERIMENTS = 1;
+export const FREE_LIFETIME_EXPERIMENTS = 10;
+export const FREE_PROJECTS = 1;
 
 export function isPaidPlan(plan: string | null | undefined): boolean {
     const p = (plan || 'free').toLowerCase();
@@ -17,15 +25,18 @@ export function maxVariationUrlsForPlan(plan: string | null | undefined): number
 
 export function upgradeHintForVariations(plan: string | null | undefined): string {
     if (isPaidPlan(plan)) return '';
-    return `The free plan allows ${FREE_MAX_VARIATIONS} variation. Upgrade to add up to ${PAID_MAX_VARIATIONS}.`;
+    return `The free plan is A/B only: a control plus ${FREE_MAX_VARIATIONS} variation. Upgrade to add up to ${PAID_MAX_VARIATIONS}.`;
 }
 
-/** Tracked pageviews per month included in each plan. A pageview is a page load on a page that is part of a running test. */
-export const FREE_MONTHLY_PAGEVIEWS = 25_000;
+/**
+ * Tracked pageviews per month. A pageview is a page load on a page that is part of a running test.
+ * Free has no pageview cap: its usage is limited by tested visitors (monthly and daily) instead.
+ */
+export const FREE_MONTHLY_PAGEVIEWS: number | null = null;
 export const PAID_MONTHLY_PAGEVIEWS = 500_000;
 /** Stored in organizations.monthly_pageview_limit to mean no cap. */
 export const UNLIMITED = -1;
 
-export function planMonthlyPageviews(plan: string | null | undefined): number {
+export function planMonthlyPageviews(plan: string | null | undefined): number | null {
     return isPaidPlan(plan) ? PAID_MONTHLY_PAGEVIEWS : FREE_MONTHLY_PAGEVIEWS;
 }

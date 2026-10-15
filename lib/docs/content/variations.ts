@@ -3,13 +3,13 @@ import type { DocPage } from '../types';
 export const variations: DocPage = {
     slug: 'variations',
     title: 'Variations',
-    description: 'Controls, A/B/n tests with up to 10 on paid plans variations, weights, traffic allocation and split URL tests.',
+    description: 'Controls, A/B/n tests (up to 50 variations on paid plans), weights, traffic allocation and split URL tests.',
     group: 'Guides',
     blocks: [
         { type: 'h2', text: 'The control' },
         { type: 'p', text: 'Every experiment has exactly one control: the version you have today. Lift and significance are always measured against it. On the new experiment form, choose **Make control** on any row to move it.' },
         { type: 'h2', text: 'How many variations' },
-        { type: 'p', text: 'A URL split test has one control URL and one or more variation URLs. The free plan allows 1 variation; paid plans allow up to 10. Weights must sum to 100 and default to equal shares.' },
+        { type: 'p', text: 'A URL split test has one control URL and one or more variation URLs. The free plan allows 1 variation (A/B only); paid plans allow up to 50. Weights must sum to 100 and default to equal shares.' },
         { type: 'callout', tone: 'info', title: 'More variations need more traffic', text: 'Each extra variation splits your visitors further, so every variation takes longer to reach a reliable sample. Two or three is usually right unless you have a lot of traffic.' },
         { type: 'h2', text: 'Weights' },
         { type: 'p', text: 'Weights decide how visitors who enter the experiment are split. They must add up to 100. Decimals are allowed. Common choices are 50/50, 34/33/33, or 90/10 when you want to limit exposure to a risky change.' },

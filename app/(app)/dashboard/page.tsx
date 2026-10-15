@@ -7,6 +7,9 @@ import { CheckIcon, PlusIcon, FlaskIcon } from '@/app/components/shell/icons';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
 import { PageviewUsage } from '@/app/components/PageviewUsage';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
+import { PlanUsage, type UsageRow } from '@/app/components/PlanUsage';
+import { getOrgEntitlements } from '@/lib/entitlements';
+import { getVisitorUsage } from '@/lib/quotas';
 
 export const metadata: Metadata = { title: 'Overview' };
 
@@ -22,6 +25,20 @@ export default async function Dashboard() {
     const pageviews = project ? await getPageviewStatus(project.org_id, { fresh: true }) : null;
     const org = project ? await db.getOrganization(project.org_id) : null;
     const count = (s: string) => experiments.filter((e) => e.status === s).length;
+    let usageRows: UsageRow[] = [];
+    if (project && org) {
+        const { limits } = await getOrgEntitlements(org.id);
+        const v = await getVisitorUsage(org.id);
+        const running = await db.countRunningExperiments(org.id);
+        const projects = (await db.getOrgProjects(org.id)).length;
+        usageRows = [
+            { label: 'Tested visitors this month', used: v.month, limit: limits.monthlyVisitors, atLimit: 'New visitors see your original page and are not counted until next month. Visitors already in a test keep their version.' },
+            { label: 'Tested visitors today', used: v.day, limit: limits.dailyVisitors, atLimit: 'New visitors see your original page and are not counted until tomorrow (UTC). Visitors already in a test keep their version.' },
+            { label: 'Running tests', used: running, limit: limits.activeExperiments, atLimit: 'Pause or complete it before you start another.', capacity: true },
+            { label: 'Tests used (all time)', used: org.experiments_started_total, limit: limits.lifetimeExperiments, atLimit: 'You have started every test the free plan includes. Deleting tests does not free them up.' },
+            { label: 'Projects', used: projects, limit: limits.projects, atLimit: 'Your plan includes one project.', capacity: true },
+        ];
+    }
 
     const steps = [
         { done: keys.some((k) => k.type === 'sdk' && k.key_plaintext), title: 'SDK key ready', body: 'A production public SDK key is created for you automatically.', href: '/settings/keys', cta: 'View API keys' },
@@ -46,7 +63,8 @@ export default async function Dashboard() {
                 <Stat label="Visitors this month" value={usage.visitors.toLocaleString()} hint="Across your organization" />
             </div>
 
-            {pageviews && <PageviewUsage status={pageviews} plan={org?.plan || 'free'} />}
+            <PlanUsage rows={usageRows} plan={org?.plan || 'free'} />
+            {pageviews && pageviews.limit !== null && <PageviewUsage status={pageviews} plan={org?.plan || 'free'} />}
 
             {project && (
                 <Card className="mt-6">

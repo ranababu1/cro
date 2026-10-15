@@ -9,6 +9,8 @@ const cap = z.number().int().min(0).max(1_000_000_000).nullable().optional();
 
 export const allowancesSchema = z.object({
     monthly_visitors: cap,
+    daily_visitors: cap,
+    lifetime_experiments: cap,
     monthly_pageviews: cap,
     heatmaps: z.boolean().optional(),
     recordings: z.boolean().optional(),

@@ -17,7 +17,7 @@ export const quickStart: DocPage = {
         { type: 'p', text: 'Choose **New experiment** and follow the steps: domain, control URL, variation URLs, goals, traffic and audience, then review.' },
         { type: 'list', items: [
             'The control URL is your original page on the registered domain.',
-            'Each variation is a full URL on the same domain. The free plan allows 1 variation; paid plans allow up to 10.',
+            'Each variation is a full URL on the same domain. The free plan allows 1 variation; paid plans allow up to 50.',
             'Goals can be clicks (CSS selectors such as `#headerCTA` or `.bodyCTA`), form submits, page visits or custom events. Mark one as primary. See [Goals](/docs/goals).',
             'Weights must sum to 100. Traffic allocation is the share of visitors who enter the test.',
         ] },

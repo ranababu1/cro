@@ -23,7 +23,7 @@ export const introduction: DocPage = {
             ['Project', 'A site or app you test on. Every organization starts with one project called Default project.'],
             ['Environment', 'Each project has three: Development (`dev`), Staging (`staging`) and Production (`prod`). Data from each is kept apart.'],
             ['API key', 'SDK keys (`cro_pk_...`) are public and used in browsers. Secret keys (`cro_sk_...`) are private and used from servers.'],
-            ['Experiment', 'A test with a name, a hypothesis, a traffic allocation and two to 26 variations.'],
+            ['Experiment', 'A test with a name, a hypothesis, a traffic allocation and a control plus 1 variation on free, or up to 50 on paid plans.'],
             ['Variation', 'One version of the page. Exactly one variation is the control (your current version).'],
             ['Visitor', 'Identified by a visitor ID. The SDK creates one and stores it in localStorage, or you can pass your own.'],
             ['Assignment', 'The record that a visitor belongs to a variation. It never changes for the life of the experiment.'],
@@ -31,7 +31,7 @@ export const introduction: DocPage = {
         ] },
         { type: 'h2', text: 'What is available today' },
         { type: 'list', items: [
-            'URL split tests with a control page and variation pages (1 variation on free, up to 10 on paid).',
+            'URL split tests with a control page and variation pages (1 variation on free, up to 50 on paid).',
             'Automatic redirect from the control page to the assigned variation, without a flash of the wrong page.',
             'Sticky, deterministic assignment based on a hash of the visitor and experiment IDs.',
             'Click goals by CSS selector, with a primary goal and deduped conversions per visitor.',

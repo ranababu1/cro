@@ -5,7 +5,7 @@ import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
 export const metadata: Metadata = { title: 'Features and roadmap' };
 
 const available = [
-    { title: 'A/B and split URL tests', body: 'Compare a control page with one variation on the free plan, or up to 10 on paid plans. Set any traffic split, such as 50/50, 70/30 or 90/10.' },
+    { title: 'A/B and split URL tests', body: 'Compare a control page with one variation on the free plan, or up to 50 on paid plans. Set any traffic split, such as 50/50, 70/30 or 90/10.' },
     { title: 'Sticky assignment', body: 'Visitors are hashed into a variation, so they see the same version on every visit.' },
     { title: 'Click goals', body: 'Count clicks on any element by CSS selector, such as #headerCTA or .bodyCTA.' },
     { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
