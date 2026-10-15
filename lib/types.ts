@@ -60,6 +60,8 @@ export interface BootstrapGoal {
 export interface BootstrapResponse {
     matched: boolean;
     action: 'none' | 'stay' | 'redirect' | 'guard';
+    /** Present only for orgs entitled to heavy capture features. */
+    capture?: { heatmaps: boolean; sample_rate?: number };
     experiment_id?: string;
     variation_id?: string;
     variation_name?: string;

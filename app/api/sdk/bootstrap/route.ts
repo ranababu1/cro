@@ -10,6 +10,7 @@ import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
+import { canUseFeature } from '@/lib/entitlements';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -49,17 +50,21 @@ export async function POST(request: NextRequest) {
             return sdkJson({ matched: false, action: 'none', reason: 'quota_paused' } satisfies BootstrapResponse);
         }
 
+        // Heavy capture (heatmaps) is offered only to entitled orgs; free orgs never get a capture config.
+        const capture = (await canUseFeature(auth.ctx.orgId, 'heatmaps')) ? { heatmaps: true } : undefined;
+        const reply = (b: BootstrapResponse) => sdkJson(capture ? { ...b, capture } : b);
+
         // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.
         await recordGoalHits({ orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, environmentId: auth.ctx.environmentId, userId: user_id, url })
             .catch((err) => console.error('page goal failed', err));
 
         const match = await db.findExperimentByPageUrl(auth.ctx.projectId, url);
         if (!match) {
-            return sdkJson({ matched: false, action: 'none', reason: 'no_match' } satisfies BootstrapResponse);
+            return reply({ matched: false, action: 'none', reason: 'no_match' });
         }
         const { experiment, variations, goals } = match;
         if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
-            return sdkJson({ matched: false, action: 'none', reason: 'not_running' } satisfies BootstrapResponse);
+            return reply({ matched: false, action: 'none', reason: 'not_running' });
         }
 
         // Only click and form goals run in the browser. Page and event goals are matched on the server.
@@ -81,16 +86,16 @@ export async function POST(request: NextRequest) {
                 visitorType: visitor ?? null,
             });
             if (failed) {
-                return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'not_targeted', control_url: controlUrl || undefined } satisfies BootstrapResponse);
+                return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'not_targeted', control_url: controlUrl || undefined });
             }
             const quota = await checkVisitorQuota(auth.ctx.orgId);
             if (!quota.allowed) {
-                return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);
+                return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined });
             }
             const active = variations.filter((v) => !v.paused && v.weight > 0);
             const assigned = active.length ? assignUserToVariation(user_id, experiment.id, experiment.traffic_allocation, active) : null;
             if (!assigned) {
-                return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'outside_traffic', goals: goalPayload, control_url: controlUrl || undefined } satisfies BootstrapResponse);
+                return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'outside_traffic', goals: goalPayload, control_url: controlUrl || undefined });
             }
             if (await db.createAssignment({
                 experiment_id: experiment.id,
@@ -103,12 +108,12 @@ export async function POST(request: NextRequest) {
         }
 
         if (!variation) {
-            return sdkJson({ matched: true, action: 'stay', experiment_id: experiment.id, goals: goalPayload } satisfies BootstrapResponse);
+            return reply({ matched: true, action: 'stay', experiment_id: experiment.id, goals: goalPayload });
         }
 
         // On a variation page but assigned elsewhere: guard (do not count as this variation's exposure).
         if (onVariation && onVariation.id !== variation.id) {
-            return sdkJson({
+            return reply({
                 matched: true,
                 action: 'guard',
                 experiment_id: experiment.id,
@@ -118,7 +123,7 @@ export async function POST(request: NextRequest) {
                 is_control: !!variation.is_control,
                 control_url: controlUrl || undefined,
                 goals: goalPayload,
-            } satisfies BootstrapResponse);
+            });
         }
 
         // On control, assigned to a variation: redirect.
@@ -134,7 +139,7 @@ export async function POST(request: NextRequest) {
                 goal_id: null,
                 metadata: null,
             }).catch((err) => console.error('redirect event failed', err));
-            return sdkJson({
+            return reply({
                 matched: true,
                 action: 'redirect',
                 experiment_id: experiment.id,
@@ -144,10 +149,10 @@ export async function POST(request: NextRequest) {
                 is_control: false,
                 control_url: controlUrl || undefined,
                 goals: goalPayload,
-            } satisfies BootstrapResponse);
+            });
         }
 
-        return sdkJson({
+        return reply({
             matched: true,
             action: 'stay',
             experiment_id: experiment.id,
@@ -157,7 +162,7 @@ export async function POST(request: NextRequest) {
             is_control: !!variation.is_control,
             control_url: controlUrl || undefined,
             goals: goalPayload,
-        } satisfies BootstrapResponse);
+        });
     } catch (error) {
         console.error('bootstrap failed', error);
         return sdkJson({ error: 'Failed to bootstrap' }, 500);
