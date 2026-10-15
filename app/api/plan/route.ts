@@ -3,7 +3,6 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
-import { maxVariationUrlsForPlan } from '@/lib/plans';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { getOrgEntitlements } from '@/lib/entitlements';
 
@@ -18,5 +17,5 @@ export async function GET(request: NextRequest) {
     const plan = org?.plan || 'free';
     const pv = await getPageviewStatus(orgId, { fresh: true });
     const ent = await getOrgEntitlements(orgId);
-    return NextResponse.json({ plan, features: ent.features, max_variations: maxVariationUrlsForPlan(plan), pageviews: { used: pv.used, limit: pv.limit, paused: pv.paused } });
+    return NextResponse.json({ plan, features: ent.features, max_variations: ent.limits.maxVariations, pageviews: { used: pv.used, limit: pv.limit, paused: pv.paused } });
 }

@@ -1,6 +1,7 @@
 import { db } from './db';
 import { planMonthlyPageviews, UNLIMITED } from './plans';
-import { isPlatformAdminEmail } from './platformAdmin';
+import { getOrgEntitlements } from './entitlements';
+import { clearConfigCache } from './configCache';
 
 /**
  * Monthly tracked pageview quota. When an organization reaches its cap, collection pauses:
@@ -26,6 +27,7 @@ export function currentMonth(now = new Date()): string {
 
 export function clearPageviewCache(): void {
     cache.clear();
+    clearConfigCache();
 }
 
 /** Effective limit: org override, else plan default; -1 or an admin member means unlimited. */
@@ -40,8 +42,8 @@ export async function getPageviewStatus(orgId: string, opts: { fresh?: boolean }
     const hit = cache.get(orgId);
     if (!opts.fresh && hit && hit.status.month === month && Date.now() - hit.at < CACHE_MS) return hit.status;
     const org = await db.getOrganization(orgId);
-    const members = org ? await db.getOrgMembers(orgId) : [];
-    const limit = org ? effectivePageviewLimit(org, members.some((m) => isPlatformAdminEmail(m.email))) : null;
+    // Plan default, org override, special friend allowance and admin bypass all resolve in the entitlement helper.
+    const limit = org ? (await getOrgEntitlements(orgId)).limits.monthlyPageviews : null;
     const used = await db.getMonthlyPageviews(orgId, month);
     const status = { limit, used, paused: limit !== null && used >= limit, month };
     cache.set(orgId, { at: Date.now(), status });

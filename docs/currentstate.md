@@ -103,3 +103,7 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 ## Entitlements (2026-10-15)
 - `lib/entitlements.ts`: `computeEntitlements` (pure), `getOrgEntitlements` (30 s cache), `canUseFeature`. HEAVY_FEATURES = heatmaps, recordings, raw_capture; add every future heavy or raw-capture feature there. Rule: plan != free, or an org member who is a platform admin or imrn.dev@gmail.com (unlimited, no caps).
 - Enforced on the server: bootstrap includes `capture` only for entitled orgs, `/api/capture` returns 403 otherwise. `/api/plan` returns `features` for the UI. Free plans see an upgrade note on the experiment Heatmaps tab.
+
+## Special friends (2026-10-15)
+- `organizations.special_friend` and `custom_allowances` (JSON, `lib/allowances.ts` zod schema, migration 0011). Admin only: PUT `/api/admin/orgs/[id]/allowances`, panel on /admin/orgs/[id], badge and `?filter=special` on /admin. Audited as `admin:special_friend` with before and after.
+- Precedence in `computeEntitlements`: admin member (everything, no caps) > special friend allowance (each set field) > plan. Pageview cap, visitor quota and max variations now come from `limits`. Active experiments, projects and seats are stored and exposed in `limits`; enforcement for them lands with the free-tier limits. `flags` is reserved for future feature flags.

@@ -1,14 +1,17 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { listTenants } from '@/lib/admin';
-import { PageHeader, Card, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState, ButtonLink } from '@/app/components/ui';
+import { PageHeader, Card, Badge, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState, ButtonLink } from '@/app/components/ui';
 
 export const metadata: Metadata = { title: 'Admin console' };
 
 const limit = (n: number | null) => (n === null ? 'Unlimited' : n.toLocaleString());
 
-export default async function AdminHome() {
-    const tenants = await listTenants();
+export default async function AdminHome({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
+    const { filter } = await searchParams;
+    const all = await listTenants();
+    const specialOnly = filter === 'special';
+    const tenants = specialOnly ? all.filter((t) => t.org.special_friend) : all;
     const active = tenants.filter((t) => t.org.status === 'active').length;
     const visitors = tenants.reduce((s, t) => s + t.usage.month.visitors, 0);
     const events = tenants.reduce((s, t) => s + t.usage.month.events, 0);
@@ -25,6 +28,10 @@ export default async function AdminHome() {
                 <Stat label="Active" value={active} hint={`${tenants.length - active} suspended`} />
                 <Stat label="Visitors this month" value={visitors.toLocaleString()} />
                 <Stat label="Events this month" value={events.toLocaleString()} />
+            </div>
+            <div className="mb-3 flex gap-2 text-sm" role="tablist" aria-label="Filter tenants">
+                <Link href="/admin" className={`rounded-md px-3 py-1.5 ${specialOnly ? 'text-zinc-600 hover:bg-zinc-100' : 'bg-blue-50 font-medium text-blue-700'}`}>All ({all.length})</Link>
+                <Link href="/admin?filter=special" className={`rounded-md px-3 py-1.5 ${specialOnly ? 'bg-blue-50 font-medium text-blue-700' : 'text-zinc-600 hover:bg-zinc-100'}`}>Special friends ({all.filter((t) => t.org.special_friend).length})</Link>
             </div>
             <Card>
                 {tenants.length === 0 ? (
@@ -43,6 +50,7 @@ export default async function AdminHome() {
                                     <TD>
                                         <Link className="font-medium text-zinc-900 hover:underline" href={`/admin/orgs/${org.id}`}>{org.name}</Link>
                                         <p className="text-xs text-zinc-500">{org.slug}</p>
+                                        {org.special_friend && <Badge tone="brand" className="mt-1">Special friend</Badge>}
                                     </TD>
                                     <TD><StatusBadge status={org.status} /></TD>
                                     <TD className="capitalize">{org.plan}</TD>
