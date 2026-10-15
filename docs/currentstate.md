@@ -143,3 +143,9 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - lib/profileGate.ts: POST /api/experiments and PATCH to running return 403 profile_incomplete until first name, last name and country are set. Platform admins and the super admin are exempt; secret-key calls pass when an org member has a completed profile.
 - /settings/profile (sidebar Profile), /api/profile GET/PUT, /api/profile/skip, /api/profile/dismiss. Admin org page shows member profiles; /api/admin/profiles exports CSV.
 - tests/setup.ts gives test users a completed profile by default (pass first_name: null for none).
+
+## WordPress plugin
+- Source in integrations/wordpress/freeabtest (not in /public). Zipped on request by GET /api/downloads/wordpress for signed-in users; signed-out get 303 to /wordpress?download=signin#download.
+- One autoloaded option freeabtest_settings; front end only calls get_option and wp_print_script_tag at wp_head priority 1. Keys must match ^cro_pk_(prod|dev)_[0-9A-Za-z]{32}$. SDK URL hardcoded.
+- Connect link: https://<domain>/wp-admin/options-general.php?page=freeabtest&freeabtest_prod=<key> only prefills; saving needs the settings nonce and manage_options.
+- PHPCS (WordPress-Extra, WordPress.Security, WordPress-Docs, PHPCompatibilityWP 7.4-8.3): 0 errors, 0 warnings. Plugin Check 2.1.0 on WP 7.1.3: no errors or warnings. CI runs PHPCS.

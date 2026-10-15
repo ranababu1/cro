@@ -14,6 +14,7 @@ const available = [
     { title: 'Shareable results', body: 'Send a read-only results link to anyone, and turn it off at any time.' },
     { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
     { title: 'Live stats', body: 'Visitors, redirects and goal clicks update while the test runs, with a plain answer on who is ahead.' },
+    { title: 'WordPress plugin', body: 'Connect a WordPress site in a minute. Install it once and every future test runs through it.' },
     { title: 'Environments and keys', body: 'Separate development and production data, with the install snippet filled in for you.' },
 ];
 
@@ -24,7 +25,7 @@ const phases: { phase: string; name: string; status: PhaseStatus; items: string[
     { phase: 'Phase 2', name: 'More goals and targeting', status: 'Done', items: ['Page visit, form submit and custom event goals', 'Targeting by device, UTM, referrer and new or returning visitors', 'Edit running tests safely', 'Sample ratio mismatch warning', 'Shareable results links', 'Google Tag Manager and WordPress guides'] },
     { phase: 'Phase 3', name: 'Heatmaps', status: 'In progress', items: ['Click, scroll and confetti heatmaps', 'Heatmaps per variation', 'Rage and dead click detection', 'Traffic overview'] },
     { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'Planned', items: ['Session recordings with privacy masking', 'Funnels built from your goals', 'Revenue goals', 'Visual editor', 'Auto-shift traffic to the winner'] },
-    { phase: 'Phase 5', name: 'Engagement extras', status: 'Planned', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking', 'WordPress plugin'] },
+    { phase: 'Phase 5', name: 'Engagement extras', status: 'Planned', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking'] },
 ];
 
 const tone: Record<PhaseStatus, 'success' | 'brand' | 'neutral'> = { Done: 'success', 'In progress': 'brand', Planned: 'neutral' };

@@ -5,6 +5,8 @@ const nextConfig = {
     // Migrations are read from disk at startup.
     outputFileTracingIncludes: {
         '/**': ['./drizzle/**/*'],
+        // The WordPress plugin is zipped on request by the signed-in download route.
+        '/api/downloads/wordpress': ['./integrations/wordpress/freeabtest/**/*'],
     },
 };
 module.exports = nextConfig;

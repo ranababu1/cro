@@ -22,3 +22,17 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  wordpress-plugin:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/wordpress
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - run: composer install --no-interaction --no-progress
+      - run: vendor/bin/phpcs --standard=phpcs.xml
