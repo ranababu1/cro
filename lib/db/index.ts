@@ -684,15 +684,46 @@ export const db = {
     },
 
     /** Marks a visitor as seen this month. Returns true (and bumps the counter) the first time only. */
-    async addMonthlyVisitor(orgId: string, month: string, userId: string): Promise<boolean> {
+    async addMonthlyVisitor(orgId: string, month: string, userId: string, day = new Date().toISOString().slice(0, 10)): Promise<boolean> {
         const d = await getDb();
         const rows = await d.insert(s.orgVisitorsMonthly).values({ org_id: orgId, month, user_id: userId }).onConflictDoNothing().returning({ u: s.orgVisitorsMonthly.user_id });
         if (!rows.length) return false;
+        await d
+            .insert(s.usageDaily)
+            .values({ org_id: orgId, day, visitors: 1 })
+            .onConflictDoUpdate({ target: [s.usageDaily.org_id, s.usageDaily.day], set: { visitors: sql`${s.usageDaily.visitors} + 1` } });
         await d
             .insert(s.usageMonthly)
             .values({ org_id: orgId, month, pageviews: 0, visitors: 1 })
             .onConflictDoUpdate({ target: [s.usageMonthly.org_id, s.usageMonthly.month], set: { visitors: sql`${s.usageMonthly.visitors} + 1` } });
         return true;
+    },
+
+    async isMonthlyVisitor(orgId: string, month: string, userId: string): Promise<boolean> {
+        const d = await getDb();
+        return !!(await d.query.orgVisitorsMonthly.findFirst({ where: and(eq(s.orgVisitorsMonthly.org_id, orgId), eq(s.orgVisitorsMonthly.month, month), eq(s.orgVisitorsMonthly.user_id, userId)) }));
+    },
+
+    async getDailyVisitors(orgId: string, day: string): Promise<number> {
+        const d = await getDb();
+        const row = await d.query.usageDaily.findFirst({ where: and(eq(s.usageDaily.org_id, orgId), eq(s.usageDaily.day, day)) });
+        return row?.visitors ?? 0;
+    },
+
+    /** Running experiments across every project in the org. */
+    async countRunningExperiments(orgId: string): Promise<number> {
+        const d = await getDb();
+        const [row] = await d
+            .select({ n: count() })
+            .from(s.experiments)
+            .innerJoin(s.projects, eq(s.projects.id, s.experiments.project_id))
+            .where(and(eq(s.projects.org_id, orgId), eq(s.experiments.status, 'running')));
+        return Number(row?.n ?? 0);
+    },
+
+    async incrementExperimentsStarted(orgId: string): Promise<void> {
+        const d = await getDb();
+        await d.update(s.organizations).set({ experiments_started_total: sql`${s.organizations.experiments_started_total} + 1` }).where(eq(s.organizations.id, orgId));
     },
 
     async getMonthlyVisitors(orgId: string, month: string): Promise<number> {

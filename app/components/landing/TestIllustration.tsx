@@ -78,7 +78,7 @@ export function TestIllustration() {
             <div className="absolute left-[27%] top-[64%] flex items-center gap-3 rounded-xl border border-zinc-100 bg-white px-[2.6%] py-[2%] shadow-[0_16px_40px_-16px_rgb(37_99_235/0.4)]">
                 <svg viewBox="0 0 28 28" className="h-[clamp(22px,2.6vw,34px)] w-[clamp(22px,2.6vw,34px)] text-blue-600" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden><path d="M5 23v-7M11.5 23V11M18 23V14M24 23V5" /></svg>
                 <div>
-                    <p className="text-[clamp(16px,2vw,26px)] font-bold leading-none text-blue-700">26</p>
+                    <p className="text-[clamp(16px,2vw,26px)] font-bold leading-none text-blue-700">50</p>
                     <p className="mt-1 text-[clamp(10px,1vw,13px)] text-zinc-600">Variations max</p>
                 </div>
             </div>

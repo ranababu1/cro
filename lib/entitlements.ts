@@ -1,5 +1,8 @@
 import { db } from './db';
-import { isPaidPlan, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED } from './plans';
+import {
+    isPaidPlan, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
+    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_PROJECTS,
+} from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
 import { cached } from './configCache';
 import { parseAllowances, type Allowances } from './allowances';
@@ -20,6 +23,9 @@ export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 /** null means unlimited. */
 export interface Limits {
     monthlyVisitors: number | null;
+    dailyVisitors: number | null;
+    /** Experiments started over the account's lifetime (deleting does not give any back). */
+    lifetimeExperiments: number | null;
     monthlyPageviews: number | null;
     maxVariations: number | null;
     activeExperiments: number | null;
@@ -52,13 +58,16 @@ export function isSuperAdminEmail(email: string | null | undefined): boolean {
 
 function planLimits(org: OrgForEntitlements | null): Limits {
     const plan = org?.plan || 'free';
+    const free = !isPaidPlan(plan);
     const pv = org?.monthly_pageview_limit;
     return {
-        monthlyVisitors: org?.monthly_visitor_limit ?? null,
+        monthlyVisitors: org?.monthly_visitor_limit ?? (free ? FREE_MONTHLY_VISITORS : null),
+        dailyVisitors: free ? FREE_DAILY_VISITORS : null,
+        lifetimeExperiments: free ? FREE_LIFETIME_EXPERIMENTS : null,
         monthlyPageviews: pv === UNLIMITED ? null : pv ?? planMonthlyPageviews(plan),
         maxVariations: maxVariationUrlsForPlan(plan),
-        activeExperiments: null,
-        projects: null,
+        activeExperiments: free ? FREE_RUNNING_EXPERIMENTS : null,
+        projects: free ? FREE_PROJECTS : null,
         seats: null,
     };
 }
@@ -67,6 +76,8 @@ function applyAllowances(limits: Limits, a: Allowances): Limits {
     const pick = <T,>(v: T | undefined, base: T) => (v === undefined ? base : v);
     return {
         monthlyVisitors: pick(a.monthly_visitors, limits.monthlyVisitors),
+        dailyVisitors: pick(a.daily_visitors, limits.dailyVisitors),
+        lifetimeExperiments: pick(a.lifetime_experiments, limits.lifetimeExperiments),
         monthlyPageviews: pick(a.monthly_pageviews, limits.monthlyPageviews),
         maxVariations: pick(a.max_variations, limits.maxVariations),
         activeExperiments: pick(a.active_experiments, limits.activeExperiments),
@@ -85,7 +96,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         return {
             plan, paid, unlimited, specialFriend,
             features: Object.fromEntries(HEAVY_FEATURES.map((f) => [f, true])) as Record<HeavyFeature, boolean>,
-            limits: { monthlyVisitors: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null },
+            limits: { monthlyVisitors: null, dailyVisitors: null, lifetimeExperiments: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null },
             flags: {},
         };
     }

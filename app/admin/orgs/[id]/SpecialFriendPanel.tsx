@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardBody, Field, Input, Button, Alert } from '@/app/components/ui';
 import type { Allowances } from '@/lib/allowances';
 
-type NumKey = 'monthly_visitors' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats';
+type NumKey = 'monthly_visitors' | 'daily_visitors' | 'lifetime_experiments' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats';
 const NUM_FIELDS: { key: NumKey; label: string }[] = [
     { key: 'monthly_visitors', label: 'Tested visitors per month' },
+    { key: 'daily_visitors', label: 'Tested visitors per day' },
+    { key: 'lifetime_experiments', label: 'Experiments (lifetime)' },
     { key: 'monthly_pageviews', label: 'Pageviews per month' },
     { key: 'max_variations', label: 'Max variations' },
     { key: 'active_experiments', label: 'Active experiments' },

@@ -107,3 +107,10 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 ## Special friends (2026-10-15)
 - `organizations.special_friend` and `custom_allowances` (JSON, `lib/allowances.ts` zod schema, migration 0011). Admin only: PUT `/api/admin/orgs/[id]/allowances`, panel on /admin/orgs/[id], badge and `?filter=special` on /admin. Audited as `admin:special_friend` with before and after.
 - Precedence in `computeEntitlements`: admin member (everything, no caps) > special friend allowance (each set field) > plan. Pageview cap, visitor quota and max variations now come from `limits`. Active experiments, projects and seats are stored and exposed in `limits`; enforcement for them lands with the free-tier limits. `flags` is reserved for future feature flags.
+
+## Free tier limits (2026-10-15)
+- Defaults in `lib/plans.ts`, effective values only from `getOrgEntitlements().limits`: monthlyVisitors 10,000, dailyVisitors 300, activeExperiments 1, lifetimeExperiments 10, projects 1, maxVariations 1 for free; paid: maxVariations 50, others unlimited (pageviews 500,000). Free pageview cap removed.
+- Visitors: `usage_daily` counter (migration 0012) bumped with the monthly first-seen row. `checkVisitorQuota(org, user)` lets visitors already counted this month through.
+- Experiments: `checkExperimentStartQuota(org, firstStart)` in PATCH /api/experiments/[id]: running limit on every start/resume, lifetime and monthly limits on first start. Create is refused once the lifetime limit is used. `experiments_started_total` increments on first start and never decreases.
+- Projects: limit exposed (1 on free); there is no project-create API yet, so nothing else to enforce.
+- Overview: `app/components/PlanUsage.tsx`. Errors from the API use `quotaMessage`.

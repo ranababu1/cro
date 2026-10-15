@@ -40,12 +40,12 @@ beforeAll(async () => {
 afterAll(() => cleanup());
 
 describe('plan variation limits', () => {
-    it('free allows 1 variation, paid allows 10', () => {
+    it('free allows 1 variation, paid allows 50', () => {
         expect(FREE_MAX_VARIATIONS).toBe(1);
-        expect(PAID_MAX_VARIATIONS).toBe(10);
+        expect(PAID_MAX_VARIATIONS).toBe(50);
         expect(maxVariationUrlsForPlan('free')).toBe(1);
-        expect(maxVariationUrlsForPlan('team')).toBe(10);
-        expect(maxVariationUrlsForPlan('enterprise')).toBe(10);
+        expect(maxVariationUrlsForPlan('team')).toBe(50);
+        expect(maxVariationUrlsForPlan('enterprise')).toBe(50);
     });
 
     it('rejects a second variation on the free plan', async () => {
@@ -62,30 +62,19 @@ describe('plan variation limits', () => {
         expect(err.error).toMatch(/1 variation/i);
     });
 
-    it('allows up to 10 variations on a paid plan', async () => {
+    it('allows up to 50 variations on a paid plan and refuses 51', async () => {
         const projects = await db.getProjectsForUser(userId);
         const org = await db.getOrganization(projects[0].org_id);
         await db.updateOrganization(org!.id, { plan: 'team' });
-        const variations = [
-            { name: 'Control', url: 'http://localhost/c.html', weight: 10, is_control: true },
-            ...Array.from({ length: 10 }, (_, i) => ({
-                name: `V${i + 1}`,
-                url: `http://localhost/v${i + 1}.html`,
-                weight: 9,
-                is_control: false as boolean,
-            })),
+        const arms = (prefix: string, n: number) => [
+            { name: 'Control', url: `http://localhost/${prefix}c.html`, weight: 100 - 2 * Math.min(n, 50), is_control: true },
+            ...Array.from({ length: n }, (_, i) => ({ name: `V${i + 1}`, url: `http://localhost/${prefix}v${i + 1}.html`, weight: i < 50 ? 2 : 0, is_control: false as boolean })),
         ];
-        variations[0].weight = 10;
-        const res = await create(json('POST', '/api/experiments', flowExperimentBody({ name: 'Paid 10', control_url: 'http://localhost/c.html', variations })));
+        const res = await create(json('POST', '/api/experiments', flowExperimentBody({ name: 'Paid 50', control_url: 'http://localhost/pc.html', variations: arms('p', 50) })));
         expect(res.status).toBe(201);
-        const tooMany = [
-            { name: 'Control', url: 'http://localhost/c2.html', weight: 1, is_control: true },
-            ...Array.from({ length: 11 }, (_, i) => ({ name: `X${i}`, url: `http://localhost/x${i}.html`, weight: 9, is_control: false as boolean })),
-        ];
-        const w = Math.floor(100 / tooMany.length);
-        tooMany.forEach((v, i) => { v.weight = i === 0 ? 100 - w * (tooMany.length - 1) : w; });
-        const res2 = await create(json('POST', '/api/experiments', flowExperimentBody({ name: 'Too many', control_url: 'http://localhost/c2.html', variations: tooMany })));
+        const res2 = await create(json('POST', '/api/experiments', flowExperimentBody({ name: 'Too many', control_url: 'http://localhost/qc.html', variations: arms('q', 51) })));
         expect(res2.status).toBe(403);
+        expect((await res2.json()).error).toContain('up to 50');
         await db.updateOrganization(org!.id, { plan: 'free' });
     });
 });

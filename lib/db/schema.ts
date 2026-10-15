@@ -31,6 +31,8 @@ export const organizations = sqliteTable('organizations', {
     // Tracked pageviews per month. null = plan default, -1 = unlimited. See lib/pageviewQuota.ts.
     monthly_pageview_limit: integer('monthly_pageview_limit'),
     // Special friend: custom allowances (JSON, see lib/allowances.ts) override the plan. Admin only, never shown to tenants.
+    // Experiments ever started in this org. Never decreases, so deleting tests does not reset the free lifetime limit.
+    experiments_started_total: integer('experiments_started_total').notNull().default(0),
     special_friend: integer('special_friend', { mode: 'boolean' }).notNull().default(false),
     custom_allowances: text('custom_allowances'),
     created_at: text('created_at').notNull().default(now),
@@ -219,6 +221,13 @@ export const usageMonthly = sqliteTable('usage_monthly', {
     // Distinct visitors enrolled this month, kept in step with org_visitors_monthly.
     visitors: integer('visitors').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.org_id, t.month] })]);
+
+/** New tested visitors per org per UTC day (daily cap). */
+export const usageDaily = sqliteTable('usage_daily', {
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    day: text('day').notNull(),
+    visitors: integer('visitors').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.org_id, t.day] })]);
 
 /** One row per visitor per org per month. Inserting tells us whether the visitor is new this month. */
 export const orgVisitorsMonthly = sqliteTable('org_visitors_monthly', {
