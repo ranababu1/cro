@@ -282,3 +282,40 @@ export const domainLedger = sqliteTable('domain_ledger', {
     experiments_used: integer('experiments_used').notNull().default(0),
     updated_at: text('updated_at').notNull().default(now),
 }, (t) => [index('idx_domain_ledger_org').on(t.org_id)]);
+
+// Heatmaps (paid plans). Raw points are kept 30 days for confetti; reports read the daily rollups.
+export const heatmapPoints = sqliteTable('heatmap_points', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    org_id: text('org_id').notNull(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device', { enum: ['desktop', 'tablet', 'mobile'] }).notNull(),
+    x: integer('x').notNull(), // 0-1000, share of page width
+    y: integer('y').notNull(), // px from the top of the page
+    selector: text('selector').notNull(),
+    rage: integer('rage', { mode: 'boolean' }).notNull().default(false),
+    dead: integer('dead', { mode: 'boolean' }).notNull().default(false),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_heatmap_points_exp').on(t.experiment_id, t.variation_id, t.device), index('idx_heatmap_points_created').on(t.created_at)]);
+
+export const heatmapClicksDaily = sqliteTable('heatmap_clicks_daily', {
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    gx: integer('gx').notNull(), // 0-49, 2% columns
+    gy: integer('gy').notNull(), // 25px rows
+    selector: text('selector').notNull(),
+    clicks: integer('clicks').notNull().default(0),
+    rage: integer('rage').notNull().default(0),
+    dead: integer('dead').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.gx, t.gy, t.selector] })]);
+
+export const heatmapScrollDaily = sqliteTable('heatmap_scroll_daily', {
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    depth: integer('depth').notNull(), // max depth reached, 0-100 in steps of 10
+    sessions: integer('sessions').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.depth] })]);

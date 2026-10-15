@@ -163,12 +163,12 @@ describe('admin profile export', () => {
 });
 
 describe('migration', () => {
-    it('0014 adds the profile columns with a journal entry newer than 0013', () => {
+    it('0014 adds the profile columns with a journal entry newer than every earlier one', () => {
         const sqlText = fs.readFileSync('drizzle/0014_user_profile.sql', 'utf8');
         for (const c of ['first_name', 'last_name', 'country', 'phone', 'marketing_opt_in', 'onboarding_pending']) expect(sqlText).toContain(`\`${c}\``);
         const j = JSON.parse(fs.readFileSync('drizzle/meta/_journal.json', 'utf8')).entries as { tag: string; when: number }[];
         const i = j.findIndex((e) => e.tag === '0014_user_profile');
-        expect(i).toBe(j.length - 1);
+        expect(i).toBeGreaterThan(0);
         expect(j[i].when).toBeGreaterThan(Math.max(...j.slice(0, i).map((e) => e.when)));
     });
 });

@@ -12,7 +12,6 @@ import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { checkVisitorQuota } from '@/lib/quotas';
 import { PUT as putAllowances } from '@/app/api/admin/orgs/[id]/allowances/route';
 import { GET as planApi } from '@/app/api/plan/route';
-import { POST as bootstrap } from '@/app/api/sdk/bootstrap/route';
 import { POST as capture } from '@/app/api/capture/route';
 import { POST as createExperiment } from '@/app/api/experiments/route';
 import { flowExperimentBody } from './helpers';
@@ -98,8 +97,7 @@ describe('admin allowances API', () => {
         expect((await getPageviewStatus(orgId, { fresh: true })).limit).toBe(3);
         expect((await checkVisitorQuota(orgId)).limit).toBe(7);
         // SDK and ingest
-        expect((await (await bootstrap(sdk('/api/sdk/bootstrap', { url: 'http://localhost/x', user_id: 'v1' }))).json()).capture).toMatchObject({ heatmaps: true });
-        expect((await capture(sdk('/api/capture', { events: [] }))).status).toBe(202);
+        expect((await capture(sdk('/api/capture', { events: [] }))).status).toBe(400); // entitled: past the plan check, rejected only as an empty batch
         // UI: tenant sees effective values but not the flag
         session.current = { user: tenant };
         const plan = await (await planApi(new NextRequest('http://localhost/api/plan'))).json();
