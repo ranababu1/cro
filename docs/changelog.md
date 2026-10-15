@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-15 13:22 IST | Commit author email switched to ranababu1 GitHub noreply so Vercel Hobby deploys private-repo commits |
 | pending | 2026-10-15 15:50 IST | fix: remove duplicate Who can enter heading on the Edit test tab. Approved Phase 1 items all shipped; screenshots in cro-shots/p2-*.png. |
 | 32476e8 | 2026-10-15 15:30 IST | feat: monthly tracked pageview quotas. A pageview is a bootstrap on a page in a running test. Counter table usage_monthly (one upsert per pageview, no event scans) and organizations.monthly_pageview_limit (null = plan default, -1 = unlimited), migration 0009. Defaults: free 25,000, paid 500,000. At the cap, bootstrap returns quota_paused (original page, no redirect, no assignment) and track/event return 202 without storing; resumes next month or when raised. Orgs with a platform admin member (imrn.dev@gmail.com) are unlimited. Usage bar and paused notice on Overview, pageview stat and editable cap in /admin. 10s per-instance status cache. Docs FAQ and 6 new tests. |
 | ce200cb | 2026-10-15 15:00 IST | docs: install guides for Google Tag Manager (Custom HTML tag, Initialization trigger, priority, custom events) and WordPress (header plugin or child theme wp_head, caching plugin exclusions) at /docs/install-guides. Quick start no longer says to replace the key and mentions all goal types. 3 new tests. |
