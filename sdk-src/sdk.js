@@ -94,11 +94,12 @@
         if (goalsBound || !data.goals || !data.goals.length || !data.variation_id) return;
         goalsBound = true;
         var fired = {};
-        document.addEventListener('click', function (ev) {
+        function handle(kind, ev) {
             var node = ev.target;
             if (!node) return;
             for (var i = 0; i < data.goals.length; i++) {
                 var g = data.goals[i];
+                if ((g.type || 'click') !== kind) continue;
                 try {
                     var el = node.closest ? node.closest(g.selector) : null;
                     if (!el) continue;
@@ -108,7 +109,9 @@
                     track(data.experiment_id, data.variation_id, 'conversion', g.id, g.name);
                 } catch { /* bad selector */ }
             }
-        }, true);
+        }
+        document.addEventListener('click', function (ev) { handle('click', ev); }, true);
+        document.addEventListener('submit', function (ev) { handle('form', ev); }, true);
     }
 
     function redirectTo(variationUrl) {
@@ -171,7 +174,15 @@
         if (options.userId) config.userId = options.userId;
     }
 
+    /** Custom event goal: ABTest.track('signup'). Counts for every running test with a matching event goal. */
+    function trackEvent(name) {
+        if (!name || !config.apiUrl || !config.apiKey) return Promise.resolve();
+        return send('/api/sdk/event', { user_id: getUserId(), event_name: String(name) }, true)
+            .catch(function () { return {}; });
+    }
+
     window.ABTest = {
+        track: trackEvent,
         init: init,
         bootstrap: bootstrap,
         getUserId: getUserId,

@@ -26,7 +26,9 @@ export interface CreateExperimentRequest {
     }[];
     goals: {
         name: string;
+        type?: 'click' | 'form' | 'page' | 'event';
         selector: string;
+        match_type?: 'equals' | 'contains' | 'regex';
         is_primary: boolean;
     }[];
 }
@@ -50,6 +52,7 @@ export interface AssignmentResponse {
 export interface BootstrapGoal {
     id: string;
     name: string;
+    type: 'click' | 'form' | 'page' | 'event';
     selector: string;
     is_primary: boolean;
 }

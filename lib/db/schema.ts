@@ -116,7 +116,10 @@ export const goals = sqliteTable('goals', {
     id: text('id').primaryKey(),
     experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    selector: text('selector').notNull(), // CSS selector, e.g. #headerCTA or .bodyCTA
+    // Target: CSS selector (click, form), URL pattern (page) or event name (event). See lib/goals.ts.
+    selector: text('selector').notNull(),
+    type: text('type', { enum: ['click', 'form', 'page', 'event'] }).notNull().default('click'),
+    match_type: text('match_type', { enum: ['equals', 'contains', 'regex'] }),
     is_primary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_goals_experiment').on(t.experiment_id)]);

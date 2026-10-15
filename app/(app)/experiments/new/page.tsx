@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Field, Alert } from '@/app/components/ui';
+import { GOAL_TYPES, GOAL_TYPE_LABELS, describeGoal, type GoalType, type PageMatchType } from '@/lib/goals';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
 
@@ -11,7 +12,10 @@ type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review'
 
 interface Domain { id: string; host: string }
 interface VarDraft { name: string; url: string; weight: number; is_control: boolean }
-interface GoalDraft { name: string; selector: string; is_primary: boolean }
+interface GoalDraft { name: string; type: GoalType; selector: string; match_type: PageMatchType; is_primary: boolean }
+
+const GOAL_PLACEHOLDER: Record<GoalType, string> = { click: '#headerCTA', form: 'form#signup', page: 'https://www.example.com/thank-you', event: 'signup' };
+const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 
 const STEPS: { id: Step; label: string }[] = [
     { id: 'domain', label: 'Domain' },
@@ -35,7 +39,7 @@ export default function NewExperimentWizard() {
         { name: 'Control', url: '', weight: 50, is_control: true },
         { name: 'Variation 1', url: '', weight: 50, is_control: false },
     ]);
-    const [goals, setGoals] = useState<GoalDraft[]>([{ name: 'Primary CTA click', selector: '#headerCTA', is_primary: true }]);
+    const [goals, setGoals] = useState<GoalDraft[]>([{ name: 'Primary CTA click', type: 'click', selector: '#headerCTA', match_type: 'equals', is_primary: true }]);
     const [traffic, setTraffic] = useState(100);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
@@ -242,12 +246,22 @@ export default function NewExperimentWizard() {
 
             {step === 'goals' && (
                 <Card>
-                    <CardHeader title="Click goals" description="CSS selectors for the elements that count as a conversion, like #headerCTA or .bodyCTA." actions={<Button variant="secondary" size="sm" onClick={() => setGoals((g) => [...g, { name: '', selector: '', is_primary: false }])}>Add goal</Button>} />
+                    <CardHeader title="Goals" description="What counts as a conversion: a click on an element (#headerCTA, .bodyCTA), a form submit, a visit to a page, or a custom event from your code." actions={<Button variant="secondary" size="sm" onClick={() => setGoals((g) => [...g, { name: '', type: 'click', selector: '', match_type: 'equals', is_primary: false }])}>Add goal</Button>} />
                     <CardBody className="space-y-4">
                         {goals.map((g, i) => (
-                            <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_1fr_auto_auto]">
+                            <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_9rem_auto_1.4fr_auto_auto]">
                                 <Input aria-label="Goal name" placeholder="Primary CTA" value={g.name} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
-                                <Input aria-label="CSS selector" placeholder="#headerCTA" value={g.selector} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, selector: e.target.value } : x))} />
+                                <select aria-label="Goal type" className={selectClass} value={g.type} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, type: e.target.value as GoalType } : x))}>
+                                    {GOAL_TYPES.map((t) => <option key={t} value={t}>{GOAL_TYPE_LABELS[t]}</option>)}
+                                </select>
+                                {g.type === 'page' ? (
+                                    <select aria-label="URL match" className={selectClass} value={g.match_type} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, match_type: e.target.value as PageMatchType } : x))}>
+                                        <option value="equals">URL is</option>
+                                        <option value="contains">URL contains</option>
+                                        <option value="regex">URL matches regex</option>
+                                    </select>
+                                ) : <span className="hidden sm:block" />}
+                                <Input aria-label={g.type === 'page' ? 'Page URL' : g.type === 'event' ? 'Event name' : 'CSS selector'} placeholder={GOAL_PLACEHOLDER[g.type]} value={g.selector} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, selector: e.target.value } : x))} />
                                 <label className="flex items-center gap-2 text-sm"><input type="radio" name="primary" checked={g.is_primary} onChange={() => setGoals((gs) => gs.map((x, j) => ({ ...x, is_primary: j === i })))} /> Primary</label>
                                 <Button variant="ghost" size="sm" disabled={goals.length <= 1} onClick={() => setGoals((gs) => {
                                     const next = gs.filter((_, j) => j !== i);
@@ -256,6 +270,12 @@ export default function NewExperimentWizard() {
                                 })}>Remove</Button>
                             </div>
                         ))}
+                        {goals.some((g) => g.type === 'event') && (
+                            <p className="text-sm text-zinc-500">For custom events, call <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;{goals.find((g) => g.type === 'event')?.selector || 'signup'}&apos;)</code> on your page when the action happens.</p>
+                        )}
+                        {goals.some((g) => g.type === 'page') && (
+                            <p className="text-sm text-zinc-500">Page visit goals need the install snippet on that page too.</p>
+                        )}
                     </CardBody>
                 </Card>
             )}
@@ -279,7 +299,7 @@ export default function NewExperimentWizard() {
                             <p><span className="font-medium text-zinc-900">Name:</span> {name}</p>
                             <p><span className="font-medium text-zinc-900">Control:</span> {controlUrl}</p>
                             <p><span className="font-medium text-zinc-900">Variations:</span> {vars.filter((v) => !v.is_control).map((v) => `${v.name} (${v.weight}%) → ${v.url}`).join('; ')}</p>
-                            <p><span className="font-medium text-zinc-900">Goals:</span> {goals.map((g) => `${g.name} [${g.selector}]${g.is_primary ? ' (primary)' : ''}`).join('; ')}</p>
+                            <p><span className="font-medium text-zinc-900">Goals:</span> {goals.map((g) => `${g.name} (${GOAL_TYPE_LABELS[g.type]}: ${describeGoal(g)})${g.is_primary ? ' (primary)' : ''}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Traffic:</span> {traffic}%</p>
                         </CardBody>
                     </Card>

@@ -1,5 +1,6 @@
 'use client';
 
+import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -21,7 +22,7 @@ export default function ExperimentDetail() {
     const router = useRouter();
     const [experiment, setExperiment] = useState<Experiment | null>(null);
     const [variations, setVariations] = useState<Variation[]>([]);
-    const [goals] = useState<{ id: string; name: string; selector: string; is_primary: boolean }[]>([]);
+    const [goals] = useState<{ id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[]>([]);
     const [results, setResults] = useState<ExperimentResults | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -238,7 +239,7 @@ function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experime
     );
 }
 
-function SetupPanel({ variations, goals }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; selector: string; is_primary: boolean }[] }) {
+function SetupPanel({ variations, goals }: { experimentId?: string; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
     return (
         <div className="space-y-6">
             <Card>
@@ -261,11 +262,11 @@ function SetupPanel({ variations, goals }: { experimentId?: string; variations: 
             </Card>
             {goals.length > 0 && (
             <Card>
-                <CardHeader title="Goals" description="Click goals tracked by CSS selector." />
+                <CardHeader title="Goals" description="What counts as a conversion in this test." />
                 <Table>
-                    <THead><tr><TH>Name</TH><TH>Selector</TH><TH>Primary</TH></tr></THead>
+                    <THead><tr><TH>Name</TH><TH>Target</TH><TH>Primary</TH></tr></THead>
                     <TBody>{goals.map((g) => (
-                        <TR key={g.id}><TD className="font-medium">{g.name}</TD><TD><Kbd>{g.selector}</Kbd></TD><TD>{g.is_primary ? 'Yes' : ''}</TD></TR>
+                        <TR key={g.id}><TD className="font-medium">{g.name}</TD><TD><span className="mr-2 text-xs text-zinc-500">{GOAL_TYPE_LABELS[(g.type || 'click') as GoalType]}</span><Kbd>{describeGoal(g)}</Kbd></TD><TD>{g.is_primary ? 'Yes' : ''}</TD></TR>
                     ))}</TBody>
                 </Table>
             </Card>

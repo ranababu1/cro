@@ -7,6 +7,7 @@ import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
+import { recordGoalHits } from '@/lib/goalHits';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -41,6 +42,10 @@ export async function POST(request: NextRequest) {
             return sdkJson({ matched: false, action: 'none', reason: 'domain_not_allowed' } satisfies BootstrapResponse);
         }
 
+        // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.
+        await recordGoalHits({ orgId: auth.ctx.orgId, projectId: auth.ctx.projectId, environmentId: auth.ctx.environmentId, userId: user_id, url })
+            .catch((err) => console.error('page goal failed', err));
+
         const match = await db.findExperimentByPageUrl(auth.ctx.projectId, url);
         if (!match) {
             return sdkJson({ matched: false, action: 'none', reason: 'no_match' } satisfies BootstrapResponse);
@@ -50,7 +55,8 @@ export async function POST(request: NextRequest) {
             return sdkJson({ matched: false, action: 'none', reason: 'not_running' } satisfies BootstrapResponse);
         }
 
-        const goalPayload = goals.map((g) => ({ id: g.id, name: g.name, selector: g.selector, is_primary: g.is_primary }));
+        // Only click and form goals run in the browser. Page and event goals are matched on the server.
+        const goalPayload = goals.filter((g) => g.type === 'click' || g.type === 'form').map((g) => ({ id: g.id, name: g.name, type: g.type, selector: g.selector, is_primary: g.is_primary }));
         const controlUrl = experiment.control_url || variations.find((v) => v.is_control)?.url || '';
         const onControl = !!(controlUrl && urlsMatch(controlUrl, url));
         const onVariation = variations.find((v) => !v.is_control && v.url && urlsMatch(v.url, url));
