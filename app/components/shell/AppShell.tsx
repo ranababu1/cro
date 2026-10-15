@@ -155,9 +155,10 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
                 </>
             )}
             <div className="mt-auto pb-4">
-                <Link href="/docs" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                <Link href="/docs" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                     <BookIcon className="h-4 w-4 text-zinc-400" />
                     Documentation
+                    <span className="sr-only"> (opens in a new tab)</span>
                 </Link>
             </div>
         </nav>
