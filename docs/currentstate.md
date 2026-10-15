@@ -155,3 +155,6 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - public/heatmap.js (loaded by the SDK only when heatmaps is true) sends click {x 0-1000 of page width, y px, selector, rage, dead} and one max scroll depth per page view. No keyboard listeners, no values or text. Batches of up to 50 every 10 s, beacon on hide.
 - POST /api/capture: plan check (403 for free), origin check, strict zod schema (unknown fields rejected), running experiment and known variation. Rollups heatmap_clicks_daily (2% columns x 25 px rows x selector) and heatmap_scroll_daily, aggregated per batch; heatmap_points raw kept 30 days (pruned on about 2% of ingests).
 - GET /api/experiments/:id/heatmaps?variation=&device= (paid only) feeds the Heatmaps tab: click map, scroll map, confetti, overlay (sandboxed iframe) and element list. Migration 0015.
+
+## In-app links to public pages
+- Links from the signed-in app to /docs, /pricing, /roadmap, /blog or /wordpress use target=_blank and rel=noopener noreferrer (tests/inAppLinks.test.ts).
