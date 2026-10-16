@@ -133,3 +133,38 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - bootstrap, assign, track, sdk/event and capture require Origin or Referer on a registered domain; development keys also accept localhost. Missing headers are refused.
 - Abuse attempts are audited as abuse:* (origin logs throttled per org and host hourly) and listed with the ledger at /admin/abuse.
 - No backfill: tests started before this change are not on the ledger.
+
+## Install once copy
+- lib/installCopy.ts INSTALL_ONCE is shown under every InstallSnippet (dashboard, domains, new test wizard, experiment page) and in Quick start and Install guides.
+
+## Profile onboarding
+- users gains first_name, last_name, country (ISO 3166), phone (E.164 via libphonenumber-js), company, job_role, company_size, heard_from, primary_goal, marketing_opt_in (default false), profile_completed_at, onboarding_pending, profile_prompt_dismissed_at (migration 0014).
+- New Google sign-ups get first and last name prefilled and onboarding_pending; the (app) layout redirects them to /onboarding until they save or skip. Existing users see a dismissable banner.
+- lib/profile.ts: zod schema (strips markup and control characters, select whitelists), safeNext for return paths, CSV cells guarded against formula injection.
+- lib/profileGate.ts: POST /api/experiments and PATCH to running return 403 profile_incomplete until first name, last name and country are set. Platform admins and the super admin are exempt; secret-key calls pass when an org member has a completed profile.
+- /settings/profile (sidebar Profile), /api/profile GET/PUT, /api/profile/skip, /api/profile/dismiss. Admin org page shows member profiles; /api/admin/profiles exports CSV.
+- tests/setup.ts gives test users a completed profile by default (pass first_name: null for none).
+
+## WordPress plugin
+- Source in integrations/wordpress/freeabtest (not in /public). Zipped on request by GET /api/downloads/wordpress for signed-in users; signed-out get 303 to /wordpress?download=signin#download.
+- One autoloaded option freeabtest_settings; front end only calls get_option and wp_print_script_tag at wp_head priority 1. Keys must match ^cro_pk_(prod|dev)_[0-9A-Za-z]{32}$. SDK URL hardcoded.
+- Connect link: https://<domain>/wp-admin/options-general.php?page=freeabtest&freeabtest_prod=<key> only prefills; saving needs the settings nonce and manage_options.
+- PHPCS (WordPress-Extra, WordPress.Security, WordPress-Docs, PHPCompatibilityWP 7.4-8.3): 0 errors, 0 warnings. Plugin Check 2.1.0 on WP 7.1.3: no errors or warnings. CI runs PHPCS.
+
+## Heatmaps
+- Bootstrap returns capture {heatmaps, sample_rate} only for orgs with the heatmaps entitlement, on matched pages where the visitor stays. Sampling is a deterministic hash of visitor and experiment (HEATMAP_SAMPLE_RATE, default 0.5).
+- public/heatmap.js (loaded by the SDK only when heatmaps is true) sends click {x 0-1000 of page width, y px, selector, rage, dead} and one max scroll depth per page view. No keyboard listeners, no values or text. Batches of up to 50 every 10 s, beacon on hide.
+- POST /api/capture: plan check (403 for free), origin check, strict zod schema (unknown fields rejected), running experiment and known variation. Rollups heatmap_clicks_daily (2% columns x 25 px rows x selector) and heatmap_scroll_daily, aggregated per batch; heatmap_points raw kept 30 days (pruned on about 2% of ingests).
+- GET /api/experiments/:id/heatmaps?variation=&device= (paid only) feeds the Heatmaps tab: click map, scroll map, confetti, overlay (sandboxed iframe) and element list. Migration 0015.
+
+## In-app links to public pages
+- Links from the signed-in app to /docs, /pricing, /roadmap, /blog or /wordpress use target=_blank and rel=noopener noreferrer (tests/inAppLinks.test.ts).
+
+## App dark mode
+- lib/theme.ts themeInitScript runs in the root layout head and sets html[data-theme] from localStorage fabt-theme (light, dark or system via prefers-color-scheme).
+- Only .app-scope (AppShell, so app and admin, plus onboarding) reacts: globals.css remaps the zinc and tint palette variables and fixes white surfaces, dark chips and links. Marketing pages have no .app-scope and stay light.
+- ThemeToggle (top bar) uses useSyncExternalStore with a system default on the server, so there is no hydration mismatch. Chart grid and labels use theme classes.
+
+Goals: up to 50 per experiment, each with a name and one CSS selector (css-what parse, single selector group) or a page or event target. goals.position (migration 0016, backfilled primary first then by created_at) sets order. POST/PATCH(order|primary)/DELETE on /api/experiments/[id]/goals, all audited; the last goal cannot be removed and removing the primary promotes the first remaining goal. Results read all goal stats from one rollup pass (getEventStatsByGoal). SDK bindGoals pre-splits click/form goals and drops a goal once it fires. Legacy comma-list selectors stay valid in the SDK.
+
+Blog: redesigned index and post layout (PR #34) merged with main; blog styles are light only and sit outside .app-scope, so app dark mode does not touch them. BlogPosting JSON-LD fallback from frontmatter kept.

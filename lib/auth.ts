@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
+import { cleanText, splitName } from "./profile";
 import { bumpMetric, METRICS, touchUserActivity, recordProductEvent } from "./telemetry";
 
 export const authOptions: NextAuthOptions = {
@@ -11,16 +12,22 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async signIn({ user }) {
+        async signIn({ user, profile }) {
             if (!user.email) return false;
 
             // Store user in database and make sure they have an org, project and environments
             const existingUser = await db.getUserByEmail(user.email);
             const isSignup = !existingUser;
+            // New accounts are prefilled from Google and see onboarding before the dashboard.
+            const g = (profile ?? {}) as { given_name?: string; family_name?: string };
+            const split = splitName(user.name);
             const dbUser = existingUser ?? await db.createUser({
                 email: user.email,
                 name: user.name || "",
                 image: user.image || "",
+                first_name: cleanText(g.given_name ?? '') || split.first || null,
+                last_name: cleanText(g.family_name ?? '') || split.last || null,
+                onboarding_pending: true,
             });
             const ws = await db.ensureWorkspace(dbUser);
             if (isSignup) {

@@ -134,21 +134,25 @@
     function bindGoals(data) {
         if (goalsBound || !data.goals || !data.goals.length || !data.variation_id) return;
         goalsBound = true;
-        var fired = {};
+        // Goals split by kind once. A goal is dropped from its list after it fires, so each
+        // click only checks goals that can still convert, and listeners go away when none remain.
+        var pending = { click: [], form: [] };
+        for (var j = 0; j < data.goals.length; j++) {
+            var gg = data.goals[j];
+            var kk = gg.type || 'click';
+            if (pending[kk] && gg.selector) pending[kk].push(gg);
+        }
         function handle(kind, ev) {
             var node = ev.target;
-            if (!node) return;
-            for (var i = 0; i < data.goals.length; i++) {
-                var g = data.goals[i];
-                if ((g.type || 'click') !== kind) continue;
-                try {
-                    var el = node.closest ? node.closest(g.selector) : null;
-                    if (!el) continue;
-                    var key = data.experiment_id + ':' + g.id;
-                    if (fired[key]) continue;
-                    fired[key] = true;
-                    track(data.experiment_id, data.variation_id, 'conversion', g.id, g.name);
-                } catch { /* bad selector */ }
+            var list = pending[kind];
+            if (!node || !node.closest || !list.length) return;
+            for (var i = list.length - 1; i >= 0; i--) {
+                var g = list[i];
+                var el = null;
+                try { el = node.closest(g.selector); } catch { list.splice(i, 1); continue; /* bad selector */ }
+                if (!el) continue;
+                list.splice(i, 1);
+                track(data.experiment_id, data.variation_id, 'conversion', g.id, g.name);
             }
         }
         document.addEventListener('click', function (ev) { handle('click', ev); }, true);
@@ -175,6 +179,19 @@
         }
     }
 
+    // Heatmap capture is a separate module, loaded only when the server says this session is sampled
+    // on a paid plan. It records clicks and scroll depth, never keystrokes or field values.
+    var heatLoaded = false;
+    function loadHeatmaps(data) {
+        if (heatLoaded) return;
+        heatLoaded = true;
+        window.__ABTestHeat = { apiUrl: config.apiUrl, apiKey: config.apiKey, experiment_id: data.experiment_id, variation_id: data.variation_id };
+        var sc = document.createElement('script');
+        sc.src = config.apiUrl + '/heatmap.js';
+        sc.async = true;
+        (document.head || document.documentElement).appendChild(sc);
+    }
+
     function bootstrap() {
         if (!config.apiUrl || !config.apiKey) {
             console.error('[ABTest] Missing apiUrl or data-key');
@@ -198,6 +215,7 @@
                     assignmentCache[data.experiment_id] = data;
                     track(data.experiment_id, data.variation_id, 'page_view');
                     bindGoals(data);
+                    if (data.capture && data.capture.heatmaps) loadHeatmaps(data);
                 }
                 return data;
             })

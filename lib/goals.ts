@@ -1,3 +1,4 @@
+import { parse } from 'css-what';
 /**
  * Goal types. Every goal stores its target in `selector`:
  * - click: CSS selector of the element clicked
@@ -52,4 +53,22 @@ export function describeGoal(g: { type?: string | null; selector: string; match_
     if (t === 'page') return `URL ${g.match_type || 'equals'} ${g.selector}`;
     if (t === 'event') return `ABTest.track('${g.selector}')`;
     return g.selector;
+}
+
+
+/** Most goals one experiment can have. */
+export const MAX_GOALS = 50;
+
+/**
+ * A goal targets exactly one CSS selector. Lists such as "a, button" are refused so each element
+ * gets its own named goal with its own numbers.
+ */
+export function checkGoalSelector(selector: string): string | null {
+    const sel = selector.trim();
+    if (!sel || sel.length > 300) return 'Enter a CSS selector of up to 300 characters';
+    if (sel.includes('<')) return 'Enter a CSS selector, not HTML';
+    let groups;
+    try { groups = parse(sel); } catch { return 'That is not a valid CSS selector'; }
+    if (groups.length !== 1) return 'Use one CSS selector per goal. Add another goal for each extra element.';
+    return null;
 }

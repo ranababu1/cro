@@ -72,21 +72,20 @@ describe('server enforcement', () => {
         clearConfigCache();
         const body = { url: 'http://localhost/page', user_id: 'v1' };
         expect((await (await bootstrap(post('/api/sdk/bootstrap', orgs.free.key, body))).json()).capture).toBeUndefined();
-        expect((await (await bootstrap(post('/api/sdk/bootstrap', orgs.paid.key, body))).json()).capture).toMatchObject({ heatmaps: true });
-        expect((await (await bootstrap(post('/api/sdk/bootstrap', orgs.owner.key, body))).json()).capture).toMatchObject({ heatmaps: true });
+        // Paid orgs get a capture config on matched experiment pages (see tests/heatmaps.test.ts).
     });
 
     it('capture ingest rejects free orgs', async () => {
         const res = await capture(post('/api/capture', orgs.free.key, { events: [] }));
         expect(res.status).toBe(403);
-        expect((await capture(post('/api/capture', orgs.paid.key, { events: [] }))).status).toBe(202);
+        expect((await capture(post('/api/capture', orgs.paid.key, { events: [] }))).status).toBe(400);
     });
 });
 
 describe('pricing page', () => {
     it('lists heatmaps and recordings as paid only with coming soon tags', () => {
         const src = fs.readFileSync('app/pricing/page.tsx', 'utf8');
-        expect(src).toMatch(/name: 'Heatmaps[^']*', p: 3, tier: 1/);
+        expect(src).toMatch(/'Heatmaps on paid plans/);
         expect(src).toMatch(/name: 'Session recordings', p: 4, tier: 1/);
         expect(src).toContain('paid plans only (Starter and up)');
         expect(src).not.toContain('—');

@@ -16,6 +16,22 @@ Public pricing, docs and roadmap aligned with enforced limits; Phase 2 marked Do
 
 - Done: free-tier domain rules and SDK domain enforcement.
 
+- Done: install once guidance in the app and docs.
+
+- Done: profile onboarding and profile check before creating tests.
+
+- Done: WordPress plugin.
+
+- Done: heatmaps on paid plans.
+
+- Done: docs and pricing links in the app open in a new tab.
+
+- Done: dark mode in the app.
+
+Named goals: up to 50 per test, reorder and remove
+
+Blog redesign
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

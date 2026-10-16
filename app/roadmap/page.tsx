@@ -14,6 +14,8 @@ const available = [
     { title: 'Shareable results', body: 'Send a read-only results link to anyone, and turn it off at any time.' },
     { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
     { title: 'Live stats', body: 'Visitors, redirects and goal clicks update while the test runs, with a plain answer on who is ahead.' },
+    { title: 'Heatmaps', body: 'On paid plans: click, scroll, confetti and overlay maps for every variation, split by device, with rage and dead clicks.' },
+    { title: 'WordPress plugin', body: 'Connect a WordPress site in a minute. Install it once and every future test runs through it.' },
     { title: 'Environments and keys', body: 'Separate development and production data, with the install snippet filled in for you.' },
 ];
 
@@ -22,9 +24,9 @@ type PhaseStatus = 'Done' | 'In progress' | 'Planned';
 const phases: { phase: string; name: string; status: PhaseStatus; items: string[] }[] = [
     { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Live stats while a test runs', 'One-line install'] },
     { phase: 'Phase 2', name: 'More goals and targeting', status: 'Done', items: ['Page visit, form submit and custom event goals', 'Targeting by device, UTM, referrer and new or returning visitors', 'Edit running tests safely', 'Sample ratio mismatch warning', 'Shareable results links', 'Google Tag Manager and WordPress guides'] },
-    { phase: 'Phase 3', name: 'Heatmaps', status: 'In progress', items: ['Click, scroll and confetti heatmaps', 'Heatmaps per variation', 'Rage and dead click detection', 'Traffic overview'] },
-    { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'Planned', items: ['Session recordings with privacy masking', 'Funnels built from your goals', 'Revenue goals', 'Visual editor', 'Auto-shift traffic to the winner'] },
-    { phase: 'Phase 5', name: 'Engagement extras', status: 'Planned', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking', 'WordPress plugin'] },
+    { phase: 'Phase 3', name: 'Heatmaps', status: 'Done', items: ['Click, scroll, confetti and overlay heatmaps', 'Heatmaps per variation and device', 'Rage and dead click detection'] },
+    { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'Planned', items: ['Session recordings with privacy masking', 'Traffic overview', 'Funnels built from your goals', 'Revenue goals', 'Visual editor', 'Auto-shift traffic to the winner'] },
+    { phase: 'Phase 5', name: 'Engagement extras', status: 'Planned', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking'] },
 ];
 
 const tone: Record<PhaseStatus, 'success' | 'brand' | 'neutral'> = { Done: 'success', 'In progress': 'brand', Planned: 'neutral' };

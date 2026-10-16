@@ -6,9 +6,10 @@ import { signOut } from 'next-auth/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOverlay } from '../overlay';
 import { Logo } from '../ui/Logo';
+import { ThemeToggle } from './ThemeToggle';
 import { cn } from '../ui/cn';
 import { setProjectCookie } from '@/lib/currentProject';
-import { HomeIcon, FlaskIcon, KeyIcon, ShieldIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
+import { HomeIcon, FlaskIcon, KeyIcon, ShieldIcon, UserIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
 
 interface ShellProject { id: string; name: string; org_id: string; org_name: string }
 
@@ -25,6 +26,7 @@ const nav = [
     { href: '/experiments', label: 'Experiments', icon: FlaskIcon },
     { href: '/settings/domains', label: 'Domains', icon: ShieldIcon },
     { href: '/settings/keys', label: 'API keys', icon: KeyIcon },
+    { href: '/settings/profile', label: 'Profile', icon: UserIcon },
 ];
 
 function useClickOutside(onOutside: () => void) {
@@ -154,9 +156,10 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
                 </>
             )}
             <div className="mt-auto pb-4">
-                <Link href="/docs" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+                <Link href="/docs" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
                     <BookIcon className="h-4 w-4 text-zinc-400" />
                     Documentation
+                    <span className="sr-only"> (opens in a new tab)</span>
                 </Link>
             </div>
         </nav>
@@ -170,7 +173,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
     const drawerTrigger = useRef<HTMLButtonElement>(null);
     useOverlay(mobileOpen, closeDrawer, drawer, drawerTrigger);
     return (
-        <div className="min-h-screen bg-zinc-50/50">
+        <div className="app-scope min-h-screen bg-zinc-50">
             {/* Desktop sidebar */}
             <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-zinc-200 bg-white lg:flex">
                 <div className="flex h-14 items-center px-5">
@@ -201,7 +204,8 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                         <MenuIcon className="h-5 w-5" />
                     </button>
                     <ProjectSwitcher projects={projects} currentProjectId={currentProjectId} />
-                    <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-3">
+                        <ThemeToggle />
                         <UserMenu user={user} />
                     </div>
                 </header>

@@ -36,7 +36,7 @@ export function PlanUsage({ rows, plan }: { rows: UsageRow[]; plan: string }) {
             </dl>
             {hit.map((r) => (
                 <Alert key={r.label} tone="warning" className="mt-4" title={`${r.label}: limit reached`}>
-                    {r.atLimit} <Link href="/pricing" className="font-medium text-blue-700 hover:underline">See plans</Link>
+                    {r.atLimit} <Link href="/pricing" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:underline">See plans</Link>
                 </Alert>
             ))}
         </Card>

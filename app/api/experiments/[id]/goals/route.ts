@@ -3,10 +3,11 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { goalSchema, formatZodError } from '@/lib/validation';
+import { MAX_GOALS } from '@/lib/goals';
+import { z } from 'zod';
 
 type Params = { params: Promise<{ id: string }> };
 
-const MAX_GOALS = 20;
 
 /** POST /api/experiments/[id]/goals: add a goal, also while the test runs. It counts from now on. */
 export async function POST(request: NextRequest, { params }: Params) {
@@ -34,5 +35,53 @@ export async function POST(request: NextRequest, { params }: Params) {
     } catch (error) {
         console.error('Failed to add goal:', error);
         return NextResponse.json({ error: 'Failed to add goal' }, { status: 500 });
+    }
+}
+
+const patchSchema = z.union([
+    z.object({ order: z.array(z.string().min(1).max(100)).min(1).max(MAX_GOALS) }).strict(),
+    z.object({ primary: z.string().min(1).max(100) }).strict(),
+]);
+
+/** PATCH /api/experiments/[id]/goals: reorder ({ order: ids }) or pick the primary goal ({ primary: id }). */
+export async function PATCH(request: NextRequest, { params }: Params) {
+    try {
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
+        const { id } = await params;
+        const experiment = await getAccessibleExperiment(ctx, id);
+        if (!experiment) return NextResponse.json({ error: 'Experiment not found' }, { status: 404 });
+        if (experiment.status === 'completed') return NextResponse.json({ error: 'A completed test cannot be edited' }, { status: 400 });
+        const parsed = patchSchema.safeParse(await request.json().catch(() => null));
+        if (!parsed.success) return NextResponse.json({ error: 'Send an order list or a primary goal id' }, { status: 400 });
+        const ok = 'order' in parsed.data ? await db.reorderGoals(id, parsed.data.order) : await db.setPrimaryGoal(id, parsed.data.primary);
+        if (!ok) return NextResponse.json({ error: 'order' in parsed.data ? 'The order must list every goal once' : 'Goal not found' }, { status: 400 });
+        await db.audit({ orgId: await orgIdForProject(experiment.project_id), actorId: ctx.userId, entity: 'experiment', entityId: id, action: 'order' in parsed.data ? 'goal:reorder' : 'goal:primary', diff: parsed.data });
+        return NextResponse.json({ goals: await db.getGoals(id) });
+    } catch (error) {
+        console.error('Failed to update goals:', error);
+        return NextResponse.json({ error: 'Failed to update goals' }, { status: 500 });
+    }
+}
+
+/** DELETE /api/experiments/[id]/goals?goal=ID: remove a goal. The last goal cannot be removed. */
+export async function DELETE(request: NextRequest, { params }: Params) {
+    try {
+        const ctx = await requireUserContext(request);
+        if (ctx instanceof NextResponse) return ctx;
+        const { id } = await params;
+        const experiment = await getAccessibleExperiment(ctx, id);
+        if (!experiment) return NextResponse.json({ error: 'Experiment not found' }, { status: 404 });
+        if (experiment.status === 'completed') return NextResponse.json({ error: 'A completed test cannot be edited' }, { status: 400 });
+        const goalId = request.nextUrl.searchParams.get('goal') ?? '';
+        const existing = await db.getGoals(id);
+        if (!existing.some((g) => g.id === goalId)) return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+        if (existing.length <= 1) return NextResponse.json({ error: 'A test needs at least one goal' }, { status: 400 });
+        await db.deleteGoal(id, goalId);
+        await db.audit({ orgId: await orgIdForProject(experiment.project_id), actorId: ctx.userId, entity: 'experiment', entityId: id, action: 'goal:remove', diff: { goal_id: goalId } });
+        return NextResponse.json({ goals: await db.getGoals(id) });
+    } catch (error) {
+        console.error('Failed to remove goal:', error);
+        return NextResponse.json({ error: 'Failed to remove goal' }, { status: 500 });
     }
 }

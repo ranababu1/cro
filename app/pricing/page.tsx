@@ -28,21 +28,19 @@ const limits: [string, string, string, string, string][] = [
 const availableToday = [
     'A/B and split URL tests', 'Flicker-free snippet', 'Sticky assignment', 'Targeting by device, UTM, referrer and new or returning visitors',
     'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
-    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides',
+    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'WordPress plugin',
+    'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
 // tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise).
 // p must match the phase that lists the item on the public /roadmap.
 const comingSoon: { name: string; p: number; tier: number }[] = [
-    { name: 'Heatmaps (click, scroll, confetti, overlay)', p: 3, tier: 1 },
-    { name: 'Rage and dead click detection', p: 3, tier: 1 },
     { name: 'Session recordings', p: 4, tier: 1 },
     { name: 'Funnels', p: 4, tier: 1 },
     { name: 'Revenue goals', p: 4, tier: 1 },
     { name: 'Visual editor', p: 4, tier: 2 },
     { name: 'Auto-shift traffic to the winner', p: 4, tier: 2 },
-    { name: 'WordPress plugin', p: 5, tier: 0 },
 ];
 
 const faqs = [
@@ -105,7 +103,7 @@ export default function PricingPage() {
                             </tbody>
                         </table>
                     </div>
-                    <p className="mt-4 text-sm text-zinc-600">Heatmaps and session recordings are on paid plans only (Starter and up). Coming soon means planned, not shipped. See the <Link href="/roadmap" className="font-medium text-blue-600 hover:underline">roadmap</Link> for details. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
+                    <p className="mt-4 text-sm text-zinc-600">Heatmaps (live) and session recordings (coming soon) are on paid plans only (Starter and up). Coming soon means planned, not shipped. See the <Link href="/roadmap" className="font-medium text-blue-600 hover:underline">roadmap</Link> for details. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
                 </section>
 
                 <section className="mt-16 rounded-2xl border border-teal-200 bg-teal-50/60 p-7">

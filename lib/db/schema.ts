@@ -14,6 +14,21 @@ export const users = sqliteTable('users', {
     created_at: text('created_at').notNull().default(now),
     last_active_at: text('last_active_at'),
     last_login_at: text('last_login_at'),
+    // Profile (onboarding and Settings > Profile). first_name, last_name and country are required to create or start tests.
+    first_name: text('first_name'),
+    last_name: text('last_name'),
+    country: text('country'),
+    phone: text('phone'),
+    company: text('company'),
+    job_role: text('job_role'),
+    company_size: text('company_size'),
+    heard_from: text('heard_from'),
+    primary_goal: text('primary_goal'),
+    marketing_opt_in: integer('marketing_opt_in', { mode: 'boolean' }).notNull().default(false),
+    profile_completed_at: text('profile_completed_at'),
+    // Set for users who sign up after onboarding shipped; they see /onboarding before the dashboard.
+    onboarding_pending: integer('onboarding_pending', { mode: 'boolean' }).notNull().default(false),
+    profile_prompt_dismissed_at: text('profile_prompt_dismissed_at'),
 });
 
 export const organizations = sqliteTable('organizations', {
@@ -131,8 +146,10 @@ export const goals = sqliteTable('goals', {
     type: text('type', { enum: ['click', 'form', 'page', 'event'] }).notNull().default('click'),
     match_type: text('match_type', { enum: ['equals', 'contains', 'regex'] }),
     is_primary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
+    // Display and evaluation order, 0-based. Set on create and by reorder.
+    position: integer('position').notNull().default(0),
     created_at: text('created_at').notNull().default(now),
-}, (t) => [index('idx_goals_experiment').on(t.experiment_id)]);
+}, (t) => [index('idx_goals_experiment').on(t.experiment_id), index('idx_goals_experiment_position').on(t.experiment_id, t.position)]);
 
 export const assignments = sqliteTable('assignments', {
     id: text('id').primaryKey(),
@@ -267,3 +284,40 @@ export const domainLedger = sqliteTable('domain_ledger', {
     experiments_used: integer('experiments_used').notNull().default(0),
     updated_at: text('updated_at').notNull().default(now),
 }, (t) => [index('idx_domain_ledger_org').on(t.org_id)]);
+
+// Heatmaps (paid plans). Raw points are kept 30 days for confetti; reports read the daily rollups.
+export const heatmapPoints = sqliteTable('heatmap_points', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    org_id: text('org_id').notNull(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device', { enum: ['desktop', 'tablet', 'mobile'] }).notNull(),
+    x: integer('x').notNull(), // 0-1000, share of page width
+    y: integer('y').notNull(), // px from the top of the page
+    selector: text('selector').notNull(),
+    rage: integer('rage', { mode: 'boolean' }).notNull().default(false),
+    dead: integer('dead', { mode: 'boolean' }).notNull().default(false),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_heatmap_points_exp').on(t.experiment_id, t.variation_id, t.device), index('idx_heatmap_points_created').on(t.created_at)]);
+
+export const heatmapClicksDaily = sqliteTable('heatmap_clicks_daily', {
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    gx: integer('gx').notNull(), // 0-49, 2% columns
+    gy: integer('gy').notNull(), // 25px rows
+    selector: text('selector').notNull(),
+    clicks: integer('clicks').notNull().default(0),
+    rage: integer('rage').notNull().default(0),
+    dead: integer('dead').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.gx, t.gy, t.selector] })]);
+
+export const heatmapScrollDaily = sqliteTable('heatmap_scroll_daily', {
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    depth: integer('depth').notNull(), // max depth reached, 0-100 in steps of 10
+    sessions: integer('sessions').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.depth] })]);

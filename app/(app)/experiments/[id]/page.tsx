@@ -1,4 +1,6 @@
 'use client';
+import { ProfileRequired } from '@/app/components/profile/ProfileRequired';
+import { PROFILE_REQUIRED_MESSAGE } from '@/lib/profile';
 
 import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { describeTargeting, parseTargeting } from '@/lib/targeting';
@@ -128,7 +130,7 @@ export default function ExperimentDetail() {
                 description={experiment.description || undefined}
                 actions={actions}
             />
-            {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
+            {error && (error === PROFILE_REQUIRED_MESSAGE ? <ProfileRequired next={`/experiments/${id}`} className="mb-4" /> : <Alert tone="danger" className="mb-4">{error}</Alert>)}
             {notice && <Alert tone="success" className="mb-4">{notice}</Alert>}
 
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -155,7 +157,7 @@ export default function ExperimentDetail() {
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
-            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} targeting={experiment.targeting} onSaved={() => void load()} />}
+            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );

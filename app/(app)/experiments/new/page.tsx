@@ -1,4 +1,7 @@
 'use client';
+import { MAX_GOALS, checkGoalSelector } from '@/lib/goals';
+import { ProfileRequired } from '@/app/components/profile/ProfileRequired';
+import { PROFILE_REQUIRED_MESSAGE } from '@/lib/profile';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,6 +32,20 @@ const STEPS: { id: Step; label: string }[] = [
 ];
 
 
+function moveItem<T>(list: T[], i: number, dir: -1 | 1): T[] {
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return list;
+    const next = [...list];
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+}
+
+/** Same rules the server applies, shown inline. Empty fields only block Next, without a message. */
+function goalProblem(g: GoalDraft): string | null {
+    if (!g.name.trim() || !g.selector.trim()) return null;
+    return g.type === 'click' || g.type === 'form' ? checkGoalSelector(g.selector) : null;
+}
+
 export default function NewExperimentWizard() {
     const router = useRouter();
     const [step, setStep] = useState<Step>('domain');
@@ -45,6 +62,10 @@ export default function NewExperimentWizard() {
     const [traffic, setTraffic] = useState(100);
     const [targeting, setTargeting] = useState<Targeting>({});
     const [error, setError] = useState('');
+    const [profileMissing, setProfileMissing] = useState(false);
+    useEffect(() => {
+        fetch('/api/profile').then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.complete === false) setProfileMissing(true); }).catch(() => undefined);
+    }, []);
     const [busy, setBusy] = useState(false);
     const [newHost, setNewHost] = useState('');
 
@@ -152,7 +173,7 @@ export default function NewExperimentWizard() {
         if (step === 'domain') return domains.length > 0;
         if (step === 'control') return !!controlUrl && !!name;
         if (step === 'variations') return vars.every((v) => v.url && v.name) && Math.abs(vars.reduce((a, v) => a + v.weight, 0) - 100) < 0.05;
-        if (step === 'goals') return goals.length > 0 && goals.every((g) => g.name && g.selector) && goals.filter((g) => g.is_primary).length === 1;
+        if (step === 'goals') return goals.length > 0 && goals.length <= MAX_GOALS && goals.every((g) => g.name.trim() && g.selector.trim() && !goalProblem(g)) && goals.filter((g) => g.is_primary).length === 1;
         if (step === 'traffic') return traffic >= 0 && traffic <= 100;
         return true;
     }, [step, domains, controlUrl, name, vars, goals, traffic]);
@@ -189,7 +210,8 @@ export default function NewExperimentWizard() {
                 ))}
             </ol>
 
-            {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
+            {(profileMissing || error === PROFILE_REQUIRED_MESSAGE) && <ProfileRequired next="/experiments/new" className="mb-4" />}
+            {error && error !== PROFILE_REQUIRED_MESSAGE && <Alert tone="danger" className="mb-4">{error}</Alert>}
 
             {step === 'domain' && (
                 <Card>
@@ -250,10 +272,16 @@ export default function NewExperimentWizard() {
 
             {step === 'goals' && (
                 <Card>
-                    <CardHeader title="Goals" description="What counts as a conversion: a click on an element (#headerCTA, .bodyCTA), a form submit, a visit to a page, or a custom event from your code." actions={<Button variant="secondary" size="sm" onClick={() => setGoals((g) => [...g, { name: '', type: 'click', selector: '', match_type: 'equals', is_primary: false }])}>Add goal</Button>} />
+                    <CardHeader title="Goals" description="Add goals one at a time. Each goal has a name and one CSS selector (or a page or custom event), and gets its own numbers in results." actions={<Button variant="secondary" size="sm" disabled={goals.length >= MAX_GOALS} onClick={() => setGoals((g) => [...g, { name: '', type: 'click', selector: '', match_type: 'equals', is_primary: false }])}>Add goal</Button>} />
                     <CardBody className="space-y-4">
+                        <p className="text-sm text-zinc-500" data-testid="goal-count">{goals.length} of {MAX_GOALS} goals</p>
                         {goals.map((g, i) => (
-                            <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_9rem_auto_1.4fr_auto_auto]">
+                            <div key={i} className="space-y-1">
+                            <div className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[auto_1fr_9rem_auto_1.4fr_auto_auto]">
+                                <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="sm" aria-label={`Move goal ${i + 1} up`} disabled={i === 0} onClick={() => setGoals((gs) => moveItem(gs, i, -1))}>↑</Button>
+                                    <Button variant="ghost" size="sm" aria-label={`Move goal ${i + 1} down`} disabled={i === goals.length - 1} onClick={() => setGoals((gs) => moveItem(gs, i, 1))}>↓</Button>
+                                </div>
                                 <Input aria-label="Goal name" placeholder="Primary CTA" value={g.name} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
                                 <select aria-label="Goal type" className={selectClass} value={g.type} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, type: e.target.value as GoalType } : x))}>
                                     {GOAL_TYPES.map((t) => <option key={t} value={t}>{GOAL_TYPE_LABELS[t]}</option>)}
@@ -272,6 +300,8 @@ export default function NewExperimentWizard() {
                                     if (!next.some((x) => x.is_primary) && next[0]) next[0] = { ...next[0], is_primary: true };
                                     return next;
                                 })}>Remove</Button>
+                            </div>
+                            {goalProblem(g) && <p className="px-1 text-sm text-red-600">{goalProblem(g)}</p>}
                             </div>
                         ))}
                         {goals.some((g) => g.type === 'event') && (

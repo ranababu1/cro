@@ -139,8 +139,8 @@ function DailyChart({ live, colorOf }: { live: LiveStatsData; colorOf: (id: stri
             <svg viewBox={`0 0 ${W} ${H}`} className="h-48 w-full" role="img" aria-label="Visitors per day by variation">
                 {[0, 0.5, 1].map((t) => (
                     <g key={t}>
-                        <line x1={P} x2={W - P} y1={y(max * t)} y2={y(max * t)} stroke="#e4e4e7" strokeDasharray="3 3" />
-                        <text x={4} y={y(max * t) + 4} fontSize="10" fill="#71717a">{Math.round(max * t)}</text>
+                        <line x1={P} x2={W - P} y1={y(max * t)} y2={y(max * t)} className="stroke-zinc-200" strokeDasharray="3 3" />
+                        <text x={4} y={y(max * t) + 4} fontSize="10" className="fill-zinc-500">{Math.round(max * t)}</text>
                     </g>
                 ))}
                 {live.variations.map((v) => (
@@ -150,7 +150,7 @@ function DailyChart({ live, colorOf }: { live: LiveStatsData; colorOf: (id: stri
                     </g>
                 ))}
                 {days.map((d, i) => (i === 0 || i === days.length - 1 || days.length <= 8) && (
-                    <text key={d.day} x={x(i)} y={H - 6} fontSize="10" fill="#71717a" textAnchor="middle">{label(d.day)}</text>
+                    <text key={d.day} x={x(i)} y={H - 6} fontSize="10" className="fill-zinc-500" textAnchor="middle">{label(d.day)}</text>
                 ))}
             </svg>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-zinc-600">

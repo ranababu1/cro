@@ -4,7 +4,7 @@ import * as s from './schema';
 import type { EnvironmentKey } from './schema';
 import { generateId } from '../ids';
 import { cached, clearConfigCache } from '../configCache';
-import { rolledEventStats, rolledLiveCounts } from '../rollups';
+import { rolledEventStats, rolledEventStatsByGoal, rolledLiveCounts } from '../rollups';
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 
@@ -55,10 +55,13 @@ export const db = {
         return (await d.query.users.findFirst({ where: eq(s.users.email, email) })) ?? null;
     },
 
-    async createUser(data: { email: string; name: string; image?: string | null }): Promise<User> {
+    async createUser(data: { email: string; name: string; image?: string | null; first_name?: string | null; last_name?: string | null; onboarding_pending?: boolean }): Promise<User> {
         const d = await getDb();
         const id = generateId('usr');
-        await d.insert(s.users).values({ id, email: data.email, name: data.name, image: data.image ?? null });
+        await d.insert(s.users).values({
+            id, email: data.email, name: data.name, image: data.image ?? null,
+            first_name: data.first_name ?? null, last_name: data.last_name ?? null, onboarding_pending: data.onboarding_pending ?? false,
+        });
         return (await d.query.users.findFirst({ where: eq(s.users.id, id) }))!;
     },
 
@@ -285,8 +288,9 @@ export const db = {
         );
         if (goals.length) {
             await d.insert(s.goals).values(
-                goals.map((g) => ({
+                goals.map((g, i) => ({
                     id: generateId('gol'),
+                    position: i,
                     experiment_id: experiment.id,
                     name: g.name,
                     selector: g.selector,
@@ -334,7 +338,8 @@ export const db = {
         const d = await getDb();
         const id = generateId('gol');
         if (g.is_primary) await d.update(s.goals).set({ is_primary: false }).where(eq(s.goals.experiment_id, experimentId));
-        await d.insert(s.goals).values({ id, experiment_id: experimentId, ...g });
+        const [{ next }] = await d.select({ next: sql<number>`coalesce(max(${s.goals.position}) + 1, 0)` }).from(s.goals).where(eq(s.goals.experiment_id, experimentId));
+        await d.insert(s.goals).values({ id, experiment_id: experimentId, ...g, position: Number(next) });
         return (await d.query.goals.findFirst({ where: eq(s.goals.id, id) }))!;
     },
 
@@ -400,6 +405,11 @@ export const db = {
     /** Results counts from daily rollups plus today's raw events. Matches getEventStatsRaw exactly. */
     async getEventStats(experimentId: string, environmentId?: string, goalId?: string | null) {
         return rolledEventStats(experimentId, environmentId, goalId);
+    },
+
+    /** Stats keyed by goal id ('' is the whole test), from one rollup read. */
+    async getEventStatsByGoal(experimentId: string, environmentId: string | undefined, goalIds: string[]) {
+        return rolledEventStatsByGoal(experimentId, environmentId, goalIds);
     },
 
     /** Reference query over raw events. Kept for tests and as a fallback. */
@@ -572,7 +582,40 @@ export const db = {
 
     async getGoals(experimentId: string): Promise<Goal[]> {
         const d = await getDb();
-        return d.select().from(s.goals).where(eq(s.goals.experiment_id, experimentId)).orderBy(desc(s.goals.is_primary), asc(s.goals.created_at));
+        return d.select().from(s.goals).where(eq(s.goals.experiment_id, experimentId)).orderBy(asc(s.goals.position), asc(s.goals.created_at));
+    },
+
+    /** Removes a goal. Its recorded conversions stay in the event log. If it was primary, the first remaining goal becomes primary. */
+    async deleteGoal(experimentId: string, goalId: string): Promise<boolean> {
+        clearConfigCache();
+        const d = await getDb();
+        const goal = await d.query.goals.findFirst({ where: and(eq(s.goals.id, goalId), eq(s.goals.experiment_id, experimentId)) });
+        if (!goal) return false;
+        await d.delete(s.goals).where(eq(s.goals.id, goalId));
+        const rest = await this.getGoals(experimentId);
+        for (const [i, g] of rest.entries()) await d.update(s.goals).set({ position: i, ...(goal.is_primary && i === 0 ? { is_primary: true } : {}) }).where(eq(s.goals.id, g.id));
+        return true;
+    },
+
+    /** Sets goal order. ids must be exactly the experiment's goal ids. */
+    async reorderGoals(experimentId: string, ids: string[]): Promise<boolean> {
+        const d = await getDb();
+        const current = await this.getGoals(experimentId);
+        if (ids.length !== current.length || new Set(ids).size !== ids.length || !ids.every((id) => current.some((g) => g.id === id))) return false;
+        clearConfigCache();
+        await d.batch(ids.map((id, i) => d.update(s.goals).set({ position: i }).where(and(eq(s.goals.id, id), eq(s.goals.experiment_id, experimentId)))) as [never, ...never[]]);
+        return true;
+    },
+
+    /** Makes one goal the primary goal. */
+    async setPrimaryGoal(experimentId: string, goalId: string): Promise<boolean> {
+        const d = await getDb();
+        const goal = await d.query.goals.findFirst({ where: and(eq(s.goals.id, goalId), eq(s.goals.experiment_id, experimentId)) });
+        if (!goal) return false;
+        clearConfigCache();
+        await d.update(s.goals).set({ is_primary: false }).where(eq(s.goals.experiment_id, experimentId));
+        await d.update(s.goals).set({ is_primary: true }).where(eq(s.goals.id, goalId));
+        return true;
     },
 
     async listDomains(projectId: string): Promise<ProjectDomain[]> {
@@ -735,7 +778,12 @@ export const db = {
     async getOrgMembers(orgId: string) {
         const d = await getDb();
         return d
-            .select({ user_id: s.users.id, email: s.users.email, name: s.users.name, role: s.memberships.role, joined_at: s.memberships.created_at })
+            .select({
+                user_id: s.users.id, email: s.users.email, name: s.users.name, role: s.memberships.role, joined_at: s.memberships.created_at,
+                first_name: s.users.first_name, last_name: s.users.last_name, country: s.users.country, phone: s.users.phone, company: s.users.company,
+                job_role: s.users.job_role, company_size: s.users.company_size, heard_from: s.users.heard_from, primary_goal: s.users.primary_goal,
+                marketing_opt_in: s.users.marketing_opt_in, profile_completed_at: s.users.profile_completed_at,
+            })
             .from(s.memberships)
             .innerJoin(s.users, eq(s.users.id, s.memberships.user_id))
             .where(eq(s.memberships.org_id, orgId))
@@ -764,6 +812,30 @@ export const db = {
     async getAuditLog(orgId: string, limit = 50) {
         const d = await getDb();
         return d.select().from(s.auditLog).where(eq(s.auditLog.org_id, orgId)).orderBy(desc(s.auditLog.created_at)).limit(limit);
+    },
+    async updateUserProfile(id: string, p: import('../profile').ProfileInput) {
+        const d = await getDb();
+        const nowIso = new Date().toISOString();
+        await d.update(s.users).set({ ...p, profile_completed_at: nowIso, onboarding_pending: false }).where(eq(s.users.id, id));
+    },
+    async skipOnboarding(id: string) {
+        const d = await getDb();
+        await d.update(s.users).set({ onboarding_pending: false }).where(eq(s.users.id, id));
+    },
+    async dismissProfilePrompt(id: string) {
+        const d = await getDb();
+        await d.update(s.users).set({ profile_prompt_dismissed_at: new Date().toISOString() }).where(eq(s.users.id, id));
+    },
+    /** All users with their first org, for the admin profile export. */
+    async listUserProfiles() {
+        const d = await getDb();
+        const rows = await d.select({ user: s.users, org_id: s.memberships.org_id, org_name: s.organizations.name, plan: s.organizations.plan })
+            .from(s.users)
+            .leftJoin(s.memberships, eq(s.memberships.user_id, s.users.id))
+            .leftJoin(s.organizations, eq(s.organizations.id, s.memberships.org_id))
+            .orderBy(asc(s.users.created_at));
+        const seen = new Set<string>();
+        return rows.filter((r) => (seen.has(r.user.id) ? false : (seen.add(r.user.id), true)));
     },
     async getAbuseLog(limit = 200) {
         const d = await getDb();

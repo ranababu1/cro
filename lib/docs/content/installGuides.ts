@@ -1,3 +1,4 @@
+import { INSTALL_ONCE } from '@/lib/installCopy';
 import type { DocPage } from '../types';
 
 export const installGuides: DocPage = {
@@ -6,6 +7,7 @@ export const installGuides: DocPage = {
     description: 'Add the snippet through Google Tag Manager or on a WordPress site, without editing theme files by hand.',
     group: 'Getting started',
     blocks: [
+        { type: 'p', text: INSTALL_ONCE.replace('<head>', '`<head>`') },
         { type: 'p', text: 'The snippet is one script tag. Copy it from the app (the key is already filled in) and add it to the `<head>` of your control page, every variation page and any page used by a page visit or custom event goal. If you can edit your HTML directly, do that. Otherwise use one of the guides below.' },
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
         { type: 'h2', text: 'Google Tag Manager', id: 'gtm' },
@@ -23,6 +25,15 @@ export const installGuides: DocPage = {
   window.ABTest && ABTest.track('signup');
 </script>` },
         { type: 'h2', text: 'WordPress', id: 'wordpress' },
+        { type: 'h3', text: 'Recommended: the FreeABTest plugin' },
+        { type: 'steps', items: [
+            { title: 'Download', text: 'Sign in and choose **Download WordPress plugin** on the Overview page, or visit [the WordPress page](/wordpress). The plugin is free for account holders.' },
+            { title: 'Upload and activate', text: 'In WordPress open **Plugins**, **Add New**, **Upload Plugin**, choose the zip and activate it.' },
+            { title: 'Connect', text: 'Open **Settings**, **FreeABTest** and paste your public SDK key (it starts with `cro_pk_prod_`). Or choose **Connect WordPress** on the Overview page to fill it in for you.' },
+            { title: 'Turn it on', text: 'Tick **Add the snippet to my site**, pick Production or Development and choose **Save settings**. Clear any page cache.' },
+        ] },
+        { type: 'image', src: '/docs/wordpress-settings.png', alt: 'FreeABTest settings page in WordPress with the snippet turned on', caption: 'Settings, FreeABTest after connecting.' },
+        { type: 'p', text: 'Prefer not to install a plugin? Use one of these options instead.' },
         { type: 'p', text: 'Pick one of these options. Both add the snippet to every page, which is fine: the snippet does nothing on pages that are not part of a running test.' },
         { type: 'h3', text: 'Option 1: a header code plugin' },
         { type: 'steps', items: [
