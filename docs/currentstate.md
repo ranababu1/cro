@@ -119,6 +119,7 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - File-based markdown blog. Posts live in content/blog/*.md; adding a post only needs a new .md file (slug from frontmatter, else filename).
 - lib/blog.ts parses frontmatter, renders markdown with marked and sanitizes it with sanitize-html (no scripts, event handlers or javascript: links). JSON-LD from article_schema and faq_schema is parsed, re-serialised and escaped before injection.
 - Routes: /blog (index, newest first), /blog/[slug] (static, dynamicParams off), /blog/rss.xml (static RSS), /sitemap.xml (core pages plus posts).
+- Optional `category` frontmatter; if missing it is derived from keywords (Tools, Statistics) or defaults to Guides. FAQ section ("## Frequently asked questions", **Question?** then answer) renders as an accordion; tests check it matches faq_schema.
 - Posts are dated from frontmatter; a post with a future date still publishes on deploy (no scheduling).
 - tests/publicContent.test.ts checks blog frontmatter, sort order, JSON-LD validity, sanitizing, internal terms and em dashes.
 
@@ -165,3 +166,5 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - ThemeToggle (top bar) uses useSyncExternalStore with a system default on the server, so there is no hydration mismatch. Chart grid and labels use theme classes.
 
 Goals: up to 50 per experiment, each with a name and one CSS selector (css-what parse, single selector group) or a page or event target. goals.position (migration 0016, backfilled primary first then by created_at) sets order. POST/PATCH(order|primary)/DELETE on /api/experiments/[id]/goals, all audited; the last goal cannot be removed and removing the primary promotes the first remaining goal. Results read all goal stats from one rollup pass (getEventStatsByGoal). SDK bindGoals pre-splits click/form goals and drops a goal once it fires. Legacy comma-list selectors stay valid in the SDK.
+
+Blog: redesigned index and post layout (PR #34) merged with main; blog styles are light only and sit outside .app-scope, so app dark mode does not touch them. BlogPosting JSON-LD fallback from frontmatter kept.

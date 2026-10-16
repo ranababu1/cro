@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { blockText, buildSearchIndex, docPages } from '@/lib/docs';
-import { buildRss, getAllPosts, ldJson, parsePost, renderMarkdown } from '@/lib/blog';
+import { buildRss, deriveCategory, getAllPosts, ldJson, parsePost, relatedPosts, renderMarkdown, renderPost } from '@/lib/blog';
 
 /**
  * Public pages must not reveal how the service is built or run. Internal setup lives in README and docs/*.md only.
@@ -23,6 +23,7 @@ const publicFiles = [
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
     'app/blog/page.tsx', 'app/blog/[slug]/page.tsx', 'lib/blog.ts',
+    ...fs.readdirSync(path.join(root, 'app/blog/_components')).map((f) => `app/blog/_components/${f}`),
 ];
 
 describe('public content hides internals', () => {
@@ -199,5 +200,41 @@ describe('BlogPosting JSON-LD', () => {
             expect(JSON.parse(p.articleSchema!)['@type'], p.slug).toBe('BlogPosting');
             if (p.faqSchema) expect(JSON.parse(p.faqSchema)['@type']).toBe('FAQPage');
         }
+    });
+});
+
+describe('blog rendering', () => {
+    const posts = getAllPosts();
+
+    it('FAQ accordion questions match the FAQ JSON-LD', () => {
+        for (const p of posts) {
+            if (!p.faqSchema) continue;
+            const names = JSON.parse(p.faqSchema).mainEntity.map((q: { name: string }) => q.name);
+            expect(renderPost(p.markdown).faq.map((f) => f.q), p.slug).toEqual(names);
+        }
+    });
+
+    it('builds a table of contents from H2s with anchor ids', () => {
+        const r = renderPost('## One\n\ntext\n\n## Two & three\n\n## Frequently asked questions\n\n**Q?**\nA.\n\nClosing.');
+        expect(r.toc.map((t) => t.id)).toEqual(['one', 'two-three', 'faq']);
+        expect(r.html).toContain('<h2 id="one">');
+        expect(r.faq).toEqual([{ q: 'Q?', a: '<p>A.</p>\n' }]);
+        expect(r.afterFaqHtml).toContain('Closing.');
+    });
+
+    it('styles callouts and wraps tables for horizontal scroll', () => {
+        const html = renderMarkdown('> **Note:** careful\n\n| a | b |\n|---|---|\n| 1 | 2 |');
+        expect(html).toContain('class="callout callout-note"');
+        expect(html).toContain('class="table-wrap"');
+    });
+
+    it('defaults category from keywords or Guides, and relates by category', () => {
+        expect(deriveCategory('Strategy', [])).toBe('Strategy');
+        expect(deriveCategory(undefined, ['free ab testing tools'])).toBe('Tools');
+        expect(deriveCategory(undefined, ['something else'])).toBe('Guides');
+        for (const p of posts) expect(p.category).toBeTruthy();
+        const mk = (slug: string, category: string, date: string) => ({ ...posts[0], slug, category, date });
+        const all = [mk('a', 'X', '2026-01-03'), mk('b', 'Y', '2026-01-02'), mk('c', 'X', '2026-01-01')];
+        expect(relatedPosts(all[0], all).map((p) => p.slug)).toEqual(['c', 'b']);
     });
 });
