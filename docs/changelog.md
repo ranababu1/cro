@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-17 10:18 IST | New blog post: How long should you run an A/B test? Worked examples. The best free A/B testing tools post now links to it. |
 | pending | 2026-10-16 11:25 IST | Blog redesign is live: featured latest post, category filter, card grid, and a reading layout with table of contents, progress bar, callouts, FAQ accordion and related posts. Article structured data falls back to the post details when a post has none of its own. |
 | pending | 2026-10-15 19:43 IST | Goals work like a list: each goal has a name and one CSS selector. Add up to 50 goals per test one at a time, reorder them, pick the primary goal and remove ones you no longer need. Results and live stats show numbers for each named goal. Selector lists such as "#a, #b" are now refused for new goals; existing goals keep working. The SDK checks only the goals that have not fired yet. |
 | pending | 2026-10-15 19:23 IST | Dark mode for the signed-in app (Light, Dark, System toggle in the top bar, saved in localStorage, set before paint so no flash). Marketing pages stay light. Charts and heatmap grid follow the theme. |
