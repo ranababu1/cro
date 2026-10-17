@@ -170,3 +170,5 @@ Goals: up to 50 per experiment, each with a name and one CSS selector (css-what 
 Blog: redesigned index and post layout (PR #34) merged with main; blog styles are light only and sit outside .app-scope, so app dark mode does not touch them. BlogPosting JSON-LD fallback from frontmatter kept.
 
 Blog: 2 posts (best-free-ab-testing-tools, how-long-to-run-an-ab-test). Article and FAQ JSON-LD come from frontmatter and render as script tags in the post page.
+
+Copy consistency: significance wording follows lib/results.ts (best variant vs control) and lib/liveStats.ts (each variant vs control); weights are editable on draft, running and paused tests (lib/allocation.ts). Guarded by tests/copyConsistency.test.ts.

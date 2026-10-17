@@ -23,7 +23,7 @@ export const winners: DocPage = {
             { title: 'Record what you learned', text: 'Write the outcome in the experiment description, so the next test builds on it.' },
         ] },
         { type: 'h3', text: 'A gradual rollout today' },
-        { type: 'p', text: 'There are no feature flags yet. If you want to keep showing the winner through the SDK for a while, leave the experiment running and keep the winning code in your callback, but remember the control share still sees the old version. Weights cannot be changed after creation, so you cannot move a running test to 100%.' },
+        { type: 'p', text: 'There are no feature flags yet. If you want to keep showing the winner through the SDK for a while, leave the experiment running and keep the winning code in your callback. You can change the traffic split on a running test from **Edit test**, so you can move new visitors toward the winner, up to 100%. Visitors who are already in the test keep the version they saw, so some of them still see the old one.' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'A one-click "ship winner" flow is planned.' },
         { type: 'h2', text: 'When the control wins' },
         { type: 'p', text: 'Complete the experiment, remove the variant code and keep your page as it is. A losing variant is a result too: you avoided shipping a change that would have hurt.' },
