@@ -21,7 +21,8 @@ export const results: DocPage = {
         { type: 'p', text: 'Intervals get narrower as visitors grow. Overlapping intervals do not prove there is no difference, but they are a sign that the test is not done.' },
         { type: 'h2', text: 'P-values and significance', id: 'significance' },
         { type: 'p', text: 'The platform runs a two-sided, two-proportion z-test between the control and the best-performing variant (the one with the highest conversion rate). The p-value is the chance of seeing a difference at least this large if the variations were really the same. The result is called significant when p is below 0.05, which matches 95% confidence.' },
-        { type: 'callout', tone: 'info', title: 'Minimum sample', text: 'Significance is only tested once both the control and the best variant have at least 100 visitors. The dashboard shows **Collecting data** until every variation has at least 100 visitors.' },
+        { type: 'callout', tone: 'info', title: 'Minimum sample', text: 'Significance is only tested once every variation has at least 100 visitors. Until then the dashboard shows **Collecting data**.' },
+        { type: 'p', text: 'Live stats, above the detailed results, run the same test for each variant against the control and mark every variant that is significantly different. The summary verdict and the winner always come from the best variant against the control.' },
         { type: 'h3', text: 'What the summary means' },
         { type: 'table', head: ['Summary', 'What to do'], rows: [
             ['Collecting data', 'At least one variation has fewer than 100 visitors. Wait.'],

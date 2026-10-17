@@ -15,7 +15,7 @@ export const introduction: DocPage = {
             { title: 'Assign', text: 'When a page loads, the SDK calls `POST /api/assign` with the experiment ID and a visitor ID. The server picks a variation and stores the assignment.' },
             { title: 'Apply', text: 'Your code receives the variation name (and an optional redirect URL) and changes the page to match.' },
             { title: 'Track', text: 'The SDK records a page view automatically. You call `ABTest.trackConversion()` when the visitor does the thing you care about.' },
-            { title: 'Analyze', text: 'The results page compares each variation with the control: conversion rate, lift, a 95% interval and a p-value.' },
+            { title: 'Analyze', text: 'The results page shows each variation\'s conversion rate, lift against the control and 95% interval, and tests the best variant against the control for significance.' },
         ] },
         { type: 'h2', text: 'Core concepts' },
         { type: 'table', head: ['Term', 'Meaning'], rows: [
