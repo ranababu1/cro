@@ -168,3 +168,5 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 Goals: up to 50 per experiment, each with a name and one CSS selector (css-what parse, single selector group) or a page or event target. goals.position (migration 0016, backfilled primary first then by created_at) sets order. POST/PATCH(order|primary)/DELETE on /api/experiments/[id]/goals, all audited; the last goal cannot be removed and removing the primary promotes the first remaining goal. Results read all goal stats from one rollup pass (getEventStatsByGoal). SDK bindGoals pre-splits click/form goals and drops a goal once it fires. Legacy comma-list selectors stay valid in the SDK.
 
 Blog: redesigned index and post layout (PR #34) merged with main; blog styles are light only and sit outside .app-scope, so app dark mode does not touch them. BlogPosting JSON-LD fallback from frontmatter kept.
+
+Blog: 2 posts (best-free-ab-testing-tools, how-long-to-run-an-ab-test). Article and FAQ JSON-LD come from frontmatter and render as script tags in the post page.
