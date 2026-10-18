@@ -195,6 +195,34 @@
         (document.head || document.documentElement).appendChild(sc);
     }
 
+    /**
+     * Analytics push (all plans): tells GA4 which version the visitor sees, once per test per page.
+     * gtag.js sites get a GA4 experience_impression event; GTM sites get the same event on dataLayer.
+     * Nothing is created when neither is on the page. Opt out with data-analytics="off" on the script tag.
+     */
+    var analyticsOff = (script && script.getAttribute('data-analytics')) === 'off';
+    var analyticsSent = {};
+    function analyticsPush(data) {
+        if (analyticsOff || !data.experiment_id || !data.variation_id || analyticsSent[data.experiment_id]) return;
+        analyticsSent[data.experiment_id] = true;
+        var params = {
+            exp_variant_string: 'FABT-' + data.experiment_id + '-' + data.variation_id,
+            experiment_id: data.experiment_id,
+            variation_id: data.variation_id,
+            variation_name: data.variation_name || '',
+            is_control: !!data.is_control
+        };
+        try {
+            if (typeof window.gtag === 'function') {
+                window.gtag('event', 'experience_impression', params);
+            } else if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+                var ev = { event: 'experience_impression' };
+                for (var k in params) ev[k] = params[k];
+                window.dataLayer.push(ev);
+            }
+        } catch (e) { /* analytics must never break the page */ }
+    }
+
     function bootstrap() {
         if (!config.apiUrl || !config.apiKey) {
             console.error('[ABTest] Missing apiUrl or data-key');
@@ -217,6 +245,7 @@
                 if (data.matched && data.variation_id && data.action !== 'guard') {
                     assignmentCache[data.experiment_id] = data;
                     track(data.experiment_id, data.variation_id, 'page_view');
+                    analyticsPush(data);
                     bindGoals(data);
                     if (data.capture && data.capture.heatmaps) loadHeatmaps(data);
                 }
