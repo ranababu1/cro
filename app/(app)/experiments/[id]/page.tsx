@@ -7,6 +7,7 @@ import { describeTargeting, parseTargeting } from '@/lib/targeting';
 import { EditTest } from './EditTest';
 import { ShareResults } from './ShareResults';
 import { HeatmapsPanel } from './HeatmapsPanel';
+import { FunnelsPanel } from './FunnelsPanel';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -249,6 +250,7 @@ function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experime
             <p className="text-xs text-zinc-500">
                 Method: two-proportion z-test of the best variant against the control, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
             </p>
+            <FunnelsPanel experimentId={experiment.id} goals={goalList.map((g) => ({ goal_id: g.goal_id, goal_name: g.goal_name }))} />
         </div>
     );
 }

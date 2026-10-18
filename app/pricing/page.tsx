@@ -21,6 +21,7 @@ const limits: [string, string, string, string, string][] = [
     ['Team seats', '1', '5', '15', 'Unlimited'],
     ['Data retention', '6 months', '12 months', '24 months', 'Custom'],
     ['WordPress plugin', 'Not included', 'Included', 'Included', 'Included'],
+    ['Funnels', 'Not included', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
     ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
@@ -31,6 +32,7 @@ const availableToday = [
     'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
     'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'WordPress plugin on paid plans',
     'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks',
+    'Funnels on paid plans, built from your goals',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
@@ -38,7 +40,6 @@ const availableToday = [
 // p must match the phase that lists the item on the public /roadmap.
 const comingSoon: { name: string; p: number; tier: number }[] = [
     { name: 'Session recordings', p: 4, tier: 1 },
-    { name: 'Funnels', p: 4, tier: 1 },
     { name: 'Revenue goals', p: 4, tier: 1 },
     { name: 'Visual editor', p: 4, tier: 2 },
     { name: 'Auto-shift traffic to the winner', p: 4, tier: 2 },

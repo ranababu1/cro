@@ -127,6 +127,13 @@
       "when": 1791971800000,
       "tag": "0017_plugin_downloads",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1791971900000,
+      "tag": "0018_funnels",
+      "breakpoints": true
     }
   ]
 }
