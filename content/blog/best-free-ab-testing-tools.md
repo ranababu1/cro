@@ -75,7 +75,7 @@ This is our product, so here is what it does today and what it doesn't. Facts be
 
 What works now:
 
-- A/B tests and split URL tests, set up with a JavaScript snippet of about 14 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
+- A/B tests and split URL tests, set up with a JavaScript snippet of under 30 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
 - Sticky assignment: each visitor ID is hashed with the experiment ID, so the same visitor always sees the same variant
 - Page visit, click (by CSS selector), form submit and custom event goals, plus conversions you send from your own code
 - Targeting by device, UTM, referrer and new or returning visitors
