@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-18 22:18 IST | Traffic overview on paid plans: a new Traffic page shows page views, entrances, page views per day, top pages, sources, devices and countries for every page with the snippet, per environment, for the last 7, 30 or 90 days. |
 | pending | 2026-10-18 21:58 IST | Blog post 'best free A/B testing tools' now says the snippet is under 30 KB gzipped (updated copy from ABTest Content). |
 | pending | 2026-10-18 21:32 IST | Auto-shift traffic to the winner (Growth plan and above): turn it on in Edit test and, about once an hour while the test gets traffic, new visitors are split by the chance each version wins on the primary goal (Thompson sampling), with at least 10% kept for every version. Visitors already in the test keep their version. Pricing moves it from coming soon to available. |
 | pending | 2026-10-18 21:08 IST | Revenue goals (paid plans): send an order value with a custom event, ABTest.track('purchase', { revenue: 49.99 }), and Results shows revenue, revenue per visitor, average order value and lift per variation, with a Welch t-test of the best variant against the control. Free plans still count the conversion. Pricing moves Revenue goals from coming soon to available. |

@@ -207,6 +207,22 @@ export const telemetryDaily = sqliteTable('telemetry_daily', {
     index('idx_telemetry_daily_metric').on(t.metric, t.day),
 ]);
 
+/**
+ * Traffic overview (paid): daily page view totals per environment and dimension, written in the
+ * same batched flush as telemetry. dim: views | entries | new_views (key '') or page | source | device | country.
+ */
+export const trafficDaily = sqliteTable('traffic_daily', {
+    day: text('day').notNull(),
+    environment_id: text('environment_id').notNull().references(() => environments.id, { onDelete: 'cascade' }),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    dim: text('dim').notNull(),
+    key: text('key').notNull(),
+    views: integer('views').notNull().default(0),
+}, (t) => [
+    primaryKey({ columns: [t.day, t.environment_id, t.dim, t.key] }),
+    index('idx_traffic_daily_env_dim').on(t.environment_id, t.dim, t.day),
+]);
+
 /** Server-side product usage events for dashboard actions (not visitor page views). */
 export const productEvents = sqliteTable('product_events', {
     id: text('id').primaryKey(),

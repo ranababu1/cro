@@ -48,6 +48,8 @@ Auto-shift traffic to the winner (Growth+); recordings postponed
 
 Blog post 01 SDK size fix
 
+Traffic overview (paid)
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
@@ -63,7 +65,7 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 - Postponed: anything that depends on recordings (JS errors linked to recordings, surveys linked to a recording). The non-recording parts can still ship.
 
 ## Next feasible items (in order, after revenue goals and auto-shift)
-1. Traffic overview (light analytics from existing events: pageviews, visitors, top pages, sources, devices).
+1. Done 19 Oct 2026: Traffic overview (paid; page views, entrances, top pages, sources, devices, countries).
 2. Heatmap compare side by side (variations or devices).
 3. Heatmap data export as JSON.
 4. GA4 push: dataLayer event with experiment and variant.

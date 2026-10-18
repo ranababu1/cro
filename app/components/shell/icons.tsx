@@ -14,6 +14,7 @@ export const KeyIcon = P('M15.5 7.5a3.5 3.5 0 1 1-4.9 3.2L3 18.3V21h3v-2h2v-2h2l
 export const ShieldIcon = P('M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z');
 export const UserIcon = P('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0');
 export const BookIcon = P('M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H20');
+export const ChartIcon = P('M4 20V10M10 20V4M16 20v-7M22 20H2');
 export const ChevronIcon = P('m8 10 4 4 4-4');
 export const MenuIcon = P('M4 6h16M4 12h16M4 18h16');
 export const PlusIcon = P('M12 5v14M5 12h14');

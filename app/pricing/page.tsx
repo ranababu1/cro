@@ -24,6 +24,7 @@ const limits: [string, string, string, string, string][] = [
     ['Funnels', 'Not included', 'Included', 'Included', 'Included'],
     ['Revenue goals', 'Not included', 'Included', 'Included', 'Included'],
     ['Auto-shift traffic to the winner', 'Not included', 'Not included', 'Included', 'Included'],
+    ['Traffic overview', 'Not included', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
     ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
@@ -37,6 +38,7 @@ const availableToday = [
     'Funnels on paid plans, built from your goals',
     'Revenue goals on paid plans: revenue per visitor and average order value',
     'Auto-shift traffic to the winner on Growth and above',
+    'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 

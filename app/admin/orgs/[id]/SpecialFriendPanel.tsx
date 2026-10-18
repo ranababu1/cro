@@ -40,6 +40,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
     const [funnels, setFunnels] = useState<Toggle>(toToggle(allowances.funnels));
     const [revenue, setRevenue] = useState<Toggle>(toToggle(allowances.revenue_goals));
     const [autoShift, setAutoShift] = useState<Toggle>(toToggle(allowances.auto_shift));
+    const [traffic, setTraffic] = useState<Toggle>(toToggle(allowances.traffic));
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
 
@@ -58,6 +59,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
         const fu = fromToggle(funnels); if (fu !== undefined) out.funnels = fu;
         const rv = fromToggle(revenue); if (rv !== undefined) out.revenue_goals = rv;
         const as = fromToggle(autoShift); if (as !== undefined) out.auto_shift = as;
+        const tr = fromToggle(traffic); if (tr !== undefined) out.traffic = tr;
         if (!out.flags) delete out.flags;
         const res = await fetch(`/api/admin/orgs/${orgId}/allowances`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ special_friend: enabled, allowances: out }) });
         setBusy(false);
@@ -91,6 +93,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
                     <Field label="Funnels">{(id) => select(id, funnels, setFunnels)}</Field>
                     <Field label="Revenue goals">{(id) => select(id, revenue, setRevenue)}</Field>
                     <Field label="Auto-shift traffic">{(id) => select(id, autoShift, setAutoShift)}</Field>
+                    <Field label="Traffic overview">{(id) => select(id, traffic, setTraffic)}</Field>
                 </div>
                 <div className="flex justify-end"><Button onClick={() => void save()} disabled={busy}>Save allowances</Button></div>
             </CardBody>
