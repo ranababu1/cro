@@ -332,3 +332,12 @@ export const pluginDownloads = sqliteTable('plugin_downloads', {
     ip_hash: text('ip_hash'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_plugin_downloads_user').on(t.user_id, t.created_at), index('idx_plugin_downloads_org').on(t.org_id, t.created_at), index('idx_plugin_downloads_created').on(t.created_at)]);
+
+// Funnels (paid plans): an ordered list of an experiment's goals. Numbers are computed from conversion events.
+export const funnels = sqliteTable('funnels', {
+    id: text('id').primaryKey(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    steps: text('steps').notNull(), // JSON array of goal ids, in order
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_funnels_experiment').on(t.experiment_id)]);

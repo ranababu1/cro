@@ -837,6 +837,41 @@ export const db = {
         const seen = new Set<string>();
         return rows.filter((r) => (seen.has(r.user.id) ? false : (seen.add(r.user.id), true)));
     },
+    async listFunnels(experimentId: string) {
+        const d = await getDb();
+        return d.select().from(s.funnels).where(eq(s.funnels.experiment_id, experimentId)).orderBy(asc(s.funnels.created_at));
+    },
+
+    async createFunnel(experimentId: string, name: string, steps: string[]) {
+        const d = await getDb();
+        const id = generateId('fnl');
+        await d.insert(s.funnels).values({ id, experiment_id: experimentId, name, steps: JSON.stringify(steps) });
+        return id;
+    },
+
+    async deleteFunnel(experimentId: string, funnelId: string): Promise<boolean> {
+        const d = await getDb();
+        const r = await d.delete(s.funnels).where(and(eq(s.funnels.id, funnelId), eq(s.funnels.experiment_id, experimentId))).returning({ id: s.funnels.id });
+        return r.length > 0;
+    },
+
+    /** First conversion time per visitor, variation and goal, for the given goals. Reads raw conversion events only. */
+    async getFirstGoalHits(experimentId: string, environmentId: string | undefined, goalIds: string[]) {
+        if (!goalIds.length) return [];
+        const d = await getDb();
+        const rows = await d
+            .select({ variation_id: s.events.variation_id, user_id: s.events.user_id, goal_id: s.events.goal_id, t: sql<string>`min(${s.events.created_at})` })
+            .from(s.events)
+            .where(and(
+                eq(s.events.experiment_id, experimentId),
+                eq(s.events.event_type, 'conversion'),
+                inArray(s.events.goal_id, goalIds),
+                environmentId ? eq(s.events.environment_id, environmentId) : undefined,
+            ))
+            .groupBy(s.events.variation_id, s.events.user_id, s.events.goal_id);
+        return rows.map((r) => ({ variation_id: r.variation_id, user_id: r.user_id, goal_id: r.goal_id ?? '', t: r.t }));
+    },
+
     async recordPluginDownload(row: { plugin: string; version: string; orgId: string; userId: string; ipHash: string | null }): Promise<string> {
         const d = await getDb();
         const id = generateId('dl');
