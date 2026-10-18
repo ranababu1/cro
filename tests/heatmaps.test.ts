@@ -162,3 +162,10 @@ describe('capture module', () => {
         expect(sdkSrc).toContain("'/heatmap.js'");
     });
 });
+
+describe('capture ingest outside a request scope', () => {
+    it('does not fail when the occasional prune runs without a request scope', () => {
+        const src = fs.readFileSync('app/api/capture/route.ts', 'utf8');
+        expect(src).toMatch(/try \{ after\(prune\); \} catch \{ void prune\(\); \}/);
+    });
+});
