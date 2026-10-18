@@ -57,7 +57,7 @@ const faqs = [
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
     { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
-    { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. Paid plans also get a WordPress plugin that adds it for you.' },
+    { q: 'What do I need to install?', a: 'A small JavaScript snippet, under 30 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. Paid plans also get a WordPress plugin that adds it for you.' },
     { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA.' },
 ];
 

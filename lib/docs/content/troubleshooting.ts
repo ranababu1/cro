@@ -37,7 +37,7 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Do I need to write code?' },
         { type: 'p', text: 'A few lines. You add the snippet and write the change for each variation in JavaScript. A visual editor is on the [roadmap](/roadmap).' },
         { type: 'h3', text: 'Will it slow my site down?' },
-        { type: 'p', text: 'The script is about 15 KB gzipped and loads asynchronously. It makes one small request on page load.' },
+        { type: 'p', text: 'The script is under 30 KB gzipped and loads asynchronously. It makes one small request on page load.' },
         { type: 'h3', text: 'Which statistics do you use?' },
         { type: 'p', text: 'A two-sided two-proportion z-test of the best variant against the control, at 95% confidence, and Wilson score intervals for each conversion rate. See [Reading results](/docs/results).' },
         { type: 'h3', text: 'Can I change variations after starting?' },
