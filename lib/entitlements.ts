@@ -20,7 +20,7 @@ export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
  * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
  * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
  */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift'] as const;
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic'] as const;
 export const GROWTH_FEATURES: readonly string[] = ['auto_shift'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
@@ -123,6 +123,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.funnels !== undefined) features.funnels = a.funnels;
         if (a.revenue_goals !== undefined) features.revenue_goals = a.revenue_goals;
         if (a.auto_shift !== undefined) features.auto_shift = a.auto_shift;
+        if (a.traffic !== undefined) features.traffic = a.traffic;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -155,6 +156,7 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     raw_capture: 'This feature is part of the paid plans. Upgrade to Starter or above to turn it on.',
     funnels: 'Funnels are part of the paid plans. Upgrade to Starter or above to build them.',
     auto_shift: 'Auto-shift traffic to the winner is part of the Growth plan and above. Upgrade to Growth to turn it on.',
+    traffic: 'The traffic overview is part of the paid plans. Upgrade to Starter or above to see page views, top pages, sources and devices.',
     revenue_goals: 'Revenue goals are part of the paid plans. Upgrade to Starter or above to track order values.',
     wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',
 };

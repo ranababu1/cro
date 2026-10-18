@@ -148,6 +148,13 @@
       "when": 1791972100000,
       "tag": "0020_auto_shift",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1791972200000,
+      "tag": "0021_traffic_daily",
+      "breakpoints": true
     }
   ]
 }

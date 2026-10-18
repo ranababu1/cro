@@ -62,18 +62,24 @@ const buffer = new Map<string, Row>();
 let timer: ReturnType<typeof setTimeout> | null = null;
 let scheduledAfter = false;
 
+/** Traffic overview counters (paid). Flushed in the same batch as telemetry, so no extra round trip. */
+type TrafficBufRow = { day: string; environment_id: string; project_id: string; dim: string; key: string; views: number };
+const trafficBuffer = new Map<string, TrafficBufRow>();
+
 export function pendingTelemetry(): number {
-    return buffer.size;
+    return buffer.size + trafficBuffer.size;
 }
 
 export async function flushTelemetry(): Promise<void> {
     scheduledAfter = false;
     if (timer) { clearTimeout(timer); timer = null; }
-    if (!buffer.size) return;
+    if (!buffer.size && !trafficBuffer.size) return;
     const rows = [...buffer.values()];
+    const traffic = [...trafficBuffer.values()];
     buffer.clear();
+    trafficBuffer.clear();
     try {
-        await db.bumpTelemetryBatch(rows);
+        await db.bumpTelemetryBatch(rows, traffic);
     } catch (err) {
         console.error('telemetry flush failed', err);
     }
@@ -109,6 +115,18 @@ export async function bumpMetric(metric: MetricName, opts: BumpOpts = {}): Promi
         const cur = buffer.get(key);
         if (cur) cur.value += by;
         else buffer.set(key, { day, scope_type: sc.type, scope_id: sc.id, metric, value: by });
+    }
+    if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
+    scheduleFlush();
+}
+
+/** Adds one page view to the traffic overview counters for an environment. */
+export async function bumpTraffic(scope: { environmentId: string; projectId: string }, dims: Array<{ dim: string; key: string }>, day = utcDay()): Promise<void> {
+    for (const { dim, key } of dims) {
+        const k = `${day}|${scope.environmentId}|${dim}|${key}`;
+        const cur = trafficBuffer.get(k);
+        if (cur) cur.views += 1;
+        else trafficBuffer.set(k, { day, environment_id: scope.environmentId, project_id: scope.projectId, dim, key, views: 1 });
     }
     if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
     scheduleFlush();

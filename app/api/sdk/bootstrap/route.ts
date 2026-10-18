@@ -8,7 +8,8 @@ import { heatmapSampleRate, isSampled } from '@/lib/heatmaps';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
-import { bumpMetric, METRICS } from '@/lib/telemetry';
+import { bumpMetric, bumpTraffic, METRICS } from '@/lib/telemetry';
+import { trafficDimensions } from '@/lib/traffic';
 import { scheduleAutoShift } from '@/lib/autoShiftRun';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
@@ -44,6 +45,14 @@ export async function POST(request: NextRequest) {
         // Monthly pageview cap reached: pause collection. Visitors see the original page.
         if ((await getPageviewStatus(auth.ctx.orgId)).paused) {
             return sdkJson({ matched: false, action: 'none', reason: 'quota_paused' } satisfies BootstrapResponse);
+        }
+
+        // Traffic overview (paid): one page view into the daily counters, flushed with telemetry in one batch.
+        if (auth.ctx.environmentId && (await canUseFeature(auth.ctx.orgId, 'traffic'))) {
+            void bumpTraffic(
+                { environmentId: auth.ctx.environmentId, projectId: auth.ctx.projectId },
+                trafficDimensions({ url, referrer, userAgent: request.headers.get('user-agent'), country: request.headers.get('x-vercel-ip-country'), visitor }),
+            );
         }
 
         // Heavy capture (heatmaps) is offered only to entitled orgs; free orgs never get a capture config.

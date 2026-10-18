@@ -972,17 +972,42 @@ export const db = {
     },
 
     /** Applies many counter increments in one round trip. */
-    async bumpTelemetryBatch(rows: Array<{ day: string; scope_type: 'platform' | 'org' | 'user' | 'project' | 'experiment'; scope_id: string; metric: string; value: number }>): Promise<void> {
-        if (!rows.length) return;
+    /** Telemetry counters and traffic overview counters, upserted in one batch (one round trip). */
+    async bumpTelemetryBatch(
+        rows: Array<{ day: string; scope_type: 'platform' | 'org' | 'user' | 'project' | 'experiment'; scope_id: string; metric: string; value: number }>,
+        traffic: Array<{ day: string; environment_id: string; project_id: string; dim: string; key: string; views: number }> = [],
+    ): Promise<void> {
+        if (!rows.length && !traffic.length) return;
         const d = await getDb();
-        const stmts = rows.map((r) => d
-            .insert(s.telemetryDaily)
-            .values(r)
-            .onConflictDoUpdate({
-                target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
-                set: { value: sql`${s.telemetryDaily.value} + ${r.value}` },
-            }));
+        const stmts = [
+            ...rows.map((r) => d
+                .insert(s.telemetryDaily)
+                .values(r)
+                .onConflictDoUpdate({
+                    target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
+                    set: { value: sql`${s.telemetryDaily.value} + ${r.value}` },
+                })),
+            ...traffic.map((r) => d
+                .insert(s.trafficDaily)
+                .values(r)
+                .onConflictDoUpdate({
+                    target: [s.trafficDaily.day, s.trafficDaily.environment_id, s.trafficDaily.dim, s.trafficDaily.key],
+                    set: { views: sql`${s.trafficDaily.views} + ${r.views}` },
+                })),
+        ];
         await d.batch(stmts as unknown as [typeof stmts[number], ...typeof stmts]);
+    },
+
+    /** Traffic overview: daily totals and per-key sums for one environment between two UTC days (inclusive). */
+    async getTraffic(environmentId: string, from: string, to: string) {
+        const d = await getDb();
+        const range = and(eq(s.trafficDaily.environment_id, environmentId), gte(s.trafficDaily.day, from), lte(s.trafficDaily.day, to));
+        const daily = await d.select({ day: s.trafficDaily.day, dim: s.trafficDaily.dim, key: s.trafficDaily.key, views: s.trafficDaily.views })
+            .from(s.trafficDaily).where(and(range, inArray(s.trafficDaily.dim, ['views', 'entries', 'new_views'])));
+        const grouped = await d.select({ dim: s.trafficDaily.dim, key: s.trafficDaily.key, views: sql<number>`sum(${s.trafficDaily.views})` })
+            .from(s.trafficDaily).where(and(range, inArray(s.trafficDaily.dim, ['page', 'source', 'device', 'country'])))
+            .groupBy(s.trafficDaily.dim, s.trafficDaily.key);
+        return { daily: daily.map((r) => ({ ...r, views: Number(r.views) })), grouped: grouped.map((r) => ({ ...r, views: Number(r.views) })) };
     },
 
     async getTelemetryRange(opts: {
