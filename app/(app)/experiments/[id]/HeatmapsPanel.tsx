@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card, CardBody, CardHeader, Spinner, Select } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
 
-type Report = {
+export type Report = {
     variation: { id: string; name: string; url: string | null };
     variations: { id: string; name: string; url: string | null; is_control: boolean }[];
     devices: Record<'desktop' | 'tablet' | 'mobile', { clicks: number; sessions: number }>;
@@ -36,6 +36,10 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
     const [view, setView] = useState<View>('click');
     const [data, setData] = useState<Report | null>(null);
     const [error, setError] = useState('');
+    // Side-by-side comparison: a second version on the same device.
+    const [compare, setCompare] = useState(false);
+    const [variationB, setVariationB] = useState('');
+    const [dataB, setDataB] = useState<Report | null>(null);
 
     useEffect(() => {
         let live = true;
@@ -55,6 +59,18 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
         return () => { live = false; };
     }, [allowed, experimentId, variation, device]);
 
+    const otherId = data ? (variationB && variationB !== data.variation.id ? variationB : data.variations.find((v) => v.id !== data.variation.id)?.id ?? '') : '';
+    useEffect(() => {
+        if (!allowed || !compare || !otherId) return;
+        let live = true;
+        fetch(`/api/experiments/${experimentId}/heatmaps?${new URLSearchParams({ device, variation: otherId })}`)
+            .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Could not load heatmaps'); return j as Report; })
+            .then((j) => { if (live) setDataB(j); })
+            .catch((e: Error) => live && setError(e.message));
+        return () => { live = false; };
+    }, [allowed, compare, experimentId, otherId, device]);
+    const b = compare && dataB && dataB.variation.id === otherId ? dataB : null;
+
     return (
         <Card>
             <CardHeader title="Heatmaps" description="Where visitors click and how far they scroll, for each version. Collected automatically from a sample of visitors." />
@@ -69,6 +85,16 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                             <Select aria-label="Variation" value={data.variation.id} onChange={(e) => setVariation(e.target.value)} className="w-auto">
                                 {data.variations.map((v) => <option key={v.id} value={v.id}>{v.name}{v.is_control ? ' (control)' : ''}</option>)}
                             </Select>
+                            {data.variations.length > 1 && (
+                                <label className="flex items-center gap-2 text-sm text-zinc-700">
+                                    <input type="checkbox" checked={compare} onChange={(e) => setCompare(e.target.checked)} /> Compare with
+                                </label>
+                            )}
+                            {compare && (
+                                <Select aria-label="Compare with" value={otherId} onChange={(e) => setVariationB(e.target.value)} className="w-auto">
+                                    {data.variations.filter((v) => v.id !== data.variation.id).map((v) => <option key={v.id} value={v.id}>{v.name}{v.is_control ? ' (control)' : ''}</option>)}
+                                </Select>
+                            )}
                             <div className="inline-flex rounded-md border border-zinc-200 p-0.5" role="tablist" aria-label="Device">
                                 {(['all', 'desktop', 'tablet', 'mobile'] as DeviceOpt[]).map((d) => (
                                     <button key={d} type="button" onClick={() => setDevice(d)} className={`rounded px-2.5 py-1 text-xs font-medium capitalize ${device === d ? 'bg-blue-600 text-white' : 'text-zinc-600 hover:bg-zinc-100'}`}>
@@ -77,17 +103,15 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                                 ))}
                             </div>
                         </div>
-                        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4 text-sm">
-                            {[['Clicks', data.totals.clicks], ['Rage clicks', data.totals.rage], ['Dead clicks', data.totals.dead], ['Sessions with scroll data', data.totals.sessions]].map(([k, v]) => (
-                                <div key={k} className="rounded-lg border border-zinc-200 px-3 py-2"><div className="text-zinc-500">{k}</div><div className="text-lg font-semibold text-zinc-900">{v}</div></div>
-                            ))}
-                        </div>
+                        {!compare && <Totals data={data} />}
                         <div className="mb-4 flex flex-wrap gap-2">
                             {VIEWS.map((v) => (
                                 <button key={v.id} type="button" onClick={() => setView(v.id)} className={`rounded-md px-3 py-1.5 text-sm ${view === v.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-zinc-600 hover:bg-zinc-100'}`}>{v.label}</button>
                             ))}
                         </div>
-                        {data.totals.clicks === 0 && data.totals.sessions === 0
+                        {compare ? (
+                            b ? <CompareView a={data} b={b} view={view} width={WIDTH[device]} /> : <Spinner />
+                        ) : data.totals.clicks === 0 && data.totals.sessions === 0
                             ? <p className="text-sm text-zinc-500">No heatmap data yet for this version and device. Data appears a few seconds after sampled visitors leave the page.</p>
                             : <HeatView data={data} view={view} width={WIDTH[device]} />}
                     </div>
@@ -97,11 +121,61 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
     );
 }
 
-function HeatView({ data, view, width }: { data: Report; view: View; width: number }) {
-    const max = useMemo(() => Math.max(1, ...data.grid.map((g) => g.clicks)), [data.grid]);
-    const rows = Math.min(200, Math.max(24, ...data.grid.map((g) => g.gy + 1), ...data.confetti.map((p) => Math.floor(p.y / data.rowPx) + 1)));
+function Totals({ data, compact = false }: { data: Report; compact?: boolean }) {
+    return (
+        <div className={`mb-4 grid gap-3 text-sm ${compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'}`}>
+            {[['Clicks', data.totals.clicks], ['Rage clicks', data.totals.rage], ['Dead clicks', data.totals.dead], ['Sessions with scroll data', data.totals.sessions]].map(([k, v]) => (
+                <div key={k} className="rounded-lg border border-zinc-200 px-3 py-2"><div className="text-zinc-500">{k}</div><div className="text-lg font-semibold text-zinc-900">{v}</div></div>
+            ))}
+        </div>
+    );
+}
+
+const rowsFor = (d: Report) => Math.min(200, Math.max(24, ...d.grid.map((g) => g.gy + 1), ...d.confetti.map((p) => Math.floor(p.y / d.rowPx) + 1)));
+const maxFor = (d: Report) => Math.max(1, ...d.grid.map((g) => g.clicks));
+
+/** Two versions side by side on one scale: the same colour means the same number of clicks on both sides. */
+export function CompareView({ a, b, view, width }: { a: Report; b: Report; view: View; width: number }) {
+    const max = Math.max(maxFor(a), maxFor(b));
+    const rows = Math.max(rowsFor(a), rowsFor(b));
+    if (view === 'list') {
+        const keys = [...new Set([...a.list, ...b.list].map((r) => r.selector))];
+        const pick = (d: Report, k: string) => d.list.find((r) => r.selector === k);
+        const share = (n: number, d: Report) => (d.totals.clicks ? `${((n / d.totals.clicks) * 100).toFixed(1)}%` : '-');
+        const rowsL = keys.map((k) => ({ k, a: pick(a, k)?.clicks ?? 0, b: pick(b, k)?.clicks ?? 0 })).sort((x, y) => (y.a + y.b) - (x.a + x.b));
+        return (
+            <table className="w-full text-sm" data-testid="heat-compare-list">
+                <thead><tr className="text-left text-zinc-500"><th className="py-2">Element</th><th className="text-right">{a.variation.name}</th><th className="text-right">Share</th><th className="text-right">{b.variation.name}</th><th className="text-right">Share</th></tr></thead>
+                <tbody>{rowsL.map((r) => (
+                    <tr key={r.k} className="border-t border-zinc-100"><td className="py-1.5 font-mono text-xs text-zinc-800">{r.k}</td><td className="text-right">{r.a}</td><td className="text-right text-zinc-500">{share(r.a, a)}</td><td className="text-right">{r.b}</td><td className="text-right text-zinc-500">{share(r.b, b)}</td></tr>
+                ))}</tbody>
+            </table>
+        );
+    }
+    return (
+        <div data-testid="heat-compare">
+            <div className="grid gap-4 lg:grid-cols-2">
+                {[a, b].map((d) => (
+                    <div key={d.variation.id}>
+                        <p className="mb-2 text-sm font-medium text-zinc-900">{d.variation.name}{d.variations.find((v) => v.id === d.variation.id)?.is_control ? ' (control)' : ''}</p>
+                        <Totals data={d} compact />
+                        {d.totals.clicks === 0 && d.totals.sessions === 0
+                            ? <p className="text-sm text-zinc-500">No heatmap data yet for this version and device.</p>
+                            : <HeatView data={d} view={view} width={width} max={max} rows={rows} previewWidth={370} />}
+                    </div>
+                ))}
+            </div>
+            {(view === 'click' || view === 'overlay') && <p className="mt-2 text-xs text-zinc-500">Both sides use the same colour scale, so the same colour means the same number of clicks.</p>}
+        </div>
+    );
+}
+
+function HeatView({ data, view, width, max: sharedMax, rows: sharedRows, previewWidth = 760 }: { data: Report; view: View; width: number; max?: number; rows?: number; previewWidth?: number }) {
+    const ownMax = useMemo(() => maxFor(data), [data]);
+    const max = sharedMax ?? ownMax;
+    const rows = sharedRows ?? rowsFor(data);
     const height = rows * data.rowPx;
-    const scale = Math.min(1, 760 / width);
+    const scale = Math.min(1, previewWidth / width);
     const cellW = width / data.cols;
 
     if (view === 'list') {
