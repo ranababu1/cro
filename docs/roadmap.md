@@ -44,6 +44,8 @@ Later: SDK slimming
 
 Revenue goals on custom events (paid)
 
+Auto-shift traffic to the winner (Growth+); recordings postponed
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
@@ -52,6 +54,19 @@ Revenue goals on custom events (paid)
 - [x] Public share links for results
 - [x] GTM and WordPress install guides
 - [x] Monthly pageview quotas that pause collection at the cap
+
+## Postponed (not feasible on the current stack, Imran 19 Oct 2026)
+Kept off the public roadmap wording; public /roadmap stays high level.
+- Postponed: session recordings (replay player, filters, links from heatmap dots and results). Needs object storage (R2 or Vercel Blob); Turso is too small for recording chunks.
+- Postponed: anything that depends on recordings (JS errors linked to recordings, surveys linked to a recording). The non-recording parts can still ship.
+
+## Next feasible items (in order, after revenue goals and auto-shift)
+1. Traffic overview (light analytics from existing events: pageviews, visitors, top pages, sources, devices).
+2. Heatmap compare side by side (variations or devices).
+3. Heatmap data export as JSON.
+4. GA4 push: dataLayer event with experiment and variant.
+5. Visual editor (DOM change list applied by the SDK before paint; lazy module so the base SDK does not grow).
+6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links).
 
 ## Approved phases
 
@@ -83,17 +98,17 @@ Technical approach:
 
 ### Phase 3: Recordings, funnels and visual editor (about 6 to 8 weeks)
 Scope:
-- Session recordings with replay player, filters (converted, page, device, rage click), links from heatmap dots and test results.
+- Postponed (needs object storage): session recordings with replay player, filters (converted, page, device, rage click), links from heatmap dots and test results.
 - Funnels built from existing goals: per step visitors, drop-off, trend.
 - Visual editor tests (from the existing roadmap): text, image, link, hide, move, custom CSS/JS, device preview.
-- Multi-armed bandit split option.
+- Multi-armed bandit split option. Done 19 Oct 2026 as auto-shift traffic to the winner (Growth+).
 - Heatmap compare side by side.
 Technical approach:
 - Recordings use the open source rrweb library loaded lazily only for sampled sessions, so the base SDK stays small.
 - Privacy: mask all input values and elements marked `data-fab-mask` by default, block password and card fields entirely, honor Do Not Track and a consent flag, configurable retention.
 - Storage: recordings are too large for Turso. Store compressed chunks in object storage (Cloudflare R2 free tier 10 GB, or Vercel Blob) and keep only metadata in Turso. Expect roughly 100 to 300 KB per compressed session, so 1,000 recordings is about 0.2 GB. Hard caps per plan (Crazy Egg gives 50 to 10,000 per month).
 - Visual editor: the SDK applies a list of DOM changes before paint using the same anti-flicker hide it uses today.
-- Bandit: Thompson sampling run on a schedule (Vercel cron) that rewrites weights.
+- Bandit: Thompson sampling that rewrites weights. Shipped without a cron: the check runs after SDK requests (at most hourly per test, claimed atomically), since Vercel Hobby cron runs only daily.
 
 ### Phase 4: Engagement tools and extras (about 4 to 6 weeks, pick per demand)
 Scope:

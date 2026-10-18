@@ -336,6 +336,30 @@ export const db = {
         await d.update(s.experiments).set({ updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
     },
 
+    /** Turns auto-shift on or off. Turning it on makes the next check due right away. */
+    async setAutoShift(experimentId: string, enabled: boolean): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.experiments).set({ auto_shift: enabled, auto_shift_at: null, updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
+    },
+
+    /**
+     * Claims the next auto-shift check for a running test when the last one is older than cutoffIso.
+     * Only one caller wins, so concurrent requests do not rebalance twice.
+     */
+    async claimAutoShift(experimentId: string, cutoffIso: string, nowIsoValue: string): Promise<boolean> {
+        const d = await getDb();
+        const r = await d.update(s.experiments).set({ auto_shift_at: nowIsoValue })
+            .where(and(
+                eq(s.experiments.id, experimentId),
+                eq(s.experiments.auto_shift, true),
+                eq(s.experiments.status, 'running'),
+                sql`(${s.experiments.auto_shift_at} is null or ${s.experiments.auto_shift_at} < ${cutoffIso})`,
+            ))
+            .returning({ id: s.experiments.id });
+        return r.length > 0;
+    },
+
     async addGoal(experimentId: string, g: Pick<Goal, 'name' | 'selector' | 'is_primary' | 'type' | 'match_type'>): Promise<Goal> {
         clearConfigCache();
         const d = await getDb();

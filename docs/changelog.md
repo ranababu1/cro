@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-18 21:32 IST | Auto-shift traffic to the winner (Growth plan and above): turn it on in Edit test and, about once an hour while the test gets traffic, new visitors are split by the chance each version wins on the primary goal (Thompson sampling), with at least 10% kept for every version. Visitors already in the test keep their version. Pricing moves it from coming soon to available. |
 | pending | 2026-10-18 21:08 IST | Revenue goals (paid plans): send an order value with a custom event, ABTest.track('purchase', { revenue: 49.99 }), and Results shows revenue, revenue per visitor, average order value and lift per variation, with a Welch t-test of the best variant against the control. Free plans still count the conversion. Pricing moves Revenue goals from coming soon to available. |
 | pending | 2026-10-18 20:45 IST | SDK size copy corrected: the homepage, pricing FAQ and docs now say under 30 KB gzipped (measured live: 26.7 KB as served, about 100 KB raw) instead of about 14 KB. |
 | pending | 2026-10-18 20:29 IST | Funnels on paid plans: build up to 10 funnels per test from 2 to 10 of its goals, in order. For each variation the Results tab shows visitors at every step, the share of all visitors and of the previous step, and the full-funnel rate against the control. Pricing, roadmap (Phase 4 in progress) and docs updated. |

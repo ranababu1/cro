@@ -7,6 +7,7 @@ import { GOAL_TYPES, GOAL_TYPE_LABELS, MAX_GOALS, checkGoalSelector, describeGoa
 import { parseTargeting, type Targeting } from '@/lib/targeting';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import type { Variation } from '@/lib/types';
+import { AutoShiftCard } from './AutoShiftCard';
 
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 const PLACEHOLDER: Record<GoalType, string> = { click: '#headerCTA', form: 'form#signup', page: 'https://www.example.com/thank-you', event: 'signup' };
@@ -19,7 +20,7 @@ async function send(url: string, method: string, body: unknown): Promise<{ ok: b
 /** Safe edits for a draft, running or paused test: split, pausing variations, audience and new goals. */
 type GoalRow = { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean };
 
-export function EditTest({ experimentId, variations, goals = [], targeting, onSaved }: { experimentId: string; variations: Variation[]; goals?: GoalRow[]; targeting: string | null; onSaved: () => void }) {
+export function EditTest({ experimentId, variations, goals = [], targeting, autoShift = false, onSaved }: { experimentId: string; variations: Variation[]; goals?: GoalRow[]; targeting: string | null; autoShift?: boolean; onSaved: () => void }) {
     const [rows, setRows] = useState(variations.map((v) => ({ id: v.id, name: v.name, is_control: v.is_control, weight: v.weight, paused: !!v.paused })));
     const [aud, setAud] = useState<Targeting>(parseTargeting(targeting));
     const [goal, setGoal] = useState({ name: '', type: 'click' as GoalType, selector: '', match_type: 'equals' as PageMatchType, is_primary: false });
@@ -75,15 +76,16 @@ export function EditTest({ experimentId, variations, goals = [], targeting, onSa
     return (
         <div className="space-y-6">
             {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
+            <AutoShiftCard experimentId={experimentId} onSaved={onSaved} />
             <Card>
-                <CardHeader title="Traffic split" description="Changes apply to new visitors. Everyone already in the test keeps their version." />
+                <CardHeader title="Traffic split" description={autoShift ? 'Auto-shift sets these weights. You can still pause or resume a variation.' : 'Changes apply to new visitors. Everyone already in the test keeps their version.'} />
                 <CardBody className="space-y-3">
                     {rows.map((r, i) => (
                         <div key={r.id} className="grid items-center gap-3 rounded-xl border border-zinc-200 p-3 sm:grid-cols-[1fr_6rem_auto]">
                             <span className="flex items-center gap-2 text-sm font-medium text-zinc-900">
                                 {r.name}{r.is_control && <Badge>Control</Badge>}{r.paused && <Badge tone="warning">Paused</Badge>}
                             </span>
-                            <Input aria-label={`Weight for ${r.name}`} type="number" min={0} max={100} value={r.weight} disabled={r.paused} onChange={(e) => setWeight(i, e.target.value)} />
+                            <Input aria-label={`Weight for ${r.name}`} type="number" min={0} max={100} value={r.weight} disabled={r.paused || autoShift} onChange={(e) => setWeight(i, e.target.value)} />
                             {r.is_control ? <span className="w-24 text-xs text-zinc-500">Always on</span> : (
                                 <Button variant="ghost" size="sm" className="w-24" onClick={() => togglePause(i)}>{r.paused ? 'Resume' : 'Pause'}</Button>
                             )}

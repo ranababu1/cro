@@ -15,6 +15,15 @@ export const FREE_PROJECTS = 1;
 /** Free tier: registered domains per account (localhost for development does not count). */
 export const FREE_DOMAINS = 1;
 
+/** Plan rank: 0 Free, 1 Starter, 2 Growth, 3 Enterprise. Unknown paid plan names rank as Starter. */
+export function planTier(plan: string | null | undefined): number {
+    const p = (plan || 'free').toLowerCase();
+    if (p === 'free') return 0;
+    if (p === 'growth') return 2;
+    if (p === 'enterprise') return 3;
+    return 1;
+}
+
 export function isPaidPlan(plan: string | null | undefined): boolean {
     const p = (plan || 'free').toLowerCase();
     return p !== 'free';

@@ -31,6 +31,7 @@ export const experiments: DocPage = {
         { type: 'p', text: 'On the **Settings** tab you can change the name, the description and the traffic allocation. The **Edit test** tab lets you make safe changes, even while the test runs:' },
         { type: 'list', items: [
             '**Traffic split.** Change the weights. Active weights always total 100.',
+            '**Auto-shift traffic to the winner.** On Growth and above, let the split follow the version most likely to win. See [Variations](/docs/variations#auto-shift).',
             '**Pause a variation.** It gets no new visitors. The control cannot be paused, and at least one variation must stay on.',
             '**Who can enter.** Change the audience rules.',
             '**Add a goal.** It counts from the moment you add it. You can make it the primary goal.',
