@@ -16,6 +16,7 @@ export const allowancesSchema = z.object({
     recordings: z.boolean().optional(),
     wordpress_plugin: z.boolean().optional(),
     funnels: z.boolean().optional(),
+    revenue_goals: z.boolean().optional(),
     max_variations: z.number().int().min(1).max(100).nullable().optional(),
     active_experiments: cap,
     projects: cap,

@@ -9,7 +9,7 @@ export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
 }
 
-/** Custom event from ABTest.track('name'): counts toward every running test with a matching event goal. */
+/** Custom event from ABTest.track('name') or ABTest.track('purchase', { revenue: 49.99 }): counts toward every running test with a matching event goal. */
 export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
             environmentId: auth.ctx.environmentId,
             userId: parsed.data.user_id,
             eventName: parsed.data.event_name,
+            revenue: parsed.data.revenue,
         });
         return sdkJson({ success: true, recorded });
     } catch (error) {

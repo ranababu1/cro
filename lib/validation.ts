@@ -1,3 +1,4 @@
+import { MAX_REVENUE_PER_EVENT } from './revenue';
 import { z } from 'zod';
 import { EVENT_NAME_RE, isValidRegex, checkGoalSelector, MAX_GOALS } from './goals';
 import { targetingSchema } from './targeting';
@@ -32,6 +33,8 @@ export const goalSchema = z
 export const customEventSchema = z.object({
     user_id: visitorId,
     event_name: z.string().regex(EVENT_NAME_RE),
+    // Order value for revenue goals: ABTest.track('purchase', { revenue: 49.99 }). Rounded to 2 decimals.
+    revenue: z.number().finite().min(0).max(MAX_REVENUE_PER_EVENT).transform((v) => Math.round(v * 100) / 100).optional(),
 });
 
 export const createDomainSchema = z.object({

@@ -8,6 +8,7 @@ import { EditTest } from './EditTest';
 import { ShareResults } from './ShareResults';
 import { HeatmapsPanel } from './HeatmapsPanel';
 import { FunnelsPanel } from './FunnelsPanel';
+import { RevenuePanel } from './RevenuePanel';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -154,7 +155,7 @@ export default function ExperimentDetail() {
                 ]}
             />
 
-            {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} />}
+            {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
@@ -164,7 +165,7 @@ export default function ExperimentDetail() {
     );
 }
 
-function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experiment; results: ExperimentResults | null; updatedAt: Date | null }) {
+function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { experiment: Experiment; results: ExperimentResults | null; updatedAt: Date | null; hasEventGoals: boolean }) {
     const goalList = results?.goals || [];
     const primaryGoalId = goalList.find((g) => g.is_primary)?.goal_id || goalList[0]?.goal_id || '';
     const [goalId, setGoalId] = useState<string | null>(null);
@@ -250,6 +251,7 @@ function ResultsPanel({ experiment, results, updatedAt }: { experiment: Experime
             <p className="text-xs text-zinc-500">
                 Method: two-proportion z-test of the best variant against the control, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
             </p>
+            <RevenuePanel experimentId={experiment.id} hasEventGoals={hasEventGoals} />
             <FunnelsPanel experimentId={experiment.id} goals={goalList.map((g) => ({ goal_id: g.goal_id, goal_name: g.goal_name }))} />
         </div>
     );

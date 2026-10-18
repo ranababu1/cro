@@ -305,7 +305,7 @@ export default function NewExperimentWizard() {
                             </div>
                         ))}
                         {goals.some((g) => g.type === 'event') && (
-                            <p className="text-sm text-zinc-500">For custom events, call <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;{goals.find((g) => g.type === 'event')?.selector || 'signup'}&apos;)</code> on your page when the action happens.</p>
+                            <p className="text-sm text-zinc-500">For custom events, call <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;{goals.find((g) => g.type === 'event')?.selector || 'signup'}&apos;)</code> on your page when the action happens. On paid plans, add the order value to track revenue: <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;purchase&apos;, {'{'} revenue: 49.99 {'}'})</code>.</p>
                         )}
                         {goals.some((g) => g.type === 'page') && (
                             <p className="text-sm text-zinc-500">Page visit goals need the install snippet on that page too.</p>

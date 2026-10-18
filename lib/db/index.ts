@@ -8,6 +8,9 @@ import { rolledEventStats, rolledEventStatsByGoal, rolledLiveCounts } from '../r
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 
+/** A new event. Revenue is optional and only set for revenue goals. */
+type NewEvent = Omit<Event, 'id' | 'created_at' | 'revenue'> & { revenue?: number | null };
+
 export { getDb } from './client';
 
 const nowIso = () => new Date().toISOString();
@@ -376,7 +379,7 @@ export const db = {
 
     // Events
     /** Inserts many events in one statement. */
-    async createEvents(list: Array<Omit<Event, 'id' | 'created_at'>>): Promise<void> {
+    async createEvents(list: Array<NewEvent>): Promise<void> {
         if (!list.length) return;
         const d = await getDb();
         await d.insert(s.events).values(list.map((e) => ({
@@ -386,10 +389,11 @@ export const db = {
             event_name: e.event_name ?? null,
             goal_id: e.goal_id ?? null,
             metadata: e.metadata ?? null,
+            revenue: e.revenue ?? null,
         })));
     },
 
-    async createEvent(e: Omit<Event, 'id' | 'created_at'>): Promise<void> {
+    async createEvent(e: NewEvent): Promise<void> {
         const d = await getDb();
         await d.insert(s.events).values({
             id: generateId('evt'),
@@ -398,6 +402,7 @@ export const db = {
             event_name: e.event_name ?? null,
             goal_id: e.goal_id ?? null,
             metadata: e.metadata ?? null,
+            revenue: e.revenue ?? null,
         });
     },
 
@@ -870,6 +875,34 @@ export const db = {
             ))
             .groupBy(s.events.variation_id, s.events.user_id, s.events.goal_id);
         return rows.map((r) => ({ variation_id: r.variation_id, user_id: r.user_id, goal_id: r.goal_id ?? '', t: r.t }));
+    },
+
+    /**
+     * Revenue per variation and goal for revenue goals: buyers, orders, total and the sum of squared
+     * per-visitor totals (for the variance). Reads raw conversion events that carry a revenue amount.
+     */
+    async getRevenueStats(experimentId: string, environmentId: string | undefined, goalIds: string[]) {
+        if (!goalIds.length) return [];
+        const d = await getDb();
+        const env = environmentId ? sql` and environment_id = ${environmentId}` : sql``;
+        const rows = await d.all<{ variation_id: string; goal_id: string; buyers: number; orders: number; revenue: number; sumsq: number }>(sql`
+            select variation_id, goal_id, count(*) as buyers, sum(o) as orders, sum(r) as revenue, sum(r * r) as sumsq from (
+                select variation_id, goal_id, user_id, count(*) as o, sum(revenue) as r from events
+                where experiment_id = ${experimentId} and event_type = 'conversion' and revenue is not null
+                and goal_id in (${sql.join(goalIds.map((g) => sql`${g}`), sql`, `)})${env}
+                group by variation_id, goal_id, user_id
+            ) group by variation_id, goal_id`);
+        return rows.map((r) => ({ variation_id: r.variation_id, goal_id: r.goal_id, buyers: Number(r.buyers) || 0, orders: Number(r.orders) || 0, revenue: Number(r.revenue) || 0, sumsq: Number(r.sumsq) || 0 }));
+    },
+
+    /** Revenue events a visitor already sent for one goal, to cap repeats. */
+    async countRevenueEvents(experimentId: string, userId: string, goalId: string): Promise<number> {
+        const d = await getDb();
+        const [r] = await d.select({ n: sql<number>`count(*)` }).from(s.events).where(and(
+            eq(s.events.experiment_id, experimentId), eq(s.events.user_id, userId), eq(s.events.goal_id, goalId),
+            eq(s.events.event_type, 'conversion'), sql`${s.events.revenue} is not null`,
+        ));
+        return Number(r?.n ?? 0);
     },
 
     async recordPluginDownload(row: { plugin: string; version: string; orgId: string; userId: string; ipHash: string | null }): Promise<string> {

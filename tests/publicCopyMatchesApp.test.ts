@@ -43,7 +43,9 @@ describe('public copy matches what the app enforces', () => {
         for (const t of tags) expect(phases.find((p) => p.n === t.p)?.status, t.name).not.toBe('Done');
         // Live features are not listed as coming soon.
         for (const live of ['targeting', 'Sample ratio', 'custom goals', 'Flicker-free']) expect(tags.some((t) => t.name.toLowerCase().includes(live.toLowerCase()))).toBe(false);
-        expect(tags.find((t) => t.name === 'Revenue goals')).toBeTruthy();
+        expect(tags.find((t) => t.name === 'Session recordings')).toBeTruthy();
+        // Revenue goals shipped: no longer coming soon, still named on the public roadmap phase.
+        expect(tags.find((t) => t.name === 'Revenue goals')).toBeFalsy();
         expect(roadmap).toContain("'Revenue goals'");
     });
 });
