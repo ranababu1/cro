@@ -5,6 +5,9 @@ export const TRAFFIC_DIMS = ['views', 'entries', 'new_views', 'page', 'source', 
 export type TrafficDim = (typeof TRAFFIC_DIMS)[number];
 export const TRAFFIC_RANGES = [7, 30, 90] as const;
 export const TRAFFIC_TOP = 20;
+/** Distinct page paths kept per environment per UTC day. Views on further new paths that day count under OTHER_PAGES. */
+export const TRAFFIC_MAX_PAGES_PER_DAY = 500;
+export const OTHER_PAGES = '(other)';
 const MAX_KEY = 200;
 
 export interface TrafficHit { url: string; referrer?: string | null; userAgent?: string | null; country?: string | null; visitor?: 'new' | 'returning' | null }

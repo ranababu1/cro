@@ -1,4 +1,5 @@
 import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import { getDb } from './client';
 import * as s from './schema';
 import type { EnvironmentKey } from './schema';
@@ -7,6 +8,7 @@ import { cached, clearConfigCache } from '../configCache';
 import { rolledEventStats, rolledEventStatsByGoal, rolledLiveCounts } from '../rollups';
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
+import { OTHER_PAGES, TRAFFIC_MAX_PAGES_PER_DAY } from '../traffic';
 
 /** A new event. Revenue is optional and only set for revenue goals. */
 type NewEvent = Omit<Event, 'id' | 'created_at' | 'revenue'> & { revenue?: number | null };
@@ -979,7 +981,7 @@ export const db = {
     ): Promise<void> {
         if (!rows.length && !traffic.length) return;
         const d = await getDb();
-        const stmts = [
+        const stmts: BatchItem<'sqlite'>[] = [
             ...rows.map((r) => d
                 .insert(s.telemetryDaily)
                 .values(r)
@@ -987,15 +989,15 @@ export const db = {
                     target: [s.telemetryDaily.day, s.telemetryDaily.scope_type, s.telemetryDaily.scope_id, s.telemetryDaily.metric],
                     set: { value: sql`${s.telemetryDaily.value} + ${r.value}` },
                 })),
-            ...traffic.map((r) => d
+            ...traffic.flatMap((r): BatchItem<'sqlite'>[] => r.dim === 'page' && r.key !== OTHER_PAGES ? cappedPageUpsert(d, r) : [d
                 .insert(s.trafficDaily)
                 .values(r)
                 .onConflictDoUpdate({
                     target: [s.trafficDaily.day, s.trafficDaily.environment_id, s.trafficDaily.dim, s.trafficDaily.key],
                     set: { views: sql`${s.trafficDaily.views} + ${r.views}` },
-                })),
+                })]),
         ];
-        await d.batch(stmts as unknown as [typeof stmts[number], ...typeof stmts]);
+        await d.batch(stmts as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
     },
 
     /** Traffic overview: daily totals and per-key sums for one environment between two UTC days (inclusive). */
@@ -1168,3 +1170,23 @@ export const db = {
     },
 
 };
+
+/**
+ * Page path counters are capped per environment per day: a path already counted that day, or one that still fits
+ * under TRAFFIC_MAX_PAGES_PER_DAY, is upserted as usual; otherwise its views go to OTHER_PAGES. Both statements run
+ * inside the same telemetry batch (one round trip), and the second only writes when the first skipped the row.
+ */
+function cappedPageUpsert(d: Awaited<ReturnType<typeof getDb>>, r: { day: string; environment_id: string; project_id: string; key: string; views: number }) {
+    const same = sql`day = ${r.day} AND environment_id = ${r.environment_id} AND dim = 'page'`;
+    return [
+        d.run(sql`INSERT INTO traffic_daily (day, environment_id, project_id, dim, key, views)
+            SELECT ${r.day}, ${r.environment_id}, ${r.project_id}, 'page', ${r.key}, ${r.views}
+            WHERE EXISTS (SELECT 1 FROM traffic_daily WHERE ${same} AND key = ${r.key})
+               OR (SELECT count(*) FROM traffic_daily WHERE ${same} AND key <> ${OTHER_PAGES}) < ${TRAFFIC_MAX_PAGES_PER_DAY}
+            ON CONFLICT (day, environment_id, dim, key) DO UPDATE SET views = views + excluded.views`),
+        d.run(sql`INSERT INTO traffic_daily (day, environment_id, project_id, dim, key, views)
+            SELECT ${r.day}, ${r.environment_id}, ${r.project_id}, 'page', ${OTHER_PAGES}, ${r.views}
+            WHERE NOT EXISTS (SELECT 1 FROM traffic_daily WHERE ${same} AND key = ${r.key})
+            ON CONFLICT (day, environment_id, dim, key) DO UPDATE SET views = views + excluded.views`),
+    ];
+}

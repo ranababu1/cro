@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PageHeader, Card, CardHeader, CardBody, Stat, Table, THead, TBody, TR, TH, TD } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
-import type { TrafficSummary } from '@/lib/traffic';
+import { OTHER_PAGES, TRAFFIC_MAX_PAGES_PER_DAY, type TrafficSummary } from '@/lib/traffic';
 
 type Data = TrafficSummary & { environment: string; environments: { key: string; name: string }[]; range: number };
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
@@ -58,7 +58,7 @@ export default function TrafficPage() {
                         <CardBody><DayChart days={d.days} /></CardBody>
                     </Card>
                     <div className="grid gap-6 lg:grid-cols-2">
-                        <TopTable title="Top pages" head="Page" rows={d.pages} total={d.totals.views} />
+                        <TopTable title="Top pages" head="Page" rows={d.pages.map((r) => (r.key === OTHER_PAGES ? { ...r, key: 'Other pages', hint: `Pages past the first ${TRAFFIC_MAX_PAGES_PER_DAY} different pages seen in a day` } : r))} total={d.totals.views} />
                         <TopTable title="Sources" head="Source" description="Where entrances came from: the utm_source value, the referring site, or direct." rows={d.sources} total={d.totals.entries} />
                         <TopTable title="Devices" head="Device" rows={d.devices.map((r) => ({ ...r, key: DEVICE[r.key] ?? r.key }))} total={d.totals.views} />
                         <TopTable title="Countries" head="Country" rows={d.countries} total={d.totals.views} />
@@ -86,7 +86,7 @@ function DayChart({ days }: { days: TrafficSummary['days'] }) {
     );
 }
 
-function TopTable({ title, head, description, rows, total }: { title: string; head: string; description?: string; rows: { key: string; views: number }[]; total: number }) {
+function TopTable({ title, head, description, rows, total }: { title: string; head: string; description?: string; rows: { key: string; views: number; hint?: string }[]; total: number }) {
     return (
         <Card>
             <CardHeader title={title} description={description} />
@@ -96,7 +96,7 @@ function TopTable({ title, head, description, rows, total }: { title: string; he
                     <TBody>
                         {rows.map((r) => (
                             <TR key={r.key}>
-                                <TD><span className="block max-w-[18rem] truncate font-medium text-zinc-900" title={r.key}>{r.key}</span></TD>
+                                <TD><span className="block max-w-[18rem] truncate font-medium text-zinc-900" title={r.hint ?? r.key}>{r.key}</span>{r.hint && <span className="block text-xs text-zinc-500">{r.hint}</span>}</TD>
                                 <TD numeric>{r.views.toLocaleString()}</TD>
                                 <TD numeric className="text-zinc-500">{total ? `${((r.views / total) * 100).toFixed(1)}%` : '-'}</TD>
                             </TR>
