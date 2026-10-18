@@ -27,6 +27,61 @@ function freeabtest_register_settings() {
 add_action( 'admin_init', 'freeabtest_register_settings' );
 
 /**
+ * Re-checks the key whenever the settings are saved.
+ */
+function freeabtest_after_save() {
+	freeabtest_refresh_status( true );
+}
+add_action( 'add_option_' . FREEABTEST_OPTION, 'freeabtest_after_save' );
+add_action( 'update_option_' . FREEABTEST_OPTION, 'freeabtest_after_save' );
+
+/**
+ * Keeps the daily check scheduled (also on sites of a network where the plugin was network activated).
+ */
+function freeabtest_ensure_cron() {
+	if ( ! wp_next_scheduled( FREEABTEST_CRON_HOOK ) ) {
+		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', FREEABTEST_CRON_HOOK );
+	}
+}
+add_action( 'admin_init', 'freeabtest_ensure_cron' );
+
+/**
+ * Text for the connection status of the active key.
+ *
+ * @param array $settings Settings.
+ * @return array{ok: bool, text: string}
+ */
+function freeabtest_status_text( $settings ) {
+	if ( '' === freeabtest_active_key( $settings ) ) {
+		return array(
+			'ok'   => false,
+			'text' => __( 'Not connected. Paste your public SDK key and save to connect this site.', 'freeabtest' ),
+		);
+	}
+	$status = freeabtest_get_status( $settings );
+	$code   = isset( $status['status'] ) ? $status['status'] : '';
+	$known  = array(
+		'ok'                 => __( 'Connected. The snippet is active on this site.', 'freeabtest' ),
+		'invalid_key'        => __( 'This key is not valid. Copy the public SDK key from your freeabtest.com dashboard.', 'freeabtest' ),
+		'suspended'          => __( 'This freeabtest.com account is suspended.', 'freeabtest' ),
+		'not_paid'           => __( 'The WordPress plugin is available to paid users only. Upgrade your freeabtest.com plan to use it.', 'freeabtest' ),
+		'no_domains'         => __( 'Add this site\'s domain in your freeabtest.com dashboard under Domains, then save again.', 'freeabtest' ),
+		'domain_not_allowed' => __( 'This site\'s domain is not registered for this key. Add it in your freeabtest.com dashboard under Domains, then save again.', 'freeabtest' ),
+		'unreachable'        => __( 'Could not reach freeabtest.com to check the key. The plugin will try again shortly.', 'freeabtest' ),
+	);
+	if ( isset( $known[ $code ] ) ) {
+		return array(
+			'ok'   => 'ok' === $code,
+			'text' => $known[ $code ],
+		);
+	}
+	return array(
+		'ok'   => false,
+		'text' => __( 'The key has not been checked yet. Save the settings to connect.', 'freeabtest' ),
+	);
+}
+
+/**
  * Sanitizes and validates submitted settings. Invalid keys are rejected with a notice and the old key is kept.
  *
  * @param mixed $input Raw input.
@@ -111,6 +166,7 @@ function freeabtest_render_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You do not have permission to change these settings.', 'freeabtest' ) );
 	}
+	freeabtest_refresh_status();
 	$settings  = freeabtest_get_settings();
 	$prefill   = array(
 		'prod' => freeabtest_connect_key( 'prod' ),
@@ -122,7 +178,8 @@ function freeabtest_render_settings_page() {
 		'dev'  => '' !== $prefill['dev'] ? $prefill['dev'] : $settings['key_dev'],
 	);
 	$enabled   = $connected ? true : (bool) $settings['enabled'];
-	$active    = '' !== freeabtest_active_key( $settings ) && $settings['enabled'];
+	$state     = freeabtest_status_text( $settings );
+	$active    = $state['ok'] && $settings['enabled'];
 	$name      = FREEABTEST_OPTION;
 	?>
 	<div class="wrap">
@@ -131,13 +188,18 @@ function freeabtest_render_settings_page() {
 		<?php if ( $connected ) : ?>
 			<div class="notice notice-info"><p><?php esc_html_e( 'Your key was filled in from your freeabtest.com dashboard. Choose Save settings to finish connecting.', 'freeabtest' ); ?></p></div>
 		<?php endif; ?>
+		<div class="notice <?php echo esc_attr( $state['ok'] ? 'notice-success' : 'notice-warning' ); ?> inline" id="freeabtest-connection">
+			<p><strong><?php esc_html_e( 'Connection:', 'freeabtest' ); ?></strong> <?php echo esc_html( $state['text'] ); ?></p>
+		</div>
 		<p>
 			<strong><?php esc_html_e( 'Status:', 'freeabtest' ); ?></strong>
 			<?php
 			if ( $active ) {
 				esc_html_e( 'The snippet is on. It loads early in the head of every page.', 'freeabtest' );
+			} elseif ( $state['ok'] ) {
+				esc_html_e( 'The snippet is off. Turn it on to start testing.', 'freeabtest' );
 			} else {
-				esc_html_e( 'The snippet is off. Add a key and turn it on to start testing.', 'freeabtest' );
+				esc_html_e( 'The snippet is off until this site is connected to a paid freeabtest.com account.', 'freeabtest' );
 			}
 			?>
 		</p>

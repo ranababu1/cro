@@ -14,6 +14,7 @@ export const allowancesSchema = z.object({
     monthly_pageviews: cap,
     heatmaps: z.boolean().optional(),
     recordings: z.boolean().optional(),
+    wordpress_plugin: z.boolean().optional(),
     max_variations: z.number().int().min(1).max(100).nullable().optional(),
     active_experiments: cap,
     projects: cap,

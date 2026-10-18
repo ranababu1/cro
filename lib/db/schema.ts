@@ -321,3 +321,14 @@ export const heatmapScrollDaily = sqliteTable('heatmap_scroll_daily', {
     depth: integer('depth').notNull(), // max depth reached, 0-100 in steps of 10
     sessions: integer('sessions').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.depth] })]);
+
+// Paid-only plugin downloads. One row per zip served, so admins can see who downloaded and leaks can be traced.
+export const pluginDownloads = sqliteTable('plugin_downloads', {
+    id: text('id').primaryKey(),
+    plugin: text('plugin').notNull(), // 'wordpress'
+    version: text('version').notNull(),
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    user_id: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    ip_hash: text('ip_hash'),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_plugin_downloads_user').on(t.user_id, t.created_at), index('idx_plugin_downloads_org').on(t.org_id, t.created_at), index('idx_plugin_downloads_created').on(t.created_at)]);

@@ -4,7 +4,7 @@ import { db } from './db';
  * Abuse attempts are written to the org's audit log as `abuse:<kind>` so platform admins see them
  * in /admin/abuse. Noisy kinds (SDK origin mismatches) are throttled per org and detail per hour.
  */
-export type AbuseKind = 'domain_taken' | 'domain_exhausted' | 'domain_limit' | 'origin_mismatch' | 'origin_missing';
+export type AbuseKind = 'domain_taken' | 'domain_exhausted' | 'domain_limit' | 'origin_mismatch' | 'origin_missing' | 'plugin_unpaid' | 'plugin_verify_refused';
 
 const THROTTLE_MS = 60 * 60_000;
 const recent = new Map<string, number>();

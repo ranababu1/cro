@@ -39,7 +39,7 @@ afterAll(() => { delete process.env.PLATFORM_ADMIN_EMAILS; cleanup(); });
 
 describe('entitlement rule', () => {
     it('gives heavy features to paid plans only', () => {
-        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false });
+        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false, wordpress_plugin: false });
         expect(computeEntitlements({ plan: null }, []).features.heatmaps).toBe(false);
         for (const plan of ['starter', 'growth', 'enterprise', 'team']) {
             const e = computeEntitlements({ plan }, []);

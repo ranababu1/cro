@@ -4,13 +4,13 @@ import { DashboardMock } from './components/landing/DashboardMock';
 import { TestIllustration } from './components/landing/TestIllustration';
 import { Arrow, SiteFooter, SiteHeader } from './components/landing/SiteChrome';
 
-// "Works with your stack": only JavaScript and HTML exist today, the rest are marked as coming soon.
+// "Works with your stack": JavaScript, HTML and WordPress (paid plans) exist today, the rest are marked as coming soon.
 const stack: { name: string; soon?: boolean; icon: React.ReactNode }[] = [
     { name: 'JavaScript', icon: <span className="flex h-5 w-5 items-end justify-end rounded-[3px] bg-zinc-500 pb-px pr-0.5 text-[8px] font-bold leading-none text-white">JS</span> },
     { name: 'HTML', icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><path d="M4 2h16l-1.5 17L12 22l-6.5-3zm3.6 5 .3 3h7.9l-.3 3.3-3.5 1-3.5-1-.2-2H5.4l.4 4.3L12 17l6.2-1.7.9-9.3z" /></svg> },
     { name: 'React', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden><ellipse cx="12" cy="12" rx="10" ry="4" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" /><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" /><circle cx="12" cy="12" r="1.6" fill="currentColor" /></svg> },
     { name: 'Next.js', soon: true, icon: <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-600 text-[10px] font-bold text-white">N</span> },
-    { name: 'WordPress', soon: true, icon: <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-zinc-500 text-[10px] font-bold">W</span> },
+    { name: 'WordPress', icon: <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-zinc-500 text-[10px] font-bold">W</span> },
     { name: 'Node.js', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><path d="M12 2 3 7v10l9 5 9-5V7zm0 2.3L19 8v8l-7 3.8L5 16V8z" /></svg> },
     { name: 'GA4', soon: true, icon: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><rect x="16" y="3" width="5" height="18" rx="2.5" /><rect x="9.5" y="9" width="5" height="12" rx="2.5" /><circle cx="5.5" cy="18.5" r="2.5" /></svg> },
 ];

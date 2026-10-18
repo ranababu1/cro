@@ -45,7 +45,7 @@
         if (beacon && maxDepth > 0) { events.push({ t: 's', d: Math.min(100, Math.round(maxDepth)) }); maxDepth = -1; }
         if (!events.length) return;
         var body = JSON.stringify({ experiment_id: cfg.experiment_id, variation_id: cfg.variation_id, device: device, events: events });
-        var url = cfg.apiUrl + '/api/capture?key=' + encodeURIComponent(cfg.apiKey);
+        var url = cfg.apiUrl + '/api/capture?key=' + encodeURIComponent(cfg.apiKey) + (cfg.via === 'wp' ? '&via=wp' : '');
         if (beacon && navigator.sendBeacon) {
             try { if (navigator.sendBeacon(url, new Blob([body], { type: 'text/plain' }))) return; } catch (e) { /* fall through */ }
         }

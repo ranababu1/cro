@@ -25,15 +25,17 @@ export const installGuides: DocPage = {
   window.ABTest && ABTest.track('signup');
 </script>` },
         { type: 'h2', text: 'WordPress', id: 'wordpress' },
-        { type: 'h3', text: 'Recommended: the FreeABTest plugin' },
+        { type: 'h3', text: 'Paid plans: the FreeABTest plugin' },
+        { type: 'p', text: 'The plugin is available to paid users only. It works on the domains registered in your project and switches itself off if the account is no longer on a paid plan. On the free plan, use one of the options further down.' },
         { type: 'steps', items: [
-            { title: 'Download', text: 'Sign in and choose **Download WordPress plugin** on the Overview page, or visit [the WordPress page](/wordpress). The plugin is free for account holders.' },
+            { title: 'Download', text: 'Sign in and choose **Download WordPress plugin** on the Overview page, or visit [the WordPress page](/wordpress). You need a paid plan to download it.' },
             { title: 'Upload and activate', text: 'In WordPress open **Plugins**, **Add New**, **Upload Plugin**, choose the zip and activate it.' },
             { title: 'Connect', text: 'Open **Settings**, **FreeABTest** and paste your public SDK key (it starts with `cro_pk_prod_`). Or choose **Connect WordPress** on the Overview page to fill it in for you.' },
-            { title: 'Turn it on', text: 'Tick **Add the snippet to my site**, pick Production or Development and choose **Save settings**. Clear any page cache.' },
+            { title: 'Turn it on', text: 'Tick **Add the snippet to my site**, pick Production or Development and choose **Save settings**. The plugin checks the key with freeabtest.com and shows **Connected** when it is ready. Clear any page cache.' },
+            { title: 'If it does not connect', text: 'The settings page says why: the key is not valid, the plan is not a paid plan, or the site\'s domain is not registered. Fix it in your dashboard and save again.' },
         ] },
         { type: 'image', src: '/docs/wordpress-settings.png', alt: 'FreeABTest settings page in WordPress with the snippet turned on', caption: 'Settings, FreeABTest after connecting.' },
-        { type: 'p', text: 'Prefer not to install a plugin? Use one of these options instead.' },
+        { type: 'p', text: 'On the free plan, or prefer not to install a plugin? Use one of these options instead.' },
         { type: 'p', text: 'Pick one of these options. Both add the snippet to every page, which is fine: the snippet does nothing on pages that are not part of a running test.' },
         { type: 'h3', text: 'Option 1: a header code plugin' },
         { type: 'steps', items: [

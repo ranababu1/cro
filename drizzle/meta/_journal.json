@@ -120,6 +120,13 @@
       "when": 1791971700000,
       "tag": "0016_goal_position",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1791971800000,
+      "tag": "0017_plugin_downloads",
+      "breakpoints": true
     }
   ]
 }

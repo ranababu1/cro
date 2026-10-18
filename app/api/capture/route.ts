@@ -35,7 +35,11 @@ export async function POST(request: NextRequest) {
         const variations = await db.getVariations(experiment.id);
         if (!variations.some((v) => v.id === b.variation_id)) return sdkJson({ error: 'Unknown variation' }, 400);
         const accepted = await ingestCapture(auth.ctx.orgId, b);
-        if (Math.random() < 0.02) after(() => pruneHeatmapPoints().catch((err) => console.error('heatmap prune failed', err)));
+        if (Math.random() < 0.02) {
+            const prune = () => pruneHeatmapPoints().catch((err) => console.error('heatmap prune failed', err));
+            // after() throws outside a request scope (tests, scripts); prune inline then instead of failing the ingest.
+            try { after(prune); } catch { void prune(); }
+        }
         return sdkJson({ success: true, accepted }, 202);
     } catch (error) {
         console.error('capture failed', error);

@@ -15,7 +15,7 @@ const available = [
     { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
     { title: 'Live stats', body: 'Visitors, redirects and goal clicks update while the test runs, with a plain answer on who is ahead.' },
     { title: 'Heatmaps', body: 'On paid plans: click, scroll, confetti and overlay maps for every variation, split by device, with rage and dead clicks.' },
-    { title: 'WordPress plugin', body: 'Connect a WordPress site in a minute. Install it once and every future test runs through it.' },
+    { title: 'WordPress plugin', body: 'On paid plans: connect a WordPress site in a minute. Install it once and every future test runs through it.' },
     { title: 'Environments and keys', body: 'Separate development and production data, with the install snippet filled in for you.' },
 ];
 
