@@ -16,8 +16,8 @@ import { parseAllowances, type Allowances } from './allowances';
  */
 export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
 
-/** Features that are only for paid plans. Add new raw-capture or heavy features here. */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture'] as const;
+/** Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here. */
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin'] as const;
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
 /** null means unlimited. */
@@ -114,6 +114,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         const a = parseAllowances(org?.custom_allowances);
         if (a.heatmaps !== undefined) features.heatmaps = a.heatmaps;
         if (a.recordings !== undefined) features.recordings = a.recordings;
+        if (a.wordpress_plugin !== undefined) features.wordpress_plugin = a.wordpress_plugin;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -144,4 +145,5 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     heatmaps: 'Heatmaps are part of the paid plans. Upgrade to Starter or above to turn them on.',
     recordings: 'Session recordings are part of the paid plans. Upgrade to Starter or above to turn them on.',
     raw_capture: 'This feature is part of the paid plans. Upgrade to Starter or above to turn it on.',
+    wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',
 };

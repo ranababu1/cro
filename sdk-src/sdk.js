@@ -28,7 +28,10 @@
         try { apiUrl = new URL(script.src).origin; } catch { apiUrl = ''; }
     }
     // Allow ABTest.init override for demos and tests.
+    // Integrations tag their calls (the WordPress plugin sets data-via="wp") so the server can apply their rules.
+    var via = (script && script.getAttribute('data-via')) === 'wp' ? 'wp' : '';
     var config = { apiUrl: apiUrl, apiKey: apiKey, userId: null };
+    function withVia(path) { return via ? path + (path.indexOf('?') === -1 ? '?' : '&') + 'via=' + via : path; }
     var FLICKER_MS = 800;
     var assignmentCache = {};
     var goalsBound = false;
@@ -79,7 +82,7 @@
     }
 
     function send(path, body, keepalive) {
-        var url = config.apiUrl + path;
+        var url = config.apiUrl + withVia(path);
         var payload = JSON.stringify(body);
         var headers = { 'Content-Type': 'application/json', 'X-API-Key': config.apiKey };
         
@@ -108,7 +111,7 @@
         var sent = false;
         if (useBeacon && navigator.sendBeacon) {
             try {
-                var url = config.apiUrl + '/api/track?key=' + encodeURIComponent(config.apiKey);
+                var url = config.apiUrl + withVia('/api/track?key=' + encodeURIComponent(config.apiKey));
                 sent = navigator.sendBeacon(url, new Blob([JSON.stringify(body)], { type: 'text/plain' }));
             } catch { sent = false; }
         }
@@ -185,7 +188,7 @@
     function loadHeatmaps(data) {
         if (heatLoaded) return;
         heatLoaded = true;
-        window.__ABTestHeat = { apiUrl: config.apiUrl, apiKey: config.apiKey, experiment_id: data.experiment_id, variation_id: data.variation_id };
+        window.__ABTestHeat = { apiUrl: config.apiUrl, apiKey: config.apiKey, via: via, experiment_id: data.experiment_id, variation_id: data.variation_id };
         var sc = document.createElement('script');
         sc.src = config.apiUrl + '/heatmap.js';
         sc.async = true;

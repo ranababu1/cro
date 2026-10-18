@@ -837,6 +837,32 @@ export const db = {
         const seen = new Set<string>();
         return rows.filter((r) => (seen.has(r.user.id) ? false : (seen.add(r.user.id), true)));
     },
+    async recordPluginDownload(row: { plugin: string; version: string; orgId: string; userId: string; ipHash: string | null }): Promise<string> {
+        const d = await getDb();
+        const id = generateId('dl');
+        await d.insert(s.pluginDownloads).values({ id, plugin: row.plugin, version: row.version, org_id: row.orgId, user_id: row.userId, ip_hash: row.ipHash });
+        return id;
+    },
+
+    /** Downloads by a user and by their org since an ISO time, for rate limiting. */
+    async countPluginDownloads(userId: string, orgId: string, sinceIso: string): Promise<{ user: number; org: number }> {
+        const d = await getDb();
+        const [u] = await d.select({ n: sql<number>`count(*)` }).from(s.pluginDownloads).where(and(eq(s.pluginDownloads.user_id, userId), gte(s.pluginDownloads.created_at, sinceIso)));
+        const [o] = await d.select({ n: sql<number>`count(*)` }).from(s.pluginDownloads).where(and(eq(s.pluginDownloads.org_id, orgId), gte(s.pluginDownloads.created_at, sinceIso)));
+        return { user: Number(u?.n ?? 0), org: Number(o?.n ?? 0) };
+    },
+
+    async listPluginDownloads(limit = 200) {
+        const d = await getDb();
+        return d
+            .select({ id: s.pluginDownloads.id, plugin: s.pluginDownloads.plugin, version: s.pluginDownloads.version, org_id: s.pluginDownloads.org_id, org_name: s.organizations.name, user_email: s.users.email, created_at: s.pluginDownloads.created_at })
+            .from(s.pluginDownloads)
+            .leftJoin(s.organizations, eq(s.organizations.id, s.pluginDownloads.org_id))
+            .leftJoin(s.users, eq(s.users.id, s.pluginDownloads.user_id))
+            .orderBy(desc(s.pluginDownloads.created_at))
+            .limit(limit);
+    },
+
     async getAbuseLog(limit = 200) {
         const d = await getDb();
         return d.select().from(s.auditLog).where(like(s.auditLog.action, 'abuse:%')).orderBy(desc(s.auditLog.created_at)).limit(limit);

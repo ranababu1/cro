@@ -136,7 +136,7 @@ describe('migration 0016_goal_position', () => {
         expect(rows).toEqual(['b0', 'a1', 'c2', 'd0']);
         const journal = JSON.parse(readFileSync('drizzle/meta/_journal.json', 'utf8')).entries as { tag: string; when: number }[];
         const mine = journal.find((e) => e.tag === '0016_goal_position')!;
-        expect(journal.filter((e) => e !== mine).every((e) => e.when < mine.when)).toBe(true);
+        expect(journal.slice(0, journal.indexOf(mine)).every((e) => e.when < mine.when)).toBe(true);
     });
 });
 

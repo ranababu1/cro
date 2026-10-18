@@ -20,6 +20,7 @@ const limits: [string, string, string, string, string][] = [
     ['Environments per project', '3 (dev, staging, production)', '3', '3', 'Custom'],
     ['Team seats', '1', '5', '15', 'Unlimited'],
     ['Data retention', '6 months', '12 months', '24 months', 'Custom'],
+    ['WordPress plugin', 'Not included', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
     ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
@@ -28,7 +29,7 @@ const limits: [string, string, string, string, string][] = [
 const availableToday = [
     'A/B and split URL tests', 'Flicker-free snippet', 'Sticky assignment', 'Targeting by device, UTM, referrer and new or returning visitors',
     'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
-    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'WordPress plugin',
+    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'WordPress plugin on paid plans',
     'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
@@ -55,7 +56,7 @@ const faqs = [
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
     { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
-    { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. A WordPress plugin is planned.' },
+    { q: 'What do I need to install?', a: 'A small JavaScript snippet, about 14 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. Paid plans also get a WordPress plugin that adds it for you.' },
     { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA.' },
 ];
 

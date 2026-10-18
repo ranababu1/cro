@@ -13,6 +13,8 @@ const LABELS: Record<string, string> = {
     'abuse:domain_limit': 'Free domain limit reached',
     'abuse:origin_mismatch': 'SDK call from unregistered domain',
     'abuse:origin_missing': 'SDK call without Origin or Referer',
+    'abuse:plugin_unpaid': 'WordPress plugin traffic from an unpaid org',
+    'abuse:plugin_verify_refused': 'WordPress plugin connect refused',
 };
 
 const when = (iso: string) => new Date(iso.endsWith('Z') || iso.includes('T') ? iso : `${iso.replace(' ', 'T')}Z`).toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST';
