@@ -135,3 +135,23 @@ export async function heatmapReport(experimentId: string, variationId: string, d
         cols: GRID_COLS, rowPx: ROW_PX,
     };
 }
+
+/** Variations included in one export file. */
+export const EXPORT_MAX_VARIATIONS = 20;
+export const EXPORT_SCHEMA = 'freeabtest.heatmaps.v1';
+
+/** Field guide written into every export, so the file explains itself when pasted into another tool. */
+export const EXPORT_FIELDS = {
+    grid: `Click counts per cell. The page is ${GRID_COLS} columns wide (gx 0 to ${GRID_COLS - 1}); each row (gy) is ${ROW_PX} px of page height from the top.`,
+    list: 'Top 50 clicked elements by CSS selector, with rage clicks (3 or more fast clicks in one spot) and dead clicks (on something that is not a link or button).',
+    scroll: 'Share of sessions (percent) that scrolled at least depth percent of the page.',
+    confetti: 'Individual clicks: x is 0 to 1000 across the page width, y is pixels from the top.',
+    totals: 'Clicks, rage clicks, dead clicks and sessions with scroll data in the period.',
+    devices: 'Clicks and sessions per device type.',
+};
+
+/** File name for an export: letters, numbers and dashes only. */
+export function exportFileName(experimentName: string, device: string, now = new Date()): string {
+    const slug = experimentName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'test';
+    return `heatmaps-${slug}-${device}-${now.toISOString().slice(0, 10)}.json`;
+}
