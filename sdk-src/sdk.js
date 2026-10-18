@@ -185,14 +185,19 @@
     // Heatmap capture is a separate module, loaded only when the server says this session is sampled
     // on a paid plan. It records clicks and scroll depth, never keystrokes or field values.
     var heatLoaded = false;
+    /** Lazy modules (heatmap capture, visual changes and the visual editor) load only on pages that need them. */
+    function loadModule(file, name, cfg) {
+        window[name] = cfg;
+        var sc = document.createElement('script');
+        sc.src = config.apiUrl + '/' + file;
+        sc.async = true;
+        (document.head || document.documentElement).appendChild(sc);
+    }
+
     function loadHeatmaps(data) {
         if (heatLoaded) return;
         heatLoaded = true;
-        window.__ABTestHeat = { apiUrl: config.apiUrl, apiKey: config.apiKey, via: via, experiment_id: data.experiment_id, variation_id: data.variation_id };
-        var sc = document.createElement('script');
-        sc.src = config.apiUrl + '/heatmap.js';
-        sc.async = true;
-        (document.head || document.documentElement).appendChild(sc);
+        loadModule('heatmap.js', '__ABTestHeat', { apiUrl: config.apiUrl, apiKey: config.apiKey, via: via, experiment_id: data.experiment_id, variation_id: data.variation_id });
     }
 
     /**
@@ -241,7 +246,9 @@
                     redirectTo(data.variation_url);
                     return data;
                 }
-                reveal();
+                // Visual variations: the page stays hidden until visual.js applied the changes (or the flicker cap).
+                if (data.action === 'stay' && data.variation_id && data.changes && data.changes.length) loadModule('visual.js', '__ABTestVisual', { changes: data.changes, done: reveal });
+                else reveal();
                 if (data.matched && data.variation_id && data.action !== 'guard') {
                     assignmentCache[data.experiment_id] = data;
                     track(data.experiment_id, data.variation_id, 'page_view');
@@ -290,15 +297,16 @@
         },
     };
 
-    // Auto-start when a data-key is present on the script tag.
-    if (config.apiKey && config.apiUrl) {
-        if (document.readyState === 'loading') {
-            // Hide ASAP, bootstrap ASAP
-            hide();
-            bootstrap();
-        } else {
-            hide();
-            bootstrap();
-        }
+    // Visual editor: opened from the dashboard with ?fabt_editor=<token>. No assignment or tracking while editing.
+    var editor = /[?&]fabt_editor=([^&#]+)/.exec(window.location.search);
+    var editorToken = editor ? decodeURIComponent(editor[1]) : '';
+    try { editorToken = editorToken || sessionStorage.getItem('fabt_editor') || ''; } catch (e) { /* storage blocked */ }
+
+    if (editorToken && config.apiUrl) {
+        loadModule('visual.js', '__ABTestVisual', { editor: editorToken, apiUrl: config.apiUrl });
+    } else if (config.apiKey && config.apiUrl) {
+        // Auto-start when a data-key is present on the script tag: hide ASAP, bootstrap ASAP.
+        hide();
+        bootstrap();
     }
 })(window, document);

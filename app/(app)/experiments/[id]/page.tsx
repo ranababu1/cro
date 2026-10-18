@@ -270,7 +270,7 @@ function SetupPanel({ variations, goals, targeting }: { targeting?: string | nul
             <Card>
                 <CardHeader title="Variations" description="Weights split the visitors who enter the experiment." />
                 <Table>
-                    <THead><tr><TH>Name</TH><TH>Redirect URL</TH><TH align="right">Weight</TH></tr></THead>
+                    <THead><tr><TH>Name</TH><TH>Page</TH><TH align="right">Weight</TH></tr></THead>
                     <TBody>
                         {variations.map((v) => (
                             <TR key={v.id}>
@@ -278,7 +278,7 @@ function SetupPanel({ variations, goals, targeting }: { targeting?: string | nul
                                     <span className="flex items-center gap-2 font-medium text-zinc-900">{v.name}{v.is_control && <Badge>Control</Badge>}{v.paused && <Badge tone="warning">Paused</Badge>}</span>
                                     {v.description && <p className="text-xs text-zinc-500">{v.description}</p>}
                                 </TD>
-                                <TD className="max-w-xs truncate">{v.url ? <a href={v.url} target="_blank" rel="noreferrer" className="text-brand-700 hover:underline">{v.url}</a> : <span className="text-zinc-400">None</span>}</TD>
+                                <TD className="max-w-xs truncate">{v.url ? <a href={v.url} target="_blank" rel="noreferrer" className="text-brand-700 hover:underline">{v.url}</a> : !v.is_control ? <span className="text-zinc-600">Same page, visual changes</span> : <span className="text-zinc-400">None</span>}</TD>
                                 <TD numeric>{v.weight}%</TD>
                             </TR>
                         ))}

@@ -53,11 +53,13 @@ export const createExperimentSchema = z.object({
             z.object({
                 name: z.string().trim().min(1).max(200),
                 description: z.preprocess(blankToUndefined, z.string().max(2000).optional()),
-                url: z.string().url().max(2000),
+                // Leave out on a variation to change the control page with the visual editor instead of redirecting.
+                url: z.preprocess(blankToUndefined, z.string().url().max(2000).optional()),
                 weight: z.number().min(0).max(100),
                 is_control: z.boolean(),
             }),
         )
+        .refine((vs) => vs.every((v) => !v.is_control || !!v.url), 'The control needs a URL')
         .min(2, 'Experiment must have a control and at least one variation')
         .max(60), // soft cap; plan limit (control plus 50 on paid) enforced in the route via lib/entitlements.ts
     goals: z

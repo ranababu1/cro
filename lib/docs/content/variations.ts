@@ -18,6 +18,17 @@ export const variations: DocPage = {
         { type: 'p', text: 'Traffic allocation (0 to 100%) decides whether a visitor enters the experiment at all. Weights then split the visitors who did enter. With 50% allocation and a 50/50 split, each variation gets about 25% of all visitors, and the other half see your default page without being counted.' },
         { type: 'h2', text: 'How assignment works' },
         { type: 'p', text: 'Assignment is deterministic. The visitor ID and experiment ID together always map to the same variation, in proportion to the weights. The result is stored, so later requests return the same variation even if the experiment changes. A second, separate hash decides traffic allocation, so changing allocation never reshuffles who gets which variation.' },
+        { type: 'h2', text: 'Visual editor', id: 'visual-editor' },
+        { type: 'p', text: 'On Growth and above, a variation can run on the control page itself instead of on its own URL. When you create the test, tick **Change the control page with the visual editor** for that variation. Then open **Edit test** and choose **Open visual editor**.' },
+        { type: 'p', text: 'Your page opens in a new tab with the editor panel. Click any element to change it, choose **Apply**, and **Save** when you are done. The link from the dashboard works for 2 hours and only for that variation, on your registered domains.' },
+        { type: 'list', items: [
+            '**Text.** Replace the words of a heading, paragraph, button or link.',
+            '**Colors and size.** Text color, background and font size.',
+            '**Links and images.** A new link address, image address or image description.',
+            '**Hide.** Remove an element, such as a banner, for visitors in this variation.',
+        ] },
+        { type: 'p', text: 'Visitors in the variation get the changes before the page shows, with the same flicker protection as redirects. A variation holds up to 50 changes. You can also add, check or remove changes by hand on **Edit test**, each with its CSS selector. Changes are plain text and styles, so the editor cannot add scripts or HTML to your site.' },
+        { type: 'callout', tone: 'info', title: 'Elements that load later', text: 'Changes also apply to elements that appear while the page loads. Content that appears long after load, for example after a click, may not change. Pick elements that are on the page from the start.' },
         { type: 'h2', text: 'Auto-shift traffic to the winner', id: 'auto-shift' },
         { type: 'p', text: 'On the Growth plan and above, turn on **Auto-shift traffic to the winner** in the **Edit test** tab. About once an hour while the test gets traffic, the split is recalculated so more new visitors see the version most likely to win on the primary goal. This method is often called a multi-armed bandit, using Thompson sampling.' },
         { type: 'list', items: [

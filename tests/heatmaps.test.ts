@@ -159,7 +159,7 @@ describe('capture module', () => {
     it('is loaded by the SDK only when the server says the session is sampled', () => {
         const sdkSrc = fs.readFileSync('sdk-src/sdk.js', 'utf8');
         expect(sdkSrc).toContain('if (data.capture && data.capture.heatmaps) loadHeatmaps(data);');
-        expect(sdkSrc).toContain("'/heatmap.js'");
+        expect(sdkSrc).toContain("loadModule('heatmap.js', '__ABTestHeat'");
     });
 });
 

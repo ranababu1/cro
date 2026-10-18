@@ -133,6 +133,8 @@ export const variations = sqliteTable('variations', {
     is_control: integer('is_control', { mode: 'boolean' }).notNull().default(false),
     // Paused variations get no new visitors. Visitors already assigned keep their version.
     paused: integer('paused', { mode: 'boolean' }).notNull().default(false),
+    // Visual editor: JSON list of page changes the SDK applies on the control page (variations without their own URL).
+    changes: text('changes'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [
     index('idx_variations_experiment').on(t.experiment_id),

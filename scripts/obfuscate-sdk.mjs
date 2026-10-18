@@ -71,7 +71,7 @@ function obfuscate(deadCodeThreshold) {
     }).getObfuscatedCode();
 }
 
-let threshold = 0.4;
+let threshold = 0.3;
 let code = obfuscate(threshold);
 let lines = code.split('\n').length;
 let bytes = Buffer.byteLength(code, 'utf8');

@@ -58,6 +58,8 @@ Google Analytics 4 events
 
 Traffic page paths capped at 500 per day per environment, extra paths roll into Other pages (paid)
 
+Visual editor (Growth+)
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
@@ -77,7 +79,7 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 2. Done 19 Oct 2026: Heatmap compare side by side (two versions, same device, shared colour scale).
 3. Done 19 Oct 2026: Heatmap data export as JSON (paid, up to 20 variations, field guide in the file).
 4. Done 19 Oct 2026: GA4 push (all plans): experience_impression via gtag or dataLayer, opt out with data-analytics="off".
-5. Visual editor (DOM change list applied by the SDK before paint; lazy module so the base SDK does not grow).
+5. Done 19 Oct 2026: Visual editor (Growth+): same-page variations with a change list (text, hide, safe styles, safe attributes) applied by lazy visual.js before paint; point-and-click editor on the customer page via a 2 hour signed link.
 6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links).
 
 ## Approved phases

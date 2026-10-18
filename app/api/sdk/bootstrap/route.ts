@@ -15,6 +15,7 @@ import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
+import { parseChanges } from '@/lib/visualChanges';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -164,6 +165,8 @@ export async function POST(request: NextRequest) {
             });
         }
 
+        // Visual variations have no URL of their own: on the control page the SDK applies their changes.
+        const changes = !variation.is_control && !variation.url && onControl ? parseChanges(variation.changes) : [];
         return reply({
             matched: true,
             action: 'stay',
@@ -174,6 +177,7 @@ export async function POST(request: NextRequest) {
             is_control: !!variation.is_control,
             control_url: controlUrl || undefined,
             goals: goalPayload,
+            ...(changes.length ? { changes } : {}),
         });
     } catch (error) {
         console.error('bootstrap failed', error);

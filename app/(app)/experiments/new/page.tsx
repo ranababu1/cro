@@ -16,7 +16,7 @@ import { describeTargeting, type Targeting } from '@/lib/targeting';
 type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review';
 
 interface Domain { id: string; host: string }
-interface VarDraft { name: string; url: string; weight: number; is_control: boolean }
+interface VarDraft { name: string; url: string; weight: number; is_control: boolean; visual?: boolean }
 interface GoalDraft { name: string; type: GoalType; selector: string; match_type: PageMatchType; is_primary: boolean }
 
 const GOAL_PLACEHOLDER: Record<GoalType, string> = { click: '#headerCTA', form: 'form#signup', page: 'https://www.example.com/thank-you', event: 'signup' };
@@ -52,6 +52,7 @@ export default function NewExperimentWizard() {
     const [domains, setDomains] = useState<Domain[]>([]);
     const [plan, setPlan] = useState('free');
     const [maxVars, setMaxVars] = useState(1);
+    const [visualOk, setVisualOk] = useState(false);
     const [name, setName] = useState('');
     const [controlUrl, setControlUrl] = useState('');
     const [vars, setVars] = useState<VarDraft[]>([
@@ -85,6 +86,7 @@ export default function NewExperimentWizard() {
                 const p = await planRes.json();
                 setPlan(p.plan || 'free');
                 setMaxVars(p.max_variations === null ? 50 : p.max_variations || 1);
+                setVisualOk(!!p.features?.visual_editor);
             }
         })();
     }, []);
@@ -142,7 +144,8 @@ export default function NewExperimentWizard() {
             control_url: controlUrl,
             traffic_allocation: traffic,
             targeting,
-            variations: vars,
+            // Visual variations have no URL: they run on the control page and get their changes in the visual editor.
+            variations: vars.map(({ visual, ...v }) => (visual && !v.is_control ? { ...v, url: undefined } : v)),
             goals,
         };
         const res = await fetch('/api/experiments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -172,7 +175,7 @@ export default function NewExperimentWizard() {
     const canNext = useMemo(() => {
         if (step === 'domain') return domains.length > 0;
         if (step === 'control') return !!controlUrl && !!name;
-        if (step === 'variations') return vars.every((v) => v.url && v.name) && Math.abs(vars.reduce((a, v) => a + v.weight, 0) - 100) < 0.05;
+        if (step === 'variations') return vars.every((v) => (v.url || (v.visual && !v.is_control)) && v.name) && Math.abs(vars.reduce((a, v) => a + v.weight, 0) - 100) < 0.05;
         if (step === 'goals') return goals.length > 0 && goals.length <= MAX_GOALS && goals.every((g) => g.name.trim() && g.selector.trim() && !goalProblem(g)) && goals.filter((g) => g.is_primary).length === 1;
         if (step === 'traffic') return traffic >= 0 && traffic <= 100;
         return true;
@@ -192,7 +195,7 @@ export default function NewExperimentWizard() {
         <div>
             <PageHeader
                 title="New test"
-                description="URL split test: one control page, variation pages, and click goals."
+                description="One control page, then variation pages or visual changes made with the visual editor, and goals."
                 breadcrumb={<Link href="/experiments" className="hover:text-zinc-800">Experiments</Link>}
             />
 
@@ -246,7 +249,7 @@ export default function NewExperimentWizard() {
             {step === 'variations' && (
                 <Card>
                     <CardHeader
-                        title="Variation URLs"
+                        title="Variations"
                         description={`Free plan: A/B only, a control plus 1 variation. Paid plans: up to 50. Your plan allows ${maxVars}.`}
                         actions={<Button variant="secondary" size="sm" onClick={addVariation} disabled={nonControlCount >= maxVars}>Add variation</Button>}
                     />
@@ -257,7 +260,17 @@ export default function NewExperimentWizard() {
                         {vars.map((v, i) => (
                             <div key={i} className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[1fr_2fr_6rem_auto]">
                                 <Input aria-label="Name" value={v.name} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
-                                <Input aria-label="URL" type="url" value={v.url} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} placeholder={v.is_control ? controlUrl : 'https://www.example.com/b'} disabled={v.is_control} />
+                                <div className="space-y-1.5">
+                                    {v.visual && !v.is_control
+                                        ? <p className="rounded-lg border border-dashed border-zinc-300 px-3 py-2 text-sm text-zinc-600">Same page as the control. Make the changes in the visual editor after you create the test.</p>
+                                        : <Input aria-label="URL" type="url" value={v.url} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} placeholder={v.is_control ? controlUrl : 'https://www.example.com/b'} disabled={v.is_control} />}
+                                    {!v.is_control && (
+                                        <label className={`flex items-center gap-2 text-xs ${visualOk ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                                            <input type="checkbox" checked={!!v.visual} disabled={!visualOk} onChange={(e) => setVars((vs) => vs.map((x, j) => j === i ? { ...x, visual: e.target.checked } : x))} data-testid={`visual-${i}`} />
+                                            Change the control page with the visual editor instead of using another URL{!visualOk && ' (Growth plan and above)'}
+                                        </label>
+                                    )}
+                                </div>
                                 <Input aria-label="Weight" type="number" min={0} max={100} value={v.weight} onChange={(e) => setWeight(i, e.target.value)} />
                                 <div className="flex items-center gap-2">
                                     {v.is_control ? <span className="text-xs font-medium text-zinc-500">Control</span> : <Button variant="ghost" size="sm" onClick={() => removeVariation(i)}>Remove</Button>}
@@ -333,7 +346,7 @@ export default function NewExperimentWizard() {
                         <CardBody className="space-y-3 text-sm text-zinc-700">
                             <p><span className="font-medium text-zinc-900">Name:</span> {name}</p>
                             <p><span className="font-medium text-zinc-900">Control:</span> {controlUrl}</p>
-                            <p><span className="font-medium text-zinc-900">Variations:</span> {vars.filter((v) => !v.is_control).map((v) => `${v.name} (${v.weight}%) → ${v.url}`).join('; ')}</p>
+                            <p><span className="font-medium text-zinc-900">Variations:</span> {vars.filter((v) => !v.is_control).map((v) => `${v.name} (${v.weight}%) → ${v.visual ? 'same page, visual editor' : v.url}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Goals:</span> {goals.map((g) => `${g.name} (${GOAL_TYPE_LABELS[g.type]}: ${describeGoal(g)})${g.is_primary ? ' (primary)' : ''}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Traffic:</span> {traffic}%</p>
                             <p><span className="font-medium text-zinc-900">Who can enter:</span> {describeTargeting(targeting)}</p>
