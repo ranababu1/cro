@@ -33,7 +33,7 @@ const limits: [string, string, string, string, string][] = [
 const availableToday = [
     'A/B and split URL tests', 'Flicker-free snippet', 'Sticky assignment', 'Targeting by device, UTM, referrer and new or returning visitors',
     'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
-    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'WordPress plugin on paid plans',
+    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'Google Analytics 4 events for every test', 'WordPress plugin on paid plans',
     'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks',
     'Funnels on paid plans, built from your goals',
     'Revenue goals on paid plans: revenue per visitor and average order value',
