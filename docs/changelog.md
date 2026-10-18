@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-18 23:25 IST | Traffic overview keeps up to 500 different page addresses per environment per day. Views on further new addresses that day still count in the totals and show as Other pages in Top pages, so sites with many unique URLs stay fast. |
 | pending | 2026-10-18 23:08 IST | Google Analytics 4 on every plan: when a visitor sees a version of a running test, the snippet sends a GA4 experience_impression event (gtag.js) or pushes it to the Google Tag Manager dataLayer, once per test per page. Turn it off with data-analytics="off". |
 | pending | 2026-10-18 22:51 IST | Heatmaps: Download JSON saves the heatmap data for every version of a test (up to 20) for the selected device, with a short guide to each field, for use in a spreadsheet or any analysis or AI tool. |
 | pending | 2026-10-18 22:34 IST | Heatmaps can compare two versions side by side: tick Compare with on the Heatmaps tab. Click maps share one colour scale, and the element list shows both versions in one table. |

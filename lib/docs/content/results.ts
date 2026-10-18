@@ -65,6 +65,7 @@ export const results: DocPage = {
             '**Entrances** are page views that came from another site or from no link at all. Clicks between your own pages are not entrances.',
             '**Sources** show where entrances came from: the `utm_source` value when the address has one, otherwise the referring site, otherwise direct.',
             '**From new visitors** is the share of page views in a visitor\'s first browser session.',
+            '**Other pages.** Each environment keeps up to 500 different page addresses per day. Views on further new addresses that day are still counted in the totals and show as **Other pages** in Top pages.',
         ] },
         { type: 'p', text: 'Days are in UTC. Page addresses are grouped by path, without the query string. Visitors are not identified in this report.' },
         { type: 'h2', text: 'Heatmaps', id: 'heatmaps' },

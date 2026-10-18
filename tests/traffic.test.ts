@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { NextRequest } from 'next/server';
 import { useTempDatabase, seedProjectDomain } from './helpers';
-import { lastDays, summarizeTraffic, trafficDimensions } from '@/lib/traffic';
+import { lastDays, summarizeTraffic, trafficDimensions, OTHER_PAGES, TRAFFIC_MAX_PAGES_PER_DAY } from '@/lib/traffic';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => session.current) }));
@@ -139,5 +139,40 @@ describe('traffic wiring', () => {
         const i = j.entries.findIndex((e) => e.tag === '0021_traffic_daily');
         expect(i).toBeGreaterThan(0);
         for (const e of j.entries.slice(0, i)) expect(j.entries[i].when).toBeGreaterThan(e.when);
+    });
+});
+
+describe('traffic page cap per day', () => {
+    let cleanup: () => void;
+    beforeAll(() => { cleanup = useTempDatabase(); });
+    afterAll(() => cleanup());
+
+    it('keeps the first 500 paths per environment per day and rolls the rest into (other)', async () => {
+        const u = await db.createUser({ email: 'cap@example.com', name: 'cap' });
+        const ws = await db.ensureWorkspace(u);
+        const [a, b] = await db.getEnvironments(ws.projectId);
+        const row = (env: string, key: string, day = '2026-10-19', views = 1) => ({ day, environment_id: env, project_id: ws.projectId, dim: 'page', key, views });
+        // 498 paths in one flush, then 5 more in a second flush: 2 fit, 3 roll up.
+        await db.bumpTelemetryBatch([], Array.from({ length: TRAFFIC_MAX_PAGES_PER_DAY - 2 }, (_, i) => row(a.id, `/p${i}`)));
+        await db.bumpTelemetryBatch([], [row(a.id, '/new1'), row(a.id, '/new2'), row(a.id, '/new3', undefined, 4), row(a.id, '/new4'), row(a.id, '/p0', undefined, 2), row(a.id, '/new5')]);
+        // Known paths keep counting, new ones keep rolling up, other days and environments have their own allowance.
+        await db.bumpTelemetryBatch([], [row(a.id, '/new1'), row(a.id, '/new3'), row(a.id, OTHER_PAGES), row(a.id, '/fresh', '2026-10-20'), row(b.id, '/new3')]);
+        const g = (env: string, from = '2026-10-19', to = '2026-10-19') => db.getTraffic(env, from, to).then((r) => new Map(r.grouped.filter((x) => x.dim === 'page').map((x) => [x.key, x.views])));
+        const day1 = await g(a.id);
+        expect(day1.size).toBe(TRAFFIC_MAX_PAGES_PER_DAY + 1);
+        expect(day1.get('/new1')).toBe(2);
+        expect(day1.get('/new2')).toBe(1);
+        expect(day1.has('/new3')).toBe(false);
+        expect(day1.get('/p0')).toBe(3);
+        expect(day1.get(OTHER_PAGES)).toBe(4 + 1 + 1 + 1 + 1);
+        expect((await g(a.id, '2026-10-20', '2026-10-20')).get('/fresh')).toBe(1);
+        expect((await g(b.id)).get('/new3')).toBe(1);
+        const summary = summarizeTraffic([], [...day1].map(([key, views]) => ({ dim: 'page', key, views })), ['2026-10-19']);
+        expect(summary.pages[0]).toEqual({ key: OTHER_PAGES, views: 8 });
+    });
+
+    it('labels the rollup row on the Traffic page and in the docs', () => {
+        expect(fs.readFileSync(path.join(__dirname, '../app/(app)/traffic/page.tsx'), 'utf8')).toMatch(/OTHER_PAGES \? \{ \.\.\.r, key: 'Other pages'/);
+        expect(fs.readFileSync(path.join(__dirname, '../lib/docs/content/results.ts'), 'utf8')).toContain('up to 500 different page addresses per day');
     });
 });
