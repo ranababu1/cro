@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, primaryKey, uniqueIndex, index, check } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, primaryKey, uniqueIndex, index, check } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
 // SQLite schema (libSQL). Kept to portable column types so it can be ported to Postgres with drizzle-orm/pg-core.
@@ -170,6 +170,8 @@ export const events = sqliteTable('events', {
     event_name: text('event_name'),
     goal_id: text('goal_id').references(() => goals.id, { onDelete: 'set null' }),
     metadata: text('metadata'),
+    // Order value for revenue goals (custom events sent with a revenue amount, paid plans). Null otherwise.
+    revenue: real('revenue'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [
     index('idx_events_experiment_type').on(t.experiment_id, t.event_type),

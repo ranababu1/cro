@@ -15,7 +15,7 @@ export function OPTIONS() {
 }
 
 type TrackBody = z.infer<typeof trackSchema>;
-type Outcome = { status: number; body: Record<string, unknown>; event?: Omit<Event, 'id' | 'created_at'> };
+type Outcome = { status: number; body: Record<string, unknown>; event?: Omit<Event, 'id' | 'created_at' | 'revenue'> };
 
 async function check(body: TrackBody, projectId: string, environmentId: string, seen: Set<string>): Promise<Outcome> {
     const metadata = body.metadata ? JSON.stringify(body.metadata) : null;

@@ -38,6 +38,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
     const [recordings, setRecordings] = useState<Toggle>(toToggle(allowances.recordings));
     const [wpPlugin, setWpPlugin] = useState<Toggle>(toToggle(allowances.wordpress_plugin));
     const [funnels, setFunnels] = useState<Toggle>(toToggle(allowances.funnels));
+    const [revenue, setRevenue] = useState<Toggle>(toToggle(allowances.revenue_goals));
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
 
@@ -54,6 +55,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
         const r = fromToggle(recordings); if (r !== undefined) out.recordings = r;
         const w = fromToggle(wpPlugin); if (w !== undefined) out.wordpress_plugin = w;
         const fu = fromToggle(funnels); if (fu !== undefined) out.funnels = fu;
+        const rv = fromToggle(revenue); if (rv !== undefined) out.revenue_goals = rv;
         if (!out.flags) delete out.flags;
         const res = await fetch(`/api/admin/orgs/${orgId}/allowances`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ special_friend: enabled, allowances: out }) });
         setBusy(false);
@@ -85,6 +87,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
                     <Field label="Recordings">{(id) => select(id, recordings, setRecordings)}</Field>
                     <Field label="WordPress plugin">{(id) => select(id, wpPlugin, setWpPlugin)}</Field>
                     <Field label="Funnels">{(id) => select(id, funnels, setFunnels)}</Field>
+                    <Field label="Revenue goals">{(id) => select(id, revenue, setRevenue)}</Field>
                 </div>
                 <div className="flex justify-end"><Button onClick={() => void save()} disabled={busy}>Save allowances</Button></div>
             </CardBody>

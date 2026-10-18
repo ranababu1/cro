@@ -23,6 +23,11 @@ export const goals: DocPage = {
         { type: 'code', label: 'JavaScript', code: `// After a successful signup
 ABTest.track('signup');` },
         { type: 'p', text: 'Event names can use letters, numbers and `_ . : -`. One event counts toward every running test that has a goal with the same name.' },
+        { type: 'h3', text: 'Revenue goals', id: 'revenue' },
+        { type: 'p', text: 'On paid plans, any custom event goal can also track revenue. Send the order value with the event and results show revenue, revenue per visitor and average order value for each variation.' },
+        { type: 'code', label: 'JavaScript', code: `// After a successful checkout
+ABTest.track('purchase', { revenue: 49.99 });` },
+        { type: 'p', text: 'Send the amount as a number in your store currency, without a currency sign. Every order counts toward revenue, up to 50 orders per visitor for each goal. The visitor still counts once as a conversion. Amounts are rounded to 2 decimals, and values above 1,000,000 are refused.' },
         { type: 'h2', text: 'How conversions are counted' },
         { type: 'table', head: ['Metric', 'How it is counted'], rows: [
             ['Visitors', 'Unique visitors who entered the test and saw a version.'],

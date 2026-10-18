@@ -236,10 +236,16 @@
         if (options.userId) config.userId = options.userId;
     }
 
-    /** Custom event goal: ABTest.track('signup'). Counts for every running test with a matching event goal. */
-    function trackEvent(name) {
+    /**
+     * Custom event goal: ABTest.track('signup'). Counts for every running test with a matching event goal.
+     * Revenue goal: ABTest.track('purchase', { revenue: 49.99 }) also records the order value (paid plans).
+     */
+    function trackEvent(name, options) {
         if (!name || !config.apiUrl || !config.apiKey) return Promise.resolve();
-        return send('/api/sdk/event', { user_id: getUserId(), event_name: String(name) }, true)
+        var body = { user_id: getUserId(), event_name: String(name) };
+        var revenue = options && typeof options === 'object' ? Number(options.revenue) : NaN;
+        if (isFinite(revenue) && revenue >= 0) body.revenue = revenue;
+        return send('/api/sdk/event', body, true)
             .catch(function () { return {}; });
     }
 

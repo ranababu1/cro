@@ -134,6 +134,13 @@
       "when": 1791971900000,
       "tag": "0018_funnels",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1791972000000,
+      "tag": "0019_event_revenue",
+      "breakpoints": true
     }
   ]
 }
