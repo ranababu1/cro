@@ -338,6 +338,14 @@ export const db = {
         await d.update(s.experiments).set({ updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
     },
 
+    /** Visual editor: replaces the change list of one variation (JSON text, or null to clear). */
+    async setVariationChanges(experimentId: string, variationId: string, changes: string | null): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.variations).set({ changes }).where(and(eq(s.variations.id, variationId), eq(s.variations.experiment_id, experimentId)));
+        await d.update(s.experiments).set({ updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
+    },
+
     /** Turns auto-shift on or off. Turning it on makes the next check due right away. */
     async setAutoShift(experimentId: string, enabled: boolean): Promise<void> {
         clearConfigCache();

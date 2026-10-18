@@ -1,3 +1,4 @@
+import type { VisualChange } from './visualChanges';
 import type { InferSelectModel } from 'drizzle-orm';
 import type * as schema from './db/schema';
 
@@ -69,6 +70,8 @@ export interface BootstrapResponse {
     is_control?: boolean;
     control_url?: string;
     goals?: BootstrapGoal[];
+    /** Visual editor changes for a variation that runs on the control page. Applied by the SDK before the page shows. */
+    changes?: VisualChange[];
     reason?: string;
 }
 

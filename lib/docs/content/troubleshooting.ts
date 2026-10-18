@@ -35,7 +35,7 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Why do I see "Complete your profile to create experiments"?' },
         { type: 'p', text: 'Creating or starting a test needs your first name, last name and country. Open **Profile** in the sidebar, fill them in and save, and you go straight back to where you were. Everything else on the profile is optional, and the dashboard, docs and settings work without it.' },
         { type: 'h3', text: 'Do I need to write code?' },
-        { type: 'p', text: 'A few lines. You add the snippet and write the change for each variation in JavaScript. A visual editor is on the [roadmap](/roadmap).' },
+        { type: 'p', text: 'No. Add the snippet once. Then either point each variation at its own page (a split URL test), or on Growth and above change the page itself with the [visual editor](/docs/variations#visual-editor).' },
         { type: 'h3', text: 'Will it slow my site down?' },
         { type: 'p', text: 'The script is under 30 KB gzipped and loads asynchronously. It makes one small request on page load.' },
         { type: 'h3', text: 'Which statistics do you use?' },

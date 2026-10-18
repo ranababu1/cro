@@ -3,7 +3,7 @@ import { assignUserToVariation, hashUserToVariation, validateVariationWeights, i
 import type { Variation } from '@/lib/types';
 
 function v(id: string, weight: number, is_control = false): Variation {
-    return { id, experiment_id: 'exp_1', name: id, description: null, url: null, weight, is_control, paused: false, created_at: '' };
+    return { id, experiment_id: 'exp_1', name: id, description: null, url: null, weight, is_control, paused: false, changes: null, created_at: '' };
 }
 
 describe('hashUserToVariation', () => {

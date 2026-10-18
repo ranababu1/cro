@@ -8,6 +8,7 @@ import { parseTargeting, type Targeting } from '@/lib/targeting';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import type { Variation } from '@/lib/types';
 import { AutoShiftCard } from './AutoShiftCard';
+import { VisualChangesCard } from './VisualChangesCard';
 
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 const PLACEHOLDER: Record<GoalType, string> = { click: '#headerCTA', form: 'form#signup', page: 'https://www.example.com/thank-you', event: 'signup' };
@@ -76,6 +77,7 @@ export function EditTest({ experimentId, variations, goals = [], targeting, auto
     return (
         <div className="space-y-6">
             {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
+            <VisualChangesCard experimentId={experimentId} variations={variations} />
             <AutoShiftCard experimentId={experimentId} onSaved={onSaved} />
             <Card>
                 <CardHeader title="Traffic split" description={autoShift ? 'Auto-shift sets these weights. You can still pause or resume a variation.' : 'Changes apply to new visitors. Everyone already in the test keeps their version.'} />

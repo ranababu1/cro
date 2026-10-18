@@ -8,7 +8,7 @@ import { createExperimentSchema, formatZodError } from '@/lib/validation';
 import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { upgradeHintForVariations } from '@/lib/plans';
-import { getOrgEntitlements } from '@/lib/entitlements';
+import { getOrgEntitlements, UPGRADE_NOTE } from '@/lib/entitlements';
 import { quotaMessage } from '@/lib/quotas';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { serializeTargeting } from '@/lib/targeting';
@@ -73,11 +73,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Variations without a URL use the visual editor (Growth and above).
+        if (nonControl.some((v) => !v.url) && !ent.features.visual_editor) {
+            return NextResponse.json({ error: UPGRADE_NOTE.visual_editor, upgrade: UPGRADE_NOTE.visual_editor }, { status: 403 });
+        }
+
         const domains = await db.getDomainHosts(projectId);
         if (domains.length === 0) {
             return NextResponse.json({ error: 'Add a domain to this project before creating a test' }, { status: 400 });
         }
-        const allUrls = body.variations.map((v) => v.url);
+        const allUrls = body.variations.map((v) => v.url).filter((u): u is string => !!u);
         for (const u of [body.control_url, ...allUrls]) {
             const host = normalizeHost(u);
             if (!host || !domains.includes(host)) {
@@ -88,10 +93,10 @@ export async function POST(request: NextRequest) {
             }
         }
         const controlVar = body.variations.find((v) => v.is_control)!;
-        if (!urlsMatch(controlVar.url, body.control_url)) {
+        if (!controlVar.url || !urlsMatch(controlVar.url, body.control_url)) {
             return NextResponse.json({ error: 'The control variation URL must match the control URL' }, { status: 400 });
         }
-        // Unique URLs
+        // Unique URLs (variations without a URL run on the control page with visual changes)
         const norms = allUrls.map((u) => normalizePageUrl(u)!);
         if (new Set(norms).size !== norms.length) {
             return NextResponse.json({ error: 'Each variation needs its own URL' }, { status: 400 });
@@ -110,7 +115,7 @@ export async function POST(request: NextRequest) {
                 control_url: normalizePageUrl(body.control_url),
                 targeting: serializeTargeting(body.targeting),
             },
-            body.variations.map((v) => ({ ...v, url: normalizePageUrl(v.url) })),
+            body.variations.map((v) => ({ ...v, url: v.url ? normalizePageUrl(v.url) : null })),
             body.goals,
         );
         await db.audit({
