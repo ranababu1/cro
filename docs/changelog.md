@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-18 22:51 IST | Heatmaps: Download JSON saves the heatmap data for every version of a test (up to 20) for the selected device, with a short guide to each field, for use in a spreadsheet or any analysis or AI tool. |
 | pending | 2026-10-18 22:34 IST | Heatmaps can compare two versions side by side: tick Compare with on the Heatmaps tab. Click maps share one colour scale, and the element list shows both versions in one table. |
 | pending | 2026-10-18 22:18 IST | Traffic overview on paid plans: a new Traffic page shows page views, entrances, page views per day, top pages, sources, devices and countries for every page with the snippet, per environment, for the last 7, 30 or 90 days. |
 | pending | 2026-10-18 21:58 IST | Blog post 'best free A/B testing tools' now says the snippet is under 30 KB gzipped (updated copy from ABTest Content). |

@@ -104,7 +104,8 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                             </div>
                         </div>
                         {!compare && <Totals data={data} />}
-                        <div className="mb-4 flex flex-wrap gap-2">
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <a href={`/api/experiments/${experimentId}/heatmaps/export?device=${device}`} download className="order-last ml-auto rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="heat-export">Download JSON</a>
                             {VIEWS.map((v) => (
                                 <button key={v.id} type="button" onClick={() => setView(v.id)} className={`rounded-md px-3 py-1.5 text-sm ${view === v.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-zinc-600 hover:bg-zinc-100'}`}>{v.label}</button>
                             ))}

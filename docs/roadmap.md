@@ -52,6 +52,8 @@ Traffic overview (paid)
 
 Heatmap compare side by side
 
+Heatmap JSON export
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
@@ -69,7 +71,7 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 ## Next feasible items (in order, after revenue goals and auto-shift)
 1. Done 19 Oct 2026: Traffic overview (paid; page views, entrances, top pages, sources, devices, countries).
 2. Done 19 Oct 2026: Heatmap compare side by side (two versions, same device, shared colour scale).
-3. Heatmap data export as JSON.
+3. Done 19 Oct 2026: Heatmap data export as JSON (paid, up to 20 variations, field guide in the file).
 4. GA4 push: dataLayer event with experiment and variant.
 5. Visual editor (DOM change list applied by the SDK before paint; lazy module so the base SDK does not grow).
 6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links).
