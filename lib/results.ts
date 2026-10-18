@@ -99,7 +99,8 @@ export async function buildExperimentResults(experiment: Experiment, environment
         statistical_significance: statisticalSignificance,
         sample_size: variationMetrics.reduce((sum, v) => sum + v.total_users, 0),
         winner,
-        srm: await srmFor(experiment.id, variations, environmentId),
+        // Auto-shift moves the split on purpose, so the mismatch check would always fire.
+        srm: experiment.auto_shift ? undefined : await srmFor(experiment.id, variations, environmentId),
         live: buildLiveStats(variations, goals, await db.getLiveCounts(experiment.id, environmentId)),
     };
     return results;

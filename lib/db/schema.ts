@@ -110,6 +110,9 @@ export const experiments = sqliteTable('experiments', {
     control_url: text('control_url'),
     traffic_allocation: integer('traffic_allocation').notNull().default(100),
     targeting: text('targeting'), // JSON audience rules, see lib/targeting.ts. null = everyone
+    // Auto-shift traffic to the winner (Growth+): weights are rewritten from Thompson sampling, see lib/autoShift.ts.
+    auto_shift: integer('auto_shift', { mode: 'boolean' }).notNull().default(false),
+    auto_shift_at: text('auto_shift_at'), // last time the weights were checked or rewritten
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),
     started_at: text('started_at'),

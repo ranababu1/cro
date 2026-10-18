@@ -1,6 +1,6 @@
 import { db } from './db';
 import {
-    isPaidPlan, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
+    isPaidPlan, planTier, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
     FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_PROJECTS, FREE_DOMAINS,
 } from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
@@ -16,8 +16,12 @@ import { parseAllowances, type Allowances } from './allowances';
  */
 export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
 
-/** Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here. */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals'] as const;
+/**
+ * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
+ * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
+ */
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift'] as const;
+export const GROWTH_FEATURES: readonly string[] = ['auto_shift'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
 /** null means unlimited. */
@@ -107,7 +111,8 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
             freeTierRules: false,
         };
     }
-    const features = Object.fromEntries(HEAVY_FEATURES.map((f) => [f, paid])) as Record<HeavyFeature, boolean>;
+    const tier = planTier(plan);
+    const features = Object.fromEntries(HEAVY_FEATURES.map((f) => [f, GROWTH_FEATURES.includes(f) ? tier >= 2 : paid])) as Record<HeavyFeature, boolean>;
     let limits = planLimits(org);
     let flags: Record<string, boolean> = {};
     if (specialFriend) {
@@ -117,6 +122,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.wordpress_plugin !== undefined) features.wordpress_plugin = a.wordpress_plugin;
         if (a.funnels !== undefined) features.funnels = a.funnels;
         if (a.revenue_goals !== undefined) features.revenue_goals = a.revenue_goals;
+        if (a.auto_shift !== undefined) features.auto_shift = a.auto_shift;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -148,6 +154,7 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     recordings: 'Session recordings are part of the paid plans. Upgrade to Starter or above to turn them on.',
     raw_capture: 'This feature is part of the paid plans. Upgrade to Starter or above to turn it on.',
     funnels: 'Funnels are part of the paid plans. Upgrade to Starter or above to build them.',
+    auto_shift: 'Auto-shift traffic to the winner is part of the Growth plan and above. Upgrade to Growth to turn it on.',
     revenue_goals: 'Revenue goals are part of the paid plans. Upgrade to Starter or above to track order values.',
     wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',
 };

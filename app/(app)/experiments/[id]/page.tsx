@@ -159,7 +159,7 @@ export default function ExperimentDetail() {
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
-            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} onSaved={() => void load()} />}
+            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
@@ -248,6 +248,9 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                 <CardHeader title="Confidence intervals" />
                 <CardBody><IntervalChart rows={rows} winner={winnerId} /></CardBody>
             </Card>
+            {experiment.auto_shift && (
+                <p className="text-sm text-zinc-600" data-testid="auto-shift-note">Auto-shift is on, so the split changes over time. Treat the significance test as a guide, and keep the test running until the leader stays clear.</p>
+            )}
             <p className="text-xs text-zinc-500">
                 Method: two-proportion z-test of the best variant against the control, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
             </p>

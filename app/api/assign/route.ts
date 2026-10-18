@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { formatZodError } from '@/lib/validation';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
+import { scheduleAutoShift } from '@/lib/autoShiftRun';
 
 const assignBody = z.object({
     experiment_id: z.string().min(1).max(100),
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
         if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
             return sdkJson(notAssigned(experimentId));
         }
+        scheduleAutoShift(experiment, auth.ctx.orgId);
         if (variations.length === 0) {
             return sdkJson({ error: 'No variations found for this experiment' }, 400);
         }

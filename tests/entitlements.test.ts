@@ -7,7 +7,7 @@ vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => null) }));
 
 import { db } from '@/lib/db';
 import { clearConfigCache } from '@/lib/configCache';
-import { computeEntitlements, getOrgEntitlements, HEAVY_FEATURES, isSuperAdminEmail } from '@/lib/entitlements';
+import { computeEntitlements, getOrgEntitlements, GROWTH_FEATURES, HEAVY_FEATURES, isSuperAdminEmail } from '@/lib/entitlements';
 import { POST as bootstrap } from '@/app/api/sdk/bootstrap/route';
 import { POST as capture } from '@/app/api/capture/route';
 
@@ -39,11 +39,12 @@ afterAll(() => { delete process.env.PLATFORM_ADMIN_EMAILS; cleanup(); });
 
 describe('entitlement rule', () => {
     it('gives heavy features to paid plans only', () => {
-        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false, wordpress_plugin: false, funnels: false, revenue_goals: false });
+        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false, wordpress_plugin: false, funnels: false, revenue_goals: false, auto_shift: false });
         expect(computeEntitlements({ plan: null }, []).features.heatmaps).toBe(false);
         for (const plan of ['starter', 'growth', 'enterprise', 'team']) {
             const e = computeEntitlements({ plan }, []);
-            expect(HEAVY_FEATURES.every((f) => e.features[f])).toBe(true);
+            expect(HEAVY_FEATURES.filter((f) => !GROWTH_FEATURES.includes(f)).every((f) => e.features[f])).toBe(true);
+            expect(e.features.auto_shift).toBe(plan === 'growth' || plan === 'enterprise');
             expect(e.unlimited).toBe(false);
         }
     });

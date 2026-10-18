@@ -9,6 +9,7 @@ import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
+import { scheduleAutoShift } from '@/lib/autoShiftRun';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
@@ -66,6 +67,8 @@ export async function POST(request: NextRequest) {
         if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
             return reply({ matched: false, action: 'none', reason: 'not_running' });
         }
+        // Auto-shift (Growth+): recompute the split at most hourly, after the response is sent.
+        scheduleAutoShift(experiment, auth.ctx.orgId);
 
         // Only click and form goals run in the browser. Page and event goals are matched on the server.
         await countPageview(auth.ctx.orgId);
