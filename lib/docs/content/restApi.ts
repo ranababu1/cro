@@ -20,7 +20,7 @@ export const restApi: DocPage = {
             ['401', 'Missing, malformed, unknown or revoked key, or not signed in.'],
             ['403', 'The organization is suspended, a plan limit was reached, or the action is not allowed for this kind of caller.'],
             ['404', 'Not found. Experiments in other projects also return 404.'],
-            ['429', 'Rate limit exceeded on SDK endpoints. A `Retry-After` header says how many seconds to wait.'],
+            ['429', 'Rate limit exceeded: per key and client IP on SDK endpoints, and 120 requests a minute per secret key on management endpoints. A `Retry-After` header says how many seconds to wait.'],
         ] },
         { type: 'h2', text: 'SDK endpoints' },
         { type: 'p', text: 'These accept cross-origin requests from any site (CORS `*`) and answer `OPTIONS` preflights. They are rate limited per key and client IP.' },

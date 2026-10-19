@@ -44,3 +44,7 @@ export class RateLimiter {
 
 const perMinute = Number(process.env.RATE_LIMIT_PER_MINUTE) || 600;
 export const sdkRateLimiter = new RateLimiter(perMinute, 60_000);
+
+/** Management API calls made with a secret key (cro_sk_...), per key. Dashboard sessions are not limited here. */
+const apiPerMinute = Number(process.env.API_RATE_LIMIT_PER_MINUTE) || 120;
+export const apiRateLimiter = new RateLimiter(apiPerMinute, 60_000);

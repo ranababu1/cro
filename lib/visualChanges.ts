@@ -15,7 +15,8 @@ export const UNSAFE_CSS = /url\s*\(|@import|expression\s*\(|javascript:|behavior
 export const VISUAL_STYLES = ['color', 'background-color', 'font-size', 'font-weight', 'text-align', 'border-radius', 'padding', 'margin'] as const;
 export const VISUAL_ATTRS = ['href', 'src', 'alt', 'placeholder', 'title'] as const;
 
-const SAFE_URL = /^(https?:\/\/|\/(?!\/)|#|mailto:|tel:)/i;
+/** Browsers read /\ and leading control characters as another site, so those are refused. */
+const SAFE_URL = /^(https?:\/\/|\/(?![\/\\])|#|mailto:|tel:)(?!.*[\u0000-\u001f\\])/i;
 const STYLE_VALUE = /^[#a-zA-Z0-9.,%()\s-]{1,100}$/;
 
 export const visualChangeSchema = z.discriminatedUnion('action', [

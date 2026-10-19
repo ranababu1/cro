@@ -256,3 +256,5 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - lib/audit.ts: AUDIT_RETENTION_DAYS { free 30, starter 90, growth 365, enterprise 730 }, unknown paid = starter, null plan = free. Hidden from customers: entity abuse, abuse:* and admin:special_friend. admin:* entries show actor freeabtest.com (Support badge) with no details (diff has admin email and notes). Null actor = API key, except allocation:auto = Automatic. Actors no longer in the org show Former member.
 - Retention job deletes audit_log rows past the plan window (CASE coalesce(lower(plan),'free'), 5000 per run). No migration.
 - Pricing: audit row Free Not included (was 30 days), Enterprise 2 years (was Custom, which had no mechanism). FAQ and downgrade FAQ updated; docs organizations-and-projects#audit-log.
+
+Hardening (19 Oct 2026): management API with a secret key is rate limited per key (API_RATE_LIMIT_PER_MINUTE, default 120, in-memory like the SDK limiter). Popup and survey [id] routes scope the plan check and audit entry to the owner org (ownerScope in lib/popupRoutes.ts). next.config.js sets security headers on every route; /share/* sends no referrer.

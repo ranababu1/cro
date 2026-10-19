@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from './db';
-import { featureProject } from './popupRoutes';
+import { featureProject, ownerScope } from './popupRoutes';
 import { lastDays } from './traffic';
 import { parseSurveyConfig } from './surveys';
 
@@ -13,7 +13,9 @@ export async function loadSurvey(request: NextRequest, params: Promise<{ id: str
     const { id } = await params;
     const survey = await db.getSurvey(id);
     if (!survey || !r.projectIds.includes(survey.project_id)) return NextResponse.json({ error: 'Survey not found' }, { status: 404 });
-    return { ...r, survey };
+    const scope = await ownerScope(r, survey.project_id, 'surveys');
+    if (scope instanceof NextResponse) return scope;
+    return { ...scope, survey };
 }
 
 export function surveyRange(request: NextRequest) {

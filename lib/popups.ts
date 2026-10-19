@@ -13,7 +13,8 @@ export const POPUP_MATCH = ['all', 'equals', 'contains', 'starts_with'] as const
 export const POPUP_METRICS = ['view', 'click', 'close'] as const;
 export const POPUP_STATUSES = ['draft', 'active', 'paused'] as const;
 
-const SAFE_URL = /^(https?:\/\/|\/(?!\/)|#|mailto:|tel:)/i;
+/** Browsers read /\ and leading control characters as another site, so those are refused. */
+const SAFE_URL = /^(https?:\/\/|\/(?![\/\\])|#|mailto:|tel:)(?!.*[\u0000-\u001f\\])/i;
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 
 /** Where, when and how often a popup or survey shows. Shared by popups and surveys. */

@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { db, type SdkKeyContext } from './db';
 import { apiKeyType, hashApiKey, isWellFormedApiKey } from './apiKeys';
-import { sdkRateLimiter, type RateLimiter } from './rateLimit';
+import { apiRateLimiter, sdkRateLimiter, type RateLimiter } from './rateLimit';
 import { bumpMetric, METRICS, touchUserActivity } from './telemetry';
 
 /** CORS headers for endpoints called from customer websites by the browser SDK. */
@@ -100,7 +100,18 @@ export async function getUserContext(request?: NextRequest): Promise<UserContext
 /**
  * Like getUserContext but returns a ready error: 401 when not signed in, 403 when the caller's tenant is suspended.
  */
-export async function requireUserContext(request?: NextRequest): Promise<UserContext | NextResponse> {
+export async function requireUserContext(request?: NextRequest, limiter: RateLimiter = apiRateLimiter): Promise<UserContext | NextResponse> {
+    const authHeader = request?.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+        const key = authHeader.slice('Bearer '.length).trim();
+        if (apiKeyType(key) === 'secret') {
+            const limit = limiter.check(`sk:${hashApiKey(key).slice(0, 16)}`);
+            if (!limit.allowed) {
+                void bumpMetric(METRICS.rate_limit_hits, {});
+                return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } });
+            }
+        }
+    }
     const ctx = await getUserContext(request);
     if (!ctx) return unauthorized();
     if (ctx.suspended) return NextResponse.json({ error: 'This account is suspended' }, { status: 403 });
