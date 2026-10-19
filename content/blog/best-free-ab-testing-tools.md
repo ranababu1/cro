@@ -15,6 +15,16 @@ schema_suggestions:
   - BlogPosting
   - FAQPage
   - ItemList
+breadcrumb_schema: |
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Blog", "item": "https://www.freeabtest.com/blog"},
+      {"@type": "ListItem", "position": 2, "name": "Free and affordable A/B testing"},
+      {"@type": "ListItem", "position": 3, "name": "Best free A/B testing tools in 2026", "item": "https://www.freeabtest.com/blog/best-free-ab-testing-tools"}
+    ]
+  }
 faq_schema: |
   {
     "@context": "https://schema.org",
@@ -58,7 +68,7 @@ Prices are what each vendor published on 15 October 2026. Where a page only offe
 
 | Tool | Free or trial | Published paid entry (A/B) | Main catch | Best for |
 |---|---|---|---|---|
-| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, control plus 1 variation | Starter $10/month (250,000 visitors, 20 experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test and one variation at a time. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $10 |
+| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, control plus 1 variation | Starter $10/month (250,000 visitors, 20 active experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test and one variation at a time. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $10 |
 | Convert Experiences | 15-day free trial, no card | Growth $399/month monthly or $299/month billed annually for 100,000 MTU | Starts near $300 a month even on annual billing | Teams that want a published enterprise-style suite and can pay for it |
 | Crazy Egg | 30-day free trial | Plus $99/month billed annually (A/B starts here; 150,000 tracked pageviews) | Starter at $29 has no A/B. All plans billed annually | Marketers who want session recordings bundled with A/B |
 | Kameleoon (PBX Starter) | 30-day free trial, up to 3 experiments, no card | From $495/month for up to 10 experiments and 50,000 tested visitors | Entry paid plan is nearly 50× freeabtest Starter | Teams buying prompt-based experimentation |
