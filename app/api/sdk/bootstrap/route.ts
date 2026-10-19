@@ -5,6 +5,8 @@ import { bootstrapSchema, formatZodError } from '@/lib/validation';
 import { normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { heatmapSampleRate, isSampled } from '@/lib/heatmaps';
+import { heatmapRate } from '@/lib/heatmapRules';
+import type { Experiment } from '@/lib/types';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import type { BootstrapResponse } from '@/lib/types';
@@ -81,11 +83,13 @@ export async function POST(request: NextRequest) {
                 return c && popupMatchesUrl(c, url) ? [sdkSurvey(p.id, c)] : [];
             })
             : [];
+        // The matched test, for its own heatmap sample rate and stop rules.
+        let matched: Experiment | null = null;
         const reply = (b: BootstrapResponse) => {
             if (popups.length && b.action !== 'redirect') b = { ...b, popups, modules: [...(b.modules ?? []), 'popups'] };
             if (surveys.length && b.action !== 'redirect') b = { ...b, surveys, modules: [...(b.modules ?? []), 'surveys'] };
             if ((!entitled && !errorsOn) || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
-            const rate = heatmapSampleRate();
+            const rate = matched && matched.id === b.experiment_id ? heatmapRate(matched) : heatmapSampleRate();
             const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};
             if (errorsOn) extra.modules = [...(b.modules ?? []), 'errors'];
             return sdkJson({ ...b, ...extra });
@@ -100,6 +104,7 @@ export async function POST(request: NextRequest) {
             return reply({ matched: false, action: 'none', reason: 'no_match' });
         }
         const { experiment, variations, goals } = match;
+        matched = experiment;
         if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
             return reply({ matched: false, action: 'none', reason: 'not_running' });
         }

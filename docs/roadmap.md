@@ -91,7 +91,8 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 4. Done 19 Oct 2026: GA4 push (all plans): experience_impression via gtag or dataLayer, opt out with data-analytics="off".
 5. Done 19 Oct 2026: Visual editor (Growth+): same-page variations with a change list (text, hide, safe styles, safe attributes) applied by lazy visual.js before paint; point-and-click editor on the customer page via a 2 hour signed link.
 6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links). Error tracking done 19 Oct 2026 (paid, errors.js, error_daily counters batched with telemetry, 200 distinct per test per day). Popups done 19 Oct 2026 (paid, popups.js on matching pages only, popup_daily counters batched with telemetry). Surveys done 19 Oct 2026 (paid, surveys.js shares a build-time kit with popups.js, answers batched and capped at 500 per survey per day).
-7. Done 19 Oct 2026: Heatmap filters (date range, traffic source, converted or not; raw clicks, 30 days max when filtered). Next: per-heatmap sampling and stop rules, funnel trend, visual editor extras.
+7. Done 19 Oct 2026: Heatmap filters (date range, traffic source, converted or not; raw clicks, 30 days max when filtered).
+8. Done 19 Oct 2026: Per-heatmap sampling and stop rules (sample percent, days or page views, new collection period). Next: funnel trend, visual editor extras.
 
 ## Approved phases
 
@@ -112,7 +113,7 @@ Scope:
 - Reports: List (element, clicks, %, CSV), Click map, Scroll map, Confetti, Overlay. Device split desktop/tablet/mobile.
 - Heatmaps auto-created for each variant of a running test.
 - Filters: date, device, source/UTM, converted yes/no.
-- Per-heatmap sampling rate and stop rules (days or visits), like Crazy Egg's 60 days / 25,000 visits default.
+- Per-heatmap sampling rate and stop rules (days or visits), like Crazy Egg's 60 days / 25,000 visits default. Done 19 Oct 2026 (per test, default 50% sample and no stop rule).
 - Light web analytics: pageviews, unique visitors, top pages, sources, devices, country (from Vercel geo header).
 - GA4 push: dataLayer event with experiment and variant.
 Technical approach:

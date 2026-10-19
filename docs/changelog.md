@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 01:45 IST | Heatmap sampling and stop rules per test (paid): sample percent, stop after days or page views, new collection period. Capture drops batches once a rule is reached and the bootstrap stops offering capture. Migration 0028. |
 | pending | 2026-10-19 01:24 IST | Heatmap filters: date range (7, 30, 90 days), traffic source and converted or not converted visitors, also in compare and JSON export. heatmap.js sends the landing source and SDK visitor id; new heatmap_scroll_points table (migration 0027) for filtered scroll maps, deleted with raw clicks after 30 days. |
 | pending | 2026-10-19 01:11 IST | Survey answers: emails, numbers of 6 or more digits and long tokens in written answers are replaced before saving. Retention cleanup now runs automatically: survey answers are deleted after 12 months on Starter and 24 months on Growth and Enterprise (6 months on Free), and individual heatmap clicks after 30 days. Pricing and docs now say exactly what is kept and for how long. |
 | pending | 2026-10-19 00:47 IST | Surveys: Net Promoter Score questions (0 to 10) with the score, promoters, passives and detractors in the answers view, and five templates to start a survey from (NPS, what almost stopped you, how did you hear about us, was this page helpful, open question). |
