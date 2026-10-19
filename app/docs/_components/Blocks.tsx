@@ -51,7 +51,7 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
                     }
                     case 'table':
                         return (
-                            <div key={i} className="overflow-x-auto rounded-lg border border-zinc-200">
+                            <div key={i} className="overflow-x-auto rounded-lg border border-zinc-200" tabIndex={0}>
                                 <table className="w-full min-w-[32rem] text-left text-sm">
                                     <thead className="bg-zinc-50 text-xs font-medium text-zinc-500">
                                         <tr>{b.head.map((h, j) => <th key={j} className="px-4 py-2.5 font-medium">{h}</th>)}</tr>

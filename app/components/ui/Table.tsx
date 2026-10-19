@@ -2,7 +2,7 @@ import { cn } from './cn';
 
 export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTableElement>) {
     return (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto" tabIndex={0}>
             <table className={cn('w-full text-left text-sm text-zinc-700', className)} {...props} />
         </div>
     );

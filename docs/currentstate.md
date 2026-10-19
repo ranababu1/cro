@@ -262,3 +262,5 @@ Hardening (19 Oct 2026): management API with a secret key is rate limited per ke
 Hot paths (19 Oct 2026): migration 0029 adds idx_popup_daily_popup, idx_survey_daily_survey, idx_audit_created, idx_survey_responses_day. Retention deletes prefilter on the newest per-plan cutoff (latestCutoff in lib/db/index.ts). /sdk.js and the helper scripts send Cache-Control public, max-age=300, stale-while-revalidate=86400. SDK is 24.6 KB gzipped (claim: under 30 KB).
 
 Copy (19 Oct 2026): there is no teammate invite or add-project flow, so pricing marks seats and projects as coming soon (Phase 6 Teams on /roadmap). Limits in lib/entitlements.ts (projects, seats) stay as the future allowances. tests/teamsCopy.test.ts guards this.
+
+A11y (19 Oct 2026): axe-core scan (wcag2a/aa/21aa) of 17 public and app pages at 390 px and 1280 px, light and dark, is clean except the brand logo .com (logos are exempt). Light zinc-400/500 tokens darkened in app/globals.css; dark theme remaps unchanged. Table wrapper is relative so sr-only labels stay inside the scroll area.

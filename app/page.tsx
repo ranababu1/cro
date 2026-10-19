@@ -17,8 +17,8 @@ const stack: { name: string; soon?: boolean; icon: React.ReactNode }[] = [
 
 const steps = [
     { n: '01', title: 'Create your test', body: 'Set up an A/B test or split test in minutes with a few lines of code.', card: 'bg-[#eef4ff]', badge: 'bg-[#dbe7ff] text-blue-700', icon: 'text-blue-600', d: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z' },
-    { n: '02', title: 'Measure what matters', body: 'Track real user behavior with clear, visual results.', card: 'bg-[#ecf8f3]', badge: 'bg-[#d5f0e5] text-teal-700', icon: 'text-teal-600', d: 'M5 20V14M10 20V9M15 20v-7M20 20V4M3 20h18' },
-    { n: '03', title: 'Ship the winner', body: 'Choose the best variation and roll it out with confidence.', card: 'bg-[#fff8ea]', badge: 'bg-[#fdebc8] text-amber-700', icon: 'text-amber-500', d: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6v4H9z' },
+    { n: '02', title: 'Measure what matters', body: 'Track real user behavior with clear, visual results.', card: 'bg-[#ecf8f3]', badge: 'bg-[#d5f0e5] text-teal-800', icon: 'text-teal-600', d: 'M5 20V14M10 20V9M15 20v-7M20 20V4M3 20h18' },
+    { n: '03', title: 'Ship the winner', body: 'Choose the best variation and roll it out with confidence.', card: 'bg-[#fff8ea]', badge: 'bg-[#fdebc8] text-amber-800', icon: 'text-amber-500', d: 'M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6v4H9z' },
 ];
 
 const testList: { text: string; note?: string }[] = [

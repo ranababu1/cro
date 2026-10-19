@@ -42,7 +42,7 @@ export default async function SharedResults({ params }: { params: Promise<{ toke
                             <h2 className="font-semibold text-zinc-900">{g.name}</h2>
                             {g.primary && <span className="rounded-md bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-200">Primary goal</span>}
                         </div>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto" tabIndex={0}>
                             <table className="w-full text-sm">
                                 <thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
                                     <tr><th className="px-5 py-2">Version</th><th className="px-5 py-2 text-right">Visitors</th><th className="px-5 py-2 text-right">Conversions</th><th className="px-5 py-2 text-right">Rate</th><th className="px-5 py-2 text-right">Lift vs control</th><th className="px-5 py-2 text-right">95% interval</th></tr>

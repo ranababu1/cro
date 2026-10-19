@@ -23,7 +23,7 @@ export function CodeBlock({ code, label, tone = 'light', className }: { code: st
                     {copied ? 'Copied' : 'Copy'}
                 </button>
             </div>
-            <pre className={cn('overflow-x-auto p-4 font-mono text-[13px] leading-6', dark ? 'text-zinc-200' : 'text-zinc-800')}>
+            <pre tabIndex={0} className={cn('overflow-x-auto p-4 font-mono text-[13px] leading-6', dark ? 'text-zinc-200' : 'text-zinc-800')}>
                 <code>{code}</code>
             </pre>
         </div>

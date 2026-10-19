@@ -18,7 +18,7 @@ export function PageviewUsage({ status, plan }: { status: PageviewStatus; plan: 
                 </p>
             </div>
             {status.limit !== null && (
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100" role="progressbar" aria-label="Page views used this month" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
                     <div className={`h-full rounded-full ${bar}`} style={{ width: `${pct}%` }} />
                 </div>
             )}

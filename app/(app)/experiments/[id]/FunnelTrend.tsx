@@ -24,9 +24,9 @@ export function FunnelTrend({ trend, onBucket }: { trend: Trend; onBucket: (b: T
         <div data-testid="funnel-trend">
             <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
                 <span className="font-medium text-zinc-900">Completion trend</span>
-                <div className="inline-flex rounded-md border border-zinc-200 p-0.5" role="tablist" aria-label="Trend period">
+                <div className="inline-flex rounded-md border border-zinc-200 p-0.5" role="group" aria-label="Trend period">
                     {(['day', 'week'] as const).map((b) => (
-                        <button key={b} type="button" onClick={() => onBucket(b)} className={`rounded px-2.5 py-1 text-xs font-medium ${trend.bucket === b ? 'bg-blue-600 text-white' : 'text-zinc-600 hover:bg-zinc-100'}`}>{b === 'day' ? 'Daily' : 'Weekly'}</button>
+                        <button key={b} type="button" aria-pressed={trend.bucket === b} onClick={() => onBucket(b)} className={`rounded px-2.5 py-1 text-xs font-medium ${trend.bucket === b ? 'bg-blue-600 text-white' : 'text-zinc-600 hover:bg-zinc-100'}`}>{b === 'day' ? 'Daily' : 'Weekly'}</button>
                     ))}
                 </div>
                 <div className="flex flex-wrap gap-3">

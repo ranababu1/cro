@@ -48,9 +48,9 @@ export function TestIllustration() {
             {/* Variant A, faded, behind */}
             <div className="absolute left-[5%] top-[40%] w-[40%] -rotate-[3deg] rounded-2xl border border-white/80 bg-white/70 p-[4%] shadow-[0_20px_40px_-20px_rgb(15_23_42/0.25)] backdrop-blur-sm">
                 <div className="mb-3 flex gap-1"><span className="h-2 w-2 rounded-full bg-zinc-200" /><span className="h-2 w-2 rounded-full bg-zinc-200" /><span className="h-2 w-2 rounded-full bg-zinc-200" /></div>
-                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-400">• Variant A</span>
+                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-500">• Variant A</span>
                 <p className="mt-4 text-[clamp(13px,1.5vw,21px)] font-semibold leading-[1.15] text-zinc-400">Smarter<br />decisions for<br />your business</p>
-                <span className="mt-4 inline-block rounded-md bg-zinc-200 px-3 py-1.5 text-[11px] text-zinc-400">Get started</span>
+                <span className="mt-4 inline-block rounded-md bg-zinc-200 px-3 py-1.5 text-[11px] text-zinc-600">Get started</span>
             </div>
 
             {/* Variant B, main card */}

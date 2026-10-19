@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 04:01 IST | Mobile and accessibility: no sideways scrolling on phones (table header labels and wide code blocks no longer widen the page, theme switch moved into the phone menu); grey text meets WCAG AA contrast; table and code scroll areas take keyboard focus; usage bar named; trend switch uses toggle buttons. |
 | pending | 2026-10-19 03:36 IST | Pricing copy: projects and team seats show 1 today with more coming soon (no invite or add-project flow exists yet); plan cards list features that exist instead of seats and projects; Enterprise environments 3 and no custom retention promise; public roadmap Phase 6 Teams; docs say paid features load one extra small script only where they apply. |
 | pending | 2026-10-19 03:22 IST | Performance: indexes for popup and survey daily counts by popup or survey, and date indexes so hourly cleanup of audit entries and survey answers reads only old rows; site scripts are cached by browsers for 5 minutes (stale-while-revalidate a day). |
 | pending | 2026-10-19 03:08 IST | Security hardening: popup and survey edits check the plan of, and audit into, the organization that owns them; link addresses refuse /\ and control characters; secret-key API calls limited to 120 a minute per key (429 with Retry-After); security headers (nosniff, frame-ancestors none, X-Frame-Options DENY, Referrer-Policy, no referrer on share links). |

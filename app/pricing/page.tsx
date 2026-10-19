@@ -109,7 +109,7 @@ export default function PricingPage() {
 
                 <section className="mt-20">
                     <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Compare plans</h2>
-                    <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
+                    <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white" tabIndex={0}>
                         <table className="w-full min-w-[760px] text-left text-sm">
                             <thead className="bg-zinc-50 text-zinc-900">
                                 <tr><th className="p-4 font-semibold">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
