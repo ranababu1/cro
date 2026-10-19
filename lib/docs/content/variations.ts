@@ -33,6 +33,15 @@ export const variations: DocPage = {
         { type: 'p', text: 'Next to **Open visual editor**, pick **Tablet (820 px window)** or **Mobile (390 px window)** to open the editor in a window of that width, so your page shows its tablet or mobile layout. The panel shows the current window width, and **Fold** shrinks it so you can see more of the page. Changes apply on every device; check each size before you start the test.' },
         { type: 'p', text: 'Visitors in the variation get the changes before the page shows, with the same flicker protection as redirects. A variation holds up to 50 changes. You can also add, check or remove changes by hand on **Edit test**, each with its CSS selector. Changes are plain text, styles, moves and CSS, so the editor cannot add scripts or HTML to your site.' },
         { type: 'callout', tone: 'info', title: 'Elements that load later', text: 'Changes also apply to elements that appear while the page loads. Content that appears long after load, for example after a click, may not change. Pick elements that are on the page from the start.' },
+        { type: 'h2', text: 'Preview links', id: 'preview-links' },
+        { type: 'p', text: 'Check every version on your real site before you start the test, or while it runs. On the test page, open **Setup**, find **Preview links** and choose **Create link** next to a version. Send the link to anyone who should check it: it works for 7 days on all plans.' },
+        { type: 'list', items: [
+            'The link opens the control page as that version. A version with its own URL goes through the same redirect visitors get, and a visual version shows its changes.',
+            'A bar at the bottom of the page names the version. Other pages you open in the same tab stay in preview until you choose **Exit preview**.',
+            'Preview visits are never counted: no visitor joins the test, and no page views, conversions, heatmap clicks or analytics events are recorded.',
+            'Links work for drafts, running and paused tests. They stop working when the test is completed or deleted.',
+        ] },
+        { type: 'callout', tone: 'info', title: 'The snippet must be on the page', text: 'Preview links use the same snippet as visitors, on your registered domains. If nothing changes, check the snippet is in the head of the control page.' },
         { type: 'h2', text: 'Auto-shift traffic to the winner', id: 'auto-shift' },
         { type: 'p', text: 'On the Growth plan and above, turn on **Auto-shift traffic to the winner** in the **Edit test** tab. About once an hour while the test gets traffic, the split is recalculated so more new visitors see the version most likely to win on the primary goal. This method is often called a multi-armed bandit, using Thompson sampling.' },
         { type: 'list', items: [

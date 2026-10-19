@@ -32,6 +32,13 @@
     var via = (script && script.getAttribute('data-via')) === 'wp' ? 'wp' : '';
     var config = { apiUrl: apiUrl, apiKey: apiKey, userId: null };
     function withVia(path) { return via ? path + (path.indexOf('?') === -1 ? '?' : '&') + 'via=' + via : path; }
+    // QA preview link (?fabt_preview=<token>): shows one variation, kept for this tab's session. Nothing is recorded.
+    var previewToken = '';
+    try {
+        var pm = /[?&]fabt_preview=([^&#]+)/.exec(window.location.search);
+        previewToken = pm ? decodeURIComponent(pm[1]) : sessionStorage.getItem('fabt_preview') || '';
+        if (pm) sessionStorage.setItem('fabt_preview', previewToken);
+    } catch (e) { /* storage blocked */ }
     var FLICKER_MS = 800;
     var assignmentCache = {};
     var goalsBound = false;
@@ -121,6 +128,7 @@
     }
 
     function track(experimentId, variationId, eventType, goalId, eventName) {
+        if (previewToken) return Promise.resolve();
         var ev = { experiment_id: experimentId, variation_id: variationId, user_id: getUserId(), event_type: eventType };
         if (goalId) ev.goal_id = goalId;
         if (eventName) ev.event_name = eventName;
@@ -235,11 +243,22 @@
             return Promise.resolve({ matched: false, action: 'none' });
         }
         hide();
-        return send('/api/sdk/bootstrap', { url: window.location.href, user_id: getUserId(), referrer: document.referrer || '', visitor: visitorType() })
+        var req = { url: window.location.href, user_id: getUserId(), referrer: document.referrer || '', visitor: visitorType() };
+        if (previewToken) req.preview = previewToken;
+        return send('/api/sdk/bootstrap', req)
             .then(function (res) {
                 var data = res.body || { matched: false, action: 'none' };
                 if (!res.ok) {
                     reveal();
+                    return data;
+                }
+                // Preview: the variation from the link, with no tracking, analytics, heatmaps or extra modules.
+                // preview.js shows the bar that names the variation and leaves preview mode.
+                if (previewToken && data.preview) {
+                    if (data.action === 'redirect' && data.variation_url) { redirectTo(data.variation_url); return data; }
+                    if (data.changes && data.changes.length) loadModule('visual.js', '__ABTestVisual', { changes: data.changes, done: reveal });
+                    else reveal();
+                    loadModule('preview.js', '__ABTestPreview', data.preview);
                     return data;
                 }
                 if (data.action === 'redirect' && data.variation_url) {
@@ -280,7 +299,7 @@
      * Revenue goal: ABTest.track('purchase', { revenue: 49.99 }) also records the order value (paid plans).
      */
     function trackEvent(name, options) {
-        if (!name || !config.apiUrl || !config.apiKey) return Promise.resolve();
+        if (!name || !config.apiUrl || !config.apiKey || previewToken) return Promise.resolve();
         var body = { user_id: getUserId(), event_name: String(name) };
         var revenue = options && typeof options === 'object' ? Number(options.revenue) : NaN;
         if (isFinite(revenue) && revenue >= 0) body.revenue = revenue;

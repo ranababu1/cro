@@ -78,6 +78,8 @@ export interface BootstrapResponse {
     goals?: BootstrapGoal[];
     /** Visual editor changes for a variation that runs on the control page. Applied by the SDK before the page shows. */
     changes?: VisualChange[];
+    /** QA preview link: the variation shown, or why the link no longer works. Nothing is recorded. */
+    preview?: { experiment_name?: string; variation_name?: string; on_page?: boolean; error?: string };
     reason?: string;
 }
 

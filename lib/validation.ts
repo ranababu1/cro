@@ -95,6 +95,8 @@ export const bootstrapSchema = z.object({
     user_id: visitorId,
     referrer: z.string().max(2000).optional(),
     visitor: z.enum(['new', 'returning']).optional(),
+    /** Signed QA preview token from a preview link. */
+    preview: z.string().max(1000).optional(),
 });
 
 export const trackSchema = z.object({
