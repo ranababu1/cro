@@ -60,6 +60,15 @@ function latestCutoff(before: Record<string, string>): string {
     return Object.values(before).reduce((a, b) => (b > a ? b : a));
 }
 
+function environmentRows(projectId: string) {
+    return s.ENVIRONMENT_KEYS.map((key) => ({
+        id: generateId('env'),
+        project_id: projectId,
+        key,
+        name: { dev: 'Development', staging: 'Staging', prod: 'Production' }[key],
+    }));
+}
+
 export const db = {
     // Users and tenancy
     async getUserByEmail(email: string): Promise<User | null> {
@@ -99,14 +108,7 @@ export const db = {
             d.insert(s.organizations).values({ id: orgId, name: orgName, slug: slugify(orgName) }),
             d.insert(s.memberships).values({ org_id: orgId, user_id: user.id, role: 'owner' }),
             d.insert(s.projects).values({ id: projectId, org_id: orgId, name: 'Default project' }),
-            d.insert(s.environments).values(
-                s.ENVIRONMENT_KEYS.map((key) => ({
-                    id: generateId('env'),
-                    project_id: projectId,
-                    key,
-                    name: { dev: 'Development', staging: 'Staging', prod: 'Production' }[key],
-                })),
-            ),
+            d.insert(s.environments).values(environmentRows(projectId)),
         ]);
         await this.ensureProjectSdkKeys(projectId, user.id);
         await this.audit({ orgId, actorId: user.id, entity: 'organization', entityId: orgId, action: 'create' });
@@ -853,6 +855,88 @@ export const db = {
             .innerJoin(s.users, eq(s.users.id, s.memberships.user_id))
             .where(eq(s.memberships.org_id, orgId))
             .orderBy(asc(s.memberships.created_at));
+    },
+
+    // Teams and projects (lib/team.ts)
+    async getMembership(orgId: string, userId: string) {
+        const d = await getDb();
+        return (await d.query.memberships.findFirst({ where: and(eq(s.memberships.org_id, orgId), eq(s.memberships.user_id, userId)) })) ?? null;
+    },
+
+    /** Adds a member. False when the user already belongs to the org. */
+    async addMember(orgId: string, userId: string, role: 'owner' | 'member'): Promise<boolean> {
+        clearConfigCache();
+        const d = await getDb();
+        const r = await d.insert(s.memberships).values({ org_id: orgId, user_id: userId, role }).onConflictDoNothing();
+        return Number(r.rowsAffected) > 0;
+    },
+
+    async setMemberRole(orgId: string, userId: string, role: 'owner' | 'member'): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.memberships).set({ role }).where(and(eq(s.memberships.org_id, orgId), eq(s.memberships.user_id, userId)));
+    },
+
+    async removeMember(orgId: string, userId: string): Promise<boolean> {
+        clearConfigCache();
+        const d = await getDb();
+        const r = await d.delete(s.memberships).where(and(eq(s.memberships.org_id, orgId), eq(s.memberships.user_id, userId)));
+        return Number(r.rowsAffected) > 0;
+    },
+
+    async createInvite(i: { orgId: string; tokenHash: string; role: 'owner' | 'member'; createdBy: string; expiresAt: string }) {
+        const d = await getDb();
+        const id = generateId('inv');
+        await d.insert(s.invites).values({ id, org_id: i.orgId, token_hash: i.tokenHash, role: i.role, created_by: i.createdBy, expires_at: i.expiresAt });
+        return (await d.query.invites.findFirst({ where: eq(s.invites.id, id) }))!;
+    },
+
+    /** Unused, unrevoked invites that have not expired. */
+    async listPendingInvites(orgId: string, atIso = nowIso()) {
+        const d = await getDb();
+        return d.select({ id: s.invites.id, role: s.invites.role, created_at: s.invites.created_at, expires_at: s.invites.expires_at, created_by_name: s.users.name, created_by_email: s.users.email })
+            .from(s.invites).leftJoin(s.users, eq(s.users.id, s.invites.created_by))
+            .where(and(eq(s.invites.org_id, orgId), isNull(s.invites.accepted_at), isNull(s.invites.revoked_at), sql`${s.invites.expires_at} > ${atIso}`))
+            .orderBy(desc(s.invites.created_at));
+    },
+
+    async getInviteByHash(tokenHash: string) {
+        const d = await getDb();
+        return (await d.query.invites.findFirst({ where: eq(s.invites.token_hash, tokenHash) })) ?? null;
+    },
+
+    async revokeInvite(orgId: string, id: string): Promise<boolean> {
+        const d = await getDb();
+        const r = await d.update(s.invites).set({ revoked_at: nowIso() })
+            .where(and(eq(s.invites.id, id), eq(s.invites.org_id, orgId), isNull(s.invites.accepted_at), isNull(s.invites.revoked_at)));
+        return Number(r.rowsAffected) > 0;
+    },
+
+    /** Marks an invite used. True for exactly one caller, and only while it is open. */
+    async claimInvite(id: string, userId: string, atIso = nowIso()): Promise<boolean> {
+        const d = await getDb();
+        const r = await d.update(s.invites).set({ accepted_at: atIso, accepted_by: userId })
+            .where(and(eq(s.invites.id, id), isNull(s.invites.accepted_at), isNull(s.invites.revoked_at), sql`${s.invites.expires_at} > ${atIso}`));
+        return Number(r.rowsAffected) > 0;
+    },
+
+    /** A new project with Development, Staging and Production and an SDK key for each. */
+    async createProject(orgId: string, name: string, createdBy: string | null) {
+        clearConfigCache();
+        const d = await getDb();
+        const id = generateId('prj');
+        await d.batch([
+            d.insert(s.projects).values({ id, org_id: orgId, name }),
+            d.insert(s.environments).values(environmentRows(id)),
+        ]);
+        await this.ensureProjectSdkKeys(id, createdBy);
+        return (await this.getProject(id))!;
+    },
+
+    async renameProject(id: string, name: string): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.projects).set({ name }).where(eq(s.projects.id, id));
     },
 
     async getOrgProjects(orgId: string) {

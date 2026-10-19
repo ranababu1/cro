@@ -14,9 +14,9 @@ const tiers: Tier[] = [
 
 const highlights: Record<string, string[]> = {
     Free: ['10,000 tested visitors a month (300 a day)', '1 running test, 10 tests total', 'Control plus 1 variation', '1 project on 1 domain'],
-    Starter: ['250,000 tested visitors a month', '20 active experiments', 'Control plus up to 50 variations', 'Heatmaps, funnels, popups and surveys'],
-    Growth: ['1,000,000 tested visitors a month', 'Unlimited active experiments', 'Visual editor', 'Auto-shift traffic to the winner'],
-    Enterprise: ['Custom tested visitors', 'Unlimited active experiments', 'Audit log kept 2 years', 'Named contact with an SLA'],
+    Starter: ['250,000 tested visitors a month', '20 active experiments', '3 projects and 5 team seats', 'Heatmaps, funnels, popups and surveys'],
+    Growth: ['1,000,000 tested visitors a month', '10 projects and 15 team seats', 'Visual editor', 'Auto-shift traffic to the winner'],
+    Enterprise: ['Custom tested visitors', 'Unlimited team seats', 'Audit log kept 2 years', 'Named contact with an SLA'],
 };
 
 export function BillingCards() {

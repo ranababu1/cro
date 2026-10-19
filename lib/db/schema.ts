@@ -60,6 +60,20 @@ export const memberships = sqliteTable('memberships', {
     created_at: text('created_at').notNull().default(now),
 }, (t) => [primaryKey({ columns: [t.org_id, t.user_id] }), index('idx_memberships_user').on(t.user_id)]);
 
+/** Signed invite links (no email). Only the SHA-256 of the token is stored; a link works once, for 7 days. */
+export const invites = sqliteTable('invites', {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    token_hash: text('token_hash').notNull(),
+    role: text('role', { enum: ['owner', 'member'] }).notNull().default('member'),
+    created_by: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    created_at: text('created_at').notNull().default(now),
+    expires_at: text('expires_at').notNull(),
+    accepted_at: text('accepted_at'),
+    accepted_by: text('accepted_by').references(() => users.id, { onDelete: 'set null' }),
+    revoked_at: text('revoked_at'),
+}, (t) => [uniqueIndex('uq_invites_token').on(t.token_hash), index('idx_invites_org').on(t.org_id)]);
+
 export const projects = sqliteTable('projects', {
     id: text('id').primaryKey(),
     org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),

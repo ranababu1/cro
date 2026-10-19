@@ -15,6 +15,10 @@ export const FREE_PROJECTS = 1;
 /** Free tier: registered domains per account (localhost for development does not count). */
 export const FREE_DOMAINS = 1;
 
+/** Projects and team seats per plan, as on the pricing page. Enterprise is set per contract (special friend allowances); null is no cap. */
+export const PLAN_PROJECTS = [FREE_PROJECTS, 3, 10, null] as const;
+export const PLAN_SEATS = [1, 5, 15, null] as const;
+
 /** Plan rank: 0 Free, 1 Starter, 2 Growth, 3 Enterprise. Unknown paid plan names rank as Starter. */
 export function planTier(plan: string | null | undefined): number {
     const p = (plan || 'free').toLowerCase();

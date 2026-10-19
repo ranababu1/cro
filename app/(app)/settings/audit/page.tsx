@@ -6,7 +6,7 @@ import { UpgradeNote } from '@/app/components/UpgradeNote';
 import type { AuditEntry } from '@/lib/audit';
 
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
-const ENTITIES: [string, string][] = [['', 'Everything'], ['experiment', 'Tests'], ['survey', 'Surveys'], ['popup', 'Popups'], ['domain', 'Domains'], ['api_key', 'API keys'], ['organization', 'Organization']];
+const ENTITIES: [string, string][] = [['', 'Everything'], ['experiment', 'Tests'], ['survey', 'Surveys'], ['popup', 'Popups'], ['domain', 'Domains'], ['api_key', 'API keys'], ['organization', 'Organization'], ['member', 'Team'], ['project', 'Projects']];
 type Page = { organization: string | null; retention_days: number; entries: AuditEntry[]; next_cursor: string | null };
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });

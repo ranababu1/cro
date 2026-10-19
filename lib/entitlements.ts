@@ -1,7 +1,7 @@
 import { db } from './db';
 import {
     isPaidPlan, planTier, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
-    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_PROJECTS, FREE_DOMAINS,
+    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_DOMAINS, PLAN_PROJECTS, PLAN_SEATS,
 } from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
 import { cached } from './configCache';
@@ -75,8 +75,8 @@ function planLimits(org: OrgForEntitlements | null): Limits {
         monthlyPageviews: pv === UNLIMITED ? null : pv ?? planMonthlyPageviews(plan),
         maxVariations: maxVariationUrlsForPlan(plan),
         activeExperiments: free ? FREE_RUNNING_EXPERIMENTS : null,
-        projects: free ? FREE_PROJECTS : null,
-        seats: null,
+        projects: PLAN_PROJECTS[planTier(plan)],
+        seats: PLAN_SEATS[planTier(plan)],
         domains: free ? FREE_DOMAINS : null,
     };
 }
@@ -142,7 +142,8 @@ export async function getOrgEntitlements(orgId: string): Promise<Entitlements> {
     return cached(`ent:${orgId}`, async () => {
         const org = await db.getOrganization(orgId);
         const members = org ? await db.getOrgMembers(orgId) : [];
-        return computeEntitlements(org, members.map((m) => m.email));
+        // Only owners lift the limits: inviting a platform admin as a member must not make an org unlimited.
+        return computeEntitlements(org, members.filter((m) => m.role === 'owner').map((m) => m.email));
     }, 30_000);
 }
 

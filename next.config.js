@@ -21,6 +21,7 @@ const nextConfig = {
             { source: '/:path*', headers: base },
             // Share links carry their token in the address, so it is never sent to other sites.
             { source: '/share/:path*', headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }] },
+            { source: '/invite/:path*', headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }, { key: 'X-Robots-Tag', value: 'noindex' }] },
             // Site scripts: browsers reuse them for 5 minutes instead of asking again on every page view, then refresh in the background.
             { source: '/:file(sdk|heatmap|popups|surveys|errors|visual).js', headers: [{ key: 'Cache-Control', value: 'public, max-age=300, stale-while-revalidate=86400' }] },
         ];

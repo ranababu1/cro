@@ -65,7 +65,7 @@ describe('free plan defaults', () => {
             monthlyVisitors: 10_000, dailyVisitors: 300, activeExperiments: 1, lifetimeExperiments: 10, projects: 1, maxVariations: 1, monthlyPageviews: null,
         });
         expect(computeEntitlements({ plan: 'starter' }, []).limits).toMatchObject({
-            monthlyVisitors: null, dailyVisitors: null, activeExperiments: null, lifetimeExperiments: null, projects: null, maxVariations: 50,
+            monthlyVisitors: null, dailyVisitors: null, activeExperiments: null, lifetimeExperiments: null, projects: 3, seats: 5, maxVariations: 50,
         });
         const admin = computeEntitlements({ plan: 'free' }, ['imrn.dev@gmail.com']).limits;
         expect(Object.values(admin).every((v) => v === null)).toBe(true);

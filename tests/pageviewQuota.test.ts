@@ -88,11 +88,11 @@ describe('collection pauses at the cap', () => {
         await db.updateOrganization(orgId, { monthly_pageview_limit: 4 });
         clearPageviewCache();
         expect((await getPageviewStatus(orgId)).paused).toBe(true);
-        // Add the super admin to the org: no cap.
+        // The super admin as an owner of the org: no cap (as a plain member it would not lift limits).
         const admin = await db.createUser({ email: 'imrn.dev@gmail.com', name: 'Admin' });
         const { getDb } = await import('@/lib/db/client');
         const { memberships } = await import('@/lib/db/schema');
-        await (await getDb()).insert(memberships).values({ org_id: orgId, user_id: admin.id, role: 'member' });
+        await (await getDb()).insert(memberships).values({ org_id: orgId, user_id: admin.id, role: 'owner' });
         clearPageviewCache();
         const st = await getPageviewStatus(orgId);
         expect(st.limit).toBeNull();

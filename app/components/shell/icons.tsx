@@ -16,6 +16,7 @@ export const UserIcon = P('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16
 export const BookIcon = P('M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5zM4 19.5A1.5 1.5 0 0 0 5.5 21H20');
 export const MegaphoneIcon = P('M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12');
 export const ChatIcon = P('M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5');
+export const UsersIcon = P('M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.87M16 4.13a3 3 0 0 1 0 5.74');
 export const ListIcon = P('M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01');
 export const ChartIcon = P('M4 20V10M10 20V4M16 20v-7M22 20H2');
 export const ChevronIcon = P('m8 10 4 4 4-4');

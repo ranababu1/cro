@@ -78,6 +78,8 @@ Hardening pass 3 (19 Oct 2026): pricing copy for seats and projects. Next feasib
 
 Hardening pass 4 (19 Oct 2026): mobile layout, contrast and keyboard access, PR fix/mobile-a11y.
 
+Gap proposal 1 done (19 Oct 2026): teammate invites, roles and multiple projects. Next: proposal 2 QA preview links, then proposal 3 sequential statistics.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
