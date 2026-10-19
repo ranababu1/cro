@@ -94,7 +94,8 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 7. Done 19 Oct 2026: Heatmap filters (date range, traffic source, converted or not; raw clicks, 30 days max when filtered).
 8. Done 19 Oct 2026: Per-heatmap sampling and stop rules (sample percent, days or page views, new collection period).
 9. Done 19 Oct 2026: Funnel trend (completion by start day or week, per variation).
-10. Done 19 Oct 2026: Visual editor extras (move, page CSS, tablet and mobile editor windows). Next: customer audit log view (paid) and audit log retention per the pricing table.
+10. Done 19 Oct 2026: Visual editor extras (move, page CSS, tablet and mobile editor windows).
+11. Done 19 Oct 2026: Customer audit log view (paid, read-only) with audit retention by plan; pricing row corrected (Free not included, Enterprise 2 years instead of Custom).
 
 ## Approved phases
 

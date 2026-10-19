@@ -869,6 +869,35 @@ export const db = {
         });
     },
 
+    /** Customer audit view: newest first, inside the retention window, with the actor and whether they are still a member. */
+    async listAuditForOrg(orgId: string, o: { since: string; before?: { t: string; id: string } | null; entity?: string | null; limit: number }) {
+        const d = await getDb();
+        return d.all<import('../audit').AuditRow>(sql`
+            SELECT a.id, a.entity, a.entity_id, a.action, a.diff, a.created_at, a.actor_id,
+                   u.name AS actor_name, u.email AS actor_email,
+                   CASE WHEN m.user_id IS NULL THEN 0 ELSE 1 END AS actor_member
+            FROM audit_log a
+            LEFT JOIN users u ON u.id = a.actor_id
+            LEFT JOIN memberships m ON m.org_id = a.org_id AND m.user_id = a.actor_id
+            WHERE a.org_id = ${orgId} AND a.created_at >= ${o.since}
+              AND a.entity != 'abuse' AND a.action NOT LIKE 'abuse:%' AND a.action != 'admin:special_friend'
+              ${o.entity ? sql`AND a.entity = ${o.entity}` : sql``}
+              ${o.before ? sql`AND (a.created_at < ${o.before.t} OR (a.created_at = ${o.before.t} AND a.id < ${o.before.id}))` : sql``}
+            ORDER BY a.created_at DESC, a.id DESC
+            LIMIT ${o.limit}`);
+    },
+
+    /** Audit entries older than the owning org's plan period (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years). */
+    async deleteOldAuditEntries(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number): Promise<number> {
+        const d = await getDb();
+        const r = await d.run(sql`DELETE FROM audit_log WHERE id IN (
+            SELECT a.id FROM audit_log a
+            JOIN organizations o ON o.id = a.org_id
+            WHERE a.created_at < CASE coalesce(lower(o.plan), 'free') WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            LIMIT ${limit})`);
+        return Number(r.rowsAffected);
+    },
+
     async getAuditLog(orgId: string, limit = 50) {
         const d = await getDb();
         return d.select().from(s.auditLog).where(eq(s.auditLog.org_id, orgId)).orderBy(desc(s.auditLog.created_at)).limit(limit);

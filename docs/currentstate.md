@@ -249,3 +249,10 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - public/visual.js: changes replay in list order. Visitor mode caches the elements each change matched (so nth-of-type selectors keep hitting the same elements after a move) and runs each move once. Page CSS goes into one style element as textContent. Editor: Move up/down records selectors from the page state just before the move, page CSS textarea when nothing is selected, window width line, Fold button; restore undoes moves and removes the CSS.
 - VisualChangesCard: editor window size select (desktop tab, 820 or 390 px popup window), hand-added moves, Page CSS box.
 - No sdk.js change.
+
+## Customer audit log (19 Oct 2026)
+- Feature audit_log in HEAVY_FEATURES (paid), allowance and SpecialFriendPanel toggle. UPGRADE_NOTE.audit_log.
+- GET /api/audit?entity=&cursor= for the current project's org: 50 per page, base64url cursor (created_at|id), only entries inside the plan window. Session or secret key.
+- lib/audit.ts: AUDIT_RETENTION_DAYS { free 30, starter 90, growth 365, enterprise 730 }, unknown paid = starter, null plan = free. Hidden from customers: entity abuse, abuse:* and admin:special_friend. admin:* entries show actor freeabtest.com (Support badge) with no details (diff has admin email and notes). Null actor = API key, except allocation:auto = Automatic. Actors no longer in the org show Former member.
+- Retention job deletes audit_log rows past the plan window (CASE coalesce(lower(plan),'free'), 5000 per run). No migration.
+- Pricing: audit row Free Not included (was 30 days), Enterprise 2 years (was Custom, which had no mechanism). FAQ and downgrade FAQ updated; docs organizations-and-projects#audit-log.

@@ -46,7 +46,7 @@ export const experiments: DocPage = {
         { type: 'h2', text: 'Deleting' },
         { type: 'p', text: 'Only drafts can be deleted, from the experiment header or the Settings tab. Once an experiment has run, complete it instead so its history stays intact.' },
         { type: 'h2', text: 'Audit log' },
-        { type: 'p', text: 'Every create, update, status change and delete is written to the audit log with who did it and what changed. A view of the audit log in the dashboard is coming later.' },
+        { type: 'p', text: 'Every create, update, status change and delete is written to the audit log with who did it and what changed. On paid plans you can read it under **Audit log**. See [Audit log](/docs/organizations-and-projects#audit-log).' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'Scheduling and duplicating experiments are planned.' },
     ],
 };

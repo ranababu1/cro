@@ -29,24 +29,37 @@ const limits: [string, string, string, string, string][] = [
     ['Popups and calls to action', 'Not included', 'Included', 'Included', 'Included'],
     ['Surveys', 'Not included', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
-    ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
+    ['Audit log', 'Not included', '90 days', '1 year', '2 years'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
 ];
 
-const availableToday = [
-    'A/B and split URL tests', 'Flicker-free snippet', 'Sticky assignment', 'Targeting by device, UTM, referrer and new or returning visitors',
-    'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
-    'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'Google Analytics 4 events for every test', 'WordPress plugin on paid plans',
-    'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks and filters by traffic source and conversion',
-    'Funnels on paid plans, built from your goals, with a completion trend',
-    'Revenue goals on paid plans: revenue per visitor and average order value',
-    'Auto-shift traffic to the winner on Growth and above',
-    'Visual editor on Growth and above: change text, colors, links and images, move or hide elements, or add page CSS, with mobile and tablet preview',
-    'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
-    'JavaScript error tracking on paid plans: errors per test version',
-    'Popups and calls to action on paid plans: center, corner or bar, with views and clicks',
-    'Surveys on paid plans: one question with choices, a 1 to 5 rating, NPS or a written answer, with templates and CSV export',
-    'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
+// tier: lowest plan that includes it (0 Free, 1 Starter, 2 Growth). Paid items show a dash on lower plans.
+const availableToday: { name: string; tier: number }[] = [
+    { name: 'A/B and split URL tests', tier: 0 },
+    { name: 'Flicker-free snippet', tier: 0 },
+    { name: 'Sticky assignment', tier: 0 },
+    { name: 'Targeting by device, UTM, referrer and new or returning visitors', tier: 0 },
+    { name: 'Click, form submit, page visit and custom event goals', tier: 0 },
+    { name: 'Wilson intervals with a z-test against the control', tier: 0 },
+    { name: 'Sample ratio mismatch warning', tier: 0 },
+    { name: 'Edit running tests safely', tier: 0 },
+    { name: 'Shareable results links', tier: 0 },
+    { name: 'Google Tag Manager and WordPress install guides', tier: 0 },
+    { name: 'Google Analytics 4 events for every test', tier: 0 },
+    { name: 'WordPress plugin on paid plans', tier: 1 },
+    { name: 'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks and filters by traffic source and conversion', tier: 1 },
+    { name: 'Funnels on paid plans, built from your goals, with a completion trend', tier: 1 },
+    { name: 'Revenue goals on paid plans: revenue per visitor and average order value', tier: 1 },
+    { name: 'Auto-shift traffic to the winner on Growth and above', tier: 2 },
+    { name: 'Visual editor on Growth and above: change text, colors, links and images, move or hide elements, or add page CSS, with mobile and tablet preview', tier: 2 },
+    { name: 'Traffic overview on paid plans: page views, top pages, sources, devices and countries', tier: 1 },
+    { name: 'JavaScript error tracking on paid plans: errors per test version', tier: 1 },
+    { name: 'Popups and calls to action on paid plans: center, corner or bar, with views and clicks', tier: 1 },
+    { name: 'Surveys on paid plans: one question with choices, a 1 to 5 rating, NPS or a written answer, with templates and CSV export', tier: 1 },
+    { name: 'Separate environments', tier: 0 },
+    { name: 'Public and secret keys', tier: 0 },
+    { name: 'REST API', tier: 0 },
+    { name: 'Audit log on paid plans: who changed what, kept 90 days to 2 years by plan', tier: 1 },
 ];
 
 // tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise).
@@ -62,8 +75,8 @@ const faqs = [
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID, and we hash it together with the experiment ID. The same visitor always lands in the same variant. Raising traffic allocation doesn\'t move people who are already in the test.' },
     { q: 'Which statistics do you use?', a: 'A two-sided, two-proportion z-test at 95% confidence, and Wilson score intervals for each conversion rate. The results verdict tests the best variant against the control. Live stats also flag each variant that differs significantly from the control. Significance is only tested once every variation has at least 100 visitors.' },
     { q: 'Are the coming soon features included in my price?', a: 'When a feature ships, it\'s included in the plan listed for it at no extra cost. Until then it\'s marked coming soon. Don\'t buy a plan for a feature that isn\'t built yet.' },
-    { q: 'Can I change or cancel my plan?', a: 'Yes, anytime. Upgrades apply right away. Downgrades and cancellations take effect at the end of the billing period. Your tests and results are kept. Survey answers follow the retention of the plan you are on, and on the free plan answers older than 6 months are deleted.' },
-    { q: 'What data do you delete, and when?', a: 'Survey answers are deleted after 12 months on Starter and 24 months on Growth and Enterprise. Individual heatmap clicks are deleted after 30 days; heatmaps keep their daily totals. Tests, visitor assignments, conversions, results and daily totals are kept while your account is active.' },
+    { q: 'Can I change or cancel my plan?', a: 'Yes, anytime. Upgrades apply right away. Downgrades and cancellations take effect at the end of the billing period. Your tests and results are kept. Survey answers follow the retention of the plan you are on, and on the free plan answers older than 6 months are deleted. Audit log entries also follow your current plan, so moving to a plan with a shorter period deletes older entries.' },
+    { q: 'What data do you delete, and when?', a: 'Survey answers are deleted after 12 months on Starter and 24 months on Growth and Enterprise. Individual heatmap clicks are deleted after 30 days; heatmaps keep their daily totals. Audit log entries are deleted after 90 days on Starter, 1 year on Growth and 2 years on Enterprise (30 days on Free). Tests, visitor assignments, conversions, results and daily totals are kept while your account is active.' },
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
     { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
@@ -103,9 +116,9 @@ export default function PricingPage() {
                                 {limits.map(([label, ...vals]) => (
                                     <tr key={label}><td className="p-4 font-medium text-zinc-900">{label}</td>{vals.map((v, i) => <td key={i} className="p-4 text-zinc-600">{v}</td>)}</tr>
                                 ))}
-                                <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Available today on all plans</td></tr>
+                                <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Available today</td></tr>
                                 {availableToday.map((f) => (
-                                    <tr key={f}><td className="p-4 text-zinc-900">{f}</td>{plans.map((p) => <td key={p} className="p-4"><Check /></td>)}</tr>
+                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Coming soon</td></tr>
                                 {comingSoon.map((f) => (

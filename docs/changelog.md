@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 02:48 IST | Customer audit log (paid, read-only): /settings/audit with type filter and paging; audit entries deleted by plan (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years) in the opportunistic retention job. Pricing audit row now Not included / 90 days / 1 year / 2 years. Pricing feature list now shows a dash instead of a check on plans that do not include paid or Growth features. |
 | pending | 2026-10-19 02:21 IST | Visual editor extras (Growth+): move elements up or down, one block of page CSS (no url(), @import or escapes), editor windows at tablet (820 px) or mobile (390 px) width, foldable editor panel. |
 | pending | 2026-10-19 02:03 IST | Funnel trend (paid): completion rate per variation by the day or week visitors started the funnel, daily or weekly toggle, latest 90 points. |
 | pending | 2026-10-19 01:45 IST | Heatmap sampling and stop rules per test (paid): sample percent, stop after days or page views, new collection period. Capture drops batches once a rule is reached and the bootstrap stops offering capture. Migration 0028. |

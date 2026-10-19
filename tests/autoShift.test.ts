@@ -169,7 +169,8 @@ describe('auto-shift wiring', () => {
     it('pricing lists auto-shift as available on Growth and above', () => {
         const pricing = read('app/pricing/page.tsx');
         expect(pricing).toMatch(/\['Auto-shift traffic to the winner', 'Not included', 'Not included', 'Included', 'Included'\]/);
-        expect(pricing).not.toMatch(/\{ name: 'Auto-shift/);
+        expect(pricing).not.toMatch(/\{ name: 'Auto-shift[^}]*p: \d/); // not under coming soon
+        expect(pricing).toContain("{ name: 'Auto-shift traffic to the winner on Growth and above', tier: 2 }");
     });
     it('migration is newer than every earlier one', () => {
         const j = JSON.parse(read('drizzle/meta/_journal.json')) as { entries: { tag: string; when: number }[] };

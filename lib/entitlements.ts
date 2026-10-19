@@ -20,7 +20,7 @@ export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
  * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
  * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
  */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys'] as const;
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys', 'audit_log'] as const;
 export const GROWTH_FEATURES: readonly string[] = ['auto_shift', 'visual_editor'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
@@ -128,6 +128,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.error_tracking !== undefined) features.error_tracking = a.error_tracking;
         if (a.popups !== undefined) features.popups = a.popups;
         if (a.surveys !== undefined) features.surveys = a.surveys;
+        if (a.audit_log !== undefined) features.audit_log = a.audit_log;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -162,6 +163,7 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     auto_shift: 'Auto-shift traffic to the winner is part of the Growth plan and above. Upgrade to Growth to turn it on.',
     traffic: 'The traffic overview is part of the paid plans. Upgrade to Starter or above to see page views, top pages, sources and devices.',
     surveys: 'Surveys are part of the paid plans. Upgrade to Starter or above to ask visitors a question on your site.',
+    audit_log: 'The audit log is part of the paid plans. Upgrade to Starter or above to see who changed what in your organization.',
     popups: 'Popups are part of the paid plans. Upgrade to Starter or above to show popups and calls to action on your site.',
     error_tracking: 'JavaScript error tracking is part of the paid plans. Upgrade to Starter or above to see errors per version.',
     visual_editor: 'The visual editor is part of the Growth plan and above. Upgrade to Growth to change pages without code.',
