@@ -27,7 +27,7 @@ const phases: { phase: string; name: string; status: PhaseStatus; items: string[
     { phase: 'Phase 3', name: 'Heatmaps', status: 'Done', items: ['Click, scroll, confetti and overlay heatmaps', 'Heatmaps per variation and device', 'Rage and dead click detection', 'Filters by traffic source, conversion and date range', 'Sampling and stop rules for each test'] },
     { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'In progress', items: ['Session recordings with privacy masking', 'Traffic overview', 'Funnels built from your goals', 'Funnel completion trend over time', 'Revenue goals', 'Visual editor with move, page CSS and mobile preview', 'Auto-shift traffic to the winner'] },
     { phase: 'Phase 5', name: 'Engagement extras', status: 'Done', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking'] },
-    { phase: 'Phase 6', name: 'Teams', status: 'In progress', items: ['Invite teammates', 'More projects from the dashboard', 'Audit log of who changed what'] },
+    { phase: 'Phase 6', name: 'Teams', status: 'Done', items: ['Invite teammates with a link', 'Owner and member roles', 'More projects from the dashboard', 'Audit log of who changed what'] },
 ];
 
 const tone: Record<PhaseStatus, 'success' | 'brand' | 'neutral'> = { Done: 'success', 'In progress': 'brand', Planned: 'neutral' };

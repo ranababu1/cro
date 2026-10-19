@@ -37,7 +37,7 @@ export default async function Dashboard() {
             { label: 'Tested visitors today', used: v.day, limit: limits.dailyVisitors, atLimit: 'New visitors see your original page and are not counted until tomorrow (UTC). Visitors already in a test keep their version.' },
             { label: 'Running tests', used: running, limit: limits.activeExperiments, atLimit: 'Pause or complete it before you start another.', capacity: true },
             { label: 'Tests used (all time)', used: org.experiments_started_total, limit: limits.lifetimeExperiments, atLimit: 'You have started every test the free plan includes. Deleting tests does not free them up.' },
-            { label: 'Projects', used: projects, limit: limits.projects, atLimit: 'Your plan includes one project.', capacity: true },
+            { label: 'Projects', used: projects, limit: limits.projects, atLimit: limits.projects === 1 ? 'Your plan includes one project. Upgrade to add more.' : `Your plan includes ${limits.projects} projects. Upgrade to add more.`, capacity: true },
         ];
     }
 

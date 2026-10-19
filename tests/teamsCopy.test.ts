@@ -1,31 +1,32 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+import { PLAN_PROJECTS, PLAN_SEATS } from '@/lib/plans';
 
 const read = (f: string) => fs.readFileSync(path.join(process.cwd(), f), 'utf8');
 
-// There is no way yet to invite teammates or add projects, so public copy must not sell them as available.
+// Teams shipped: public copy states the enforced seat and project limits, with no coming-soon tags.
 describe('team seats and projects copy', () => {
     const pricing = read('app/pricing/page.tsx');
     const cards = read('app/pricing/BillingCards.tsx');
     const roadmap = read('app/roadmap/page.tsx');
 
-    it('pricing rows say 1 today and mark more as coming soon', () => {
-        const row = (name: string) => pricing.match(new RegExp(`\\['${name}', ([^\\]]+)\\]`))![1];
-        for (const name of ['Projects', 'Team seats']) {
-            const cells = row(name).split(/',\s*'/).map((c) => c.replace(/'/g, ''));
-            expect(cells[0]).toBe('1');
-            for (const c of cells.slice(1)) expect(c, `${name}: ${c}`).toMatch(/^1 today, .+ coming soon$/);
-        }
+    it('pricing rows match the enforced limits', () => {
+        expect(pricing).toContain("['Projects', '1', '3', '10', 'Custom'],");
+        expect(pricing).toContain("['Team seats', '1', '5', '15', 'Unlimited'],");
+        expect(PLAN_PROJECTS).toEqual([1, 3, 10, null]);
+        expect(PLAN_SEATS).toEqual([1, 5, 15, null]);
+        expect(pricing).not.toMatch(/coming soon'\]/);
+        expect(pricing).not.toMatch(/name: 'Invite teammates', p:/);
     });
 
-    it('plan cards do not list seats or projects', () => {
-        expect(cards).not.toMatch(/team seats|\d+ projects|Custom projects/i);
+    it('plan cards list the seats and projects each plan includes', () => {
+        expect(cards).toContain("'3 projects and 5 team seats'");
+        expect(cards).toContain("'10 projects and 15 team seats'");
     });
 
-    it('coming-soon rows point at a roadmap phase that lists them', () => {
-        expect(pricing).toContain("{ name: 'Invite teammates', p: 6, tier: 1 }");
-        expect(roadmap).toMatch(/phase: 'Phase 6', name: 'Teams', status: '(Planned|In progress)', items: \['Invite teammates', 'More projects from the dashboard'/);
+    it('the Teams phase is done on the public roadmap', () => {
+        expect(roadmap).toMatch(/phase: 'Phase 6', name: 'Teams', status: 'Done'/);
     });
 
     it('no custom retention or custom environments promise for Enterprise', () => {

@@ -5,7 +5,7 @@
  */
 export const AUDIT_RETENTION_DAYS = { free: 30, starter: 90, growth: 365, enterprise: 730 } as const;
 export const AUDIT_PAGE_SIZE = 50;
-export const AUDIT_ENTITIES = ['experiment', 'survey', 'popup', 'domain', 'api_key', 'organization'] as const;
+export const AUDIT_ENTITIES = ['experiment', 'survey', 'popup', 'domain', 'api_key', 'organization', 'member', 'project'] as const;
 
 /** Unknown paid plan names get the Starter period, a missing plan is Free. */
 export function auditRetentionDays(plan: string | null | undefined): number {
@@ -30,9 +30,10 @@ export function isCustomerVisible(entity: string, action: string): boolean {
     return true;
 }
 
-const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization' };
+const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project' };
 const ACTION_NAMES: Record<string, string> = {
-    create: 'created', update: 'updated', delete: 'deleted', revoke: 'revoked',
+    create: 'created', update: 'updated', delete: 'deleted', revoke: 'revoked', rename: 'renamed',
+    'invite:create': 'invite link created', 'invite:revoke': 'invite cancelled', join: 'joined', role: 'role changed', remove: 'removed', leave: 'left',
     'goal:remove': 'goal removed', 'goal:reorder': 'goals reordered', 'goal:primary': 'primary goal changed',
     'funnel:add': 'funnel added', 'funnel:remove': 'funnel removed',
     'share:create': 'share link created', 'share:revoke': 'share link revoked',
