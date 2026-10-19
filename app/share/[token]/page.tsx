@@ -45,7 +45,7 @@ export default async function SharedResults({ params }: { params: Promise<{ toke
                         <div className="overflow-x-auto" tabIndex={0}>
                             <table className="w-full text-sm">
                                 <thead className="bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500">
-                                    <tr><th className="px-5 py-2">Version</th><th className="px-5 py-2 text-right">Visitors</th><th className="px-5 py-2 text-right">Conversions</th><th className="px-5 py-2 text-right">Rate</th><th className="px-5 py-2 text-right">Lift vs control</th><th className="px-5 py-2 text-right">95% interval</th></tr>
+                                    <tr><th className="px-5 py-2">Version</th><th className="px-5 py-2 text-right">Visitors</th><th className="px-5 py-2 text-right">Conversions</th><th className="px-5 py-2 text-right">Rate</th><th className="px-5 py-2 text-right">Lift vs control</th><th className="px-5 py-2 text-right">95% interval</th><th className="px-5 py-2 text-right">Chance to beat control</th></tr>
                                 </thead>
                                 <tbody>
                                     {g.rows.map((r) => (
@@ -56,6 +56,7 @@ export default async function SharedResults({ params }: { params: Promise<{ toke
                                             <td className="px-5 py-2.5 text-right tabular-nums">{pct(r.rate)}</td>
                                             <td className={`px-5 py-2.5 text-right tabular-nums ${r.lift === null ? 'text-zinc-400' : r.lift >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>{r.lift === null ? '–' : `${r.lift >= 0 ? '+' : ''}${(r.lift * 100).toFixed(1)}%`}</td>
                                             <td className="px-5 py-2.5 text-right tabular-nums text-zinc-600">{pct(r.ci[0])} to {pct(r.ci[1])}</td>
+                                            <td className="px-5 py-2.5 text-right tabular-nums text-zinc-700">{r.chance}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -63,7 +64,7 @@ export default async function SharedResults({ params }: { params: Promise<{ toke
                         </div>
                     </section>
                 ))}
-                <p className="text-xs text-zinc-500">Significance is tested once every version has at least 100 visitors, at 95% confidence. Made with <a href="https://www.freeabtest.com" className="text-blue-700 hover:underline">freeabtest.com</a>.</p>
+                <p className="text-xs text-zinc-500">Significance is tested once every version has at least 100 visitors, at 95% confidence, with a sequential test that stays valid however often results are checked. Made with <a href="https://www.freeabtest.com" className="text-blue-700 hover:underline">freeabtest.com</a>.</p>
             </main>
         </div>
     );

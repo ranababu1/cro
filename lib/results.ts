@@ -1,5 +1,6 @@
 import { db } from './db';
-import type { Experiment, ExperimentResults, GoalResults, VariationMetrics } from './types';
+import type { Experiment, ExperimentResults, GoalResults, SequentialVerdict, VariationMetrics } from './types';
+import { chanceToBeatControl, sequentialTest, SEQUENTIAL_ALPHA } from './sequential';
 import { buildLiveStats } from './liveStats';
 import { calculateConfidenceInterval, calculateStatisticalSignificance, sampleRatioMismatch } from './statistics';
 
@@ -24,25 +25,41 @@ function metricsFromStats(
     });
 }
 
+/**
+ * Fixed-sample z-test of the best variant (kept for the API), plus the peeking-safe verdict that decides the winner:
+ * each variation gets a sequential p-value and a chance to beat the control, and a winner needs its sequential
+ * p-value below alpha divided by the number of comparisons.
+ */
 function significanceAndWinner(variationMetrics: VariationMetrics[]) {
     const control = variationMetrics.find((v) => v.is_control);
     let statisticalSignificance;
+    let sequential: SequentialVerdict | undefined;
     let winner;
     if (control && variationMetrics.length > 1) {
         const others = variationMetrics.filter((v) => !v.is_control);
+        for (const v of others) {
+            const s = sequentialTest(control, v, others.length);
+            v.chance_to_beat_control = chanceToBeatControl(control, v);
+            v.sequential_p_value = s.p_value;
+            v.sequential_significant = s.is_significant;
+        }
         const best = others.reduce((a, b) => (b.conversion_rate > a.conversion_rate ? b : a), others[0]);
         if (best) {
-            const significance = calculateStatisticalSignificance(
+            statisticalSignificance = calculateStatisticalSignificance(
                 { total_users: control.total_users, conversions: control.conversions, conversion_rate: control.conversion_rate },
                 { total_users: best.total_users, conversions: best.conversions, conversion_rate: best.conversion_rate },
             );
-            statisticalSignificance = significance;
-            if (significance.is_significant && best.conversion_rate > control.conversion_rate) {
-                winner = best.variation_id;
-            }
+            const s = sequentialTest(control, best, others.length);
+            sequential = {
+                method: 'msprt', alpha: SEQUENTIAL_ALPHA, threshold: s.threshold, comparisons: s.comparisons,
+                best_variation_id: best.variation_id, p_value: s.p_value, is_significant: s.is_significant,
+                control_ahead: others.every((v) => v.sequential_significant && v.conversion_rate < control.conversion_rate),
+            };
+            const winners = others.filter((v) => v.sequential_significant && v.conversion_rate > control.conversion_rate);
+            if (winners.length) winner = winners.reduce((a, b) => (b.conversion_rate > a.conversion_rate ? b : a)).variation_id;
         }
     }
-    return { statisticalSignificance, winner };
+    return { statisticalSignificance, sequential, winner };
 }
 
 /** Full results for an experiment, used by the dashboard and public share links. */
@@ -63,7 +80,7 @@ export async function buildExperimentResults(experiment: Experiment, environment
         total_users: visitorMap.get(s.variation_id) ?? Number(s.total_users),
     }));
     const variationMetrics = metricsFromStats(variations, overallWithVisitors);
-    const { statisticalSignificance, winner } = significanceAndWinner(variationMetrics);
+    const { statisticalSignificance, sequential, winner } = significanceAndWinner(variationMetrics);
 
     const goalResults: GoalResults[] = [];
     for (const goal of goals) {
@@ -86,6 +103,7 @@ export async function buildExperimentResults(experiment: Experiment, environment
             is_primary: goal.is_primary,
             variations: metrics,
             statistical_significance: sig.statisticalSignificance,
+            sequential: sig.sequential,
             winner: sig.winner,
         });
     }
@@ -97,6 +115,7 @@ export async function buildExperimentResults(experiment: Experiment, environment
         variations: variationMetrics,
         goals: goalResults,
         statistical_significance: statisticalSignificance,
+        sequential,
         sample_size: variationMetrics.reduce((sum, v) => sum + v.total_users, 0),
         winner,
         // Auto-shift moves the split on purpose, so the mismatch check would always fire.

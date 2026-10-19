@@ -272,3 +272,5 @@ Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain
 Blog posts support article_schema, faq_schema and breadcrumb_schema frontmatter, each rendered as JSON-LD. Three posts live.
 
 Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.
+
+Statistics: lib/sequential.ts (mSPRT normal approximation, tau = 0.2 x pooled rate with a 0.002 floor, Bonferroni across variants, 100 visitor floor; chance to beat control from Beta(1,1) posteriors with a normal approximation, shown from 100 visitors per arm). Needs about 2.5x the visitors of a one-look z-test for the same observed difference; A/A simulation with 100 looks gives about 2% false winners against 34 to 40% for the z-test. Revenue still uses Welch's t-test (fixed sample).

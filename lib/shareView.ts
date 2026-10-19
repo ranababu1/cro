@@ -1,4 +1,5 @@
 import type { ExperimentResults } from './types';
+import { formatChance } from './sequential';
 
 /**
  * Trims results down to what a public share page may show: names and numbers only.
@@ -21,6 +22,7 @@ export function publicResultsView(r: ExperimentResults) {
                 rate: v.conversion_rate,
                 lift: v.is_control || !control || control.conversion_rate === 0 ? null : (v.conversion_rate - control.conversion_rate) / control.conversion_rate,
                 ci: [v.confidence_interval?.lower ?? 0, v.confidence_interval?.upper ?? 0] as [number, number],
+                chance: v.is_control ? '-' : formatChance(v.chance_to_beat_control, control?.total_users ?? 0, v.total_users),
             })),
         };
     });
@@ -28,8 +30,8 @@ export function publicResultsView(r: ExperimentResults) {
     const winner = r.variations.find((v) => v.variation_id === r.winner);
     let headline: { tone: 'success' | 'info'; title: string; text: string };
     if (minArm < 100) headline = { tone: 'info', title: 'Collecting data', text: 'Each version needs at least 100 visitors before the result is called.' };
-    else if (winner) headline = { tone: 'success', title: `${winner.variation_name} is ahead`, text: 'The difference on the primary goal is significant at 95% confidence.' };
-    else if (r.statistical_significance?.is_significant) headline = { tone: 'info', title: 'Control is ahead', text: 'The control converts significantly better on the primary goal.' };
+    else if (winner) headline = { tone: 'success', title: `${winner.variation_name} is ahead`, text: 'The difference on the primary goal is significant on a sequential test that stays valid however often results are checked.' };
+    else if (r.sequential?.control_ahead) headline = { tone: 'info', title: 'Control is ahead', text: 'The control converts significantly better on the primary goal.' };
     else headline = { tone: 'info', title: 'Too early to call', text: 'There is no significant difference on the primary goal yet.' };
     const srm = r.srm ? { ...r.srm, variations: r.srm.variations.map((v) => ({ ...v, variation_id: '' })) } : undefined;
     return { name: r.experiment_name, statusLabel, visitors: r.sample_size, goals, headline, srm };

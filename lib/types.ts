@@ -91,6 +91,27 @@ export interface VariationMetrics {
     conversions: number;
     conversion_rate: number;
     confidence_interval?: { lower: number; upper: number };
+    /** Variations only: probability that this variation's true rate beats the control's. */
+    chance_to_beat_control?: number;
+    /** Variations only: peeking-safe sequential p-value against the control. */
+    sequential_p_value?: number;
+    /** Variations only: the sequential test has a verdict (better or worse than the control). */
+    sequential_significant?: boolean;
+}
+
+/** Peeking-safe verdict: valid however often results are checked. */
+export interface SequentialVerdict {
+    method: 'msprt';
+    alpha: number;
+    /** alpha divided by the number of variations compared with the control. */
+    threshold: number;
+    comparisons: number;
+    /** The variation with the highest conversion rate, compared with the control. */
+    best_variation_id?: string;
+    p_value: number;
+    is_significant: boolean;
+    /** Every variation is significantly worse than the control. */
+    control_ahead: boolean;
 }
 
 export interface GoalResults {
@@ -104,6 +125,7 @@ export interface GoalResults {
         confidence_level: number;
         z_score: number;
     };
+    sequential?: SequentialVerdict;
     winner?: string;
 }
 
@@ -120,6 +142,8 @@ export interface ExperimentResults {
         z_score: number;
     };
     sample_size: number;
+    /** Peeking-safe verdict on the primary goal; `winner` follows it. */
+    sequential?: SequentialVerdict;
     winner?: string;
     srm?: {
         p_value: number;

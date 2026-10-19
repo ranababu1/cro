@@ -39,7 +39,7 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Will it slow my site down?' },
         { type: 'p', text: 'The script is under 30 KB gzipped and loads asynchronously. It makes one small request on page load. A paid feature adds one more small script only on pages where it applies, such as a heatmap, popup, survey or visual change.' },
         { type: 'h3', text: 'Which statistics do you use?' },
-        { type: 'p', text: 'A two-sided two-proportion z-test of the best variant against the control, at 95% confidence, and Wilson score intervals for each conversion rate. See [Reading results](/docs/results).' },
+        { type: 'p', text: 'A sequential test of each variant against the control that stays valid however often you check, at 95% confidence split across the variants, plus a chance to beat control and Wilson score intervals for each conversion rate. See [Reading results](/docs/results#significance).' },
         { type: 'h3', text: 'Can I change variations after starting?' },
         { type: 'p', text: 'You can change the traffic split, pause a variation, change who can enter and add goals from the **Edit test** tab. Those changes apply to new visitors only. Variation URLs cannot change and variations cannot be added or removed, so results stay valid. For different pages, create a new test.' },
         { type: 'h3', text: 'What are the free plan limits?', id: 'free-limits' },

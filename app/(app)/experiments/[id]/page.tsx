@@ -23,6 +23,7 @@ import {
 import { IntervalChart } from './IntervalChart';
 import { LiveStats } from './LiveStats';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
+import { formatChance } from '@/lib/sequential';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-');
 const pct = (v: number, digits = 2) => `${(v * 100).toFixed(digits)}%`;
@@ -184,20 +185,21 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
     const sourceVariations = activeGoal?.variations || results.variations;
     const rows = [...sourceVariations].sort((a, b) => Number(b.is_control) - Number(a.is_control));
     const control = rows.find((v) => v.is_control);
-    const sig = activeGoal?.statistical_significance || results.statistical_significance;
-    const winnerId = activeGoal?.winner || results.winner;
+    const seq = activeGoal ? activeGoal.sequential : results.sequential;
+    const winnerId = activeGoal ? activeGoal.winner : results.winner;
     const winner = sourceVariations.find((v) => v.variation_id === winnerId);
     const perArmMin = Math.min(...sourceVariations.map((v) => v.total_users));
+    const bar = seq ? `${+(seq.threshold * 100).toFixed(2)}%` : '5%';
 
     let summary: React.ReactNode;
     if (perArmMin < 100) {
         summary = <Alert tone="neutral" title="Collecting data">Each variation needs at least 100 visitors before significance is tested. The smallest has {perArmMin.toLocaleString()}.</Alert>;
-    } else if (winner && sig) {
-        summary = <Alert tone="success" title={`${winner.variation_name} is outperforming the control`}>The difference is statistically significant at 95% confidence (p = {sig.p_value.toFixed(4)}).</Alert>;
-    } else if (sig?.is_significant) {
-        summary = <Alert tone="warning" title="The control is outperforming every variant">The best variant converts significantly worse than the control (p = {sig.p_value.toFixed(4)}). Consider stopping the experiment.</Alert>;
-    } else if (sig) {
-        summary = <Alert tone="neutral" title="No significant difference yet">The best variant compared with the control gives p = {sig.p_value.toFixed(4)}. Keep the experiment running or accept that the effect may be small.</Alert>;
+    } else if (winner && seq) {
+        summary = <Alert tone="success" title={`${winner.variation_name} is outperforming the control`}>The sequential test is significant (p = {(winner.sequential_p_value ?? seq.p_value).toFixed(4)}, below {bar}), with a {formatChance(winner.chance_to_beat_control, control?.total_users ?? 0, winner.total_users)} chance to beat the control. This result holds however often you checked.</Alert>;
+    } else if (seq?.control_ahead) {
+        summary = <Alert tone="warning" title="The control is outperforming every variant">Every variant converts significantly worse than the control on the sequential test. Consider stopping the experiment.</Alert>;
+    } else if (seq) {
+        summary = <Alert tone="neutral" title="No significant difference yet">The best variant compared with the control gives a sequential p = {seq.p_value.toFixed(4)} (it needs to be below {bar}). You can keep checking: the verdict stays valid however often you look.</Alert>;
     }
 
     return (
@@ -219,7 +221,7 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                 <CardHeader title="Conversion rate by variation" description="Unique visitors who converted, divided by unique visitors assigned." />
                 <Table>
                     <THead>
-                        <tr><TH>Variation</TH><TH align="right">Visitors</TH><TH align="right">Conversions</TH><TH align="right">Conversion rate</TH><TH align="right">Lift vs control</TH><TH align="right">95% interval</TH></tr>
+                        <tr><TH>Variation</TH><TH align="right">Visitors</TH><TH align="right">Conversions</TH><TH align="right">Conversion rate</TH><TH align="right">Lift vs control</TH><TH align="right">95% interval</TH><TH align="right">Chance to beat control</TH></tr>
                     </THead>
                     <TBody>
                         {rows.map((v) => {
@@ -242,6 +244,7 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                                         </span>
                                     </TD>
                                     <TD numeric className="text-zinc-500">{v.confidence_interval ? `${pct(v.confidence_interval.lower)} to ${pct(v.confidence_interval.upper)}` : '-'}</TD>
+                                    <TD numeric>{v.is_control ? <span className="text-zinc-400">-</span> : formatChance(v.chance_to_beat_control, control?.total_users ?? 0, v.total_users)}</TD>
                                 </TR>
                             );
                         })}
@@ -253,10 +256,10 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                 <CardBody><IntervalChart rows={rows} winner={winnerId} /></CardBody>
             </Card>
             {experiment.auto_shift && (
-                <p className="text-sm text-zinc-600" data-testid="auto-shift-note">Auto-shift is on, so the split changes over time. Treat the significance test as a guide, and keep the test running until the leader stays clear.</p>
+                <p className="text-sm text-zinc-600" data-testid="auto-shift-note">Auto-shift is on, so the split changes over time, which can bias the comparison. Treat the significance verdict as a guide and keep the test running until the leader stays clear.</p>
             )}
             <p className="text-xs text-zinc-500">
-                Method: two-proportion z-test of the best variant against the control, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
+                Method: sequential test of each variant against the control (safe to check at any time, 5% split across {seq?.comparisons ?? 1} {seq?.comparisons === 1 ? 'comparison' : 'comparisons'}), chance to beat control from Beta posteriors, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
             </p>
             <RevenuePanel experimentId={experiment.id} hasEventGoals={hasEventGoals} />
             <FunnelsPanel experimentId={experiment.id} goals={goalList.map((g) => ({ goal_id: g.goal_id, goal_name: g.goal_name }))} />

@@ -35,7 +35,7 @@ export const introduction: DocPage = {
             'Automatic redirect from the control page to the assigned variation, without a flash of the wrong page.',
             'Sticky, deterministic assignment based on a hash of the visitor and experiment IDs.',
             'Click goals by CSS selector, with a primary goal and deduped conversions per visitor.',
-            'Results with conversion rate, lift, Wilson 95% intervals and a two-proportion z-test.',
+            'Results with conversion rate, lift, Wilson 95% intervals, chance to beat control and a peeking-safe sequential test.',
             'Separate dev, staging and prod environments, each with its own keys.',
             'An audit log of every change to experiments and keys, which you can read on paid plans.',
         ] },

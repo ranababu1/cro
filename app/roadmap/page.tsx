@@ -12,7 +12,7 @@ const available = [
     { title: 'Edit running tests', body: 'Change the split, pause a variation or add goals without resetting results.' },
     { title: 'Sample ratio mismatch warning', body: 'Get a plain warning when traffic does not split the way you set it.' },
     { title: 'Shareable results', body: 'Send a read-only results link to anyone, and turn it off at any time.' },
-    { title: 'Results you can defend', body: 'Conversion rate, lift and 95% confidence intervals per variation, with a significance test against the control.' },
+    { title: 'Results you can defend', body: 'Conversion rate, lift, 95% intervals and chance to beat control per variation, with a significance test that stays valid however often you check.' },
     { title: 'Live stats', body: 'Visitors, redirects and goal clicks update while the test runs, with a plain answer on who is ahead.' },
     { title: 'Heatmaps', body: 'On paid plans: click, scroll, confetti and overlay maps for every variation, split by device, with rage and dead clicks.' },
     { title: 'WordPress plugin', body: 'On paid plans: connect a WordPress site in a minute. Install it once and every future test runs through it.' },
@@ -22,7 +22,7 @@ const available = [
 type PhaseStatus = 'Done' | 'In progress' | 'Planned';
 
 const phases: { phase: string; name: string; status: PhaseStatus; items: string[] }[] = [
-    { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Live stats while a test runs', 'One-line install', 'Preview links for every version'] },
+    { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Peeking-safe significance and chance to beat control', 'Live stats while a test runs', 'One-line install', 'Preview links for every version'] },
     { phase: 'Phase 2', name: 'More goals and targeting', status: 'Done', items: ['Page visit, form submit and custom event goals', 'Targeting by device, UTM, referrer and new or returning visitors', 'Edit running tests safely', 'Sample ratio mismatch warning', 'Shareable results links', 'Google Tag Manager and WordPress guides'] },
     { phase: 'Phase 3', name: 'Heatmaps', status: 'Done', items: ['Click, scroll, confetti and overlay heatmaps', 'Heatmaps per variation and device', 'Rage and dead click detection', 'Filters by traffic source, conversion and date range', 'Sampling and stop rules for each test'] },
     { phase: 'Phase 4', name: 'Funnels, revenue and visual editor', status: 'Done', items: ['Traffic overview', 'Funnels built from your goals', 'Funnel completion trend over time', 'Revenue goals', 'Visual editor with move, page CSS and mobile preview', 'Auto-shift traffic to the winner'] },
