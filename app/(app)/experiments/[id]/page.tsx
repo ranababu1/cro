@@ -12,6 +12,7 @@ import { FunnelsPanel } from './FunnelsPanel';
 import { RevenuePanel } from './RevenuePanel';
 import { SegmentsPanel } from './SegmentsPanel';
 import { RolloutCard } from './RolloutCard';
+import { ScheduleCard } from './ScheduleCard';
 import { PreviewLinks } from './PreviewLinks';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
@@ -168,6 +169,7 @@ export default function ExperimentDetail() {
             {tab === 'errors' && <ErrorsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} completed={experiment.status === 'completed'} variations={variations} goals={goals} targeting={experiment.targeting} />}
             {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} onSaved={() => void load()} />}
+            {tab === 'settings' && experiment.status !== 'completed' && <div className="mb-6"><ScheduleCard experimentId={experiment.id} status={experiment.status} traffic={experiment.traffic_allocation} onSaved={() => void load()} /></div>}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );

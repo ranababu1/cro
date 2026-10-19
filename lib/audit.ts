@@ -37,7 +37,7 @@ const ACTION_NAMES: Record<string, string> = {
     'goal:remove': 'goal removed', 'goal:reorder': 'goals reordered', 'goal:primary': 'primary goal changed',
     'funnel:add': 'funnel added', 'funnel:remove': 'funnel removed',
     'share:create': 'share link created', 'share:revoke': 'share link revoked',
-    'rollout:start': 'winner rolled out to all visitors', 'rollout:stop': 'rollout stopped',
+    'rollout:start': 'winner rolled out to all visitors', 'rollout:stop': 'rollout stopped', 'schedule:set': 'schedule saved', 'schedule:clear': 'schedule removed', 'schedule:start': 'started on schedule', 'schedule:stop': 'stopped on schedule', 'schedule:start_failed': 'scheduled start cancelled',
     'auto_shift:on': 'auto-shift turned on', 'auto_shift:off': 'auto-shift turned off',
     'heatmap:export': 'heatmap data downloaded', 'heatmaps:settings': 'heatmap sampling or stop rules changed', 'heatmaps:restart': 'new heatmap collection period started',
     allocation: 'traffic split changed', 'allocation:auto': 'traffic split changed by auto-shift', 'variation:changes': 'visual changes saved',

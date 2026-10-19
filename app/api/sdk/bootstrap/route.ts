@@ -21,6 +21,7 @@ import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
 import { scheduleRetention } from '@/lib/retention';
+import { scheduleSchedules, effectiveAllocation } from '@/lib/schedule';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 import { previewReply } from '@/lib/preview';
@@ -40,6 +41,8 @@ export async function POST(request: NextRequest) {
         void bumpMetric(METRICS.sdk_bootstrap, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
         // Retention cleanup without a cron: at most hourly across instances, after the response is sent.
         scheduleRetention();
+        // Scheduled starts and stops: at most once a minute across instances, after the response.
+        scheduleSchedules();
 
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
@@ -117,7 +120,7 @@ export async function POST(request: NextRequest) {
         }
         const { experiment, variations, goals } = match;
         matched = experiment;
-        if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
+        if (!isExperimentEligible(experiment.status, effectiveAllocation(experiment))) {
             return reply({ matched: false, action: 'none', reason: 'not_running' });
         }
         // Auto-shift (Growth+): recompute the split at most hourly, after the response is sent.
@@ -149,7 +152,7 @@ export async function POST(request: NextRequest) {
                 return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'quota_exceeded', goals: goalPayload, control_url: controlUrl || undefined });
             }
             const active = variations.filter((v) => !v.paused && v.weight > 0);
-            const assigned = active.length ? assignUserToVariation(user_id, experiment.id, experiment.traffic_allocation, active) : null;
+            const assigned = active.length ? assignUserToVariation(user_id, experiment.id, effectiveAllocation(experiment), active) : null;
             if (!assigned) {
                 return reply({ matched: true, action: 'stay', experiment_id: experiment.id, reason: 'outside_traffic', goals: goalPayload, control_url: controlUrl || undefined });
             }

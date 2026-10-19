@@ -100,6 +100,8 @@ Admin-assigned plans and Enterprise for platform admin orgs: done
 
 Blog breadcrumbs on posts 01 and 02: done
 
+Scheduling with start and end dates, plus a gradual traffic ramp: done (proposal 6)
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

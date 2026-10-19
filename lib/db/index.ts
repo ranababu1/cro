@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, isNotNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
+import { and, or, eq, inArray, isNull, isNotNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
 import type { SegmentRow } from '../segments';
 import type { BatchItem } from 'drizzle-orm/batch';
 import { getDb } from './client';
@@ -331,11 +331,20 @@ export const db = {
 
     async updateExperiment(
         id: string,
-        updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at' | 'rollout_variation_id' | 'rollout_at'>>,
+        updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at' | 'rollout_variation_id' | 'rollout_at' | 'schedule_start_at' | 'schedule_stop_at' | 'schedule_error' | 'ramp_start' | 'ramp_step' | 'ramp_every_hours'>>,
     ): Promise<void> {
         clearConfigCache();
         const d = await getDb();
         await d.update(s.experiments).set({ ...updates, updated_at: nowIso() }).where(eq(s.experiments.id, id));
+    },
+
+    /** Experiments with a scheduled start or stop that is due: starts on draft or paused tests, stops on running or paused ones. */
+    async getDueSchedules(nowIso: string, limit = 50): Promise<Experiment[]> {
+        const d = await getDb();
+        return d.select().from(s.experiments).where(or(
+            and(isNotNull(s.experiments.schedule_start_at), lte(s.experiments.schedule_start_at, nowIso), inArray(s.experiments.status, ['draft', 'paused'])),
+            and(isNotNull(s.experiments.schedule_stop_at), lte(s.experiments.schedule_stop_at, nowIso), inArray(s.experiments.status, ['running', 'paused'])),
+        )).limit(limit);
     },
 
     async deleteExperiment(id: string): Promise<void> {
