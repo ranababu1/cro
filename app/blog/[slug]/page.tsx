@@ -31,6 +31,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         <div className="min-h-screen bg-white text-zinc-950">
             {p.articleSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.articleSchema) }} />}
             {p.faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.faqSchema) }} />}
+            {p.breadcrumbSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.breadcrumbSchema) }} />}
             <ReadingProgress target="article-body" />
             <SiteHeader />
             <main>

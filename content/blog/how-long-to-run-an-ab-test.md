@@ -105,7 +105,7 @@ Here is the same calculation for a 3% baseline across different traffic levels, 
 | 25,000 | 30 days (5 weeks) | 8 days (2 weeks) | 4 days (2 weeks) |
 | 50,000 | 15 days (3 weeks) | 4 days (2 weeks) | 2 days (2 weeks) |
 
-If your row only has long numbers, our upcoming guide to A/B testing with low traffic covers what you can still learn.
+If your row only has long numbers, our guide to [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) covers what you can still learn.
 
 ## Why at least 2 weeks, even with lots of traffic?
 

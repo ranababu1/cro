@@ -148,7 +148,7 @@ Answer three questions in order.
 | 30% (3.0% to 3.9%) | 6,455 | 12,910 |
 | 50% (3.0% to 4.5%) | 2,518 | 5,036 |
 
-If you get 10,000 visitors a week to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take about 11 weeks. Our guide on [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test) works through this for other traffic levels. No free plan fixes that. Paying Convert $299 a month does not shrink the sample size; it only buys you a different editor and feature set.
+If you get 10,000 visitors a week to the page you want to test, you can detect a 20% lift in about 3 weeks, but a 10% lift would take about 11 weeks. Our guide on [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test) works through this for other traffic levels, and our guide to [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) covers what a small site can still learn. No free plan fixes that. Paying Convert $299 a month does not shrink the sample size; it only buys you a different editor and feature set.
 
 ## What to check before you pay
 
