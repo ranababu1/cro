@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { canUseFeature, UPGRADE_NOTE } from '@/lib/entitlements';
-import { computeFunnel, funnelSchema, MAX_FUNNELS, parseSteps } from '@/lib/funnels';
+import { computeFunnel, computeFunnelTrend, funnelSchema, MAX_FUNNELS, parseSteps, pickBucket } from '@/lib/funnels';
 import { formatZodError } from '@/lib/validation';
 import type { Experiment } from '@/lib/types';
 
@@ -21,7 +21,7 @@ async function guard(request: NextRequest, params: Params['params']): Promise<{ 
     return { experiment, orgId, userId: ctx.userId };
 }
 
-/** GET /api/experiments/[id]/funnels: funnels with per-variation step counts. */
+/** GET /api/experiments/[id]/funnels?environment=&trend=day|week: funnels with per-variation step counts and a trend. */
 export async function GET(request: NextRequest, { params }: Params) {
     try {
         const g = await guard(request, params);
@@ -43,15 +43,20 @@ export async function GET(request: NextRequest, { params }: Params) {
         ]);
         const visitors = new Map((totals.get('') ?? []).map((r) => [r.variation_id, Number(r.total_users)]));
         const vars = [...variations].sort((a, b) => Number(b.is_control) - Number(a.is_control)).map((v) => ({ id: v.id, name: v.name, is_control: !!v.is_control }));
+        // Trend periods: days for up to 60 days of data, weeks after that, unless ?trend= asks for one.
+        const times = hits.map((h) => h.t).sort();
+        const bucket = pickBucket(times[0] ?? null, times[times.length - 1] ?? null, request.nextUrl.searchParams.get('trend'));
         const funnels = list.map((f) => {
             const steps = parseSteps(f.steps);
             const live = steps.filter((id) => names.has(id)).map((id) => ({ id, name: names.get(id)! }));
+            const own = hits.filter((h) => live.some((s) => s.id === h.goal_id));
             return {
                 id: f.id,
                 name: f.name,
                 steps: live,
                 removed_steps: steps.length - live.length,
-                variations: live.length >= 2 ? computeFunnel(live, vars, visitors, hits.filter((h) => live.some((s) => s.id === h.goal_id))) : [],
+                variations: live.length >= 2 ? computeFunnel(live, vars, visitors, own) : [],
+                trend: live.length >= 2 ? computeFunnelTrend(live, vars, own, bucket) : null,
             };
         });
         return NextResponse.json({ funnels, max: MAX_FUNNELS });

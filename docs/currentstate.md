@@ -238,3 +238,8 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - Page views = scroll entries (heatmap.js sends one with the final beacon of each page view). /api/capture adds them with one UPDATE per batch and returns 202 { accepted: 0, stopped: true } once a rule is reached.
 - Bootstrap uses the matched test's rate (from the cached running config, so a stop can lag the cache TTL; capture enforces it from the database).
 - GET/PATCH /api/experiments/:id/heatmaps/settings (paid; null clears; restart resets counter and since; audited heatmaps:settings or heatmaps:restart). UI: HeatmapCollection bar at the top of the Heatmaps tab.
+
+## Funnel trend (19 Oct 2026)
+- lib/funnels.ts computeFunnelTrend(): cohort = period of a visitor's first step-1 hit (UTC day or Monday week); completed = finished every step in order (same rule as computeFunnel), at any later time. Gaps filled with zeros, latest 90 periods kept (MAX_TREND_POINTS).
+- GET /api/experiments/:id/funnels returns trend per funnel; ?trend=day|week, default days up to 60 days of data, else weeks. Computed from the same first-hit rows, no extra query or writes.
+- UI: FunnelTrend SVG line chart under each funnel card, gaps where nobody started, point tooltips with counts.
