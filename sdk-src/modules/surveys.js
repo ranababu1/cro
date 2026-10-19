@@ -5,7 +5,7 @@ window.__ABTestSrvOn = true;
 
 var SRV_CSS = '.opts{display:flex;flex-direction:column;gap:8px;margin:4px 0 14px}.rate{flex-direction:row;gap:6px}' +
     '.opt{display:block;width:100%;text-align:left;padding:9px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#0f172a;font-size:14px;cursor:pointer}' +
-    '.rate .opt{text-align:center;padding:9px 0}.opt[aria-pressed=true]{color:#fff}' +
+    '.rate .opt{text-align:center;padding:9px 0}.nps{gap:3px}.nps .opt{padding:8px 0;font-size:13px;border-radius:7px}.opt[aria-pressed=true]{color:#fff}' +
     'textarea{display:block;width:100%;min-height:72px;margin:0 0 14px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;font-size:14px;resize:vertical;color:#0f172a;background:#fff}' +
     'label{display:block;font-size:13px;color:#475569;margin:0 0 6px}.ends{display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin:-8px 0 14px}' +
     'button.send{padding:9px 18px;border:0;border-radius:9px;color:#fff;font-size:14px;font-weight:600;cursor:pointer}button.send:disabled{opacity:.5;cursor:default}';
@@ -22,6 +22,7 @@ function show(q) {
     if (done(q) || getFlag(store(q.frequency), srvKey(q)) || !claim()) return;
     setFlag(store(q.frequency), srvKey(q));
     var answered = false;
+    var scale = q.type === 'rating' || q.type === 'nps';
     var s = shell('data-abtest-survey', q.id, SRV_CSS, q.position, q.question, function () { if (!answered) send(q, 'close'); });
     s.box.appendChild(el('h2', '', q.question));
     var form = el('div');
@@ -38,8 +39,8 @@ function show(q) {
         submit.disabled = true;
         text.addEventListener('input', function () { submit.disabled = !text.value.trim(); });
     } else {
-        var list = el('div', q.type === 'rating' ? 'opts rate' : 'opts');
-        var values = q.type === 'rating' ? ['1', '2', '3', '4', '5'] : q.options;
+        var list = el('div', q.type === 'nps' ? 'opts rate nps' : scale ? 'opts rate' : 'opts');
+        var values = q.type === 'rating' ? ['1', '2', '3', '4', '5'] : q.type === 'nps' ? ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'] : q.options;
         var buttons = [];
         for (var i = 0; i < values.length; i++) (function (v) {
             var b = el('button', 'opt', v);
@@ -59,10 +60,10 @@ function show(q) {
             list.appendChild(b);
         })(values[i]);
         form.appendChild(list);
-        if (q.type === 'rating') {
+        if (scale) {
             var ends = el('div', 'ends');
-            ends.appendChild(el('span', '', 'Not at all'));
-            ends.appendChild(el('span', '', 'Very'));
+            ends.appendChild(el('span', '', q.type === 'nps' ? 'Not likely' : 'Not at all'));
+            ends.appendChild(el('span', '', q.type === 'nps' ? 'Very likely' : 'Very'));
             form.appendChild(ends);
         }
         if (q.comment) {
@@ -79,7 +80,7 @@ function show(q) {
         if (!answer || answered) return;
         answered = true;
         setFlag(store('once'), srvKey(q) + '_done');
-        send(q, 'response', { answer: q.type === 'rating' ? Number(answer) : answer, comment: q.type !== 'text' && text ? text.value.trim() : '' });
+        send(q, 'response', { answer: scale ? Number(answer) : answer, comment: q.type !== 'text' && text ? text.value.trim() : '' });
         form.parentNode.removeChild(form);
         s.box.appendChild(el('p', '', q.thanks));
         setTimeout(s.remove, 2500);

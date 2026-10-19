@@ -44,7 +44,7 @@ const availableToday = [
     'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
     'JavaScript error tracking on paid plans: errors per test version',
     'Popups and calls to action on paid plans: center, corner or bar, with views and clicks',
-    'Surveys on paid plans: one question with choices, a 1 to 5 rating or a written answer, with CSV export',
+    'Surveys on paid plans: one question with choices, a 1 to 5 rating, NPS or a written answer, with templates and CSV export',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
