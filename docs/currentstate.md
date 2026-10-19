@@ -305,3 +305,9 @@ Webhooks (feature 'webhooks', paid; lib/webhooks.ts): tables webhooks and webhoo
 
 ## Webhook connection pinning
 - lib/webhooks.ts: checkHost(url, resolve) resolves once, refuses if any answer is private, and returns { pin: { address, family } } (first answer). pinnedFetch(url, init, pin) is the default Fetcher: node:https request with lookup = pinnedLookup(pin) (answers both the single and the all:true form, so autoSelectFamily cannot re-resolve), agent false, no redirects, AbortSignal timeout. Certificate and SNI use the URL host. Fetcher signature is (url, init, pin).
+
+## Test planner
+- All plans, no heavy writes. Table test_ideas (project, title, hypothesis, page_url, baseline_rate %, expected_lift % relative, daily_visitors, variations incl. control, priority low/medium/high, status idea/planned/started/dropped, experiment_id FK set null). Up to 200 per project (MAX_IDEAS). Ids idea_.
+- lib/planner.ts: planEstimate uses estimateRequiredSampleSize with alpha 0.05/(versions-1) and power 0.8; fixed_days = ceil(total/daily), sequential_days = 2x to 3x (SEQUENTIAL_FACTOR, matching docs/results#sample-size). estimateText for the UI.
+- API: GET/POST /api/ideas (current project via currentProject in lib/popupRoutes.ts, any member), GET/PATCH/DELETE /api/ideas/[id]. PATCH experiment_id must be a test in the same project and moves the idea to started (audit idea:start). Audit entity idea.
+- UI: /planner board (nav Test planner). Create test links to /experiments/new?idea=<id>; the wizard prefills name and control URL, sends Hypothesis: ... as the description, and PATCHes the idea with the new experiment id.

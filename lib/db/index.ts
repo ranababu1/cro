@@ -1260,6 +1260,41 @@ export const db = {
         await d.delete(s.popups).where(eq(s.popups.id, id));
     },
 
+    // Test planner (lib/planner.ts)
+    async listIdeas(projectId: string) {
+        const d = await getDb();
+        return d.select().from(s.testIdeas).where(eq(s.testIdeas.project_id, projectId)).orderBy(desc(s.testIdeas.updated_at));
+    },
+
+    async countIdeas(projectId: string): Promise<number> {
+        const d = await getDb();
+        const r = await d.select({ n: sql<number>`count(*)` }).from(s.testIdeas).where(eq(s.testIdeas.project_id, projectId));
+        return Number(r[0]?.n ?? 0);
+    },
+
+    async getIdea(id: string) {
+        const d = await getDb();
+        return (await d.select().from(s.testIdeas).where(eq(s.testIdeas.id, id)))[0] ?? null;
+    },
+
+    async createIdea(i: Omit<typeof s.testIdeas.$inferInsert, 'id' | 'created_at' | 'updated_at'>) {
+        const d = await getDb();
+        const id = generateId('idea');
+        await d.insert(s.testIdeas).values({ ...i, id });
+        return (await this.getIdea(id))!;
+    },
+
+    async updateIdea(id: string, u: Partial<Omit<typeof s.testIdeas.$inferInsert, 'id' | 'project_id' | 'created_at'>>) {
+        const d = await getDb();
+        await d.update(s.testIdeas).set({ ...u, updated_at: nowIso() }).where(eq(s.testIdeas.id, id));
+        return this.getIdea(id);
+    },
+
+    async deleteIdea(id: string): Promise<void> {
+        const d = await getDb();
+        await d.delete(s.testIdeas).where(eq(s.testIdeas.id, id));
+    },
+
     // Page heatmaps (lib/pageHeatmaps.ts)
     async listPageHeatmaps(projectId: string) {
         const d = await getDb();
