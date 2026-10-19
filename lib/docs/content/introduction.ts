@@ -37,7 +37,7 @@ export const introduction: DocPage = {
             'Click goals by CSS selector, with a primary goal and deduped conversions per visitor.',
             'Results with conversion rate, lift, Wilson 95% intervals and a two-proportion z-test.',
             'Separate dev, staging and prod environments, each with its own keys.',
-            'An audit log of every change to experiments and keys.',
+            'An audit log of every change to experiments and keys, which you can read on paid plans.',
         ] },
         { type: 'h2', text: 'What is coming later' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'Session recordings are on the [roadmap](/roadmap). Heatmaps and funnels are live on paid plans, and the visual editor on Growth and above.' },
