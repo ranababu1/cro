@@ -1,4 +1,5 @@
 import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
+import type { SegmentRow } from '../segments';
 import type { BatchItem } from 'drizzle-orm/batch';
 import { getDb } from './client';
 import * as s from './schema';
@@ -429,7 +430,10 @@ export const db = {
     },
 
     /** Returns true when a new assignment row was written. */
-    async createAssignment(a: { experiment_id: string; variation_id: string; user_id: string; environment_id?: string | null }): Promise<boolean> {
+    async createAssignment(a: {
+        experiment_id: string; variation_id: string; user_id: string; environment_id?: string | null;
+        segment_device?: string | null; segment_source?: string | null; segment_visitor?: string | null;
+    }): Promise<boolean> {
         const d = await getDb();
         const rows = await d
             .insert(s.assignments)
@@ -437,6 +441,34 @@ export const db = {
             .onConflictDoNothing()
             .returning({ id: s.assignments.id });
         return rows.length > 0;
+    },
+
+    /**
+     * Visitors and converters per variation for each segment dimension. Visitors are users with any event, as in the
+     * main results; converters have a conversion for the goal (any conversion when goalId is null).
+     */
+    async getSegmentStats(experimentId: string, environmentId: string | undefined, goalId: string | null): Promise<SegmentRow[]> {
+        const d = await getDb();
+        const env = environmentId ? sql` and e.environment_id = ${environmentId}` : sql``;
+        const conv = goalId ? sql`e.event_type = 'conversion' and e.goal_id = ${goalId}` : sql`e.event_type = 'conversion'`;
+        const rows = await d.all<{ variation_id: string; device: string | null; source: string | null; visitor: string | null; users: number; conversions: number }>(sql`
+            select u.variation_id, a.segment_device as device, a.segment_source as source, a.segment_visitor as visitor,
+                count(*) as users, sum(u.converted) as conversions
+            from (
+                select e.variation_id, e.user_id, max(case when ${conv} then 1 else 0 end) as converted
+                from events e where e.experiment_id = ${experimentId}${env}
+                group by e.variation_id, e.user_id
+            ) u
+            left join assignments a on a.experiment_id = ${experimentId} and a.user_id = u.user_id
+            group by u.variation_id, a.segment_device, a.segment_source, a.segment_visitor`);
+        const out: SegmentRow[] = [];
+        for (const r of rows) {
+            const users = Number(r.users) || 0, conversions = Number(r.conversions) || 0;
+            out.push({ dim: 'device', key: r.device, variation_id: r.variation_id, users, conversions });
+            out.push({ dim: 'source', key: r.source, variation_id: r.variation_id, users, conversions });
+            out.push({ dim: 'visitor', key: r.visitor, variation_id: r.variation_id, users, conversions });
+        }
+        return out;
     },
 
     // Events

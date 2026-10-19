@@ -184,6 +184,10 @@ export const assignments = sqliteTable('assignments', {
     environment_id: text('environment_id').references(() => environments.id, { onDelete: 'cascade' }),
     user_id: text('user_id').notNull(),
     assigned_at: text('assigned_at').notNull().default(now),
+    // Segment of the visitor when first assigned (results by segment). Null for visitors assigned before segments were stored.
+    segment_device: text('segment_device'),
+    segment_source: text('segment_source'),
+    segment_visitor: text('segment_visitor'),
 }, (t) => [uniqueIndex('uq_assignments_experiment_user').on(t.experiment_id, t.user_id)]);
 
 export const events = sqliteTable('events', {

@@ -10,6 +10,7 @@ import { HeatmapsPanel } from './HeatmapsPanel';
 import { ErrorsPanel } from './ErrorsPanel';
 import { FunnelsPanel } from './FunnelsPanel';
 import { RevenuePanel } from './RevenuePanel';
+import { SegmentsPanel } from './SegmentsPanel';
 import { PreviewLinks } from './PreviewLinks';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
@@ -261,6 +262,7 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
             <p className="text-xs text-zinc-500">
                 Method: sequential test of each variant against the control (safe to check at any time, 5% split across {seq?.comparisons ?? 1} {seq?.comparisons === 1 ? 'comparison' : 'comparisons'}), chance to beat control from Beta posteriors, Wilson score intervals. Sample size: {results.sample_size.toLocaleString()} visitors.
             </p>
+            <SegmentsPanel experimentId={experiment.id} />
             <RevenuePanel experimentId={experiment.id} hasEventGoals={hasEventGoals} />
             <FunnelsPanel experimentId={experiment.id} goals={goalList.map((g) => ({ goal_id: g.goal_id, goal_name: g.goal_name }))} />
         </div>
