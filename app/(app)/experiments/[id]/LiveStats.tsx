@@ -1,4 +1,5 @@
 import type { LiveStats as LiveStatsData, LiveGoal } from '@/lib/liveStats';
+import { formatChance } from '@/lib/sequential';
 import { Card, CardHeader, CardBody, Badge, Table, THead, TBody, TR, TH, TD, Stat, Kbd, EmptyState } from '@/app/components/ui';
 
 const pct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
@@ -81,6 +82,7 @@ export function LiveStats({ live, running, updatedAt }: { live: LiveStatsData; r
 
 function GoalBlock({ goal, colorOf }: { goal: LiveGoal; colorOf: (id: string) => string }) {
     const max = Math.max(1, ...goal.arms.map((a) => a.clicks));
+    const controlVisitors = goal.arms.find((a) => a.is_control)?.visitors ?? 0;
     return (
         <div className="rounded-lg border border-zinc-200">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-100 px-4 py-3">
@@ -96,7 +98,7 @@ function GoalBlock({ goal, colorOf }: { goal: LiveGoal; colorOf: (id: string) =>
                 </div>
             </div>
             <Table>
-                <THead><tr><TH>Variation</TH><TH>Clicks</TH><TH align="right">Conversion rate</TH><TH align="right">95% interval</TH><TH align="right">Uplift vs control</TH></tr></THead>
+                <THead><tr><TH>Variation</TH><TH>Clicks</TH><TH align="right">Conversion rate</TH><TH align="right">95% interval</TH><TH align="right">Uplift vs control</TH><TH align="right">Chance to beat control</TH></tr></THead>
                 <TBody>
                     {goal.arms.map((a) => (
                         <TR key={a.variation_id}>
@@ -118,6 +120,7 @@ function GoalBlock({ goal, colorOf }: { goal: LiveGoal; colorOf: (id: string) =>
                                     </span>
                                 )}
                             </TD>
+                            <TD numeric>{a.is_control ? <span className="text-zinc-400">-</span> : formatChance(a.chance_to_beat, controlVisitors, a.visitors)}</TD>
                         </TR>
                     ))}
                 </TBody>

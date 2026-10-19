@@ -4,7 +4,8 @@ import { describeGoal } from './goals';
  * variation, conversion rates with Wilson 95% intervals, uplift vs control
  * and a plain-language status. Pure functions so they are easy to test.
  */
-import { calculateConfidenceInterval, calculateStatisticalSignificance } from './statistics';
+import { calculateConfidenceInterval } from './statistics';
+import { chanceToBeatControl, sequentialTest } from './sequential';
 
 export interface LiveCounts {
     byType: { variation_id: string; event_type: string; users: number; events: number }[];
@@ -35,8 +36,11 @@ export interface LiveGoalArm {
     /** Relative uplift vs control, e.g. 0.12 = +12%. Null for the control or when control has no clicks. */
     uplift: number | null;
     uplift_ci: { lower: number; upper: number } | null;
+    /** Peeking-safe sequential p-value against the control. */
     p_value: number | null;
     significant: boolean;
+    /** Probability this version beats the control, null for the control. */
+    chance_to_beat: number | null;
 }
 
 export type LiveTone = 'ahead' | 'behind' | 'early';
@@ -130,13 +134,17 @@ export function buildLiveStats(variations: VariationIn[], goals: GoalIn[], count
             const rate = v.visitors > 0 ? clicks / v.visitors : 0;
             let p: number | null = null;
             let significant = false;
+            let chance: number | null = null;
             if (!v.is_control && control) {
-                const sig = calculateStatisticalSignificance(
+                // Peeking-safe: live stats are checked often, so the verdict uses the sequential test.
+                const sig = sequentialTest(
                     { total_users: ctlN, conversions: ctlClicks, conversion_rate: ctlN ? ctlClicks / ctlN : 0 },
                     { total_users: v.visitors, conversions: clicks, conversion_rate: rate },
+                    Math.max(1, liveVariations.length - 1),
                 );
                 p = sig.p_value;
                 significant = sig.is_significant;
+                chance = chanceToBeatControl({ total_users: ctlN, conversions: ctlClicks }, { total_users: v.visitors, conversions: clicks });
             }
             const ctlRate = ctlN ? ctlClicks / ctlN : 0;
             return {
@@ -151,6 +159,7 @@ export function buildLiveStats(variations: VariationIn[], goals: GoalIn[], count
                 uplift_ci: v.is_control ? null : upliftInterval(ctlClicks, ctlN, clicks, v.visitors),
                 p_value: p,
                 significant,
+                chance_to_beat: chance,
             };
         });
         return {

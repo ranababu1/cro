@@ -28,7 +28,8 @@ describe('public copy matches what the app enforces', () => {
     it('drops old variant counts and unplanned promises', () => {
         for (const src of [pricing, cards, roadmap, home, docs]) {
             expect(src).not.toMatch(/\b26\b(?! 26)|2 to 26|control \+ 25|up to 10 on paid|allow up to 10\b/);
-            expect(src).not.toMatch(/Bayesian|sequential/i);
+            // Sequential testing is shipped (lib/sequential.ts); a Bayesian engine is not, so never claim one.
+            expect(src).not.toMatch(/Bayesian/i);
             expect(src).not.toContain('—');
         }
         expect(pricing).not.toMatch(/email you at 80%/);

@@ -88,20 +88,30 @@ export const restApi: DocPage = {
   "experiment_id": "exp_123",
   "experiment_name": "Pricing page headline",
   "status": "running",
-  "sample_size": 2400,
-  "winner": "var_456",               // present only when a variant is significantly better
+  "sample_size": 4800,
+  "winner": "var_456",               // present only when a variant is significantly better on the sequential test
   "variations": [
     {
       "variation_id": "var_111", "variation_name": "Control", "is_control": true,
-      "total_users": 1200, "conversions": 60, "conversion_rate": 0.05,
-      "confidence_interval": { "lower": 0.039, "upper": 0.064 }
+      "total_users": 2400, "conversions": 120, "conversion_rate": 0.05,
+      "confidence_interval": { "lower": 0.042, "upper": 0.059 }
+    },
+    {
+      "variation_id": "var_456", "variation_name": "Variant B", "is_control": false,
+      "total_users": 2400, "conversions": 175, "conversion_rate": 0.0729,
+      "confidence_interval": { "lower": 0.063, "upper": 0.084 },
+      "chance_to_beat_control": 0.9995, "sequential_p_value": 0.047, "sequential_significant": true
     }
   ],
+  "sequential": {                    // peeking-safe verdict; "winner" follows it
+    "method": "msprt", "alpha": 0.05, "threshold": 0.05, "comparisons": 1,
+    "best_variation_id": "var_456", "p_value": 0.047, "is_significant": true, "control_ahead": false
+  },
   "statistical_significance": {
-    "is_significant": true, "p_value": 0.012, "confidence_level": 0.95, "z_score": -2.51
+    "is_significant": true, "p_value": 0.0009, "confidence_level": 0.95, "z_score": -3.31
   }
 }` },
-        { type: 'p', text: '`z_score` is computed as control minus variant, so a negative value means the variant converts better.' },
+        { type: 'p', text: '`statistical_significance` is a fixed-sample z-test of the best variant, valid only if you look once at a sample size planned in advance. `z_score` is computed as control minus variant, so a negative value means the variant converts better. `sequential` and the per-variation `sequential_p_value` stay valid however often you check; `threshold` is 0.05 divided by the number of variants compared with the control.' },
         { type: 'h2', text: 'API keys' },
         { type: 'p', text: 'Dashboard session only. `GET /api/keys` lists environments and keys (prefix only). `POST /api/keys` with `{ "environment_id": "env_...", "type": "sdk" | "secret", "label": "optional" }` creates a key and returns the plaintext once. `DELETE /api/keys/{id}` revokes it immediately.' },
     ],
