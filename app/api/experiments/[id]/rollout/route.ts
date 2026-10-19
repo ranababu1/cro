@@ -6,6 +6,7 @@ import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { formatZodError } from '@/lib/validation';
 import { ROLLOUT_FROM } from '@/lib/rollout';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
+import { emitTestCompleted } from '@/lib/webhooks';
 
 type Params = { params: Promise<{ id: string }> };
 const body = z.object({ variation_id: z.string().min(1).max(100) });
@@ -32,7 +33,10 @@ export async function POST(request: NextRequest, { params }: Params) {
         const ending = experiment.status !== 'completed';
         await db.updateExperiment(id, { status: 'completed', ...(experiment.ended_at ? {} : { ended_at: now }), rollout_variation_id: variation.id, rollout_at: now });
         const orgId = await orgIdForProject(experiment.project_id);
-        if (ending) await bumpMetric(METRICS.tests_completed, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
+        if (ending) {
+            await bumpMetric(METRICS.tests_completed, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
+            await emitTestCompleted(orgId, experiment, 'rollout');
+        }
         await db.audit({ orgId, actorId: ctx.userId, entity: 'experiment', entityId: id, action: 'rollout:start', diff: { variation: variation.name, ended_test: ending } });
         return NextResponse.json({ experiment: await db.getExperiment(id) });
     } catch (error) {

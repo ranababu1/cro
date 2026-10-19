@@ -11,6 +11,7 @@ import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { scheduleAutoShift } from '@/lib/autoShiftRun';
 import { scheduleSchedules, effectiveAllocation, pastStop } from '@/lib/schedule';
+import { scheduleWebhooks } from '@/lib/webhooks';
 
 const assignBody = z.object({
     experiment_id: z.string().min(1).max(100),
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
         const { experiment_id: experimentId, user_id: userId } = parsed.data;
 
         scheduleSchedules();
+        scheduleWebhooks();
         const experiment = await db.getExperiment(experimentId);
         if (!experiment || experiment.project_id !== auth.ctx.projectId) {
             return sdkJson({ error: 'Experiment not found' }, 404);

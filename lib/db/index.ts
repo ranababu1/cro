@@ -1286,6 +1286,85 @@ export const db = {
         return Number(r.rowsAffected) > 0;
     },
 
+    // Webhooks (paid). See lib/webhooks.ts.
+    async listWebhooks(orgId: string) {
+        const d = await getDb();
+        return d.select().from(s.webhooks).where(eq(s.webhooks.org_id, orgId)).orderBy(asc(s.webhooks.created_at));
+    },
+    async getWebhook(id: string) {
+        const d = await getDb();
+        return (await d.select().from(s.webhooks).where(eq(s.webhooks.id, id)).limit(1))[0] ?? null;
+    },
+    async createWebhook(w: { id: string; org_id: string; url: string; secret: string; events: string; created_by: string | null }) {
+        clearConfigCache();
+        const d = await getDb();
+        await d.insert(s.webhooks).values(w);
+    },
+    async updateWebhook(id: string, patch: Partial<{ url: string; secret: string; events: string; enabled: boolean; last_delivery_at: string | null; last_status: number | null; last_error: string | null }>) {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.webhooks).set(patch).where(eq(s.webhooks.id, id));
+    },
+    async deleteWebhook(id: string) {
+        clearConfigCache();
+        const d = await getDb();
+        await d.delete(s.webhooks).where(eq(s.webhooks.id, id));
+    },
+    /** Org ids with at least one enabled webhook. */
+    async orgsWithWebhooks(): Promise<string[]> {
+        const d = await getDb();
+        const rows = await d.selectDistinct({ org_id: s.webhooks.org_id }).from(s.webhooks).where(eq(s.webhooks.enabled, true));
+        return rows.map((r) => r.org_id);
+    },
+    /** Inserts outbox rows in one statement; an event already queued for an endpoint (same dedupe key) is skipped. */
+    async enqueueWebhookDeliveries(rows: Array<{ id: string; webhook_id: string; org_id: string; event: string; dedupe_key: string; payload: string; next_attempt_at: string }>): Promise<number> {
+        if (!rows.length) return 0;
+        const d = await getDb();
+        const r = await d.insert(s.webhookDeliveries).values(rows).onConflictDoNothing().returning({ id: s.webhookDeliveries.id });
+        return r.length;
+    },
+    /** Claims due deliveries (pending, or stuck in sending for 5 minutes) so only one runner sends each. */
+    async claimDueWebhookDeliveries(nowIsoValue: string, limit: number) {
+        const d = await getDb();
+        const stale = new Date(Date.parse(nowIsoValue) - 5 * 60_000).toISOString();
+        const due = await d.select({ id: s.webhookDeliveries.id }).from(s.webhookDeliveries).where(or(
+            and(eq(s.webhookDeliveries.status, 'pending'), lte(s.webhookDeliveries.next_attempt_at, nowIsoValue)),
+            and(eq(s.webhookDeliveries.status, 'sending'), lte(s.webhookDeliveries.locked_at, stale)),
+        )).orderBy(asc(s.webhookDeliveries.next_attempt_at)).limit(limit);
+        const claimed = [];
+        for (const { id } of due) {
+            const r = await d.update(s.webhookDeliveries).set({ status: 'sending', locked_at: nowIsoValue })
+                .where(and(eq(s.webhookDeliveries.id, id), or(eq(s.webhookDeliveries.status, 'pending'), and(eq(s.webhookDeliveries.status, 'sending'), lte(s.webhookDeliveries.locked_at, stale)))))
+                .returning();
+            if (r[0]) claimed.push(r[0]);
+        }
+        return claimed;
+    },
+    /** Claims one pending delivery by id (the Send test button). */
+    async claimWebhookDelivery(id: string, nowIsoValue: string) {
+        const d = await getDb();
+        const r = await d.update(s.webhookDeliveries).set({ status: 'sending', locked_at: nowIsoValue })
+            .where(and(eq(s.webhookDeliveries.id, id), eq(s.webhookDeliveries.status, 'pending'))).returning();
+        return r[0] ?? null;
+    },
+    async finishWebhookDelivery(id: string, patch: { status: 'pending' | 'sent' | 'failed'; attempts: number; next_attempt_at?: string; response_status: number | null; last_error: string | null; sent_at?: string | null }) {
+        const d = await getDb();
+        await d.update(s.webhookDeliveries).set({ ...patch, locked_at: null }).where(eq(s.webhookDeliveries.id, id));
+    },
+    async listWebhookDeliveries(orgId: string, limit = 30) {
+        const d = await getDb();
+        return d.select({
+            id: s.webhookDeliveries.id, webhook_id: s.webhookDeliveries.webhook_id, event: s.webhookDeliveries.event, status: s.webhookDeliveries.status,
+            attempts: s.webhookDeliveries.attempts, response_status: s.webhookDeliveries.response_status, last_error: s.webhookDeliveries.last_error,
+            created_at: s.webhookDeliveries.created_at, sent_at: s.webhookDeliveries.sent_at, next_attempt_at: s.webhookDeliveries.next_attempt_at,
+        }).from(s.webhookDeliveries).where(eq(s.webhookDeliveries.org_id, orgId)).orderBy(desc(s.webhookDeliveries.created_at)).limit(limit);
+    },
+    async deleteOldWebhookDeliveries(beforeIso: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const r = await d.run(sql`DELETE FROM webhook_deliveries WHERE id IN (SELECT id FROM webhook_deliveries WHERE created_at < ${beforeIso} LIMIT ${limit})`);
+        return Number(r.rowsAffected);
+    },
+
     async deleteOldHeatmapPoints(beforeIso: string, limit: number): Promise<number> {
         const d = await getDb();
         const r = await d.run(sql`DELETE FROM heatmap_points WHERE rowid IN (SELECT rowid FROM heatmap_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);

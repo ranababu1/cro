@@ -27,7 +27,7 @@ const phases: { phase: string; name: string; status: PhaseStatus; items: string[
     { phase: 'Phase 3', name: 'Heatmaps', status: 'Done', items: ['Click, scroll, confetti and overlay heatmaps', 'Heatmaps per variation and device', 'Rage and dead click detection', 'Filters by traffic source, conversion and date range', 'Sampling and stop rules for each test'] },
     { phase: 'Phase 4', name: 'Funnels, revenue and visual editor', status: 'Done', items: ['Traffic overview', 'Funnels built from your goals', 'Funnel completion trend over time', 'Revenue goals', 'Results by device, traffic source and new or returning visitors', 'Visual editor with move, page CSS and mobile preview', 'Auto-shift traffic to the winner'] },
     { phase: 'Phase 5', name: 'Engagement extras', status: 'Done', items: ['Popups and calls to action', 'Simple surveys', 'Error tracking'] },
-    { phase: 'Phase 6', name: 'Teams', status: 'Done', items: ['Invite teammates with a link', 'Owner and member roles', 'More projects from the dashboard', 'Audit log of who changed what'] },
+    { phase: 'Phase 6', name: 'Teams', status: 'Done', items: ['Invite teammates with a link', 'Owner and member roles', 'More projects from the dashboard', 'Audit log of who changed what', 'Webhooks for test events'] },
     { phase: 'Phase 7', name: 'Session recordings', status: 'Planned', items: ['Session recordings with privacy masking'] },
 ];
 

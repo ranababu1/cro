@@ -12,7 +12,9 @@ const FORBIDDEN: RegExp[] = [
     /sqlite/i, /libsql/i, /turso/i, /drizzle/i, /vercel/i,
     /PLATFORM_ADMIN/, /DATABASE_URL/, /DATABASE_AUTH/, /NEXTAUTH/i, /next-auth/i, /GOOGLE_CLIENT/, /RATE_LIMIT/, /DB_AUTO_MIGRATE/, /\.env\b/,
     /github\.com/i, /self[- ]?host/i, /\/api\/admin/, /admin console/i, /platform admin/i, /\/admin\b/,
-    /in[- ]memory/i, /per[- ]server/i, /each instance/i, /your instance/i, /built (with|on) next/i, /next\.js app/i, /sha-?256/i,
+    /in[- ]memory/i, /per[- ]server/i, /each instance/i, /your instance/i, /built (with|on) next/i, /next\.js app/i,
+    // How keys are hashed stays private. The webhook signature (HMAC-SHA256) is a public contract customers need to verify deliveries.
+    /(?<!HMAC-|createHmac\(')sha-?256/i,
     /requests per minute/i, /db:migrate/, /migrations?\b/i,
 ];
 
