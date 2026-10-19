@@ -20,7 +20,7 @@ export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
  * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
  * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
  */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor'] as const;
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking'] as const;
 export const GROWTH_FEATURES: readonly string[] = ['auto_shift', 'visual_editor'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
@@ -125,6 +125,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.auto_shift !== undefined) features.auto_shift = a.auto_shift;
         if (a.traffic !== undefined) features.traffic = a.traffic;
         if (a.visual_editor !== undefined) features.visual_editor = a.visual_editor;
+        if (a.error_tracking !== undefined) features.error_tracking = a.error_tracking;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -158,6 +159,7 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     funnels: 'Funnels are part of the paid plans. Upgrade to Starter or above to build them.',
     auto_shift: 'Auto-shift traffic to the winner is part of the Growth plan and above. Upgrade to Growth to turn it on.',
     traffic: 'The traffic overview is part of the paid plans. Upgrade to Starter or above to see page views, top pages, sources and devices.',
+    error_tracking: 'JavaScript error tracking is part of the paid plans. Upgrade to Starter or above to see errors per version.',
     visual_editor: 'The visual editor is part of the Growth plan and above. Upgrade to Growth to change pages without code.',
     revenue_goals: 'Revenue goals are part of the paid plans. Upgrade to Starter or above to track order values.',
     wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',

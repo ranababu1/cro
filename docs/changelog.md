@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 00:08 IST | JavaScript error tracking on paid plans: a new Errors tab on each test shows uncaught errors and failed promises per version, with pages with errors, errors per 100 visitors and the top errors. Messages are cleaned of emails, long numbers and tokens. The Phase 5 roadmap is now in progress. |
 | pending | 2026-10-18 23:53 IST | Visual editor on Growth and above: a variation can run on the control page itself. Open the visual editor from Edit test, click elements on your page to change text, colors, font size, links and images or hide them, and save. Visitors in that variation get the changes before the page shows. Changes can also be added or removed by hand. The SDK snippet stays under 30 KB gzipped. |
 | pending | 2026-10-18 23:25 IST | Traffic overview keeps up to 500 different page addresses per environment per day. Views on further new addresses that day still count in the totals and show as Other pages in Top pages, so sites with many unique URLs stay fast. |
 | pending | 2026-10-18 23:08 IST | Google Analytics 4 on every plan: when a visitor sees a version of a running test, the snippet sends a GA4 experience_impression event (gtag.js) or pushes it to the Google Tag Manager dataLayer, once per test per page. Turn it off with data-analytics="off". |

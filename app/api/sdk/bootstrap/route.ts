@@ -58,11 +58,15 @@ export async function POST(request: NextRequest) {
 
         // Heavy capture (heatmaps) is offered only to entitled orgs; free orgs never get a capture config.
         // Sampling is per visitor and experiment, so the capture module only loads for sampled sessions.
+        // JavaScript error tracking (paid) loads errors.js for visitors in a test version.
         const entitled = await canUseFeature(auth.ctx.orgId, 'heatmaps');
+        const errorsOn = await canUseFeature(auth.ctx.orgId, 'error_tracking');
         const reply = (b: BootstrapResponse) => {
-            if (!entitled || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
+            if ((!entitled && !errorsOn) || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
             const rate = heatmapSampleRate();
-            return sdkJson({ ...b, capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } });
+            const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};
+            if (errorsOn) extra.modules = [...(b.modules ?? []), 'errors'];
+            return sdkJson({ ...b, ...extra });
         };
 
         // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.

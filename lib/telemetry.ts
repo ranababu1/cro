@@ -66,20 +66,26 @@ let scheduledAfter = false;
 type TrafficBufRow = { day: string; environment_id: string; project_id: string; dim: string; key: string; views: number };
 const trafficBuffer = new Map<string, TrafficBufRow>();
 
+/** JavaScript error counters (paid), flushed in the same batch. */
+export type ErrorBufRow = { day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number };
+const errorBuffer = new Map<string, ErrorBufRow>();
+
 export function pendingTelemetry(): number {
-    return buffer.size + trafficBuffer.size;
+    return buffer.size + trafficBuffer.size + errorBuffer.size;
 }
 
 export async function flushTelemetry(): Promise<void> {
     scheduledAfter = false;
     if (timer) { clearTimeout(timer); timer = null; }
-    if (!buffer.size && !trafficBuffer.size) return;
+    if (!buffer.size && !trafficBuffer.size && !errorBuffer.size) return;
     const rows = [...buffer.values()];
     const traffic = [...trafficBuffer.values()];
+    const errors = [...errorBuffer.values()];
     buffer.clear();
     trafficBuffer.clear();
+    errorBuffer.clear();
     try {
-        await db.bumpTelemetryBatch(rows, traffic);
+        await db.bumpTelemetryBatch(rows, traffic, errors);
     } catch (err) {
         console.error('telemetry flush failed', err);
     }
@@ -127,6 +133,18 @@ export async function bumpTraffic(scope: { environmentId: string; projectId: str
         const cur = trafficBuffer.get(k);
         if (cur) cur.views += 1;
         else trafficBuffer.set(k, { day, environment_id: scope.environmentId, project_id: scope.projectId, dim, key, views: 1 });
+    }
+    if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
+    scheduleFlush();
+}
+
+/** Adds JavaScript error counts for one test version. */
+export async function bumpErrors(scope: { experimentId: string; variationId: string }, rows: Array<Omit<ErrorBufRow, 'day' | 'experiment_id' | 'variation_id'>>, day = utcDay()): Promise<void> {
+    for (const r of rows) {
+        const k = `${day}|${scope.experimentId}|${scope.variationId}|${r.fingerprint}`;
+        const cur = errorBuffer.get(k);
+        if (cur) cur.count += r.count;
+        else errorBuffer.set(k, { ...r, day, experiment_id: scope.experimentId, variation_id: scope.variationId });
     }
     if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
     scheduleFlush();

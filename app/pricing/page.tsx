@@ -40,6 +40,7 @@ const availableToday = [
     'Auto-shift traffic to the winner on Growth and above',
     'Visual editor on Growth and above: change text, colors, links and images, or hide elements, without code',
     'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
+    'JavaScript error tracking on paid plans: errors per test version',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 

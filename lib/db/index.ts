@@ -9,6 +9,7 @@ import { rolledEventStats, rolledEventStatsByGoal, rolledLiveCounts } from '../r
 import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 import { OTHER_PAGES, TRAFFIC_MAX_PAGES_PER_DAY } from '../traffic';
+import { ERROR_MAX_PER_DAY, OTHER_ERRORS, PAGES_WITH_ERRORS } from '../jsErrors';
 
 /** A new event. Revenue is optional and only set for revenue goals. */
 type NewEvent = Omit<Event, 'id' | 'created_at' | 'revenue'> & { revenue?: number | null };
@@ -986,8 +987,9 @@ export const db = {
     async bumpTelemetryBatch(
         rows: Array<{ day: string; scope_type: 'platform' | 'org' | 'user' | 'project' | 'experiment'; scope_id: string; metric: string; value: number }>,
         traffic: Array<{ day: string; environment_id: string; project_id: string; dim: string; key: string; views: number }> = [],
+        errors: Array<{ day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number }> = [],
     ): Promise<void> {
-        if (!rows.length && !traffic.length) return;
+        if (!rows.length && !traffic.length && !errors.length) return;
         const d = await getDb();
         const stmts: BatchItem<'sqlite'>[] = [
             ...rows.map((r) => d
@@ -1004,8 +1006,21 @@ export const db = {
                     target: [s.trafficDaily.day, s.trafficDaily.environment_id, s.trafficDaily.dim, s.trafficDaily.key],
                     set: { views: sql`${s.trafficDaily.views} + ${r.views}` },
                 })]),
+            ...errors.flatMap((r): BatchItem<'sqlite'>[] => r.fingerprint === PAGES_WITH_ERRORS || r.fingerprint === OTHER_ERRORS ? [plainErrorUpsert(d, r)] : cappedErrorUpsert(d, r)),
         ];
         await d.batch(stmts as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
+    },
+
+    /** JavaScript errors for one test between two UTC days (inclusive), summed per version and error. */
+    async getErrors(experimentId: string, from: string, to: string) {
+        const d = await getDb();
+        const e = s.errorDaily;
+        const rows = await d.select({
+            variation_id: e.variation_id, fingerprint: e.fingerprint,
+            kind: sql<string>`max(${e.kind})`, message: sql<string>`max(${e.message})`, source: sql<string>`max(${e.source})`, line: sql<number>`max(${e.line})`,
+            count: sql<number>`sum(${e.count})`, last_seen: sql<string>`max(${e.day})`,
+        }).from(e).where(and(eq(e.experiment_id, experimentId), gte(e.day, from), lte(e.day, to))).groupBy(e.variation_id, e.fingerprint);
+        return rows.map((r) => ({ ...r, line: Number(r.line), count: Number(r.count) }));
     },
 
     /** Traffic overview: daily totals and per-key sums for one environment between two UTC days (inclusive). */
@@ -1196,5 +1211,32 @@ function cappedPageUpsert(d: Awaited<ReturnType<typeof getDb>>, r: { day: string
             SELECT ${r.day}, ${r.environment_id}, ${r.project_id}, 'page', ${OTHER_PAGES}, ${r.views}
             WHERE NOT EXISTS (SELECT 1 FROM traffic_daily WHERE ${same} AND key = ${r.key})
             ON CONFLICT (day, environment_id, dim, key) DO UPDATE SET views = views + excluded.views`),
+    ];
+}
+
+type ErrorUpsertRow = { day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number };
+
+function plainErrorUpsert(d: Awaited<ReturnType<typeof getDb>>, r: ErrorUpsertRow) {
+    return d.run(sql`INSERT INTO error_daily (day, experiment_id, variation_id, fingerprint, kind, message, source, line, count)
+        VALUES (${r.day}, ${r.experiment_id}, ${r.variation_id}, ${r.fingerprint}, ${r.kind}, ${r.fingerprint === OTHER_ERRORS ? '' : r.message}, ${r.fingerprint === OTHER_ERRORS ? '' : r.source}, ${r.fingerprint === OTHER_ERRORS ? 0 : r.line}, ${r.count})
+        ON CONFLICT (day, experiment_id, variation_id, fingerprint) DO UPDATE SET count = count + excluded.count`);
+}
+
+/**
+ * Distinct errors are capped per test per day (all versions together): a known error, or a new one that still fits
+ * under ERROR_MAX_PER_DAY, is upserted; otherwise it counts under OTHER_ERRORS. Same batch, no extra round trip.
+ */
+function cappedErrorUpsert(d: Awaited<ReturnType<typeof getDb>>, r: ErrorUpsertRow) {
+    const known = sql`EXISTS (SELECT 1 FROM error_daily WHERE day = ${r.day} AND experiment_id = ${r.experiment_id} AND fingerprint = ${r.fingerprint})`;
+    const distinct = sql`(SELECT count(DISTINCT fingerprint) FROM error_daily WHERE day = ${r.day} AND experiment_id = ${r.experiment_id} AND fingerprint NOT IN (${OTHER_ERRORS}, ${PAGES_WITH_ERRORS}))`;
+    return [
+        d.run(sql`INSERT INTO error_daily (day, experiment_id, variation_id, fingerprint, kind, message, source, line, count)
+            SELECT ${r.day}, ${r.experiment_id}, ${r.variation_id}, ${r.fingerprint}, ${r.kind}, ${r.message}, ${r.source}, ${r.line}, ${r.count}
+            WHERE ${known} OR ${distinct} < ${ERROR_MAX_PER_DAY}
+            ON CONFLICT (day, experiment_id, variation_id, fingerprint) DO UPDATE SET count = count + excluded.count`),
+        d.run(sql`INSERT INTO error_daily (day, experiment_id, variation_id, fingerprint, kind, message, source, line, count)
+            SELECT ${r.day}, ${r.experiment_id}, ${r.variation_id}, ${OTHER_ERRORS}, 'other', '', '', 0, ${r.count}
+            WHERE NOT ${known}
+            ON CONFLICT (day, experiment_id, variation_id, fingerprint) DO UPDATE SET count = count + excluded.count`),
     ];
 }
