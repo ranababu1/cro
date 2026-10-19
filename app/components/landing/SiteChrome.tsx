@@ -7,7 +7,6 @@ const menus = {
     Product: [
         { href: '/#how-it-works', title: 'How it works', body: 'From idea to result in three steps' },
         { href: '/roadmap', title: 'Features and roadmap', body: 'What works today and what is next' },
-        { href: '/demo.html', title: 'Demo page', body: 'See the SDK on a sample page' },
     ],
     'Use cases': [
         { href: '/#test-anything', title: 'Landing pages', body: 'Headlines, copy and calls to action' },
@@ -17,7 +16,6 @@ const menus = {
     Resources: [
         { href: '/docs', title: 'Documentation', body: 'Guides, SDK and API reference' },
         { href: '/docs/quick-start', title: 'Quick start', body: 'Your first experiment, step by step' },
-        { href: '/demo.html', title: 'Demo page', body: 'The SDK running on a sample page' },
         { href: '/roadmap', title: 'Roadmap', body: 'Planned features by phase' },
         { href: '/pricing#faq', title: 'FAQ', body: 'Common questions' },
     ],
@@ -63,7 +61,6 @@ export function SiteFooter() {
                     <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
                     <Link href="/roadmap" className="hover:text-zinc-900">Roadmap</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
-                    <a href="/demo.html" className="hover:text-zinc-900">Demo page</a>
                     <Link href="/signin" className="hover:text-zinc-900">Sign in</Link>
                 </nav>
                 <p className="text-zinc-500 md:ml-auto">© {new Date().getFullYear()} freeabtest.com</p>

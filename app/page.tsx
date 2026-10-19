@@ -73,7 +73,7 @@ export default function LandingPage() {
                         </p>
                         <div className="mt-10 flex flex-wrap gap-5">
                             <Link href="/signin" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-[#0b1630] px-10 text-[18px] font-medium text-white shadow-[0_12px_24px_-12px_rgb(11_22_48/0.6)] hover:bg-[#13224a]">Start testing for free <Arrow /></Link>
-                            <a href="/demo.html" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-white/90 px-6 pr-10 shadow-[0_10px_30px_-12px_rgb(30_64_175/0.25)] ring-1 ring-zinc-100 hover:bg-white">
+                            <a href="#" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-white/90 px-6 pr-10 shadow-[0_10px_30px_-12px_rgb(30_64_175/0.25)] ring-1 ring-zinc-100 hover:bg-white">
                                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white"><svg viewBox="0 0 20 20" className="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden><path d="M6 4v12l10-6z" /></svg></span>
                                 <span className="text-left"><span className="block text-[18px] font-medium leading-tight text-zinc-900">See the demo</span><span className="block text-[14px] text-zinc-500">Sample page</span></span>
                             </a>
