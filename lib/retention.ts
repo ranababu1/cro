@@ -5,7 +5,7 @@ import { RAW_RETENTION_DAYS } from './heatmaps';
 /**
  * Retention cleanup without a cron. Busy SDK routes call scheduleRetention(); at most once an hour across all
  * instances (claimed atomically in maintenance_runs) one request deletes, after its response is sent:
- * - raw heatmap clicks older than 30 days (heatmaps keep their daily totals),
+ * - raw heatmap clicks and scroll rows older than 30 days (heatmaps keep their daily totals),
  * - survey answers older than the plan's data retention (Free 6 months, Starter 12, Growth and Enterprise 24).
  * Each run deletes a bounded number of rows, so a large backlog is cleared over several runs.
  */
@@ -35,13 +35,14 @@ export function retentionCutoffs(now = new Date()) {
 }
 
 /** Runs the cleanup if no instance ran it in the last hour. Returns what was deleted, or null when not due. */
-export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; surveyAnswers: number } | null> {
+export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number } | null> {
     const claimed = await db.claimMaintenance(RETENTION_JOB, new Date(now.getTime() - RETENTION_EVERY_MS).toISOString(), now.toISOString());
     if (!claimed) return null;
     const c = retentionCutoffs(now);
     const heatmapPoints = await db.deleteOldHeatmapPoints(c.heatmapBefore, DELETE_LIMIT);
+    const heatmapScrolls = await db.deleteOldHeatmapScrolls(c.heatmapBefore, DELETE_LIMIT);
     const surveyAnswers = await db.deleteOldSurveyAnswers(c.surveyBefore, DELETE_LIMIT);
-    return { heatmapPoints, surveyAnswers };
+    return { heatmapPoints, heatmapScrolls, surveyAnswers };
 }
 
 let lastLocalCheck = 0;

@@ -59,13 +59,13 @@ describe('retention cleanup', () => {
 
     it('deletes old survey answers by plan and raw clicks past 30 days, at most once an hour', async () => {
         const r = await runRetention(NOW);
-        expect(r).toEqual({ heatmapPoints: 1, surveyAnswers: 5 });
+        expect(r).toEqual({ heatmapPoints: 1, heatmapScrolls: 0, surveyAnswers: 5 });
         for (const plan of Object.keys(surveys)) expect(await answers(plan), plan).toEqual(['inside', 'today']);
         const d = await getDb();
         expect((await d.all<{ selector: string }>(sql`select selector from heatmap_points`)).map((p) => p.selector)).toEqual(['new']);
         // Another instance in the same hour does nothing; an hour later it runs again.
         expect(await runRetention(new Date(NOW.getTime() + 30 * 60_000))).toBeNull();
-        expect(await runRetention(new Date(NOW.getTime() + 61 * 60_000))).toEqual({ heatmapPoints: 0, surveyAnswers: 0 });
+        expect(await runRetention(new Date(NOW.getTime() + 61 * 60_000))).toEqual({ heatmapPoints: 0, heatmapScrolls: 0, surveyAnswers: 0 });
         const runs = await d.all<{ job: string }>(sql`select job from maintenance_runs`);
         expect(runs.map((x) => x.job)).toEqual([RETENTION_JOB]);
     });

@@ -3,9 +3,9 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { canUseFeature, UPGRADE_NOTE } from '@/lib/entitlements';
-import { heatmapReport, DEVICES, type Device } from '@/lib/heatmaps';
+import { heatmapReport, heatmapSources, hasFilters, parseHeatmapQuery, RAW_RETENTION_DAYS, DEVICES, type Device } from '@/lib/heatmaps';
 
-// GET /api/experiments/:id/heatmaps?variation=&device= - Heatmap report for one variation. Paid plans only.
+// GET /api/experiments/:id/heatmaps?variation=&device=&days=&source=&converted= - Heatmap report for one variation. Paid plans only.
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const ctx = await requireUserContext(request);
@@ -22,11 +22,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         if (!variation) return NextResponse.json({ error: 'No variations' }, { status: 400 });
         const deviceParam = sp.get('device') ?? 'all';
         const device = (deviceParam === 'all' || (DEVICES as readonly string[]).includes(deviceParam) ? deviceParam : 'all') as Device | 'all';
-        const report = await heatmapReport(experiment.id, variation.id, device);
+        const { days, filters } = parseHeatmapQuery(sp);
+        const filtered = hasFilters(filters);
+        const [report, sources] = await Promise.all([heatmapReport(experiment.id, variation.id, device, days, filters), heatmapSources(experiment.id, variation.id)]);
         return NextResponse.json({
             variation: { id: variation.id, name: variation.name, url: variation.url ?? experiment.control_url },
             variations: variations.map((v) => ({ id: v.id, name: v.name, url: v.url ?? experiment.control_url, is_control: v.is_control })),
             device,
+            // Filters read individual clicks, which are kept for 30 days, so a filtered report covers at most 30 days.
+            days: filtered ? Math.min(days, RAW_RETENTION_DAYS) : days,
+            filters,
+            sources,
             ...report,
         });
     } catch (error) {

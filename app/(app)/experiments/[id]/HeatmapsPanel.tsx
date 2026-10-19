@@ -14,6 +14,9 @@ export type Report = {
     confetti: { x: number; y: number; rage: boolean; dead: boolean }[];
     totals: { clicks: number; rage: number; dead: number; sessions: number };
     cols: number; rowPx: number;
+    days?: number;
+    filters?: { source?: string; converted?: 'yes' | 'no' };
+    sources?: { source: string; clicks: number }[];
 };
 type View = 'click' | 'scroll' | 'confetti' | 'overlay' | 'list';
 type DeviceOpt = 'all' | 'desktop' | 'tablet' | 'mobile';
@@ -40,6 +43,17 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
     const [compare, setCompare] = useState(false);
     const [variationB, setVariationB] = useState('');
     const [dataB, setDataB] = useState<Report | null>(null);
+    // Range and filters. Filters read individual clicks, which are kept for 30 days.
+    const [days, setDays] = useState('30');
+    const [source, setSource] = useState('');
+    const [converted, setConverted] = useState('');
+    const filterQuery = useMemo(() => {
+        const q: Record<string, string> = { device, days };
+        if (source) q.source = source;
+        if (converted) q.converted = converted;
+        return q;
+    }, [device, days, source, converted]);
+    const filtered = !!(source || converted);
 
     useEffect(() => {
         let live = true;
@@ -50,25 +64,25 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
     useEffect(() => {
         if (!allowed) return;
         let live = true;
-        const q = new URLSearchParams({ device });
+        const q = new URLSearchParams(filterQuery);
         if (variation) q.set('variation', variation);
         fetch(`/api/experiments/${experimentId}/heatmaps?${q}`)
             .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Could not load heatmaps'); return j as Report; })
             .then((j) => { if (live) { setData(j); setError(''); } })
             .catch((e: Error) => live && setError(e.message));
         return () => { live = false; };
-    }, [allowed, experimentId, variation, device]);
+    }, [allowed, experimentId, variation, filterQuery]);
 
     const otherId = data ? (variationB && variationB !== data.variation.id ? variationB : data.variations.find((v) => v.id !== data.variation.id)?.id ?? '') : '';
     useEffect(() => {
         if (!allowed || !compare || !otherId) return;
         let live = true;
-        fetch(`/api/experiments/${experimentId}/heatmaps?${new URLSearchParams({ device, variation: otherId })}`)
+        fetch(`/api/experiments/${experimentId}/heatmaps?${new URLSearchParams({ ...filterQuery, variation: otherId })}`)
             .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Could not load heatmaps'); return j as Report; })
             .then((j) => { if (live) setDataB(j); })
             .catch((e: Error) => live && setError(e.message));
         return () => { live = false; };
-    }, [allowed, compare, experimentId, otherId, device]);
+    }, [allowed, compare, experimentId, otherId, filterQuery]);
     const b = compare && dataB && dataB.variation.id === otherId ? dataB : null;
 
     return (
@@ -103,9 +117,33 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                                 ))}
                             </div>
                         </div>
+                        <div className="mb-4 flex flex-wrap items-center gap-3" data-testid="heat-filters">
+                            <div className="w-40">
+                                <Select aria-label="Date range" value={days} onChange={(e) => setDays(e.target.value)}>
+                                    <option value="7">Last 7 days</option>
+                                    <option value="30">Last 30 days</option>
+                                    <option value="90">Last 90 days</option>
+                                </Select>
+                            </div>
+                            <div className="w-48">
+                                <Select aria-label="Traffic source" value={source} onChange={(e) => setSource(e.target.value)}>
+                                    <option value="">All sources</option>
+                                    {source && !(data.sources ?? []).some((x) => x.source === source) && <option value={source}>{source}</option>}
+                                    {(data.sources ?? []).map((x) => <option key={x.source} value={x.source}>{x.source} ({x.clicks})</option>)}
+                                </Select>
+                            </div>
+                            <div className="w-64">
+                                <Select aria-label="Visitors" value={converted} onChange={(e) => setConverted(e.target.value)}>
+                                    <option value="">All visitors</option>
+                                    <option value="yes">Visitors who converted</option>
+                                    <option value="no">Visitors who did not convert</option>
+                                </Select>
+                            </div>
+                            {filtered && <p className="text-xs text-zinc-500" data-testid="heat-filter-note">Filtered views use individual clicks, which are kept for 30 days{days === '90' ? ', so this shows the last 30 days' : ''}.</p>}
+                        </div>
                         {!compare && <Totals data={data} />}
                         <div className="mb-4 flex flex-wrap items-center gap-2">
-                            <a href={`/api/experiments/${experimentId}/heatmaps/export?device=${device}`} download className="order-last ml-auto rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="heat-export">Download JSON</a>
+                            <a href={`/api/experiments/${experimentId}/heatmaps/export?${new URLSearchParams(filterQuery)}`} download className="order-last ml-auto rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="heat-export">Download JSON</a>
                             {VIEWS.map((v) => (
                                 <button key={v.id} type="button" onClick={() => setView(v.id)} className={`rounded-md px-3 py-1.5 text-sm ${view === v.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-zinc-600 hover:bg-zinc-100'}`}>{v.label}</button>
                             ))}
@@ -113,7 +151,7 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                         {compare ? (
                             b ? <CompareView a={data} b={b} view={view} width={WIDTH[device]} /> : <Spinner />
                         ) : data.totals.clicks === 0 && data.totals.sessions === 0
-                            ? <p className="text-sm text-zinc-500">No heatmap data yet for this version and device. Data appears a few seconds after sampled visitors leave the page.</p>
+                            ? <p className="text-sm text-zinc-500">{filtered ? 'No clicks match these filters in this range.' : 'No heatmap data yet for this version and device.'} Data appears a few seconds after sampled visitors leave the page.</p>
                             : <HeatView data={data} view={view} width={WIDTH[device]} />}
                     </div>
                 )}

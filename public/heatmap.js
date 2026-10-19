@@ -40,11 +40,29 @@
         return Math.max(d.scrollHeight, b ? b.scrollHeight : 0, d.clientHeight);
     }
 
+    // Filters: the session's landing source (utm_source, referring site or direct) and the SDK visitor id.
+    function landingSource() {
+        var k = 'fabt_src', src = '';
+        try { src = sessionStorage.getItem(k) || ''; } catch (e) { /* storage blocked */ }
+        if (src) return src;
+        var m = /[?&]utm_source=([^&#]*)/.exec(window.location.search);
+        try { if (m) src = decodeURIComponent(m[1].replace(/\+/g, ' ')); } catch (e) { src = ''; }
+        if (!src && document.referrer) {
+            try { var h = new URL(document.referrer).hostname; if (h && h !== window.location.hostname) src = h; } catch (e) { /* ignore */ }
+        }
+        src = String(src || 'direct').toLowerCase().replace(/^www\./, '').replace(/[^a-z0-9._-]/g, '').slice(0, 60) || 'direct';
+        try { sessionStorage.setItem(k, src); } catch (e) { /* storage blocked */ }
+        return src;
+    }
+    var src = landingSource();
+    var vid = '';
+    try { vid = window.ABTest && typeof window.ABTest.getUserId === 'function' ? String(window.ABTest.getUserId() || '') : ''; } catch (e) { vid = ''; }
+
     function send(beacon) {
         var events = queue.splice(0, 200);
         if (beacon && maxDepth > 0) { events.push({ t: 's', d: Math.min(100, Math.round(maxDepth)) }); maxDepth = -1; }
         if (!events.length) return;
-        var body = JSON.stringify({ experiment_id: cfg.experiment_id, variation_id: cfg.variation_id, device: device, events: events });
+        var body = JSON.stringify({ experiment_id: cfg.experiment_id, variation_id: cfg.variation_id, device: device, events: events, src: src, vid: vid.slice(0, 100) });
         var url = cfg.apiUrl + '/api/capture?key=' + encodeURIComponent(cfg.apiKey) + (cfg.via === 'wp' ? '&via=wp' : '');
         if (beacon && navigator.sendBeacon) {
             try { if (navigator.sendBeacon(url, new Blob([body], { type: 'text/plain' }))) return; } catch (e) { /* fall through */ }
