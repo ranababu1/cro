@@ -115,6 +115,8 @@ Webhooks for test events (signed, retried, paid): done (proposal 7)
 
 - Done: results CSV export and GA4 audience recipe (proposal 12), all plans.
 
+Server-side SDK: Done. Endpoints and docs live; Node package kept in integrations/node, not published to npm (needs a go-ahead to publish).
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

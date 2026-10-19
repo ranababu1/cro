@@ -51,6 +51,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Roll out the winner to every visitor with one click while you update your code', tier: 0 },
     { name: 'Scheduled start and stop, with a gradual traffic ramp', tier: 0 },
     { name: 'Test planner with hypotheses and a duration estimate', tier: 0 },
+    { name: 'Server-side tests from your backend with a secret key', tier: 0 },
     { name: 'Google Tag Manager and WordPress install guides', tier: 0 },
     { name: 'Google Analytics 4 events for every test', tier: 0 },
     { name: 'WordPress plugin on paid plans', tier: 1 },

@@ -3,6 +3,7 @@ import { introduction } from './content/introduction';
 import { quickStart } from './content/quickStart';
 import { installGuides } from './content/installGuides';
 import { sdk } from './content/sdk';
+import { serverSide } from './content/serverSide';
 import { experiments } from './content/experiments';
 import { variations } from './content/variations';
 import { goals } from './content/goals';
@@ -20,7 +21,7 @@ export type { Block, DocPage } from './types';
 
 /** Reading order. The sidebar groups pages by `group` in this order. */
 export const docPages: DocPage[] = [
-    introduction, quickStart, installGuides, sdk, experiments, variations, goals, popups, surveys, results, winners, webhooks, restApi, environments, organizations, troubleshooting,
+    introduction, quickStart, installGuides, sdk, serverSide, experiments, variations, goals, popups, surveys, results, winners, webhooks, restApi, environments, organizations, troubleshooting,
 ];
 
 export function getDocPage(slug: string): DocPage | undefined {

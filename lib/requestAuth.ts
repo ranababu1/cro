@@ -58,6 +58,31 @@ export async function authenticateSdkRequest(
     return { ctx };
 }
 
+/**
+ * Server SDK endpoints (/api/server/*): "Authorization: Bearer cro_sk_..." only. No Origin check, since
+ * calls come from the customer's backend. Rate limited per key like the browser SDK endpoints.
+ */
+export async function authenticateServerRequest(
+    request: NextRequest,
+    limiter: RateLimiter = sdkRateLimiter,
+): Promise<{ ctx: SdkKeyContext } | { error: NextResponse }> {
+    const header = request.headers.get('authorization');
+    const key = header?.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : '';
+    if (!key || !isWellFormedApiKey(key) || apiKeyType(key) !== 'secret') {
+        return { error: NextResponse.json({ error: 'Send a secret key (cro_sk_...) as "Authorization: Bearer <key>".' }, { status: 401 }) };
+    }
+    const limit = limiter.check(`srv:${hashApiKey(key).slice(0, 16)}`);
+    if (!limit.allowed) {
+        void bumpMetric(METRICS.rate_limit_hits, {});
+        return { error: NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }) };
+    }
+    const ctx = await db.authenticateApiKey(key);
+    if (!ctx) return { error: NextResponse.json({ error: 'Unknown or revoked API key' }, { status: 401 }) };
+    if (ctx.orgStatus !== 'active') return { error: NextResponse.json({ error: 'This account is suspended' }, { status: 403 }) };
+    void bumpMetric(METRICS.api_key_requests, { orgId: ctx.orgId, projectId: ctx.projectId });
+    return { ctx };
+}
+
 export interface UserContext {
     userId: string | null;
     projectIds: string[];
