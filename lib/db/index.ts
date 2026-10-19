@@ -370,6 +370,44 @@ export const db = {
     },
 
     /** Visual editor: replaces the change list of one variation (JSON text, or null to clear). */
+    /** Multi-page tests: the extra page rules (JSON, null = control page only). */
+    async setExperimentPages(experimentId: string, pages: string | null): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.experiments).set({ pages, updated_at: nowIso() }).where(eq(s.experiments.id, experimentId));
+    },
+
+    /**
+     * Drafts only (the caller checks): replaces every variation in one batch and sets the multivariate config.
+     * Used to build combinations from visual variations and to undo that.
+     */
+    async replaceVariations(
+        experimentId: string,
+        rows: Array<{ name: string; weight: number; is_control: boolean; changes: string | null; combo: string | null; url?: string | null; description?: string | null }>,
+        mvt: string | null,
+    ): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        // Spaced timestamps keep the listed order (variations sort by created_at, then id).
+        const t0 = Date.now();
+        await d.batch([
+            d.delete(s.variations).where(eq(s.variations.experiment_id, experimentId)),
+            d.insert(s.variations).values(rows.map((r, i) => ({
+                created_at: new Date(t0 + i).toISOString(),
+                id: generateId('var'),
+                experiment_id: experimentId,
+                name: r.name,
+                description: r.description ?? null,
+                url: r.url ?? null,
+                weight: r.weight,
+                is_control: r.is_control,
+                changes: r.changes,
+                combo: r.combo,
+            }))),
+            d.update(s.experiments).set({ mvt, rollout_variation_id: null, updated_at: nowIso() }).where(eq(s.experiments.id, experimentId)),
+        ]);
+    },
+
     async setVariationChanges(experimentId: string, variationId: string, changes: string | null): Promise<void> {
         clearConfigCache();
         const d = await getDb();
@@ -775,11 +813,12 @@ export const db = {
     /** Running experiments for a project whose control or variation URL matches the page URL. */
     async findExperimentByPageUrl(projectId: string, pageUrl: string): Promise<{ experiment: Experiment; variations: Variation[]; goals: Goal[] } | null> {
         const { normalizePageUrl, urlsMatch } = await import('../domains');
+        const { onExtraPage } = await import('../multipage');
         const target = normalizePageUrl(pageUrl);
         if (!target) return null;
         for (const { experiment, variations, goals } of await this.getRunningConfig(projectId)) {
             const urls = [experiment.control_url, ...variations.map((v) => v.url)].filter(Boolean) as string[];
-            if (urls.some((u) => urlsMatch(u, pageUrl))) {
+            if (urls.some((u) => urlsMatch(u, pageUrl)) || onExtraPage(experiment, pageUrl)) {
                 return { experiment, variations, goals };
             }
         }

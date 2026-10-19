@@ -1,4 +1,5 @@
 import { urlsMatch } from './domains';
+import { onExtraPage, onTestPage } from './multipage';
 import { parseChanges } from './visualChanges';
 import { failedRule, parseTargeting, type VisitorContext } from './targeting';
 import type { BootstrapResponse, Experiment, Variation } from './types';
@@ -17,9 +18,9 @@ export function rolloutVariation(experiment: Pick<Experiment, 'status' | 'rollou
 }
 
 /** True when the URL is one of the test's pages (control or a variation URL). */
-export function rolloutCoversUrl(experiment: Pick<Experiment, 'control_url'>, variations: Variation[], url: string): boolean {
+export function rolloutCoversUrl(experiment: Pick<Experiment, 'control_url' | 'pages'>, variations: Variation[], url: string): boolean {
     const urls = [experiment.control_url, ...variations.map((v) => v.url)].filter(Boolean) as string[];
-    return urls.some((u) => urlsMatch(u, url));
+    return urls.some((u) => urlsMatch(u, url)) || onExtraPage(experiment, url);
 }
 
 /** SDK reply for a page of a rolled-out test. */
@@ -37,7 +38,8 @@ export function rolloutReply(experiment: Experiment, variations: Variation[], ct
         return { ...base, action: 'redirect', variation_url: target };
     }
     // A visual variation runs on the control page; visitors on another variation's page go back to the control.
-    if (controlUrl && !urlsMatch(controlUrl, ctx.url)) return { ...base, action: 'redirect', variation_url: controlUrl };
+    // Extra pages of a multi-page test keep the visitor where they are and get the changes too.
+    if (controlUrl && !onTestPage(experiment, controlUrl, ctx.url)) return { ...base, action: 'redirect', variation_url: controlUrl };
     const changes = parseChanges(winner.changes);
     return changes.length ? { ...base, action: 'stay', changes } : { ...base, action: 'none' };
 }

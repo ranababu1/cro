@@ -153,6 +153,10 @@ export const experiments = sqliteTable('experiments', {
     ramp_start: integer('ramp_start'),
     ramp_step: integer('ramp_step'),
     ramp_every_hours: integer('ramp_every_hours'),
+    // Multi-page tests (Growth+, visual tests): JSON list of extra page rules where the variations' changes also apply. Null = control page only. See lib/multipage.ts.
+    pages: text('pages'),
+    // Multivariate tests (Growth+): JSON factors and levels the variations were built from. Null = a normal test. See lib/mvt.ts.
+    mvt: text('mvt'),
 }, (t) => [
     index('idx_experiments_project').on(t.project_id),
     index('idx_experiments_status').on(t.status),
@@ -173,6 +177,8 @@ export const variations = sqliteTable('variations', {
     paused: integer('paused', { mode: 'boolean' }).notNull().default(false),
     // Visual editor: JSON list of page changes the SDK applies on the control page (variations without their own URL).
     changes: text('changes'),
+    // Multivariate tests: JSON list of level indexes, one per factor (0 = original). Null otherwise.
+    combo: text('combo'),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [
     index('idx_variations_experiment').on(t.experiment_id),

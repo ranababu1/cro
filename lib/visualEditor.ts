@@ -11,6 +11,8 @@ export async function editableVariation(experiment: Experiment, variationId: str
     if (variation.is_control) return { error: 'The control is your original page and has no visual changes', status: 400 };
     if (variation.url) return { error: 'This variation has its own URL. Visual changes are for variations that run on the control page', status: 400 };
     if (experiment.status === 'completed') return { error: 'A completed test cannot be edited', status: 400 };
+    // A combination of a multivariate test is built from its levels; change a level by undoing the combinations on the draft.
+    if (variation.combo) return { error: 'This version is a combination of a multivariate test. To change a level, undo the combinations on the draft and edit that variation', status: 400 };
     if (!experiment.control_url) return { error: 'This test has no control URL', status: 400 };
     // Changes already saved keep showing to visitors after a downgrade; editing needs Growth and above.
     if (!(await canUseFeature(await orgIdForProject(experiment.project_id), 'visual_editor'))) return { error: UPGRADE_NOTE.visual_editor, status: 403 };

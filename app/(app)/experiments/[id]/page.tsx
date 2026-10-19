@@ -4,6 +4,7 @@ import { PROFILE_REQUIRED_MESSAGE } from '@/lib/profile';
 
 import { GOAL_TYPE_LABELS, describeGoal, type GoalType } from '@/lib/goals';
 import { describeTargeting, parseTargeting } from '@/lib/targeting';
+import { describePageRule, parsePages } from '@/lib/multipage';
 import { EditTest } from './EditTest';
 import { ShareResults } from './ShareResults';
 import { HeatmapsPanel } from './HeatmapsPanel';
@@ -14,6 +15,7 @@ import { SegmentsPanel } from './SegmentsPanel';
 import { RolloutCard } from './RolloutCard';
 import { ScheduleCard } from './ScheduleCard';
 import { PreviewLinks } from './PreviewLinks';
+import { FactorEffects } from './FactorEffects';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -163,19 +165,19 @@ export default function ExperimentDetail() {
             />
 
             {tab === 'results' && experiment.status !== 'draft' && variations.length > 0 && <div className="mb-6"><RolloutCard key={`${experiment.rollout_variation_id ?? ''}${experiment.updated_at}`} experiment={experiment} variations={variations} winnerId={results?.winner} onChanged={() => { void load(); router.refresh(); }} /></div>}
-            {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
+            {tab === 'results' && <ResultsPanel experiment={experiment} variations={variations} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'errors' && <ErrorsPanel experimentId={experiment.id} />}
-            {tab === 'setup' && <SetupPanel experimentId={experiment.id} completed={experiment.status === 'completed'} variations={variations} goals={goals} targeting={experiment.targeting} />}
-            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} onSaved={() => void load()} />}
+            {tab === 'setup' && <SetupPanel experimentId={experiment.id} completed={experiment.status === 'completed'} variations={variations} goals={goals} targeting={experiment.targeting} pages={experiment.pages} controlUrl={experiment.control_url} />}
+            {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} status={experiment.status} mvt={experiment.mvt} onSaved={() => void load()} />}
             {tab === 'settings' && experiment.status !== 'completed' && <div className="mb-6"><ScheduleCard experimentId={experiment.id} status={experiment.status} traffic={experiment.traffic_allocation} onSaved={() => void load()} /></div>}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
 }
 
-function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { experiment: Experiment; results: ExperimentResults | null; updatedAt: Date | null; hasEventGoals: boolean }) {
+function ResultsPanel({ experiment, variations, results, updatedAt, hasEventGoals }: { experiment: Experiment; variations: Variation[]; results: ExperimentResults | null; updatedAt: Date | null; hasEventGoals: boolean }) {
     const goalList = results?.goals || [];
     const primaryGoalId = goalList.find((g) => g.is_primary)?.goal_id || goalList[0]?.goal_id || '';
     const [goalId, setGoalId] = useState<string | null>(null);
@@ -260,6 +262,7 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                     </TBody>
                 </Table>
             </Card>
+            <FactorEffects mvt={experiment.mvt} variations={variations} rows={rows} />
             <Card>
                 <CardHeader title="Confidence intervals" />
                 <CardBody><IntervalChart rows={rows} winner={winnerId} /></CardBody>
@@ -277,13 +280,22 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
     );
 }
 
-function SetupPanel({ experimentId, completed, variations, goals, targeting }: { targeting?: string | null; experimentId: string; completed: boolean; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
+function SetupPanel({ experimentId, completed, variations, goals, targeting, pages, controlUrl }: { pages?: string | null; controlUrl?: string | null; targeting?: string | null; experimentId: string; completed: boolean; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
     return (
         <div className="space-y-6">
             <Card>
                 <CardHeader title="Who can enter" description="Checked before a new visitor joins. People already in the test keep their version." />
                 <CardBody className="text-sm text-zinc-700">{describeTargeting(parseTargeting(targeting))}</CardBody>
             </Card>
+            {parsePages(pages).length > 0 && (
+                <Card data-testid="setup-pages">
+                    <CardHeader title="Pages in this test" description="Visual changes apply on the control page and on every page that matches a rule." />
+                    <CardBody className="space-y-1 text-sm text-zinc-700">
+                        {controlUrl && <p>Control page: {controlUrl}</p>}
+                        {parsePages(pages).map((r, i) => <p key={i}>{describePageRule(r)}</p>)}
+                    </CardBody>
+                </Card>
+            )}
             <Card>
                 <CardHeader title="Variations" description="Weights split the visitors who enter the experiment." />
                 <Table>

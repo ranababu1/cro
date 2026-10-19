@@ -1,5 +1,6 @@
 import { db } from './db';
 import { urlsMatch } from './domains';
+import { onTestPage } from './multipage';
 import { parseChanges } from './visualChanges';
 import { verifyPreviewToken } from './previewToken';
 import type { BootstrapResponse, Experiment, Variation } from './types';
@@ -32,7 +33,7 @@ export async function previewReply(token: string, projectId: string, url: string
     if (previewBlocker(experiment, variations, t.variationId)) return invalid;
     const variation = variations.find((v) => v.id === t.variationId)!;
     const controlUrl = controlUrlOf(experiment, variations);
-    const onControl = urlsMatch(controlUrl, url);
+    const onControl = onTestPage(experiment, controlUrl, url);
     const onVariation = !!(variation.url && urlsMatch(variation.url, url));
     const base: BootstrapResponse = {
         matched: true,
