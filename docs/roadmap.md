@@ -82,6 +82,8 @@ Gap proposal 1 done (19 Oct 2026): teammate invites, roles and multiple projects
 
 - Done: QA preview links per variation (all plans, never counted).
 
+- Done: blog post on A/B testing with low traffic.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

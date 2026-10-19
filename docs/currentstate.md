@@ -268,3 +268,5 @@ A11y (19 Oct 2026): axe-core scan (wcag2a/aa/21aa) of 17 public and app pages at
 Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with owner check, seatUsage, invite tokens hashed with SHA-256), routes /api/team, /api/team/invites[/id], /api/team/members/[userId], /api/projects[/id], /api/invites/accept; page /settings/team and /invite/[token] (noindex, no referrer). PLAN_PROJECTS and PLAN_SEATS in lib/plans.ts feed limits. getOrgEntitlements counts only owner emails for the platform admin bypass. New users who join keep their own auto-created organization.
 
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
+
+Blog posts support article_schema, faq_schema and breadcrumb_schema frontmatter, each rendered as JSON-LD. Three posts live.
