@@ -69,6 +69,23 @@ export default function NewExperimentWizard() {
     }, []);
     const [busy, setBusy] = useState(false);
     const [newHost, setNewHost] = useState('');
+    // Started from the test planner (?idea=): name, page and hypothesis come from the idea, and the idea is linked after.
+    const [idea, setIdea] = useState<{ id: string; title: string; hypothesis: string } | null>(null);
+    useEffect(() => {
+        const ideaId = new URLSearchParams(window.location.search).get('idea');
+        if (!ideaId) return;
+        let live = true;
+        fetch(`/api/ideas/${encodeURIComponent(ideaId)}`).then((r) => (r.ok ? r.json() : null)).then((j) => {
+            if (!live || !j?.idea) return;
+            setIdea({ id: j.idea.id, title: j.idea.title, hypothesis: j.idea.hypothesis });
+            setName((n) => n || j.idea.title);
+            if (j.idea.page_url) {
+                setControlUrl((u) => u || j.idea.page_url);
+                setVars((vs) => vs.map((v) => (v.is_control && !v.url ? { ...v, url: j.idea.page_url } : v)));
+            }
+        }).catch(() => undefined);
+        return () => { live = false; };
+    }, []);
 
     useEffect(() => {
         void (async () => {
@@ -141,6 +158,7 @@ export default function NewExperimentWizard() {
         setBusy(true); setError('');
         const payload = {
             name: name || 'Untitled test',
+            ...(idea?.hypothesis ? { description: `Hypothesis: ${idea.hypothesis}`.slice(0, 2000) } : {}),
             control_url: controlUrl,
             traffic_allocation: traffic,
             targeting,
@@ -154,6 +172,9 @@ export default function NewExperimentWizard() {
             setBusy(false);
             setError(data.error || 'Could not create the test');
             return;
+        }
+        if (idea) {
+            await fetch(`/api/ideas/${idea.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ experiment_id: data.experiment.id }) }).catch(() => undefined);
         }
         if (start) {
             const startRes = await fetch(`/api/experiments/${data.experiment.id}`, {
@@ -198,6 +219,7 @@ export default function NewExperimentWizard() {
                 description="One control page, then variation pages or visual changes made with the visual editor, and goals."
                 breadcrumb={<Link href="/experiments" className="hover:text-zinc-800">Experiments</Link>}
             />
+            {idea && <Alert tone="info" className="mb-4">From the test planner: <strong>{idea.title}</strong>. The hypothesis is saved as the test description, and the idea moves to Started.</Alert>}
 
             <ol className="mb-8 flex flex-wrap gap-2">
                 {STEPS.map((s, i) => (

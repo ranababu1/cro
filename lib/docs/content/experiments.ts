@@ -6,6 +6,10 @@ export const experiments: DocPage = {
     description: 'Creating, editing, starting, pausing and completing experiments, and what each status means.',
     group: 'Guides',
     blocks: [
+        { type: 'h2', text: 'Planning tests', id: 'planner' },
+        { type: 'p', text: 'Open **Test planner** to keep a list of test ideas on any plan. Each idea has a title, a hypothesis, an optional page and a priority, and sits in one of four columns: **Ideas**, **Planned**, **Started** and **Dropped**.' },
+        { type: 'p', text: 'Add the page\'s conversion rate now, the smallest lift worth detecting and the visitors per day who would enter the test, and the planner shows how many visitors each version needs and how many days that takes. The estimate uses 95% confidence and 80% power, the same formula as [How many visitors you need](/docs/results#sample-size). The results use a peeking-safe test, which needs about 2 to 3 times as long to call the same lift, so the planner shows that range too. With more than two versions, each version needs more visitors.' },
+        { type: 'p', text: '**Create test** opens the new test wizard with the idea\'s title and page filled in. The hypothesis is saved as the test description, and the idea moves to **Started** with a link to the test.' },
         { type: 'h2', text: 'Creating an experiment' },
         { type: 'p', text: 'Go to **Experiments** and choose **New experiment**. You set the name, the hypothesis, the traffic allocation and the variations. New experiments always start as **Draft**. They are created in the project selected in the top bar.' },
         { type: 'h2', text: 'Targeting', id: 'targeting' },

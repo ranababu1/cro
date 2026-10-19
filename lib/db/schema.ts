@@ -608,3 +608,28 @@ export const pageHeatmapScrollDaily = sqliteTable('page_heatmap_scroll_daily', {
     depth: integer('depth').notNull(),
     sessions: integer('sessions').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.depth] })]);
+
+/**
+ * Test planner (all plans): ideas with a hypothesis, the expected lift and inputs for a duration estimate
+ * (lib/planner.ts). Starting an idea links it to the draft test made from it.
+ */
+export const testIdeas = sqliteTable('test_ideas', {
+    id: text('id').primaryKey(),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    hypothesis: text('hypothesis').notNull().default(''),
+    page_url: text('page_url'),
+    /** Current conversion rate of the page, in percent (for example 3.5). */
+    baseline_rate: real('baseline_rate'),
+    /** Smallest relative lift worth detecting, in percent (for example 10). */
+    expected_lift: real('expected_lift'),
+    daily_visitors: integer('daily_visitors'),
+    /** Versions including the control. */
+    variations: integer('variations').notNull().default(2),
+    priority: text('priority', { enum: ['low', 'medium', 'high'] }).notNull().default('medium'),
+    status: text('status', { enum: ['idea', 'planned', 'started', 'dropped'] }).notNull().default('idea'),
+    experiment_id: text('experiment_id').references(() => experiments.id, { onDelete: 'set null' }),
+    created_by: text('created_by'),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_test_ideas_project').on(t.project_id)]);

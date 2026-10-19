@@ -111,6 +111,8 @@ Webhooks for test events (signed, retried, paid): done (proposal 7)
 
 - Done: webhook deliveries pinned to the checked address (DNS rebinding closed).
 
+- Done: test planner with hypotheses and duration estimates (proposal 10), all plans.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
