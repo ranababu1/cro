@@ -1,0 +1,13 @@
+{
+  "name": "@freeabtest/node",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Server-side SDK for FreeABTest: assign visitors and track events from Node.js. Not published to npm yet.",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": { ".": { "types": "./index.d.ts", "default": "./index.js" } },
+  "files": ["index.js", "index.d.ts", "README.md"],
+  "engines": { "node": ">=18" },
+  "license": "MIT"
+}

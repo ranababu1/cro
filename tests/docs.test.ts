@@ -43,7 +43,7 @@ describe('in-app docs', () => {
         const validation = fs.readFileSync(path.join(__dirname, '../lib/validation.ts'), 'utf8');
         expect(validation).toMatch(/control_url/);
         expect(allText('variations')).toMatch(/up to 10/);
-        expect(fs.readFileSync(path.join(__dirname, '../app/api/track/route.ts'), 'utf8')).toMatch(/MAX_METADATA_BYTES = 4096/);
+        expect(fs.readFileSync(path.join(__dirname, '../lib/sdkFlows.ts'), 'utf8')).toMatch(/MAX_METADATA_BYTES = 4096/);
         expect(fs.readFileSync(path.join(__dirname, '../lib/statistics.ts'), 'utf8')).toMatch(/minSampleSize = 100/);
     });
 

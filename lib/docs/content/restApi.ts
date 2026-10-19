@@ -10,6 +10,7 @@ export const restApi: DocPage = {
         { type: 'h2', text: 'Authentication' },
         { type: 'table', head: ['Used for', 'How to authenticate'], rows: [
             ['SDK endpoints (`/api/assign`, `/api/track`)', 'An SDK key in the `X-API-Key` header (or a `?key=` query parameter). Secret keys are rejected here.'],
+            ['Server endpoints (`/api/server/...`)', 'A secret key: `Authorization: Bearer cro_sk_...`. For tests run from your backend; see [Server-side testing](/docs/server-side).'],
             ['Management endpoints (`/api/experiments...`)', 'A signed-in dashboard session, or a secret key: `Authorization: Bearer cro_sk_...`. A secret key only sees experiments in its own project.'],
             ['Key management (`/api/keys...`)', 'Dashboard session only.'],
         ] },

@@ -163,7 +163,7 @@ describe('auto-shift wiring', () => {
     const read = (f: string) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
     it('runs from the SDK entry points after the response', () => {
         expect(read('app/api/sdk/bootstrap/route.ts')).toMatch(/scheduleAutoShift\(experiment, auth\.ctx\.orgId\)/);
-        expect(read('app/api/assign/route.ts')).toMatch(/scheduleAutoShift\(experiment, auth\.ctx\.orgId\)/);
+        expect(read('lib/sdkFlows.ts')).toMatch(/scheduleAutoShift\(experiment, ctx\.orgId\)/);
         expect(read('lib/autoShiftRun.ts')).toMatch(/after\(run\)/);
     });
     it('pricing lists auto-shift as available on Growth and above', () => {
