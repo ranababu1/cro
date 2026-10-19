@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { orgIdForProject } from '@/lib/access';
-import { canUseFeature, UPGRADE_NOTE } from '@/lib/entitlements';
+import { canUseFeature, getOrgEntitlements, UPGRADE_NOTE } from '@/lib/entitlements';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { AUDIT_ENTITIES, AUDIT_PAGE_SIZE, auditRetentionDays, decodeCursor, encodeCursor, presentAudit } from '@/lib/audit';
 
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'The audit log needs a paid plan', upgrade: UPGRADE_NOTE.audit_log }, { status: 403 });
         }
         const org = await db.getOrganization(orgId);
-        const days = auditRetentionDays(org?.plan);
+        const days = auditRetentionDays((await getOrgEntitlements(orgId)).plan);
         const since = new Date(Date.now() - days * 86_400_000).toISOString();
         const sp = request.nextUrl.searchParams;
         const e = sp.get('entity');

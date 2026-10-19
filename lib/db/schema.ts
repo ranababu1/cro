@@ -40,6 +40,10 @@ export const organizations = sqliteTable('organizations', {
     suspended_at: text('suspended_at'),
     suspended_reason: text('suspended_reason'),
     plan: text('plan').notNull().default('free'),
+    // Plan assigned by a platform admin. Overrides the billing plan above until it is removed (null). Audited.
+    plan_override: text('plan_override', { enum: ['free', 'starter', 'growth', 'enterprise'] }),
+    plan_override_by: text('plan_override_by'),
+    plan_override_at: text('plan_override_at'),
     // null means unlimited
     monthly_visitor_limit: integer('monthly_visitor_limit'),
     monthly_experiment_limit: integer('monthly_experiment_limit'),

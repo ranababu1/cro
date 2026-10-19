@@ -2,18 +2,23 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardBody, Field, Input, Button, Alert } from '@/app/components/ui';
+import { Card, CardHeader, CardBody, Field, Input, Select, Button, Alert } from '@/app/components/ui';
+import type { TenantPlan } from '../../PlanCell';
+
+const PLANS = ['free', 'starter', 'growth', 'enterprise'] as const;
 
 interface Org {
     id: string; status: 'active' | 'suspended'; plan: string;
+    plan_override: string | null; plan_override_by: string | null; plan_override_at: string | null;
     monthly_visitor_limit: number | null; monthly_experiment_limit: number | null; monthly_pageview_limit: number | null;
 }
 
 const toLimit = (v: string) => (v.trim() === '' ? null : Number(v));
 
-export default function TenantControls({ org }: { org: Org }) {
+export default function TenantControls({ org, plan: effective }: { org: Org; plan: TenantPlan }) {
     const router = useRouter();
     const [plan, setPlan] = useState(org.plan);
+    const [assigned, setAssigned] = useState<string>(org.plan_override ?? 'enterprise');
     const [visitors, setVisitors] = useState(org.monthly_visitor_limit?.toString() ?? '');
     const [pageviews, setPageviews] = useState(org.monthly_pageview_limit?.toString() ?? '');
     const [experiments, setExperiments] = useState(org.monthly_experiment_limit?.toString() ?? '');
@@ -42,7 +47,7 @@ export default function TenantControls({ org }: { org: Org }) {
                         {error && <Alert tone="danger">{error}</Alert>}
                         {saved && <Alert tone="success">{saved}</Alert>}
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <Field label="Plan">{(id) => <Input id={id} required value={plan} onChange={(e) => setPlan(e.target.value)} />}</Field>
+                            <Field label="Billing plan">{(id) => <Input id={id} required value={plan} onChange={(e) => setPlan(e.target.value)} />}</Field>
                             <Field label="Visitors per month">{(id) => <Input id={id} type="number" min={0} value={visitors} placeholder="Unlimited" onChange={(e) => setVisitors(e.target.value)} />}</Field>
                             <Field label="Pageviews per month" hint="Blank uses the plan default. -1 is unlimited.">{(id) => <Input id={id} type="number" min={-1} value={pageviews} placeholder="Plan default" onChange={(e) => setPageviews(e.target.value)} />}</Field>
                             <Field label="Experiment starts per month">{(id) => <Input id={id} type="number" min={0} value={experiments} placeholder="Unlimited" onChange={(e) => setExperiments(e.target.value)} />}</Field>
@@ -68,6 +73,26 @@ export default function TenantControls({ org }: { org: Org }) {
                             <Button className="w-full" disabled={busy} onClick={() => patch({ status: 'active' }, 'Tenant reactivated.')}>Reactivate tenant</Button>
                         </>
                     )}
+                </CardBody>
+            </Card>
+            <Card className="lg:col-span-2">
+                <CardHeader title="Assigned plan" description="Gives this organization a plan directly. It overrides the billing plan until you remove it, takes effect for the tenant within 30 seconds, and both changes are saved in the audit log." />
+                <CardBody className="space-y-3">
+                    <p className="text-sm text-zinc-700">
+                        Effective plan: <span className="font-medium capitalize">{effective.effective}</span>
+                        {effective.source === 'platform_admin' && ' (a platform admin owns this organization, so it is always Enterprise)'}
+                        {effective.source === 'assigned' && org.plan_override_by && ` (assigned by ${org.plan_override_by}${org.plan_override_at ? ` on ${new Date(org.plan_override_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : ''})`}
+                        {effective.source === 'billing' && ' (from billing)'}
+                    </p>
+                    <div className="flex flex-wrap items-end gap-3">
+                        <Field label="Plan to assign">{(id) => (
+                            <Select id={id} value={assigned} onChange={(e) => setAssigned(e.target.value)}>
+                                {PLANS.map((p) => <option key={p} value={p}>{p[0].toUpperCase() + p.slice(1)}</option>)}
+                            </Select>
+                        )}</Field>
+                        <Button disabled={busy || assigned === org.plan_override} onClick={() => patch({ plan_override: assigned }, `Assigned the ${assigned} plan.`)}>Assign plan</Button>
+                        {org.plan_override && <Button variant="secondary" disabled={busy} onClick={() => patch({ plan_override: null }, 'Assigned plan removed. Billing applies again.')}>Remove assigned plan</Button>}
+                    </div>
                 </CardBody>
             </Card>
         </div>

@@ -2,6 +2,8 @@ import { after } from 'next/server';
 import { db } from './db';
 import { RAW_RETENTION_DAYS } from './heatmaps';
 import { AUDIT_RETENTION_DAYS } from './audit';
+import { SUPER_ADMIN_EMAIL } from './entitlements';
+import { platformAdminEmails } from './platformAdmin';
 
 /**
  * Retention cleanup without a cron. Busy SDK routes call scheduleRetention(); at most once an hour across all
@@ -49,8 +51,10 @@ export async function runRetention(now = new Date()): Promise<{ heatmapPoints: n
     const c = retentionCutoffs(now);
     const heatmapPoints = await db.deleteOldHeatmapPoints(c.heatmapBefore, DELETE_LIMIT);
     const heatmapScrolls = await db.deleteOldHeatmapScrolls(c.heatmapBefore, DELETE_LIMIT);
-    const surveyAnswers = await db.deleteOldSurveyAnswers(c.surveyBefore, DELETE_LIMIT);
-    const auditEntries = await db.deleteOldAuditEntries(c.auditBefore, DELETE_LIMIT);
+    // Orgs a platform admin owns keep Enterprise retention, as everywhere else.
+    const admins = [...new Set([SUPER_ADMIN_EMAIL, ...platformAdminEmails()])];
+    const surveyAnswers = await db.deleteOldSurveyAnswers(c.surveyBefore, DELETE_LIMIT, admins);
+    const auditEntries = await db.deleteOldAuditEntries(c.auditBefore, DELETE_LIMIT, admins);
     return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries };
 }
 

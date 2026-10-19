@@ -1,4 +1,5 @@
 import { db, monthStartIso } from './db';
+import { getOrgEntitlements } from './entitlements';
 import { METRICS } from './telemetry';
 
 export function defaultRange(sp: { from?: string; to?: string } = {}): { from: string; to: string } {
@@ -84,7 +85,7 @@ export async function overviewTotals(from: string, to: string) {
         quotaRows.push({
             org_id: org.id,
             name: org.name,
-            plan: org.plan,
+            plan: (await getOrgEntitlements(org.id)).plan,
             status: org.status,
             visitors: usage.visitors,
             visitor_limit: visitorLimit,
@@ -153,13 +154,15 @@ export async function topOrgs(from: string, to: string, metric: string = METRICS
     const tops = await db.topTelemetryScopes({ from, to, scopeType: 'org', metric, limit: 100 });
     const orgs = await db.listOrganizations();
     const byId = Object.fromEntries(orgs.map((o) => [o.id, o]));
+    const ids = [...new Set([...tops.map((t) => t.scope_id).filter((id) => byId[id]), ...(q ? orgs.map((o) => o.id) : [])])];
+    const plans: Record<string, string> = Object.fromEntries(await Promise.all(ids.map(async (id) => [id, (await getOrgEntitlements(id)).plan] as const)));
     let rows = tops.map((t) => {
         const o = byId[t.scope_id];
         return {
             ...t,
             name: o?.name ?? t.scope_id,
             slug: o?.slug ?? '',
-            plan: o?.plan ?? '',
+            plan: o ? plans[o.id] ?? o.plan : '',
             status: o?.status ?? '',
             created_at: o?.created_at,
         };
@@ -175,7 +178,7 @@ export async function topOrgs(from: string, to: string, metric: string = METRICS
                     total: 0,
                     name: o.name,
                     slug: o.slug,
-                    plan: o.plan,
+                    plan: plans[o.id] ?? o.plan,
                     status: o.status,
                     created_at: o.created_at,
                 });

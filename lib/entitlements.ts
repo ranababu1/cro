@@ -39,8 +39,19 @@ export interface Limits {
     domains: number | null;
 }
 
+/** Plans an admin can assign. */
+export const ASSIGNABLE_PLANS = ['free', 'starter', 'growth', 'enterprise'] as const;
+export type AssignablePlan = (typeof ASSIGNABLE_PLANS)[number];
+
+/** Where the effective plan comes from: a platform admin owns the org, an admin assigned it, or the billing plan. */
+export type PlanSource = 'platform_admin' | 'assigned' | 'billing';
+
 export interface Entitlements {
+    /** Effective plan, shown everywhere: Enterprise for orgs a platform admin owns, else the assigned plan, else billing. */
     plan: string;
+    /** Admin only: why the plan is what it is, and the billing plan underneath. */
+    planSource: PlanSource;
+    billingPlan: string;
     paid: boolean;
     unlimited: boolean;
     specialFriend: boolean;
@@ -53,6 +64,7 @@ export interface Entitlements {
 
 export interface OrgForEntitlements {
     plan: string | null;
+    plan_override?: string | null;
     monthly_visitor_limit?: number | null;
     monthly_pageview_limit?: number | null;
     special_friend?: boolean | null;
@@ -98,13 +110,17 @@ function applyAllowances(limits: Limits, a: Allowances): Limits {
 
 /** Pure rule used everywhere. */
 export function computeEntitlements(org: OrgForEntitlements | null, memberEmails: string[]): Entitlements {
-    const plan = org?.plan || 'free';
-    const paid = isPaidPlan(plan);
+    const billingPlan = org?.plan || 'free';
     const unlimited = memberEmails.some(isSuperAdminEmail);
+    const assigned = org?.plan_override && (ASSIGNABLE_PLANS as readonly string[]).includes(org.plan_override) ? org.plan_override : null;
+    const planSource: PlanSource = unlimited ? 'platform_admin' : assigned ? 'assigned' : 'billing';
+    const plan = unlimited ? 'enterprise' : assigned ?? billingPlan;
+    const paid = isPaidPlan(plan);
     const specialFriend = !!org?.special_friend;
+    if (org) org = { ...org, plan };
     if (unlimited) {
         return {
-            plan, paid, unlimited, specialFriend,
+            plan, planSource, billingPlan, paid, unlimited, specialFriend,
             features: Object.fromEntries(HEAVY_FEATURES.map((f) => [f, true])) as Record<HeavyFeature, boolean>,
             limits: { monthlyVisitors: null, dailyVisitors: null, lifetimeExperiments: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null, domains: null },
             flags: {},
@@ -135,7 +151,12 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         limits = applyAllowances(limits, a);
         flags = a.flags ?? {};
     }
-    return { plan, paid, unlimited, specialFriend, features, limits, flags, freeTierRules: !paid && !specialFriend };
+    return { plan, planSource, billingPlan, paid, unlimited, specialFriend, features, limits, flags, freeTierRules: !paid && !specialFriend };
+}
+
+/** Entitlements from an org and its members. Only owners lift the limits: inviting a platform admin as a member must not make an org unlimited. */
+export function memberEntitlements(org: OrgForEntitlements | null, members: { role: string; email: string }[]): Entitlements {
+    return computeEntitlements(org, members.filter((m) => m.role === 'owner').map((m) => m.email));
 }
 
 /** Entitlements for an org, cached briefly (cleared on any org write through lib/db). */
@@ -143,8 +164,7 @@ export async function getOrgEntitlements(orgId: string): Promise<Entitlements> {
     return cached(`ent:${orgId}`, async () => {
         const org = await db.getOrganization(orgId);
         const members = org ? await db.getOrgMembers(orgId) : [];
-        // Only owners lift the limits: inviting a platform admin as a member must not make an org unlimited.
-        return computeEntitlements(org, members.filter((m) => m.role === 'owner').map((m) => m.email));
+        return memberEntitlements(org, members);
     }, 30_000);
 }
 

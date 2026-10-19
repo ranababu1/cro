@@ -40,10 +40,22 @@ export interface SdkKeyContext {
     type: ApiKeyType;
 }
 
+/** SQL for an org's effective plan: Enterprise when a platform admin owns it, else the assigned plan, else billing. */
+function effectivePlanSql(orgAlias: string, adminEmails: string[]) {
+    const o = sql.raw(orgAlias);
+    const owned = adminEmails.length
+        ? sql`WHEN EXISTS (SELECT 1 FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.org_id = ${o}.id AND m.role = 'owner' AND lower(u.email) IN (${sql.join(adminEmails.map((e) => sql`${e.toLowerCase()}`), sql`, `)})) THEN 'enterprise' `
+        : sql``;
+    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) ELSE coalesce(lower(${o}.plan), 'free') END)`;
+}
+
 export interface OrgUpdate {
     status?: 'active' | 'suspended';
     suspended_reason?: string | null;
     plan?: string;
+    plan_override?: 'free' | 'starter' | 'growth' | 'enterprise' | null;
+    plan_override_by?: string | null;
+    plan_override_at?: string | null;
     monthly_visitor_limit?: number | null;
     monthly_experiment_limit?: number | null;
     monthly_pageview_limit?: number | null;
@@ -1020,12 +1032,12 @@ export const db = {
     },
 
     /** Audit entries older than the owning org's plan period (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years). */
-    async deleteOldAuditEntries(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number): Promise<number> {
+    async deleteOldAuditEntries(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number, adminEmails: string[] = []): Promise<number> {
         const d = await getDb();
         const r = await d.run(sql`DELETE FROM audit_log WHERE id IN (
             SELECT a.id FROM audit_log a
             JOIN organizations o ON o.id = a.org_id
-            WHERE a.created_at < ${latestCutoff(before)} AND a.created_at < CASE coalesce(lower(o.plan), 'free') WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            WHERE a.created_at < ${latestCutoff(before)} AND a.created_at < CASE ${effectivePlanSql('o', adminEmails)} WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
             LIMIT ${limit})`);
         return Number(r.rowsAffected);
     },
@@ -1278,14 +1290,14 @@ export const db = {
     },
 
     /** Survey answers older than the owning organization's plan retention. Unknown paid plans use the Starter cutoff. */
-    async deleteOldSurveyAnswers(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number): Promise<number> {
+    async deleteOldSurveyAnswers(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number, adminEmails: string[] = []): Promise<number> {
         const d = await getDb();
         const r = await d.run(sql`DELETE FROM survey_responses WHERE id IN (
             SELECT r.id FROM survey_responses r
             JOIN surveys sv ON sv.id = r.survey_id
             JOIN projects p ON p.id = sv.project_id
             JOIN organizations o ON o.id = p.org_id
-            WHERE r.day < ${latestCutoff(before)} AND r.day < CASE lower(o.plan) WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            WHERE r.day < ${latestCutoff(before)} AND r.day < CASE ${effectivePlanSql('o', adminEmails)} WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
             LIMIT ${limit})`);
         return Number(r.rowsAffected);
     },

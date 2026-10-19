@@ -1,4 +1,5 @@
 import { db, monthStartIso } from './db';
+import { memberEntitlements } from './entitlements';
 
 export async function getTenantSummary(orgId: string) {
     const org = await db.getOrganization(orgId);
@@ -9,7 +10,10 @@ export async function getTenantSummary(orgId: string) {
         db.getOrgUsage(orgId, monthStartIso()),
         db.getOrgUsage(orgId),
     ]);
-    return { org, members, projects, usage: { month: usageMonth, total: usageTotal } };
+    // Effective plan as the tenant sees it, and where it comes from. Computed fresh (not cached) so admin changes show at once.
+    const ent = memberEntitlements(org, members);
+    const plan = { effective: ent.plan, source: ent.planSource, billing: ent.billingPlan };
+    return { org, members, projects, plan, usage: { month: usageMonth, total: usageTotal } };
 }
 
 export type TenantSummary = NonNullable<Awaited<ReturnType<typeof getTenantSummary>>>;

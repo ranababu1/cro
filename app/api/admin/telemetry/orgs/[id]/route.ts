@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         members: summary.members,
         projects: summary.projects,
         usage: { month: monthUsage, total: summary.usage.total },
-        quota: { visitor_limit: visitorLimit, visitor_pct: visitorPct, plan: summary.org.plan },
+        quota: { visitor_limit: visitorLimit, visitor_pct: visitorPct, plan: summary.plan.effective },
         totals,
         series,
         timeline: events,

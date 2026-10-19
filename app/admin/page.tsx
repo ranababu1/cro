@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { listTenants } from '@/lib/admin';
+import PlanCell from './PlanCell';
 import { PageHeader, Card, Badge, StatusBadge, Table, THead, TBody, TR, TH, TD, Stat, EmptyState, ButtonLink } from '@/app/components/ui';
 
 export const metadata: Metadata = { title: 'Admin console' };
@@ -45,7 +46,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                             </tr>
                         </THead>
                         <TBody>
-                            {tenants.map(({ org, members, projects, usage }) => (
+                            {tenants.map(({ org, members, projects, usage, plan }) => (
                                 <TR key={org.id}>
                                     <TD>
                                         <Link className="font-medium text-zinc-900 hover:underline" href={`/admin/orgs/${org.id}`}>{org.name}</Link>
@@ -53,7 +54,7 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                                         {org.special_friend && <Badge tone="brand" className="mt-1">Special friend</Badge>}
                                     </TD>
                                     <TD><StatusBadge status={org.status} /></TD>
-                                    <TD className="capitalize">{org.plan}</TD>
+                                    <TD><PlanCell plan={plan} /></TD>
                                     <TD className="max-w-[14rem] truncate" title={members.map((m) => m.email).join(', ')}>{members.map((m) => m.email).join(', ')}</TD>
                                     <TD numeric>{projects.length}</TD>
                                     <TD numeric>{usage.total.experiments}<span className="text-zinc-400"> ({usage.total.running} running)</span></TD>
