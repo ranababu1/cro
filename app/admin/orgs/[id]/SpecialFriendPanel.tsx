@@ -42,6 +42,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
     const [autoShift, setAutoShift] = useState<Toggle>(toToggle(allowances.auto_shift));
     const [traffic, setTraffic] = useState<Toggle>(toToggle(allowances.traffic));
     const [visualEd, setVisualEd] = useState<Toggle>(toToggle(allowances.visual_editor));
+    const [errTrack, setErrTrack] = useState<Toggle>(toToggle(allowances.error_tracking));
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
 
@@ -62,6 +63,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
         const as = fromToggle(autoShift); if (as !== undefined) out.auto_shift = as;
         const tr = fromToggle(traffic); if (tr !== undefined) out.traffic = tr;
         const ve = fromToggle(visualEd); if (ve !== undefined) out.visual_editor = ve;
+        const et = fromToggle(errTrack); if (et !== undefined) out.error_tracking = et;
         if (!out.flags) delete out.flags;
         const res = await fetch(`/api/admin/orgs/${orgId}/allowances`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ special_friend: enabled, allowances: out }) });
         setBusy(false);
@@ -97,6 +99,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
                     <Field label="Auto-shift traffic">{(id) => select(id, autoShift, setAutoShift)}</Field>
                     <Field label="Traffic overview">{(id) => select(id, traffic, setTraffic)}</Field>
                     <Field label="Visual editor">{(id) => select(id, visualEd, setVisualEd)}</Field>
+                    <Field label="Error tracking">{(id) => select(id, errTrack, setErrTrack)}</Field>
                 </div>
                 <div className="flex justify-end"><Button onClick={() => void save()} disabled={busy}>Save allowances</Button></div>
             </CardBody>

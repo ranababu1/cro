@@ -7,6 +7,7 @@ import { describeTargeting, parseTargeting } from '@/lib/targeting';
 import { EditTest } from './EditTest';
 import { ShareResults } from './ShareResults';
 import { HeatmapsPanel } from './HeatmapsPanel';
+import { ErrorsPanel } from './ErrorsPanel';
 import { FunnelsPanel } from './FunnelsPanel';
 import { RevenuePanel } from './RevenuePanel';
 import { SrmWarning } from '@/app/components/SrmWarning';
@@ -150,6 +151,7 @@ export default function ExperimentDetail() {
                     { id: 'results', label: 'Results' },
                     { id: 'setup', label: 'Setup' },
                     { id: 'heatmaps', label: 'Heatmaps' },
+                    { id: 'errors', label: 'Errors' },
                     ...(experiment.status !== 'completed' ? [{ id: 'edit', label: 'Edit test' }] : []),
                     { id: 'settings', label: 'Settings' },
                 ]}
@@ -158,6 +160,7 @@ export default function ExperimentDetail() {
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
+            {tab === 'errors' && <ErrorsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
             {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}

@@ -58,6 +58,14 @@ export const results: DocPage = {
         { type: 'h2', text: 'Visitors not split as expected', id: 'srm' },
         { type: 'p', text: 'If the number of visitors in each version is far from your traffic split, the Results tab shows a warning. For example, a 50/50 test with 5,500 visitors on the control and 4,500 on the variation. A gap this large rarely happens by chance, so something is usually wrong: a redirect that drops visitors, a slow or broken variation page, or the snippet missing on one page.' },
         { type: 'p', text: 'The check runs once a test has at least 100 visitors and flags a gap only when the chance of it happening by luck is under 0.1%. Fix the cause before trusting the results. If you changed the split during the test, the warning can appear for that reason alone.' },
+        { type: 'h2', text: 'JavaScript errors', id: 'errors' },
+        { type: 'p', text: 'On paid plans, the **Errors** tab of a test counts JavaScript errors on test pages for the version each visitor sees. Use it to check that a new version does not break something, such as a script that expects an element the version removed.' },
+        { type: 'list', items: [
+            '**What is counted.** Uncaught errors and failed promises (unhandled rejections) after the snippet has loaded. Errors from the freeabtest.com scripts themselves are left out.',
+            '**What is sent.** The error message, the script file and the line, nothing else. No stack traces, page text or form values. Emails, long numbers and tokens in messages are removed, and addresses lose their query strings.',
+            '**Per version.** Each version shows visitors, pages with errors, total errors and errors per 100 visitors. **Top errors** lists the most frequent errors with a count for every version.',
+            '**Limits.** Up to 20 different errors per page load, and 200 different errors per test per day. Further new errors that day count as **Other errors**.',
+        ] },
         { type: 'h2', text: 'Traffic overview', id: 'traffic' },
         { type: 'p', text: 'On paid plans, **Traffic** in the sidebar shows page views for every page that has the install snippet, not only pages in a test. Pick an environment and the last 7, 30 or 90 days to see page views per day, top pages, sources, devices and countries.' },
         { type: 'list', items: [

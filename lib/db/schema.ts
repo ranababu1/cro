@@ -225,6 +225,22 @@ export const trafficDaily = sqliteTable('traffic_daily', {
     index('idx_traffic_daily_env_dim').on(t.environment_id, t.dim, t.day),
 ]);
 
+/** JavaScript errors per test version per day (paid). Batched with telemetry; distinct errors are capped per test per day. */
+export const errorDaily = sqliteTable('error_daily', {
+    day: text('day').notNull(),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    fingerprint: text('fingerprint').notNull(),
+    kind: text('kind').notNull(),
+    message: text('message').notNull(),
+    source: text('source').notNull(),
+    line: integer('line').notNull().default(0),
+    count: integer('count').notNull().default(0),
+}, (t) => [
+    primaryKey({ columns: [t.day, t.experiment_id, t.variation_id, t.fingerprint] }),
+    index('idx_error_daily_exp_day').on(t.experiment_id, t.day),
+]);
+
 /** Server-side product usage events for dashboard actions (not visitor page views). */
 export const productEvents = sqliteTable('product_events', {
     id: text('id').primaryKey(),

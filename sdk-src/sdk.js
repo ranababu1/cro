@@ -255,6 +255,9 @@
                     analyticsPush(data);
                     bindGoals(data);
                     if (data.capture && data.capture.heatmaps) loadHeatmaps(data);
+                    // Extra modules the server turned on for this page (error tracking, popups, surveys).
+                    // Each module reads the bootstrap reply from window.__ABTestMod and the key from the script tag.
+                    for (var m = 0; data.modules && m < data.modules.length; m++) loadModule(data.modules[m] + '.js', '__ABTestMod', data);
                 }
                 return data;
             })
