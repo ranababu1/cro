@@ -172,3 +172,27 @@ export async function rolledLiveCounts(experimentId: string, environmentId?: str
         daily,
     };
 }
+
+export interface DailyBucketRow { day: string; variation_id: string; bucket: string; users: number }
+
+/**
+ * Per-day buckets for the results export: rolled-up closed days plus today's raw events. For v and g buckets, users
+ * are first-seen counts (so a running sum gives the distinct total); bucket d is the distinct visitors that day.
+ */
+export async function dailyBuckets(experimentId: string, environmentId?: string, now = new Date()): Promise<DailyBucketRow[]> {
+    const today = await ensureRolledUp(experimentId, now);
+    const scope = environmentId ?? ALL;
+    const d = await getDb();
+    const rolled = await d.all<DailyBucketRow>(sql`
+        select day, variation_id, bucket, users from experiment_stats_daily
+        where experiment_id = ${experimentId} and scope = ${scope} and day < ${today} and (bucket = 'v' or bucket = 'd' or bucket like 'g:%' or bucket = 't:conversion')`);
+    const out: DailyBucketRow[] = rolled.map((r) => ({ ...r, users: n(r.users) }));
+    for (const kind of ['v', 't', 'g'] as Kind[]) {
+        for (const r of await firstSeen(experimentId, scope, kind, today, null)) {
+            if (kind === 't' && r.bucket !== 't:conversion') continue;
+            out.push({ day: today, variation_id: r.variation_id, bucket: r.bucket, users: r.users });
+        }
+    }
+    for (const r of await dailyDistinct(experimentId, scope, today, null)) out.push({ day: r.day, variation_id: r.variation_id, bucket: 'd', users: r.users });
+    return out;
+}

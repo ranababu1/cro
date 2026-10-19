@@ -311,3 +311,7 @@ Webhooks (feature 'webhooks', paid; lib/webhooks.ts): tables webhooks and webhoo
 - lib/planner.ts: planEstimate uses estimateRequiredSampleSize with alpha 0.05/(versions-1) and power 0.8; fixed_days = ceil(total/daily), sequential_days = 2x to 3x (SEQUENTIAL_FACTOR, matching docs/results#sample-size). estimateText for the UI.
 - API: GET/POST /api/ideas (current project via currentProject in lib/popupRoutes.ts, any member), GET/PATCH/DELETE /api/ideas/[id]. PATCH experiment_id must be a test in the same project and moves the idea to started (audit idea:start). Audit entity idea.
 - UI: /planner board (nav Test planner). Create test links to /experiments/new?idea=<id>; the wizard prefills name and control URL, sends Hypothesis: ... as the description, and PATCHes the idea with the new experiment id.
+
+## Results CSV export
+- GET /api/experiments/[id]/results/export?environment= (session auth, any member with access, all plans). lib/rollups.ts dailyBuckets reads experiment_stats_daily (v, d, g:<goal>, t:conversion) for closed days plus today's raw firstSeen and dailyDistinct. lib/resultsCsv.ts builds rows per goal (primary first; All conversions when no goals), version and day with running totals; days with no activity are skipped; csvCell prefixes = + - @ and quotes. Audit results:export. Button Download CSV in the Results tab table header.
+- Docs: results#export column table, sdk#ga4-audience recipe (exp_variant_string custom dimension and one audience per version).

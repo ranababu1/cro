@@ -223,7 +223,11 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
                 </div>
             )}
             <Card>
-                <CardHeader title="Conversion rate by variation" description="Unique visitors who converted, divided by unique visitors assigned." />
+                <CardHeader
+                    title="Conversion rate by variation"
+                    description="Unique visitors who converted, divided by unique visitors assigned."
+                    actions={<a href={`/api/experiments/${experiment.id}/results/export`} download className="rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="results-csv">Download CSV</a>}
+                />
                 <Table>
                     <THead>
                         <tr><TH>Variation</TH><TH align="right">Visitors</TH><TH align="right">Conversions</TH><TH align="right">Conversion rate</TH><TH align="right">Lift vs control</TH><TH align="right">95% interval</TH><TH align="right">Chance to beat control</TH></tr>
