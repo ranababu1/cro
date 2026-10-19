@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { formatZodError } from '@/lib/validation';
 import { updatePopupSchema } from '@/lib/popups';
-import { popupJson, popupProject } from '@/lib/popupRoutes';
+import { ownerScope, popupJson, popupProject } from '@/lib/popupRoutes';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -13,7 +13,9 @@ async function load(request: NextRequest, params: Params['params']) {
     const popup = await db.getPopup(id);
     // Popups in another project of the same user are found through that project, never by id alone.
     if (!popup || !r.projectIds.includes(popup.project_id)) return NextResponse.json({ error: 'Popup not found' }, { status: 404 });
-    return { ...r, popup };
+    const scope = await ownerScope(r, popup.project_id, 'popups');
+    if (scope instanceof NextResponse) return scope;
+    return { ...scope, popup };
 }
 
 /** PATCH /api/popups/[id]: rename, change content or targeting, turn on or pause. */

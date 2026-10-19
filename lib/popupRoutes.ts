@@ -28,6 +28,22 @@ export async function featureProject(request: NextRequest, feature: Feature): Pr
     return { projectId, orgId, userId: ctx.userId, projectIds: ctx.projectIds };
 }
 
+/**
+ * Scopes a request to the project that owns a popup or survey. The current project from the switcher may be in another
+ * organization, so the plan check and the audit entry use the owner's organization.
+ */
+export async function ownerScope(
+    r: { projectId: string; orgId: string; userId: string | null; projectIds: string[] },
+    ownerProjectId: string,
+    feature: Feature,
+): Promise<NextResponse | { projectId: string; orgId: string; userId: string | null; projectIds: string[] }> {
+    if (ownerProjectId === r.projectId) return r;
+    const orgId = await orgIdForProject(ownerProjectId);
+    if (orgId === r.orgId) return { ...r, projectId: ownerProjectId };
+    if (!(await canUseFeature(orgId, feature))) return NextResponse.json({ error: LOCKED[feature], upgrade: UPGRADE_NOTE[feature] }, { status: 403 });
+    return { ...r, projectId: ownerProjectId, orgId };
+}
+
 export function popupJson(p: Awaited<ReturnType<typeof db.getPopup>>) {
     if (!p) return null;
     return { id: p.id, name: p.name, status: p.status, config: parsePopupConfig(p.config), created_at: p.created_at, updated_at: p.updated_at };
