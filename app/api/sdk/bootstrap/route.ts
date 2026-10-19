@@ -26,6 +26,7 @@ import { scheduleWebhooks } from '@/lib/webhooks';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 import { previewReply } from '@/lib/preview';
+import { pickPageHeatmap } from '@/lib/pageHeatmaps';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -95,16 +96,27 @@ export async function POST(request: NextRequest) {
                 return c && popupMatchesUrl(c, url) ? [sdkSurvey(p.id, c)] : [];
             })
             : [];
+        // Page heatmaps (paid): pages without a test. Active ones from the config cache; the rule and sample are checked per reply.
+        const pageHeatmaps = entitled ? await db.getActivePageHeatmaps(auth.ctx.projectId) : [];
         // The matched test, for its own heatmap sample rate and stop rules.
         let matched: Experiment | null = null;
         const reply = (b: BootstrapResponse) => {
             if (popups.length && b.action !== 'redirect') b = { ...b, popups, modules: [...(b.modules ?? []), 'popups'] };
             if (surveys.length && b.action !== 'redirect') b = { ...b, surveys, modules: [...(b.modules ?? []), 'surveys'] };
-            if ((!entitled && !errorsOn) || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
-            const rate = matched && matched.id === b.experiment_id ? heatmapRate(matched) : heatmapSampleRate();
-            const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};
-            if (errorsOn) extra.modules = [...(b.modules ?? []), 'errors'];
-            return sdkJson({ ...b, ...extra });
+            if (b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
+            if ((entitled || errorsOn) && b.matched && b.variation_id && b.experiment_id) {
+                const rate = matched && matched.id === b.experiment_id ? heatmapRate(matched) : heatmapSampleRate();
+                const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};
+                if (errorsOn) extra.modules = [...(b.modules ?? []), 'errors'];
+                b = { ...b, ...extra };
+            }
+            // Visitors in a test on this page feed the test's heatmap, so versions never mix. Everyone else can feed a
+            // matching page heatmap; heatmap.js then loads as a module, only for sampled visitors.
+            if (pageHeatmaps.length && !(b.matched && b.variation_id)) {
+                const ph = pickPageHeatmap(pageHeatmaps, url, user_id);
+                if (ph) b = { ...b, page_heatmap: { id: ph.id }, modules: [...(b.modules ?? []), 'heatmap'] };
+            }
+            return sdkJson(b);
         };
 
         // Page-visit goals: any page on a registered domain can complete a goal for visitors already in a test.

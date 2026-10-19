@@ -21,8 +21,8 @@ export function collectionSummary(c: Collection): string {
     return `Collecting from ${c.sample_percent}% of visitors. ${num(c.views)} page views captured since ${fmtDate(c.since)}.${rules ? ` Stops after ${rules}.` : ' No stop rule.'}`;
 }
 
-/** Sample rate and stop rules for this test's heatmaps (paid plans; the server enforces the same rule). */
-export function HeatmapCollection({ experimentId }: { experimentId: string }) {
+/** Sample rate and stop rules for a test's or a page's heatmap (paid plans; the server enforces the same rule). */
+export function HeatmapCollection({ url, page = false }: { url: string; page?: boolean }) {
     const [c, setC] = useState<Collection | null>(null);
     const [open, setOpen] = useState(false);
     const [sample, setSample] = useState('');
@@ -30,7 +30,6 @@ export function HeatmapCollection({ experimentId }: { experimentId: string }) {
     const [views, setViews] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
-    const url = `/api/experiments/${experimentId}/heatmaps/settings`;
 
     const fill = (j: Collection) => {
         setC(j);
@@ -71,7 +70,7 @@ export function HeatmapCollection({ experimentId }: { experimentId: string }) {
                     <Field label="Sample (% of visitors)" hint={`Empty uses the default of ${c.default_percent}%.`}>
                         {(id) => <Input id={id} type="number" min={1} max={100} value={sample} onChange={(e) => setSample(e.target.value)} placeholder="Default" />}
                     </Field>
-                    <Field label="Stop after (days)" hint="Counted from the test start or the last new period. Empty means no limit.">
+                    <Field label="Stop after (days)" hint={`Counted from ${page ? 'when the heatmap was created' : 'the test start'} or the last new period. Empty means no limit.`}>
                         {(id) => <Input id={id} type="number" min={1} max={365} value={days} onChange={(e) => setDays(e.target.value)} placeholder="No limit" />}
                     </Field>
                     <Field label="Stop after (page views)" hint="Page views captured for this heatmap. At least 100.">

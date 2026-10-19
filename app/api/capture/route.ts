@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { captureSchema, ingestCapture } from '@/lib/heatmaps';
+import { captureSchema, ingestCapture, PAGE_TABLES } from '@/lib/heatmaps';
+import { isPageHeatmapId, pageCollection, PAGE_VARIATION } from '@/lib/pageHeatmaps';
 import { heatmapCollection } from '@/lib/heatmapRules';
 import { scheduleRetention } from '@/lib/retention';
 import { formatZodError } from '@/lib/validation';
@@ -12,7 +13,7 @@ export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
 }
 
-/** Heatmap capture ingest. Refused for organizations without the heatmaps entitlement. */
+/** Heatmap capture ingest, for tests and page heatmaps. Refused for organizations without the heatmaps entitlement. */
 export async function POST(request: NextRequest) {
     try {
         const auth = await authenticateSdkRequest(request);
@@ -30,6 +31,17 @@ export async function POST(request: NextRequest) {
         const parsed = captureSchema.safeParse(body);
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
         const b = parsed.data;
+        // Page heatmap (a page without a test): same batch format, its own tables and stop rules.
+        if (isPageHeatmapId(b.experiment_id)) {
+            const h = await db.getPageHeatmap(b.experiment_id);
+            if (!h || h.project_id !== auth.ctx.projectId || h.status !== 'active') return sdkJson({ error: 'Page heatmap not found or paused' }, 404);
+            if (b.variation_id !== PAGE_VARIATION) return sdkJson({ error: 'Unknown variation' }, 400);
+            if (!pageCollection(h).collecting) return sdkJson({ success: true, accepted: 0, stopped: true }, 202);
+            const accepted = await ingestCapture(auth.ctx.orgId, b, PAGE_TABLES);
+            await db.addPageHeatmapViews(h.id, b.events.filter((e) => e.t === 's').length);
+            scheduleRetention();
+            return sdkJson({ success: true, accepted }, 202);
+        }
         const experiment = await db.getExperiment(b.experiment_id);
         if (!experiment || experiment.project_id !== auth.ctx.projectId || experiment.status !== 'running') {
             return sdkJson({ error: 'Experiment not found or not running' }, 404);

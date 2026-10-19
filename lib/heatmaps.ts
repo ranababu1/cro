@@ -52,13 +52,27 @@ export function normalizeVisitor(vid: string | undefined): string {
 }
 export type CaptureBatch = z.infer<typeof captureSchema>;
 
+/**
+ * The tables a heatmap reads and writes: a test's heatmaps, or a page heatmap (pages without a test). Both sets have
+ * the same columns; for page heatmaps experiment_id holds the page heatmap id and variation_id is always 'page'.
+ */
+export interface HeatTables { P: typeof s.heatmapPoints; SP: typeof s.heatmapScrollPoints; C: typeof s.heatmapClicksDaily; S: typeof s.heatmapScrollDaily }
+export const TEST_TABLES: HeatTables = { P: s.heatmapPoints, SP: s.heatmapScrollPoints, C: s.heatmapClicksDaily, S: s.heatmapScrollDaily };
+export const PAGE_TABLES: HeatTables = {
+    P: s.pageHeatmapPoints as unknown as typeof s.heatmapPoints,
+    SP: s.pageHeatmapScrollPoints as unknown as typeof s.heatmapScrollPoints,
+    C: s.pageHeatmapClicksDaily as unknown as typeof s.heatmapClicksDaily,
+    S: s.pageHeatmapScrollDaily as unknown as typeof s.heatmapScrollDaily,
+};
+
 const GRID_COLS = 50;
 const ROW_PX = 25;
 const day = (d = new Date()) => d.toISOString().slice(0, 10);
 
 /** Stores a batch: rollups aggregated within the batch (few writes), raw click points for confetti. */
-export async function ingestCapture(orgId: string, b: CaptureBatch): Promise<number> {
+export async function ingestCapture(orgId: string, b: CaptureBatch, t: HeatTables = TEST_TABLES): Promise<number> {
     const d = await getDb();
+    const { C: CD, S: SD } = t;
     const today = day();
     const clicks = new Map<string, { gx: number; gy: number; selector: string; clicks: number; rage: number; dead: number }>();
     const depths = new Map<number, number>();
@@ -83,25 +97,25 @@ export async function ingestCapture(orgId: string, b: CaptureBatch): Promise<num
     }
     const base = { experiment_id: b.experiment_id, variation_id: b.variation_id, device: b.device, day: today };
     if (clicks.size) {
-        await d.insert(s.heatmapClicksDaily).values([...clicks.values()].map((c) => ({ ...base, ...c })))
+        await d.insert(CD).values([...clicks.values()].map((c) => ({ ...base, ...c })))
             .onConflictDoUpdate({
-                target: [s.heatmapClicksDaily.experiment_id, s.heatmapClicksDaily.variation_id, s.heatmapClicksDaily.device, s.heatmapClicksDaily.day, s.heatmapClicksDaily.gx, s.heatmapClicksDaily.gy, s.heatmapClicksDaily.selector],
+                target: [CD.experiment_id, CD.variation_id, CD.device, CD.day, CD.gx, CD.gy, CD.selector],
                 set: {
-                    clicks: sql`${s.heatmapClicksDaily.clicks} + excluded.clicks`,
-                    rage: sql`${s.heatmapClicksDaily.rage} + excluded.rage`,
-                    dead: sql`${s.heatmapClicksDaily.dead} + excluded.dead`,
+                    clicks: sql`${CD.clicks} + excluded.clicks`,
+                    rage: sql`${CD.rage} + excluded.rage`,
+                    dead: sql`${CD.dead} + excluded.dead`,
                 },
             });
     }
     if (depths.size) {
-        await d.insert(s.heatmapScrollDaily).values([...depths].map(([depth, sessions]) => ({ ...base, depth, sessions })))
+        await d.insert(SD).values([...depths].map(([depth, sessions]) => ({ ...base, depth, sessions })))
             .onConflictDoUpdate({
-                target: [s.heatmapScrollDaily.experiment_id, s.heatmapScrollDaily.variation_id, s.heatmapScrollDaily.device, s.heatmapScrollDaily.day, s.heatmapScrollDaily.depth],
-                set: { sessions: sql`${s.heatmapScrollDaily.sessions} + excluded.sessions` },
+                target: [SD.experiment_id, SD.variation_id, SD.device, SD.day, SD.depth],
+                set: { sessions: sql`${SD.sessions} + excluded.sessions` },
             });
     }
-    if (points.length) await d.insert(s.heatmapPoints).values(points);
-    if (scrolls.length) await d.insert(s.heatmapScrollPoints).values(scrolls);
+    if (points.length) await d.insert(t.P).values(points);
+    if (scrolls.length) await d.insert(t.SP).values(scrolls);
     return b.events.length;
 }
 
@@ -135,11 +149,13 @@ export function hasFilters(f: HeatmapFilters): boolean {
     return !!(f.source || f.converted);
 }
 
-export async function heatmapReport(experimentId: string, variationId: string, device: Device | 'all', days = 30, filters: HeatmapFilters = {}): Promise<HeatmapReport> {
-    if (hasFilters(filters)) return filteredReport(experimentId, variationId, device, Math.min(days, RAW_RETENTION_DAYS), filters);
+export async function heatmapReport(experimentId: string, variationId: string, device: Device | 'all', days = 30, filters: HeatmapFilters = {}, t: HeatTables = TEST_TABLES): Promise<HeatmapReport> {
+    // The converted filter matches conversions in a test, so page heatmaps (no test) ignore it.
+    if (t !== TEST_TABLES && filters.converted) filters = { ...filters, converted: undefined };
+    if (hasFilters(filters)) return filteredReport(experimentId, variationId, device, Math.min(days, RAW_RETENTION_DAYS), filters, t);
     const d = await getDb();
     const from = day(new Date(Date.now() - (days - 1) * 86_400_000));
-    const C = s.heatmapClicksDaily, S = s.heatmapScrollDaily, P = s.heatmapPoints;
+    const { C, S, P } = t;
     const cw = and(eq(C.experiment_id, experimentId), eq(C.variation_id, variationId), gte(C.day, from), device === 'all' ? undefined : eq(C.device, device));
     const sw = and(eq(S.experiment_id, experimentId), eq(S.variation_id, variationId), gte(S.day, from), device === 'all' ? undefined : eq(S.device, device));
     const [grid, list, depthRows, byDeviceC, byDeviceS, confetti] = await Promise.all([
@@ -189,18 +205,18 @@ function shapeReport(
  * Report from individual clicks and scroll rows (last 30 days at most), with source and converted filters.
  * Converted means the visitor has a conversion in this test (any goal), matched by the SDK visitor id.
  */
-async function filteredReport(experimentId: string, variationId: string, device: Device | 'all', days: number, f: HeatmapFilters): Promise<HeatmapReport> {
+async function filteredReport(experimentId: string, variationId: string, device: Device | 'all', days: number, f: HeatmapFilters, t: HeatTables): Promise<HeatmapReport> {
     const d = await getDb();
     const since = new Date(Date.now() - days * 86_400_000).toISOString();
-    const P = s.heatmapPoints, SP = s.heatmapScrollPoints;
-    const conv = (t: typeof P | typeof SP) => f.converted
-        ? sql`${t.visitor} != '' and ${f.converted === 'yes' ? sql`` : sql`not`} exists (select 1 from events e where e.experiment_id = ${experimentId} and e.user_id = ${t.visitor} and e.event_type = 'conversion')`
+    const { P, SP } = t;
+    const conv = (x: typeof P | typeof SP) => f.converted
+        ? sql`${x.visitor} != '' and ${f.converted === 'yes' ? sql`` : sql`not`} exists (select 1 from events e where e.experiment_id = ${experimentId} and e.user_id = ${x.visitor} and e.event_type = 'conversion')`
         : undefined;
-    const where = (t: typeof P | typeof SP, withDevice = true) => and(
-        eq(t.experiment_id, experimentId), eq(t.variation_id, variationId), gte(t.created_at, since),
-        withDevice && device !== 'all' ? eq(t.device, device) : undefined,
-        f.source ? eq(t.source, f.source) : undefined,
-        conv(t),
+    const where = (x: typeof P | typeof SP, withDevice = true) => and(
+        eq(x.experiment_id, experimentId), eq(x.variation_id, variationId), gte(x.created_at, since),
+        withDevice && device !== 'all' ? eq(x.device, device) : undefined,
+        f.source ? eq(x.source, f.source) : undefined,
+        conv(x),
     );
     const gx = sql<number>`min(${GRID_COLS - 1}, cast((${P.x} * ${GRID_COLS}) / 1000 as integer))`;
     const gy = sql<number>`cast(${P.y} / ${ROW_PX} as integer)`;
@@ -216,9 +232,9 @@ async function filteredReport(experimentId: string, variationId: string, device:
 }
 
 /** Landing sources with clicks on this version in the last 30 days, most clicks first, for the filter menu. */
-export async function heatmapSources(experimentId: string, variationId: string): Promise<Array<{ source: string; clicks: number }>> {
+export async function heatmapSources(experimentId: string, variationId: string, t: HeatTables = TEST_TABLES): Promise<Array<{ source: string; clicks: number }>> {
     const d = await getDb();
-    const P = s.heatmapPoints;
+    const P = t.P;
     const since = new Date(Date.now() - RAW_RETENTION_DAYS * 86_400_000).toISOString();
     const rows = await d.select({ source: P.source, clicks: sql<number>`count(*)` }).from(P)
         .where(and(eq(P.experiment_id, experimentId), eq(P.variation_id, variationId), gte(P.created_at, since), sql`${P.source} != ''`))

@@ -4,6 +4,17 @@
 (function () {
     'use strict';
     var cfg = window.__ABTestHeat;
+    // Page heatmap (a page without a test): loaded as a module with the bootstrap reply in __ABTestMod.
+    if (!cfg) cfg = pageConfig(window.__ABTestMod);
+    function pageConfig(mod) {
+        if (!mod || !mod.page_heatmap || !mod.page_heatmap.id) return null;
+        var tag = document.querySelector('script[data-key][src*="sdk.js"], script[data-api-key][src*="sdk.js"]');
+        var api = '';
+        try { api = new URL(document.currentScript.src).origin; } catch (e) { api = ''; }
+        var key = tag ? tag.getAttribute('data-key') || tag.getAttribute('data-api-key') : '';
+        if (!api || !key) return null;
+        return { apiUrl: api, apiKey: key, via: tag.getAttribute('data-via'), experiment_id: mod.page_heatmap.id, variation_id: 'page' };
+    }
     if (!cfg || window.__ABTestHeatOn) return;
     window.__ABTestHeatOn = true;
 

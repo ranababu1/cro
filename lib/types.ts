@@ -64,7 +64,9 @@ export interface BootstrapResponse {
     /** Present only for orgs entitled to heavy capture features. */
     capture?: { heatmaps: boolean; sample_rate?: number };
     /** Lazy modules the SDK loads for this page, from a fixed list: public/<name>.js. */
-    modules?: Array<'errors' | 'popups' | 'surveys'>;
+    modules?: Array<'errors' | 'popups' | 'surveys' | 'heatmap'>;
+    /** Page heatmap (paid) this sampled visitor records on this page; heatmap.js reads it. */
+    page_heatmap?: { id: string };
     /** Popups (paid) whose page rule matches this URL; shown by popups.js. */
     popups?: import('./popups').SdkPopup[];
     /** Surveys (paid) whose page rule matches this URL; shown by surveys.js. */

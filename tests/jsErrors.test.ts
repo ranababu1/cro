@@ -185,6 +185,6 @@ describe('SDK wiring', () => {
         const sdk = fs.readFileSync(path.join(__dirname, '../sdk-src/sdk.js'), 'utf8');
         expect(sdk).toMatch(/data\.modules && m < data\.modules\.length; m\+\+\) loadModule\(data\.modules\[m\] \+ '\.js', '__ABTestMod', data\)/);
         const types = fs.readFileSync(path.join(__dirname, '../lib/types.ts'), 'utf8');
-        expect(types).toMatch(/modules\?: Array<'errors' \| 'popups' \| 'surveys'>/);
+        expect(types).toMatch(/modules\?: Array<'errors' \| 'popups' \| 'surveys' \| 'heatmap'>/);
     });
 });

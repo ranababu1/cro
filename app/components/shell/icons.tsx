@@ -19,6 +19,8 @@ export const ChatIcon = P('M4 5h16v11H9l-5 4zM8 9.5h8M8 12.5h5');
 export const UsersIcon = P('M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.87M16 4.13a3 3 0 0 1 0 5.74');
 export const BoltIcon = P('M13 2 4 14h7l-1 8 9-12h-7l1-8Z');
 export const ListIcon = P('M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01');
+/** A cursor over a target, for heatmaps. */
+export const CursorIcon = P('M4 4l6.5 16 2.3-6.7L19.5 11z M15 15l5 5');
 export const ChartIcon = P('M4 20V10M10 20V4M16 20v-7M22 20H2');
 export const ChevronIcon = P('m8 10 4 4 4-4');
 export const MenuIcon = P('M4 6h16M4 12h16M4 18h16');

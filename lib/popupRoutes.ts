@@ -6,8 +6,8 @@ import { canUseFeature, UPGRADE_NOTE } from './entitlements';
 import { PROJECT_COOKIE } from './currentProject';
 import { parsePopupConfig } from './popups';
 
-type Feature = 'popups' | 'surveys';
-const LOCKED: Record<Feature, string> = { popups: 'Popups need a paid plan', surveys: 'Surveys need a paid plan' };
+type Feature = 'popups' | 'surveys' | 'heatmaps';
+const LOCKED: Record<Feature, string> = { popups: 'Popups need a paid plan', surveys: 'Surveys need a paid plan', heatmaps: 'Heatmaps need a paid plan' };
 
 /** The signed-in user's current project for the Popups page, with the plan check. */
 export function popupProject(request: NextRequest) {
