@@ -213,3 +213,8 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - Dashboard /surveys (list, editor with preview, answers view with 7/30/90 days, CSV export with formula-safe cells). API /api/surveys, /api/surveys/[id] (GET results, PATCH, DELETE), /api/surveys/[id]/export, /api/sdk/surveys.
 - Bootstrap adds surveys plus modules ['surveys'] like popups (cached under srv:projectId). sdk.js unchanged (no size change).
 - public/popups.js and public/surveys.js are now built by scripts/build-modules.mjs from sdk-src/modules (shared kit.js: setup, display rules, beacons, shadow-root shell). One overlay per page view across both. Display rule schema and the dashboard fields are shared too (displayRules, DisplayRuleFields).
+
+## Survey NPS and templates (19 Oct 2026)
+- Survey type 'nps' (0 to 10, stored as text '0'..'10'); npsScore and summarizeAnswers return the score and groups. No migration (config JSON only).
+- SURVEY_TEMPLATES in lib/surveys.ts (fill question fields only). Editor shows a template picker for new surveys.
+- surveys.js renders an 11 point scale; sdk.js unchanged.

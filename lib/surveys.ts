@@ -2,17 +2,19 @@ import { z } from 'zod';
 import { checkDisplayRules, displayRules, POPUP_STATUSES } from './popups';
 
 /**
- * Simple surveys (paid). One question per survey: multiple choice, a 1 to 5 rating or a short text answer, with an
+ * Simple surveys (paid). One question per survey: multiple choice, a 1 to 5 rating, a 0 to 10 NPS question or a short text answer, with an
  * optional comment box. Display rules (trigger, frequency, devices, pages) are the same as for popups.
  * The SDK only loads surveys.js on pages where an active survey matches.
  */
 export const MAX_SURVEYS_PER_PROJECT = 20;
 /** Individual answers kept per survey per UTC day. Answers past this still count in the response total. */
 export const SURVEY_MAX_RESPONSES_PER_DAY = 500;
-export const SURVEY_TYPES = ['choice', 'rating', 'text'] as const;
+export const SURVEY_TYPES = ['choice', 'rating', 'nps', 'text'] as const;
 export const SURVEY_POSITIONS = ['bottom-right', 'bottom-left', 'center'] as const;
 export const SURVEY_METRICS = ['view', 'close', 'response'] as const;
 export const RATING_SCALE = 5;
+/** Net Promoter Score: 0 to 10, promoters answer 9 or 10, detractors 0 to 6. */
+export const NPS_MAX = 10;
 export const MAX_ANSWER = 1000;
 
 export const surveyConfigSchema = z.object({
@@ -32,6 +34,15 @@ export const surveyConfigSchema = z.object({
     if (c.type === 'choice' && new Set(c.options.map((o) => o.toLowerCase())).size !== c.options.length) ctx.addIssue({ code: 'custom', path: ['options'], message: 'Each answer must be different' });
 });
 export type SurveyConfig = z.infer<typeof surveyConfigSchema>;
+
+/** Starting points in the editor. Each only fills the question fields; display rules stay as they are. */
+export const SURVEY_TEMPLATES: Array<{ id: string; label: string; fields: Pick<SurveyConfig, 'question' | 'type' | 'options' | 'comment' | 'comment_label'> }> = [
+    { id: 'nps', label: 'Net Promoter Score (0 to 10)', fields: { question: 'How likely are you to recommend us to a friend or colleague?', type: 'nps', options: [], comment: true, comment_label: 'What is the main reason for your score?' } },
+    { id: 'blocker', label: 'What almost stopped you', fields: { question: 'What almost stopped you from signing up today?', type: 'choice', options: ['The price', 'Not sure it fits my needs', 'Missing a feature', 'Nothing, it was easy'], comment: true, comment_label: 'Anything else you want to tell us?' } },
+    { id: 'source', label: 'How did you hear about us', fields: { question: 'How did you hear about us?', type: 'choice', options: ['Search engine', 'Friend or colleague', 'Social media', 'Ad', 'Other'], comment: false, comment_label: 'Anything else you want to tell us?' } },
+    { id: 'page', label: 'Was this page helpful', fields: { question: 'How useful was this page?', type: 'rating', options: [], comment: true, comment_label: 'What could make it better?' } },
+    { id: 'missing', label: 'Open question', fields: { question: 'What is missing on this page?', type: 'text', options: [], comment: false, comment_label: 'Anything else you want to tell us?' } },
+];
 
 export const createSurveySchema = z.object({
     name: z.string().trim().min(1).max(120),
@@ -67,9 +78,10 @@ const clean = (t: string, max = MAX_ANSWER) => t.replace(/[\u0000-\u0008\u000b\u
 export function normalizeAnswer(c: SurveyConfig, answer: unknown, comment?: string): { answer: string; comment: string | null } | null {
     let a: string | null = null;
     if (c.type === 'choice') a = typeof answer === 'string' && c.options.includes(answer) ? answer : null;
-    else if (c.type === 'rating') {
-        const n = Number(answer);
-        a = Number.isInteger(n) && n >= 1 && n <= RATING_SCALE ? String(n) : null;
+    else if (c.type === 'rating' || c.type === 'nps') {
+        const n = typeof answer === 'number' || (typeof answer === 'string' && answer.trim() !== '') ? Number(answer) : NaN;
+        const [lo, hi] = c.type === 'rating' ? [1, RATING_SCALE] : [0, NPS_MAX];
+        a = Number.isInteger(n) && n >= lo && n <= hi ? String(n) : null;
     } else a = typeof answer === 'string' && clean(answer) ? clean(answer) : null;
     if (a === null) return null;
     const extra = c.type !== 'text' && c.comment && comment ? clean(comment) : '';
@@ -106,15 +118,30 @@ export function surveyStats(rows: Array<{ survey_id: string; metric: string; cou
     return out;
 }
 
-/** Answer breakdown for the results view: counts per option (or per rating), with the rating average. */
+export interface NpsSummary { score: number; promoters: number; passives: number; detractors: number }
+
+/** NPS from 0 to 10 answers: percent promoters (9, 10) minus percent detractors (0 to 6), from -100 to 100. */
+export function npsScore(rows: Array<{ answer: string; count: number }>): NpsSummary | null {
+    let promoters = 0, passives = 0, detractors = 0;
+    for (const r of rows) {
+        const n = Number(r.answer);
+        if (n >= 9) promoters += r.count; else if (n >= 7) passives += r.count; else detractors += r.count;
+    }
+    const total = promoters + passives + detractors;
+    return total ? { score: Math.round(((promoters - detractors) / total) * 100), promoters, passives, detractors } : null;
+}
+
+/** Answer breakdown for the results view: counts per option (or per score), with the rating average or the NPS. */
 export function summarizeAnswers(c: SurveyConfig, rows: Array<{ answer: string; count: number }>) {
     const total = rows.reduce((n, r) => n + r.count, 0);
-    if (c.type === 'text') return { total, breakdown: [] as Array<{ answer: string; count: number; share: number }>, average: null as number | null };
-    const keys = c.type === 'choice' ? c.options : Array.from({ length: RATING_SCALE }, (_, i) => String(i + 1));
+    if (c.type === 'text') return { total, breakdown: [] as Array<{ answer: string; count: number; share: number }>, average: null as number | null, nps: null as NpsSummary | null };
+    const keys = c.type === 'choice' ? c.options
+        : c.type === 'nps' ? Array.from({ length: NPS_MAX + 1 }, (_, i) => String(i))
+            : Array.from({ length: RATING_SCALE }, (_, i) => String(i + 1));
     const m = new Map(rows.map((r) => [r.answer, r.count]));
     const breakdown = keys.map((k) => ({ answer: k, count: m.get(k) ?? 0, share: total ? (m.get(k) ?? 0) / total : 0 }));
     const average = c.type === 'rating' && total ? breakdown.reduce((n, b) => n + Number(b.answer) * b.count, 0) / total : null;
-    return { total, breakdown, average };
+    return { total, breakdown, average, nps: c.type === 'nps' ? npsScore(rows) : null };
 }
 
 /** CSV with a header row. Cells starting with = + - @ are prefixed so spreadsheets do not run them as formulas. */

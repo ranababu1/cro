@@ -4,7 +4,7 @@ import path from 'node:path';
 import { Window } from 'happy-dom';
 import { NextRequest } from 'next/server';
 import { useTempDatabase, seedProjectDomain } from './helpers';
-import { answerPath, normalizeAnswer, responsesCsv, summarizeAnswers, surveyConfigSchema, surveyStats, MAX_SURVEYS_PER_PROJECT, SURVEY_MAX_RESPONSES_PER_DAY } from '@/lib/surveys';
+import { answerPath, normalizeAnswer, npsScore, responsesCsv, summarizeAnswers, surveyConfigSchema, surveyStats, MAX_SURVEYS_PER_PROJECT, SURVEY_MAX_RESPONSES_PER_DAY, SURVEY_TEMPLATES } from '@/lib/surveys';
 import { buildModule } from '../scripts/build-modules.mjs';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
@@ -65,6 +65,29 @@ describe('survey rules', () => {
         expect(surveyStats([{ survey_id: 's', metric: 'view', count: 4 }, { survey_id: 's', metric: 'response', count: 1 }]).get('s')).toEqual({ views: 4, closes: 0, responses: 1, rate: 0.25 });
         const csv = responsesCsv([{ created_at: 't', answer: '=HYPERLINK("x")', comment: 'a, "b"\nc', path: '/p' }]);
         expect(csv).toBe('time_utc,answer,comment,page\nt,"\'=HYPERLINK(""x"")","a, ""b""\nc",/p\n');
+    });
+});
+
+describe('NPS and templates', () => {
+    it('accepts 0 to 10 and scores promoters minus detractors', () => {
+        const nps = cfg({ type: 'nps', options: [], comment: true });
+        expect(normalizeAnswer(nps, 0)).toEqual({ answer: '0', comment: null });
+        expect(normalizeAnswer(nps, '10', 'Fast support')).toEqual({ answer: '10', comment: 'Fast support' });
+        for (const bad of [-1, 11, 7.5, '', ' ', 'nine', null]) expect(normalizeAnswer(nps, bad), String(bad)).toBeNull();
+        expect(normalizeAnswer(cfg({ type: 'rating', options: [] }), '')).toBeNull();
+        // 5 promoters, 3 passives, 2 detractors: 50% - 20% = 30.
+        const rows = [{ answer: '10', count: 3 }, { answer: '9', count: 2 }, { answer: '8', count: 2 }, { answer: '7', count: 1 }, { answer: '6', count: 1 }, { answer: '0', count: 1 }];
+        expect(npsScore(rows)).toEqual({ score: 30, promoters: 5, passives: 3, detractors: 2 });
+        expect(npsScore([{ answer: '3', count: 4 }])!.score).toBe(-100);
+        expect(npsScore([])).toBeNull();
+        const sum = summarizeAnswers(nps, rows);
+        expect(sum.breakdown.map((b) => b.answer)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        expect(sum.nps!.score).toBe(30);
+        expect(summarizeAnswers(cfg(), []).nps).toBeNull();
+    });
+    it('has templates that are valid surveys', () => {
+        expect(SURVEY_TEMPLATES.map((t) => t.id)).toEqual(['nps', 'blocker', 'source', 'page', 'missing']);
+        for (const t of SURVEY_TEMPLATES) expect(surveyConfigSchema.safeParse(t.fields).success, t.id).toBe(true);
     });
 });
 
@@ -228,6 +251,17 @@ describe('surveys.js on a page', () => {
         (r2.querySelectorAll('button.opt')[3] as unknown as HTMLButtonElement).click();
         (r2.querySelector('button.send') as unknown as HTMLButtonElement).click();
         expect(b.sent[1].body.answer).toBe(4);
+    });
+    it('shows an 11 point NPS scale and sends the score as a number', async () => {
+        const { sent, host } = page({ type: 'nps', options: [], comment: false });
+        await tick();
+        const root = host()!.shadowRoot;
+        const opts = root.querySelectorAll('button.opt');
+        expect([...opts].map((o) => o.textContent)).toEqual(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+        expect(root.querySelector('.ends')!.textContent).toBe('Not likelyVery likely');
+        (opts[0] as unknown as HTMLButtonElement).click();
+        (root.querySelector('button.send') as unknown as HTMLButtonElement).click();
+        expect(sent[1].body).toMatchObject({ event: 'response', answer: 0 });
     });
     it('does not open over a popup already on the page', async () => {
         const { w, host } = page({});
