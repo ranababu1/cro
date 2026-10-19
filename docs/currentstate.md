@@ -286,3 +286,5 @@ Docs guard: tests/sdkDocsMatch.test.ts checks every ABTest.<name> in lib/docs/co
 Effective plan: computeEntitlements returns plan (Enterprise for orgs a platform admin owns, else organizations.plan_override, else billing plan), planSource (platform_admin, assigned, billing) and billingPlan. Every plan display and plan-based rule reads the effective plan. Admin org page has an Assigned plan card (select plus Assign and Remove), and the tenant list shows Admin or Assigned badges. Platform admins as non-owner members still do not lift an org (owners only, from #77).
 
 Blog: all three posts (best-free-ab-testing-tools, how-long-to-run-an-ab-test, ab-testing-low-traffic) carry BreadcrumbList, BlogPosting and FAQPage JSON-LD.
+
+No public demo page: /demo, /demo.html and /demo/* redirect to / (next.config.js redirects). The homepage hero See the demo button links to # for now (a video link comes later).

@@ -8,6 +8,14 @@ const nextConfig = {
         // The WordPress plugin is zipped on request by the signed-in download route.
         '/api/downloads/wordpress': ['./integrations/wordpress/freeabtest/**/*'],
     },
+    // The demo page was taken down; old links go to the homepage.
+    async redirects() {
+        return [
+            { source: '/demo', destination: '/', permanent: false },
+            { source: '/demo.html', destination: '/', permanent: false },
+            { source: '/demo/:path*', destination: '/', permanent: false },
+        ];
+    },
     async headers() {
         const base = [
             { key: 'X-Content-Type-Options', value: 'nosniff' },
