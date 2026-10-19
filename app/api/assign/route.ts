@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { AssignmentResponse } from '@/lib/types';
 import { assignUserToVariation, isExperimentEligible } from '@/lib/assignment';
+import { rolloutVariation } from '@/lib/rollout';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { z } from 'zod';
 import { formatZodError } from '@/lib/validation';
@@ -47,6 +48,11 @@ export async function POST(request: NextRequest) {
         }
 
         const variations = await db.getVariations(experimentId);
+        // Rolled-out winner: every visitor gets that variation, and nothing is stored or counted.
+        const rolled = rolloutVariation(experiment, variations);
+        if (rolled) {
+            return sdkJson({ experiment_id: experimentId, variation_id: rolled.id, variation_name: rolled.name, variation_url: rolled.url ?? undefined, assigned: false, reason: 'rollout' } satisfies AssignmentResponse);
+        }
         const existing = await db.getAssignment(experimentId, userId);
         if (existing) {
             const variation = variations.find((v) => v.id === existing.variation_id);

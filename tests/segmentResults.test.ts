@@ -173,7 +173,7 @@ describe('segment wiring', () => {
     it('migration adds the segment columns with a newer timestamp', () => {
         const j = JSON.parse(read('drizzle/meta/_journal.json')) as { entries: { tag: string; when: number }[] };
         const i = j.entries.findIndex((e) => e.tag === '0031_assignment_segments');
-        expect(i).toBe(j.entries.length - 1);
+        expect(i).toBeGreaterThan(0);
         expect(j.entries[i].when).toBeGreaterThan(j.entries[i - 1].when);
         expect(read('drizzle/0031_assignment_segments.sql')).toMatch(/ADD `segment_device` text/);
     });

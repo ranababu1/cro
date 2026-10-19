@@ -11,6 +11,7 @@ import { ErrorsPanel } from './ErrorsPanel';
 import { FunnelsPanel } from './FunnelsPanel';
 import { RevenuePanel } from './RevenuePanel';
 import { SegmentsPanel } from './SegmentsPanel';
+import { RolloutCard } from './RolloutCard';
 import { PreviewLinks } from './PreviewLinks';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
@@ -160,6 +161,7 @@ export default function ExperimentDetail() {
                 ]}
             />
 
+            {tab === 'results' && experiment.status !== 'draft' && variations.length > 0 && <div className="mb-6"><RolloutCard key={`${experiment.rollout_variation_id ?? ''}${experiment.updated_at}`} experiment={experiment} variations={variations} winnerId={results?.winner} onChanged={() => { void load(); router.refresh(); }} /></div>}
             {tab === 'results' && <ResultsPanel experiment={experiment} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}

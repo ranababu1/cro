@@ -16,6 +16,7 @@ import { scheduleAutoShift } from '@/lib/autoShiftRun';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
 import { segmentOf } from '@/lib/segments';
+import { rolloutCoversUrl, rolloutReply } from '@/lib/rollout';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
@@ -106,6 +107,12 @@ export async function POST(request: NextRequest) {
 
         const match = await db.findExperimentByPageUrl(auth.ctx.projectId, url);
         if (!match) {
+            // Rolled-out winner: the chosen version for everyone, with nothing recorded beyond the page view count.
+            const rolled = (await db.getRolloutConfig(auth.ctx.projectId)).find((r) => rolloutCoversUrl(r.experiment, r.variations, url));
+            if (rolled) {
+                await countPageview(auth.ctx.orgId);
+                return reply(rolloutReply(rolled.experiment, rolled.variations, { url, userAgent: request.headers.get('user-agent'), referrer: referrer ?? null, visitorType: visitor ?? null }));
+            }
             return reply({ matched: false, action: 'none', reason: 'no_match' });
         }
         const { experiment, variations, goals } = match;

@@ -47,7 +47,7 @@ export interface AssignmentResponse {
     variation_name: string;
     variation_url?: string;
     assigned: boolean;
-    reason?: 'quota_exceeded' | 'domain_not_allowed' | 'no_match' | 'not_running' | 'plan_required';
+    reason?: 'quota_exceeded' | 'domain_not_allowed' | 'no_match' | 'not_running' | 'plan_required' | 'rollout';
 }
 
 export interface BootstrapGoal {
