@@ -224,3 +224,10 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - lib/retention.ts: no cron. Bootstrap and capture call scheduleRetention(); each instance checks at most every 10 min, maintenance_runs (migration 0026) claims the 'retention' job at most hourly across instances; runs after the response. Deletes up to 5000 heatmap_points older than 30 days and up to 5000 survey_responses older than the org plan cutoff (free 183, starter and unknown paid 365, growth and enterprise 730 days) per run.
 - The old 2% random heatmap prune in /api/capture is replaced.
 - Pricing: 'Data retention' row replaced by 'Survey answers kept' and 'Individual heatmap clicks kept'; FAQ says what is deleted. Test events, assignments and results are not deleted (no retention on them yet). Audit log rows are not pruned and have no customer view yet.
+
+## Heatmap filters (19 Oct 2026)
+- heatmap_points gain source and visitor; heatmap_scroll_points stores one row per scroll batch (depth rounded to 10). Migration 0027.
+- heatmap.js: src = utm_source, else referrer host (other site), else direct, cached in sessionStorage fabt_src; vid = ABTest.getUserId(). No sdk.js change.
+- heatmapReport(exp, variation, device, days, filters): unfiltered uses rollups for 7/30/90 days; filtered reads raw tables over at most 30 days. Converted = visitor has a conversion event in the test (any goal); clicks without a visitor id are excluded from converted filters.
+- Report and export take days, source, converted; report returns sources (top 20 by clicks, 30 days), filters and days.
+- Retention deletes heatmap_scroll_points older than 30 days alongside raw clicks.

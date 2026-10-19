@@ -391,8 +391,24 @@ export const heatmapPoints = sqliteTable('heatmap_points', {
     selector: text('selector').notNull(),
     rage: integer('rage', { mode: 'boolean' }).notNull().default(false),
     dead: integer('dead', { mode: 'boolean' }).notNull().default(false),
+    /** Landing source of the session (utm_source, referring site or direct), for heatmap filters. */
+    source: text('source').notNull().default(''),
+    /** The SDK visitor id, so the converted filter can match conversions. Kept with the raw click for 30 days. */
+    visitor: text('visitor').notNull().default(''),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_heatmap_points_exp').on(t.experiment_id, t.variation_id, t.device), index('idx_heatmap_points_created').on(t.created_at)]);
+
+/** Max scroll depth per page view, raw (30 days), so the scroll map can use the same filters as clicks. */
+export const heatmapScrollPoints = sqliteTable('heatmap_scroll_points', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    depth: integer('depth').notNull(),
+    source: text('source').notNull().default(''),
+    visitor: text('visitor').notNull().default(''),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_heatmap_scroll_points_exp').on(t.experiment_id, t.variation_id, t.device), index('idx_heatmap_scroll_points_created').on(t.created_at)]);
 
 export const heatmapClicksDaily = sqliteTable('heatmap_clicks_daily', {
     experiment_id: text('experiment_id').notNull().references(() => experiments.id, { onDelete: 'cascade' }),

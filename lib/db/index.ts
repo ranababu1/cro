@@ -1091,6 +1091,12 @@ export const db = {
         return Number(r.rowsAffected);
     },
 
+    async deleteOldHeatmapScrolls(beforeIso: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const r = await d.run(sql`DELETE FROM heatmap_scroll_points WHERE id IN (SELECT id FROM heatmap_scroll_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
+        return Number(r.rowsAffected);
+    },
+
     /** Survey answers older than the owning organization's plan retention. Unknown paid plans use the Starter cutoff. */
     async deleteOldSurveyAnswers(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number): Promise<number> {
         const d = await getDb();

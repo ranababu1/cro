@@ -91,6 +91,7 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 4. Done 19 Oct 2026: GA4 push (all plans): experience_impression via gtag or dataLayer, opt out with data-analytics="off".
 5. Done 19 Oct 2026: Visual editor (Growth+): same-page variations with a change list (text, hide, safe styles, safe attributes) applied by lazy visual.js before paint; point-and-click editor on the customer page via a 2 hour signed link.
 6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links). Error tracking done 19 Oct 2026 (paid, errors.js, error_daily counters batched with telemetry, 200 distinct per test per day). Popups done 19 Oct 2026 (paid, popups.js on matching pages only, popup_daily counters batched with telemetry). Surveys done 19 Oct 2026 (paid, surveys.js shares a build-time kit with popups.js, answers batched and capped at 500 per survey per day).
+7. Done 19 Oct 2026: Heatmap filters (date range, traffic source, converted or not; raw clicks, 30 days max when filtered). Next: per-heatmap sampling and stop rules, funnel trend, visual editor extras.
 
 ## Approved phases
 
