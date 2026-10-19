@@ -5,6 +5,15 @@ import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helper
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => session.current) }));
+// The real sender (node:https with a pinned lookup), answered here without a network. DNS is stubbed to a public address.
+const net = vi.hoisted(() => ({ status: 204, calls: [] as Array<{ hostname: string; lookup: unknown }> }));
+vi.mock('node:dns/promises', () => ({ lookup: vi.fn(async () => [{ address: '93.184.216.34', family: 4 }]) }));
+vi.mock('node:https', () => ({
+    request: vi.fn((opts: { hostname: string; lookup: unknown }, cb: (res: { statusCode: number; resume: () => void }) => void) => {
+        net.calls.push({ hostname: opts.hostname, lookup: opts.lookup });
+        return { on: () => undefined, end: () => cb({ statusCode: net.status, resume: () => undefined }) };
+    }),
+}));
 
 import { db } from '@/lib/db';
 import { clearConfigCache } from '@/lib/configCache';
@@ -184,15 +193,18 @@ describe('webhooks end to end', () => {
 
     it('send test, replace secret, turn off', async () => {
         as('owner');
-        vi.stubGlobal('fetch', vi.fn(async () => ({ status: 204 })));
+        net.status = 204;
         const r = await (await ping(req('POST', '/'), p(hookId))).json();
         expect(r).toMatchObject({ ok: true, status: 204 });
-        vi.stubGlobal('fetch', vi.fn(async () => ({ status: 500 })));
+        // The connection is pinned: the lookup handed to the request answers with the checked address, whatever the host.
+        const call = net.calls[net.calls.length - 1];
+        const answer = await new Promise((res) => (call.lookup as (h: string, o: object, cb: (...a: unknown[]) => void) => void)('other.example', {}, (...a) => res(a)));
+        expect(answer).toEqual([null, '93.184.216.34', 4]);
+        net.status = 500;
         const bad = await (await ping(req('POST', '/'), p(hookId))).json();
         expect(bad).toMatchObject({ ok: false, status: 500 });
         // A test is sent once and never retried.
         expect((await db.listWebhookDeliveries(users.owner.orgId, 1))[0]).toMatchObject({ event: 'ping', status: 'failed', attempts: 1 });
-        vi.unstubAllGlobals();
         const rot = await (await edit(req('PATCH', '/', { rotate_secret: true }), p(hookId))).json();
         expect(rot.secret).toMatch(/^whsec_/);
         expect(rot.secret).not.toBe(secret);

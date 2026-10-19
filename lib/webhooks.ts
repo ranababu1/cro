@@ -1,7 +1,8 @@
 import { after } from 'next/server';
 import { createHmac, randomBytes } from 'node:crypto';
 import { lookup } from 'node:dns/promises';
-import { isIP } from 'node:net';
+import { isIP, type LookupFunction } from 'node:net';
+import { request as httpsRequest } from 'node:https';
 import { db } from './db';
 import { cached } from './configCache';
 import { generateId } from './ids';
@@ -90,15 +91,52 @@ export function webhookUrlError(raw: string): string | null {
 export type Resolver = (host: string) => Promise<string[]>;
 const dnsResolver: Resolver = async (host) => (await lookup(host, { all: true, verbatim: true })).map((a) => a.address);
 
-/** Resolves the host and refuses to send if any address is not public. */
-async function publicHostError(url: string, resolve: Resolver): Promise<string | null> {
+/** The checked address a delivery connects to. */
+export interface Pin { address: string; family: 4 | 6 }
+
+/**
+ * Resolves the host and refuses to send if any address is not public. Returns the address to connect to, so the
+ * request goes to exactly the address that was checked (a second DNS answer cannot point it elsewhere).
+ */
+export async function checkHost(url: string, resolve: Resolver): Promise<{ error: string } | { pin: Pin }> {
     const host = new URL(url).hostname.replace(/^\[|\]$/g, '');
-    if (isIP(host)) return isPrivateAddress(host) ? 'The address is not public.' : null;
+    const pinOf = (a: string): Pin => ({ address: a, family: isIP(a) === 6 ? 6 : 4 });
+    if (isIP(host)) return isPrivateAddress(host) ? { error: 'The address is not public.' } : { pin: pinOf(host) };
     let addrs: string[];
-    try { addrs = await resolve(host); } catch { return 'The host name could not be found.'; }
-    if (!addrs.length) return 'The host name could not be found.';
-    return addrs.some(isPrivateAddress) ? 'The host name points to a private address.' : null;
+    try { addrs = await resolve(host); } catch { return { error: 'The host name could not be found.' }; }
+    addrs = addrs.filter((a) => isIP(a));
+    if (!addrs.length) return { error: 'The host name could not be found.' };
+    if (addrs.some(isPrivateAddress)) return { error: 'The host name points to a private address.' };
+    return { pin: pinOf(addrs[0]) };
 }
+
+/** A DNS lookup that always answers with the pinned address, in both the single and the all-addresses form. */
+export function pinnedLookup(pin: Pin): LookupFunction {
+    return ((_host: string, opts: unknown, cb?: unknown) => {
+        const done = (typeof opts === 'function' ? opts : cb) as (err: Error | null, a: unknown, f?: number) => void;
+        const all = typeof opts === 'object' && opts !== null && (opts as { all?: boolean }).all;
+        if (all) done(null, [{ address: pin.address, family: pin.family }]);
+        else done(null, pin.address, pin.family);
+    }) as LookupFunction;
+}
+
+/**
+ * The real sender: an HTTPS POST that connects only to the pinned address. TLS still checks the certificate against
+ * the host name in the URL (SNI and verification use the URL host). Redirects are never followed.
+ */
+export const pinnedFetch: Fetcher = (url, init, pin) => new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = httpsRequest({
+        protocol: 'https:', hostname: u.hostname, port: u.port || 443, path: `${u.pathname}${u.search}`,
+        method: init.method ?? 'POST', headers: init.headers as Record<string, string>,
+        lookup: pinnedLookup(pin), signal: init.signal ?? undefined, agent: false,
+    }, (res) => {
+        res.resume();
+        resolve({ status: res.statusCode ?? 0 });
+    });
+    req.on('error', reject);
+    req.end(typeof init.body === 'string' ? init.body : undefined);
+});
 
 /** An endpoint as the dashboard sees it: never the full secret. */
 export const presentWebhook = (w: Awaited<ReturnType<typeof db.listWebhooks>>[number]) => ({
@@ -172,7 +210,7 @@ export async function scanForWebhookEvents(now = new Date()): Promise<number> {
     return queued;
 }
 
-export type Fetcher = (url: string, init: RequestInit) => Promise<{ status: number }>;
+export type Fetcher = (url: string, init: RequestInit, pin: Pin) => Promise<{ status: number }>;
 
 /** Sends one claimed delivery and records the outcome, with a retry time on failure. */
 async function sendOne(row: Awaited<ReturnType<typeof db.claimDueWebhookDeliveries>>[number], now: Date, fetcher: Fetcher, resolve: Resolver, once = false): Promise<'sent' | 'retry' | 'failed'> {
@@ -187,8 +225,10 @@ async function sendOne(row: Awaited<ReturnType<typeof db.claimDueWebhookDeliveri
     };
     if (!hook || !hook.enabled) return fail(null, 'The endpoint was turned off or deleted.', true);
     if (!(await canUseFeature(row.org_id, 'webhooks'))) return fail(null, 'Webhooks need a paid plan.', true);
-    const bad = webhookUrlError(hook.url) ?? await publicHostError(hook.url, resolve);
+    const bad = webhookUrlError(hook.url);
     if (bad) return fail(null, bad);
+    const host = await checkHost(hook.url, resolve);
+    if ('error' in host) return fail(null, host.error);
     const t = Math.floor(now.getTime() / 1000);
     try {
         const res = await fetcher(hook.url, {
@@ -203,7 +243,7 @@ async function sendOne(row: Awaited<ReturnType<typeof db.claimDueWebhookDeliveri
                 'X-FreeABTest-Signature': `t=${t},v1=${signPayload(hook.secret, t, row.payload)}`,
             },
             body: row.payload,
-        });
+        }, host.pin);
         if (res.status >= 200 && res.status < 300) {
             await db.finishWebhookDelivery(row.id, { status: 'sent', attempts, response_status: res.status, last_error: null, sent_at: now.toISOString() });
             await db.updateWebhook(hook.id, { last_delivery_at: now.toISOString(), last_status: res.status, last_error: null });
@@ -217,7 +257,7 @@ async function sendOne(row: Awaited<ReturnType<typeof db.claimDueWebhookDeliveri
 }
 
 /** Sends due deliveries in one small batch, a few at a time. */
-export async function deliverDueWebhooks(now = new Date(), fetcher: Fetcher = fetch, resolve: Resolver = dnsResolver) {
+export async function deliverDueWebhooks(now = new Date(), fetcher: Fetcher = pinnedFetch, resolve: Resolver = dnsResolver) {
     const rows = await db.claimDueWebhookDeliveries(now.toISOString(), DELIVERY_BATCH);
     const out = { sent: 0, retry: 0, failed: 0 };
     for (let i = 0; i < rows.length; i += 5) {
@@ -228,7 +268,7 @@ export async function deliverDueWebhooks(now = new Date(), fetcher: Fetcher = fe
 }
 
 /** Send test: queues a ping to one endpoint and sends it now. Returns the outcome. */
-export async function sendTestPing(hook: { id: string; org_id: string }, now = new Date(), fetcher: Fetcher = fetch, resolve: Resolver = dnsResolver) {
+export async function sendTestPing(hook: { id: string; org_id: string }, now = new Date(), fetcher: Fetcher = pinnedFetch, resolve: Resolver = dnsResolver) {
     const id = generateId('whd');
     const at = now.toISOString();
     const payload = JSON.stringify({ id, event: 'ping', created_at: at, data: { message: 'Test delivery from freeabtest.com' } });
@@ -240,7 +280,7 @@ export async function sendTestPing(hook: { id: string; org_id: string }, now = n
 }
 
 /** The maintenance job: scan every 10 minutes, deliver every minute, across all instances. */
-export async function runWebhooks(now = new Date(), fetcher: Fetcher = fetch, resolve: Resolver = dnsResolver) {
+export async function runWebhooks(now = new Date(), fetcher: Fetcher = pinnedFetch, resolve: Resolver = dnsResolver) {
     const t = now.getTime();
     const scan = await db.claimMaintenance(WEBHOOKS_SCAN_JOB, new Date(t - SCAN_EVERY_MS).toISOString(), now.toISOString());
     const deliver = await db.claimMaintenance(WEBHOOKS_JOB, new Date(t - DELIVER_EVERY_MS).toISOString(), now.toISOString());
