@@ -10,6 +10,7 @@ import { generateApiKey, hashApiKey, type ApiKeyType } from '../apiKeys';
 import type { Experiment, Variation, Assignment, Event, User, Goal, ProjectDomain } from '../types';
 import { OTHER_PAGES, TRAFFIC_MAX_PAGES_PER_DAY } from '../traffic';
 import { ERROR_MAX_PER_DAY, OTHER_ERRORS, PAGES_WITH_ERRORS } from '../jsErrors';
+import { SURVEY_MAX_RESPONSES_PER_DAY } from '../surveys';
 
 /** A new event. Revenue is optional and only set for revenue goals. */
 type NewEvent = Omit<Event, 'id' | 'created_at' | 'revenue'> & { revenue?: number | null };
@@ -989,8 +990,10 @@ export const db = {
         traffic: Array<{ day: string; environment_id: string; project_id: string; dim: string; key: string; views: number }> = [],
         errors: Array<{ day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number }> = [],
         popupRows: Array<{ day: string; popup_id: string; metric: string; count: number }> = [],
+        surveyRows: Array<{ day: string; survey_id: string; metric: string; count: number }> = [],
+        answers: Array<{ day: string; survey_id: string; answer: string; comment: string | null; path: string }> = [],
     ): Promise<void> {
-        if (!rows.length && !traffic.length && !errors.length && !popupRows.length) return;
+        if (!rows.length && !traffic.length && !errors.length && !popupRows.length && !surveyRows.length && !answers.length) return;
         const d = await getDb();
         const stmts: BatchItem<'sqlite'>[] = [
             ...rows.map((r) => d
@@ -1011,6 +1014,14 @@ export const db = {
             ...popupRows.map((r) => d.run(sql`INSERT INTO popup_daily (day, popup_id, metric, count)
                 SELECT ${r.day}, ${r.popup_id}, ${r.metric}, ${r.count} WHERE EXISTS (SELECT 1 FROM popups WHERE id = ${r.popup_id})
                 ON CONFLICT (day, popup_id, metric) DO UPDATE SET count = count + excluded.count`)),
+            ...surveyRows.map((r) => d.run(sql`INSERT INTO survey_daily (day, survey_id, metric, count)
+                SELECT ${r.day}, ${r.survey_id}, ${r.metric}, ${r.count} WHERE EXISTS (SELECT 1 FROM surveys WHERE id = ${r.survey_id})
+                ON CONFLICT (day, survey_id, metric) DO UPDATE SET count = count + excluded.count`)),
+            // Individual answers, capped per survey per day; the response total in survey_daily still counts the rest.
+            ...answers.map((r) => d.run(sql`INSERT INTO survey_responses (survey_id, day, answer, comment, path)
+                SELECT ${r.survey_id}, ${r.day}, ${r.answer}, ${r.comment}, ${r.path}
+                WHERE EXISTS (SELECT 1 FROM surveys WHERE id = ${r.survey_id})
+                AND (SELECT count(*) FROM survey_responses WHERE survey_id = ${r.survey_id} AND day = ${r.day}) < ${SURVEY_MAX_RESPONSES_PER_DAY}`)),
             ...errors.flatMap((r): BatchItem<'sqlite'>[] => r.fingerprint === PAGES_WITH_ERRORS || r.fingerprint === OTHER_ERRORS ? [plainErrorUpsert(d, r)] : cappedErrorUpsert(d, r)),
         ];
         await d.batch(stmts as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
@@ -1063,6 +1074,73 @@ export const db = {
             .where(and(eq(s.popups.project_id, projectId), gte(s.popupDaily.day, from), lte(s.popupDaily.day, to)))
             .groupBy(s.popupDaily.popup_id, s.popupDaily.metric);
         return rows.map((r) => ({ ...r, count: Number(r.count) }));
+    },
+
+    // Surveys (paid)
+    async listSurveys(projectId: string) {
+        const d = await getDb();
+        return d.select().from(s.surveys).where(eq(s.surveys.project_id, projectId)).orderBy(desc(s.surveys.created_at));
+    },
+
+    async getSurvey(id: string) {
+        const d = await getDb();
+        return (await d.select().from(s.surveys).where(eq(s.surveys.id, id)))[0] ?? null;
+    },
+
+    async createSurvey(p: { project_id: string; name: string; status: 'draft' | 'active' | 'paused'; config: string }) {
+        clearConfigCache();
+        const d = await getDb();
+        const id = generateId('srv');
+        await d.insert(s.surveys).values({ id, ...p });
+        return (await this.getSurvey(id))!;
+    },
+
+    async updateSurvey(id: string, update: { name?: string; status?: 'draft' | 'active' | 'paused'; config?: string }) {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.surveys).set({ ...update, updated_at: nowIso() }).where(eq(s.surveys.id, id));
+        return this.getSurvey(id);
+    },
+
+    async deleteSurvey(id: string): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.delete(s.surveys).where(eq(s.surveys.id, id));
+    },
+
+    /** Active surveys of a project for the SDK, cached briefly like popups. */
+    async getActiveSurveys(projectId: string) {
+        return cached(`srv:${projectId}`, async () => {
+            const d = await getDb();
+            return d.select().from(s.surveys).where(and(eq(s.surveys.project_id, projectId), eq(s.surveys.status, 'active')));
+        });
+    },
+
+    async getSurveyStats(projectId: string, from: string, to: string) {
+        const d = await getDb();
+        const rows = await d.select({ survey_id: s.surveyDaily.survey_id, metric: s.surveyDaily.metric, count: sql<number>`sum(${s.surveyDaily.count})` })
+            .from(s.surveyDaily).innerJoin(s.surveys, eq(s.surveys.id, s.surveyDaily.survey_id))
+            .where(and(eq(s.surveys.project_id, projectId), gte(s.surveyDaily.day, from), lte(s.surveyDaily.day, to)))
+            .groupBy(s.surveyDaily.survey_id, s.surveyDaily.metric);
+        return rows.map((r) => ({ ...r, count: Number(r.count) }));
+    },
+
+    /** Kept answers per value for one survey between two UTC days. */
+    async getSurveyAnswerCounts(surveyId: string, from: string, to: string) {
+        const d = await getDb();
+        const rows = await d.select({ answer: s.surveyResponses.answer, count: sql<number>`count(*)` }).from(s.surveyResponses)
+            .where(and(eq(s.surveyResponses.survey_id, surveyId), gte(s.surveyResponses.day, from), lte(s.surveyResponses.day, to)))
+            .groupBy(s.surveyResponses.answer);
+        return rows.map((r) => ({ answer: r.answer, count: Number(r.count) }));
+    },
+
+    /** Newest answers first. Text questions list answers; others list answers that have a comment. */
+    async getSurveyResponses(surveyId: string, from: string, to: string, opts: { limit: number; withCommentOnly?: boolean }) {
+        const d = await getDb();
+        const where = [eq(s.surveyResponses.survey_id, surveyId), gte(s.surveyResponses.day, from), lte(s.surveyResponses.day, to)];
+        if (opts.withCommentOnly) where.push(sql`${s.surveyResponses.comment} IS NOT NULL`);
+        return d.select({ created_at: s.surveyResponses.created_at, answer: s.surveyResponses.answer, comment: s.surveyResponses.comment, path: s.surveyResponses.path })
+            .from(s.surveyResponses).where(and(...where)).orderBy(desc(s.surveyResponses.id)).limit(opts.limit);
     },
 
     /** JavaScript errors for one test between two UTC days (inclusive), summed per version and error. */

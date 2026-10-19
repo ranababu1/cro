@@ -206,3 +206,10 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - public/popups.js: shadow DOM, textContent only, one popup per page view, frequency in local or session storage, exit intent on desktop only, Escape closes.
 - Events: POST /api/sdk/popups (view, click, close), counted in a telemetry buffer and written in the same batch; rows for deleted popups are skipped.
 - The experiment errors report now flushes telemetry before reading.
+
+## Surveys (paid, 19 Oct 2026)
+- Tables surveys, survey_daily and survey_responses (migration 0025). Entitlement 'surveys' (HEAVY, special friend toggle). Max 20 per project.
+- Answers are buffered in telemetry and inserted in the same batch, capped at 500 kept answers per survey per UTC day (the response count in survey_daily keeps counting). Early flush at 500 pending answers. No visitor id stored; path without query.
+- Dashboard /surveys (list, editor with preview, answers view with 7/30/90 days, CSV export with formula-safe cells). API /api/surveys, /api/surveys/[id] (GET results, PATCH, DELETE), /api/surveys/[id]/export, /api/sdk/surveys.
+- Bootstrap adds surveys plus modules ['surveys'] like popups (cached under srv:projectId). sdk.js unchanged (no size change).
+- public/popups.js and public/surveys.js are now built by scripts/build-modules.mjs from sdk-src/modules (shared kit.js: setup, display rules, beacons, shadow-root shell). One overlay per page view across both. Display rule schema and the dashboard fields are shared too (displayRules, DisplayRuleFields).

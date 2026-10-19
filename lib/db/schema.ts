@@ -244,6 +244,36 @@ export const popupDaily = sqliteTable('popup_daily', {
     count: integer('count').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.day, t.popup_id, t.metric] })]);
 
+/** Simple surveys (paid). Question, answers and targeting live in config (JSON, validated by lib/surveys.ts). */
+export const surveys = sqliteTable('surveys', {
+    id: text('id').primaryKey(),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['draft', 'active', 'paused'] }).notNull().default('draft'),
+    config: text('config').notNull(),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_surveys_project').on(t.project_id)]);
+
+/** Survey views, closes and responses per day, batched with telemetry. Responses are counted here even past the daily answer cap. */
+export const surveyDaily = sqliteTable('survey_daily', {
+    day: text('day').notNull(),
+    survey_id: text('survey_id').notNull().references(() => surveys.id, { onDelete: 'cascade' }),
+    metric: text('metric').notNull(),
+    count: integer('count').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.day, t.survey_id, t.metric] })]);
+
+/** Individual answers (no visitor id), written in the telemetry batch and capped per survey per day. */
+export const surveyResponses = sqliteTable('survey_responses', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    survey_id: text('survey_id').notNull().references(() => surveys.id, { onDelete: 'cascade' }),
+    day: text('day').notNull(),
+    answer: text('answer').notNull(),
+    comment: text('comment'),
+    path: text('path').notNull().default(''),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_survey_responses_survey_day').on(t.survey_id, t.day)]);
+
 /** JavaScript errors per test version per day (paid). Batched with telemetry; distinct errors are capped per test per day. */
 export const errorDaily = sqliteTable('error_daily', {
     day: text('day').notNull(),

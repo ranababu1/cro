@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
-    "sdk:build": "node scripts/obfuscate-sdk.mjs",
+    "sdk:build": "node scripts/obfuscate-sdk.mjs && node scripts/build-modules.mjs",
     "pretest": "npm run sdk:build"
   },
   "dependencies": {

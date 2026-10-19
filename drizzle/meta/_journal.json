@@ -176,6 +176,13 @@
       "when": 1791972500000,
       "tag": "0024_popups",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1791972600000,
+      "tag": "0025_surveys",
+      "breakpoints": true
     }
   ]
 }

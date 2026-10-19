@@ -23,7 +23,7 @@ export const popups: DocPage = {
             ['Devices', 'All devices, computers only or phones only'],
             ['Pages', 'All pages, or pages whose address is, contains or starts with what you enter'],
         ] },
-        { type: 'p', text: 'Leaving intent uses the mouse moving out through the top of the window, so it shows on computers only. A visitor sees at most one popup per page view. Visitors close a popup with the close button, the Escape key, or a click outside a centered popup.' },
+        { type: 'p', text: 'Leaving intent uses the mouse moving out through the top of the window, so it shows on computers only. A visitor sees at most one popup or survey per page view. Visitors close a popup with the close button, the Escape key, or a click outside a centered popup.' },
         { type: 'h3', text: 'Matching pages' },
         { type: 'p', text: 'A path such as `/pricing` matches that path on any of your domains. A full address such as `https://shop.example.com/pricing` also checks the domain. Query strings and a trailing slash are ignored.' },
         { type: 'h2', text: 'Numbers' },

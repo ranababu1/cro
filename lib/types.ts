@@ -67,6 +67,8 @@ export interface BootstrapResponse {
     modules?: Array<'errors' | 'popups' | 'surveys'>;
     /** Popups (paid) whose page rule matches this URL; shown by popups.js. */
     popups?: import('./popups').SdkPopup[];
+    /** Surveys (paid) whose page rule matches this URL; shown by surveys.js. */
+    surveys?: import('./surveys').SdkSurvey[];
     experiment_id?: string;
     variation_id?: string;
     variation_name?: string;

@@ -44,6 +44,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
     const [visualEd, setVisualEd] = useState<Toggle>(toToggle(allowances.visual_editor));
     const [errTrack, setErrTrack] = useState<Toggle>(toToggle(allowances.error_tracking));
     const [popupsT, setPopupsT] = useState<Toggle>(toToggle(allowances.popups));
+    const [surveysT, setSurveysT] = useState<Toggle>(toToggle(allowances.surveys));
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
 
@@ -66,6 +67,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
         const ve = fromToggle(visualEd); if (ve !== undefined) out.visual_editor = ve;
         const et = fromToggle(errTrack); if (et !== undefined) out.error_tracking = et;
         const pp = fromToggle(popupsT); if (pp !== undefined) out.popups = pp;
+        const sv = fromToggle(surveysT); if (sv !== undefined) out.surveys = sv;
         if (!out.flags) delete out.flags;
         const res = await fetch(`/api/admin/orgs/${orgId}/allowances`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ special_friend: enabled, allowances: out }) });
         setBusy(false);
@@ -103,6 +105,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
                     <Field label="Visual editor">{(id) => select(id, visualEd, setVisualEd)}</Field>
                     <Field label="Error tracking">{(id) => select(id, errTrack, setErrTrack)}</Field>
                     <Field label="Popups">{(id) => select(id, popupsT, setPopupsT)}</Field>
+                    <Field label="Surveys">{(id) => select(id, surveysT, setSurveysT)}</Field>
                 </div>
                 <div className="flex justify-end"><Button onClick={() => void save()} disabled={busy}>Save allowances</Button></div>
             </CardBody>
