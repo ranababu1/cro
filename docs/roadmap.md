@@ -74,6 +74,8 @@ Hardening pass 1 (19 Oct 2026): security fixes, PR fix/security-hardening.
 
 Hardening pass 2 (19 Oct 2026): query indexes and script caching, PR perf/indexes.
 
+Hardening pass 3 (19 Oct 2026): pricing copy for seats and projects. Next feasible: teammate invites (invite links, no email needed) and creating projects from the dashboard, enforcing the existing seats and projects limits.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
