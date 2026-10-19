@@ -7,7 +7,16 @@ export interface UsageRow { label: string; used: number; limit: number | null; a
 /** Plan usage on Overview: one bar per limit, with a plain note at each limit. */
 export function PlanUsage({ rows, plan }: { rows: UsageRow[]; plan: string }) {
     const limited = rows.filter((r) => r.limit !== null);
-    if (!limited.length) return null;
+    if (!limited.length) {
+        // Unlimited plans (Enterprise, platform admin orgs) still show which plan applies.
+        if (!rows.length) return null;
+        return (
+            <Card className="mt-6 p-5" data-testid="plan-usage">
+                <p className="text-sm font-semibold text-zinc-900">Plan usage</p>
+                <p className="mt-1 text-sm text-zinc-600">Plan: <span className="font-medium capitalize text-zinc-900">{plan}</span>. No limits on tested visitors, tests or projects.</p>
+            </Card>
+        );
+    }
     const hit = limited.filter((r) => !r.capacity && r.used >= (r.limit as number));
     return (
         <Card className="mt-6 p-5">

@@ -132,6 +132,8 @@ export const adminUpdateOrgSchema = z
         status: z.enum(['active', 'suspended']),
         suspended_reason: z.string().trim().max(500).nullable(),
         plan: z.string().trim().min(1).max(50),
+        // Admin-assigned plan. Overrides billing until removed (null).
+        plan_override: z.enum(['free', 'starter', 'growth', 'enterprise']).nullable(),
         monthly_visitor_limit: limit,
         monthly_experiment_limit: limit,
         // null = plan default, -1 = unlimited

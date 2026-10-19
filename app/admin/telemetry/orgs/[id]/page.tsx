@@ -50,7 +50,7 @@ export default async function TelemetryOrgPage({
         <>
             <PageHeader
                 title={summary.org.name}
-                description={`${summary.org.slug} · ${summary.org.plan} plan`}
+                description={`${summary.org.slug} · ${summary.plan.effective} plan`}
                 breadcrumb={
                     <span>
                         <Link href={`/admin/telemetry?from=${from}&to=${to}`} className="hover:underline">Telemetry</Link>

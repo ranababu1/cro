@@ -31,10 +31,10 @@ export function clearPageviewCache(): void {
 }
 
 /** Effective limit: org override, else plan default; -1 or an admin member means unlimited. */
-export function effectivePageviewLimit(org: { plan: string; monthly_pageview_limit: number | null }, hasAdminMember: boolean): number | null {
+export function effectivePageviewLimit(org: { plan: string; plan_override?: string | null; monthly_pageview_limit: number | null }, hasAdminMember: boolean): number | null {
     if (hasAdminMember) return null;
     if (org.monthly_pageview_limit === UNLIMITED) return null;
-    return org.monthly_pageview_limit ?? planMonthlyPageviews(org.plan);
+    return org.monthly_pageview_limit ?? planMonthlyPageviews(org.plan_override || org.plan);
 }
 
 export async function getPageviewStatus(orgId: string, opts: { fresh?: boolean } = {}): Promise<PageviewStatus> {

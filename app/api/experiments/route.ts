@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         const nonControl = body.variations.filter((v) => !v.is_control);
         if (maxVars !== null && nonControl.length > maxVars) {
             return NextResponse.json(
-                { error: `Your plan allows up to ${maxVars} variation${maxVars === 1 ? '' : 's'}. ${upgradeHintForVariations(org?.plan)}`.trim() },
+                { error: `Your plan allows up to ${maxVars} variation${maxVars === 1 ? '' : 's'}. ${upgradeHintForVariations(ent.plan)}`.trim() },
                 { status: 403 },
             );
         }

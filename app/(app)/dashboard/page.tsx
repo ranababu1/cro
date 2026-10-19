@@ -27,6 +27,8 @@ export default async function Dashboard() {
     const org = project ? await db.getOrganization(project.org_id) : null;
     const count = (s: string) => experiments.filter((e) => e.status === s).length;
     let usageRows: UsageRow[] = [];
+    // Effective plan: Enterprise for orgs a platform admin owns, else an admin-assigned plan, else billing.
+    const plan = org ? (await getOrgEntitlements(org.id)).plan : 'free';
     if (project && org) {
         const { limits } = await getOrgEntitlements(org.id);
         const v = await getVisitorUsage(org.id);
@@ -64,8 +66,8 @@ export default async function Dashboard() {
                 <Stat label="Visitors this month" value={usage.visitors.toLocaleString()} hint="Across your organization" />
             </div>
 
-            <PlanUsage rows={usageRows} plan={org?.plan || 'free'} />
-            {pageviews && pageviews.limit !== null && <PageviewUsage status={pageviews} plan={org?.plan || 'free'} />}
+            <PlanUsage rows={usageRows} plan={plan} />
+            {pageviews && pageviews.limit !== null && <PageviewUsage status={pageviews} plan={plan} />}
 
             {project && (
                 <Card className="mt-6">
