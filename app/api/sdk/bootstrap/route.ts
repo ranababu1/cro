@@ -27,6 +27,7 @@ import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 import { previewReply } from '@/lib/preview';
 import { pickPageHeatmap } from '@/lib/pageHeatmaps';
+import { onTestPage } from '@/lib/multipage';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -146,7 +147,8 @@ export async function POST(request: NextRequest) {
 
         const goalPayload = goals.filter((g) => g.type === 'click' || g.type === 'form').map((g) => ({ id: g.id, name: g.name, type: g.type, selector: g.selector, is_primary: g.is_primary }));
         const controlUrl = experiment.control_url || variations.find((v) => v.is_control)?.url || '';
-        const onControl = !!(controlUrl && urlsMatch(controlUrl, url));
+        // Multi-page tests: the extra pages count as the control page, so visual changes apply there too.
+        const onControl = onTestPage(experiment, controlUrl, url);
         const onVariation = variations.find((v) => !v.is_control && v.url && urlsMatch(v.url, url));
 
         let assignment = await db.getAssignment(experiment.id, user_id);

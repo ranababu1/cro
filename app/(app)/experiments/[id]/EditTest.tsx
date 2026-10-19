@@ -9,6 +9,8 @@ import { evenWeights, redistributeWeights } from '@/lib/weights';
 import type { Variation } from '@/lib/types';
 import { AutoShiftCard } from './AutoShiftCard';
 import { VisualChangesCard } from './VisualChangesCard';
+import { MultiPageCard } from './MultiPageCard';
+import { MvtCard } from './MvtCard';
 
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 const PLACEHOLDER: Record<GoalType, string> = { click: '#headerCTA', form: 'form#signup', page: 'https://www.example.com/thank-you', event: 'signup' };
@@ -21,7 +23,7 @@ async function send(url: string, method: string, body: unknown): Promise<{ ok: b
 /** Safe edits for a draft, running or paused test: split, pausing variations, audience and new goals. */
 type GoalRow = { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean };
 
-export function EditTest({ experimentId, variations, goals = [], targeting, autoShift = false, onSaved }: { experimentId: string; variations: Variation[]; goals?: GoalRow[]; targeting: string | null; autoShift?: boolean; onSaved: () => void }) {
+export function EditTest({ experimentId, variations, goals = [], targeting, autoShift = false, status = 'draft', mvt = null, onSaved }: { experimentId: string; variations: Variation[]; goals?: GoalRow[]; targeting: string | null; autoShift?: boolean; status?: string; mvt?: string | null; onSaved: () => void }) {
     const [rows, setRows] = useState(variations.map((v) => ({ id: v.id, name: v.name, is_control: v.is_control, weight: v.weight, paused: !!v.paused })));
     const [aud, setAud] = useState<Targeting>(parseTargeting(targeting));
     const [goal, setGoal] = useState({ name: '', type: 'click' as GoalType, selector: '', match_type: 'equals' as PageMatchType, is_primary: false });
@@ -78,6 +80,8 @@ export function EditTest({ experimentId, variations, goals = [], targeting, auto
         <div className="space-y-6">
             {msg && <Alert tone={msg.tone}>{msg.text}</Alert>}
             <VisualChangesCard experimentId={experimentId} variations={variations} />
+            <MvtCard experimentId={experimentId} status={status} mvt={mvt} variations={variations} onSaved={onSaved} />
+            <MultiPageCard experimentId={experimentId} onSaved={onSaved} />
             <AutoShiftCard experimentId={experimentId} onSaved={onSaved} />
             <Card>
                 <CardHeader title="Traffic split" description={autoShift ? 'Auto-shift sets these weights. You can still pause or resume a variation.' : 'Changes apply to new visitors. Everyone already in the test keeps their version.'} />

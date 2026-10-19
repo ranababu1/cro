@@ -14,7 +14,8 @@ type DeviceKey = keyof typeof DEVICES;
 
 /** Visual variations (no URL of their own): open the visual editor on the control page, or edit the change list by hand. */
 export function VisualChangesCard({ experimentId, variations }: { experimentId: string; variations: Variation[] }) {
-    const visual = variations.filter((v) => !v.is_control && !v.url);
+    // Combinations of a multivariate test are built from their levels and are not edited one by one.
+    const visual = variations.filter((v) => !v.is_control && !v.url && !v.combo);
     if (!visual.length) return null;
     return <>{visual.map((v) => <VisualVariation key={v.id} experimentId={experimentId} variation={v} />)}</>;
 }

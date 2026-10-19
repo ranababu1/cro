@@ -63,6 +63,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Results by segment on paid plans: device, traffic source and new or returning visitors', tier: 1 },
     { name: 'Auto-shift traffic to the winner on Growth and above', tier: 2 },
     { name: 'Visual editor on Growth and above: change text, colors, links and images, move or hide elements, or add page CSS, with mobile and tablet preview', tier: 2 },
+    { name: 'Multi-page and multivariate tests on Growth and above', tier: 2 },
     { name: 'Traffic overview on paid plans: page views, top pages, sources, devices and countries', tier: 1 },
     { name: 'JavaScript error tracking on paid plans: errors per test version', tier: 1 },
     { name: 'Popups and calls to action on paid plans: center, corner or bar, with views and clicks', tier: 1 },
