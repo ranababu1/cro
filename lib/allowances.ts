@@ -22,6 +22,7 @@ export const allowancesSchema = z.object({
     visual_editor: z.boolean().optional(),
     error_tracking: z.boolean().optional(),
     popups: z.boolean().optional(),
+    surveys: z.boolean().optional(),
     max_variations: z.number().int().min(1).max(100).nullable().optional(),
     active_experiments: cap,
     projects: cap,

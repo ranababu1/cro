@@ -17,6 +17,7 @@ import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
+import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -70,8 +71,16 @@ export async function POST(request: NextRequest) {
                 return c && popupMatchesUrl(c, url) ? [sdkPopup(p.id, c)] : [];
             })
             : [];
+        // Surveys (paid) work the same way and load surveys.js.
+        const surveys = (await canUseFeature(auth.ctx.orgId, 'surveys'))
+            ? (await db.getActiveSurveys(auth.ctx.projectId)).flatMap((p) => {
+                const c = parseSurveyConfig(p.config);
+                return c && popupMatchesUrl(c, url) ? [sdkSurvey(p.id, c)] : [];
+            })
+            : [];
         const reply = (b: BootstrapResponse) => {
             if (popups.length && b.action !== 'redirect') b = { ...b, popups, modules: [...(b.modules ?? []), 'popups'] };
+            if (surveys.length && b.action !== 'redirect') b = { ...b, surveys, modules: [...(b.modules ?? []), 'surveys'] };
             if ((!entitled && !errorsOn) || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
             const rate = heatmapSampleRate();
             const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};

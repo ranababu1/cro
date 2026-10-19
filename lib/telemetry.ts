@@ -73,25 +73,36 @@ const errorBuffer = new Map<string, ErrorBufRow>();
 /** Popup views, clicks and closes (paid), flushed in the same batch. */
 type PopupBufRow = { day: string; popup_id: string; metric: string; count: number };
 const popupBuffer = new Map<string, PopupBufRow>();
+/** Survey views, closes and responses (paid), and the individual answers, flushed in the same batch. */
+type SurveyBufRow = { day: string; survey_id: string; metric: string; count: number };
+export type SurveyAnswerRow = { day: string; survey_id: string; answer: string; comment: string | null; path: string };
+const surveyBuffer = new Map<string, SurveyBufRow>();
+let answerBuffer: SurveyAnswerRow[] = [];
+/** Flush early when this many answers wait in memory, so one instance never holds a large backlog. */
+const MAX_PENDING_ANSWERS = 500;
 
 export function pendingTelemetry(): number {
-    return buffer.size + trafficBuffer.size + errorBuffer.size + popupBuffer.size;
+    return buffer.size + trafficBuffer.size + errorBuffer.size + popupBuffer.size + surveyBuffer.size + answerBuffer.length;
 }
 
 export async function flushTelemetry(): Promise<void> {
     scheduledAfter = false;
     if (timer) { clearTimeout(timer); timer = null; }
-    if (!buffer.size && !trafficBuffer.size && !errorBuffer.size && !popupBuffer.size) return;
+    if (!buffer.size && !trafficBuffer.size && !errorBuffer.size && !popupBuffer.size && !surveyBuffer.size && !answerBuffer.length) return;
     const rows = [...buffer.values()];
     const traffic = [...trafficBuffer.values()];
     const errors = [...errorBuffer.values()];
     const popupRows = [...popupBuffer.values()];
+    const surveyRows = [...surveyBuffer.values()];
+    const answers = answerBuffer;
+    answerBuffer = [];
+    surveyBuffer.clear();
     popupBuffer.clear();
     buffer.clear();
     trafficBuffer.clear();
     errorBuffer.clear();
     try {
-        await db.bumpTelemetryBatch(rows, traffic, errors, popupRows);
+        await db.bumpTelemetryBatch(rows, traffic, errors, popupRows, surveyRows, answers);
     } catch (err) {
         console.error('telemetry flush failed', err);
     }
@@ -163,6 +174,17 @@ export async function bumpPopup(popupId: string, metric: string, day = utcDay())
     if (cur) cur.count += 1;
     else popupBuffer.set(k, { day, popup_id: popupId, metric, count: 1 });
     if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
+    scheduleFlush();
+}
+
+/** Counts one survey view, close or response; a response also queues its answer. */
+export async function bumpSurvey(surveyId: string, metric: string, answer?: Omit<SurveyAnswerRow, 'day' | 'survey_id'>, day = utcDay()): Promise<void> {
+    const k = `${day}|${surveyId}|${metric}`;
+    const cur = surveyBuffer.get(k);
+    if (cur) cur.count += 1;
+    else surveyBuffer.set(k, { day, survey_id: surveyId, metric, count: 1 });
+    if (answer) answerBuffer.push({ day, survey_id: surveyId, ...answer });
+    if (process.env.TELEMETRY_SYNC === '1' || answerBuffer.length >= MAX_PENDING_ANSWERS) return flushTelemetry();
     scheduleFlush();
 }
 

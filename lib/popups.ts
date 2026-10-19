@@ -16,13 +16,8 @@ export const POPUP_STATUSES = ['draft', 'active', 'paused'] as const;
 const SAFE_URL = /^(https?:\/\/|\/(?!\/)|#|mailto:|tel:)/i;
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 
-export const popupConfigSchema = z.object({
-    title: z.string().trim().min(1, 'Add a title').max(120),
-    body: z.string().trim().max(600).default(''),
-    button_text: z.string().trim().min(1, 'Add the button text').max(40),
-    button_url: z.string().trim().max(2000).refine((u) => SAFE_URL.test(u), 'The button needs an http(s), relative, #, mailto: or tel: address'),
-    new_tab: z.boolean().default(false),
-    position: z.enum(POPUP_POSITIONS).default('center'),
+/** Where, when and how often a popup or survey shows. Shared by popups and surveys. */
+export const displayRules = {
     color: z.string().regex(COLOR, 'Use a hex color such as #2563eb').default('#2563eb'),
     trigger: z.enum(POPUP_TRIGGERS).default('delay'),
     /** Seconds for delay, percent of the page for scroll. Ignored for exit intent. */
@@ -31,10 +26,22 @@ export const popupConfigSchema = z.object({
     device: z.enum(POPUP_DEVICES).default('all'),
     match: z.enum(POPUP_MATCH).default('all'),
     match_value: z.string().trim().max(500).default(''),
-}).superRefine((c, ctx) => {
+};
+
+export function checkDisplayRules(c: { trigger: string; trigger_value: number; match: string; match_value: string }, ctx: z.RefinementCtx) {
     if (c.trigger === 'scroll' && c.trigger_value > 100) ctx.addIssue({ code: 'custom', path: ['trigger_value'], message: 'Scroll depth is a percent from 0 to 100' });
     if (c.match !== 'all' && !c.match_value) ctx.addIssue({ code: 'custom', path: ['match_value'], message: 'Add the page address or part of it' });
-});
+}
+
+export const popupConfigSchema = z.object({
+    title: z.string().trim().min(1, 'Add a title').max(120),
+    body: z.string().trim().max(600).default(''),
+    button_text: z.string().trim().min(1, 'Add the button text').max(40),
+    button_url: z.string().trim().max(2000).refine((u) => SAFE_URL.test(u), 'The button needs an http(s), relative, #, mailto: or tel: address'),
+    new_tab: z.boolean().default(false),
+    position: z.enum(POPUP_POSITIONS).default('center'),
+    ...displayRules,
+}).superRefine(checkDisplayRules);
 export type PopupConfig = z.infer<typeof popupConfigSchema>;
 
 export const createPopupSchema = z.object({

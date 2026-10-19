@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { PageHeader, Card, CardHeader, CardBody, Table, THead, TBody, TR, TH, TD, Button, Input, Textarea, Select, Field, StatusBadge, Alert, EmptyState } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
 import type { PopupConfig, PopupStats } from '@/lib/popups';
+import { DisplayRuleFields, rulesText } from './DisplayRules';
 
 interface Popup { id: string; name: string; status: 'draft' | 'active' | 'paused'; config: PopupConfig | null; stats: PopupStats }
 interface Data { popups: Popup[]; max: number }
@@ -13,14 +14,6 @@ const BLANK: PopupConfig = {
     new_tab: false, position: 'center', color: '#2563eb', trigger: 'delay', trigger_value: 5, frequency: 'once', device: 'all', match: 'all', match_value: '',
 };
 const POSITION: Record<PopupConfig['position'], string> = { center: 'Center of the page', 'bottom-right': 'Bottom right corner', 'bottom-left': 'Bottom left corner', 'top-bar': 'Bar at the top', 'bottom-bar': 'Bar at the bottom' };
-const FREQ: Record<PopupConfig['frequency'], string> = { once: 'Once per visitor', session: 'Once per visit', every_page: 'On every page view' };
-const MATCH: Record<PopupConfig['match'], string> = { all: 'All pages', equals: 'Page address is', contains: 'Page address contains', starts_with: 'Page address starts with' };
-
-function triggerText(c: PopupConfig) {
-    if (c.trigger === 'exit') return 'When leaving';
-    if (c.trigger === 'scroll') return `After ${c.trigger_value}% scroll`;
-    return c.trigger_value ? `After ${c.trigger_value}s` : 'Right away';
-}
 
 export default function PopupsPage() {
     const [state, setState] = useState<{ status: 'loading' | 'ok' | 'locked' | 'error'; data?: Data }>({ status: 'loading' });
@@ -74,7 +67,7 @@ export default function PopupsPage() {
                                     <TR key={p.id}>
                                         <TD className="font-medium">{p.name}</TD>
                                         <TD><StatusBadge status={p.status} /></TD>
-                                        <TD className="text-sm text-zinc-600">{p.config ? `${MATCH[p.config.match]}${p.config.match === 'all' ? '' : ` ${p.config.match_value}`}, ${triggerText(p.config).toLowerCase()}` : '-'}</TD>
+                                        <TD className="text-sm text-zinc-600">{p.config ? rulesText(p.config) : '-'}</TD>
                                         <TD className="text-right tabular-nums">{p.stats.views.toLocaleString()}</TD>
                                         <TD className="text-right tabular-nums">{p.stats.clicks.toLocaleString()}</TD>
                                         <TD className="text-right tabular-nums">{p.stats.ctr === null ? '-' : `${(p.stats.ctr * 100).toFixed(1)}%`}</TD>
@@ -133,31 +126,7 @@ function Editor({ initial, onDone }: { initial: { id: string | null; name: strin
                         <Field label="Where on the page">{(id) => <Select id={id} value={c.position} onChange={(e) => set('position', e.target.value as PopupConfig['position'])}>{Object.entries(POSITION).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select>}</Field>
                         <Field label="Color">{(id) => <Input id={id} type="color" value={c.color} onChange={(e) => set('color', e.target.value)} className="p-1" />}</Field>
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <Field label="When it shows">{(id) => (
-                            <Select id={id} value={c.trigger} onChange={(e) => set('trigger', e.target.value as PopupConfig['trigger'])}>
-                                <option value="delay">After some seconds</option>
-                                <option value="scroll">After scrolling part of the page</option>
-                                <option value="exit">When the visitor is about to leave</option>
-                            </Select>
-                        )}</Field>
-                        {c.trigger !== 'exit' && (
-                            <Field label={c.trigger === 'scroll' ? 'Scroll depth (%)' : 'Seconds'}>{(id) => <Input id={id} type="number" min={0} max={c.trigger === 'scroll' ? 100 : 600} value={c.trigger_value} onChange={(e) => set('trigger_value', Math.max(0, Math.round(Number(e.target.value) || 0)))} />}</Field>
-                        )}
-                    </div>
-                    {c.trigger === 'exit' && <p className="text-sm text-zinc-500">Exit intent uses the mouse leaving the window, so it shows on computers only.</p>}
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <Field label="How often">{(id) => <Select id={id} value={c.frequency} onChange={(e) => set('frequency', e.target.value as PopupConfig['frequency'])}>{Object.entries(FREQ).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select>}</Field>
-                        <Field label="Devices">{(id) => (
-                            <Select id={id} value={c.device} onChange={(e) => set('device', e.target.value as PopupConfig['device'])}>
-                                <option value="all">All devices</option><option value="desktop">Computers only</option><option value="mobile">Phones only</option>
-                            </Select>
-                        )}</Field>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <Field label="Pages">{(id) => <Select id={id} value={c.match} onChange={(e) => set('match', e.target.value as PopupConfig['match'])}>{Object.entries(MATCH).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select>}</Field>
-                        {c.match !== 'all' && <Field label="Address" hint="A full address or a path such as /pricing">{(id) => <Input id={id} value={c.match_value} onChange={(e) => set('match_value', e.target.value)} placeholder="/pricing" />}</Field>}
-                    </div>
+                    <DisplayRuleFields c={c} onChange={(patch) => setC((x) => ({ ...x, ...patch }))} />
                     {error && <Alert tone="danger">{error}</Alert>}
                     <div className="flex gap-2">
                         <Button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save popup'}</Button>
