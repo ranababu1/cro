@@ -258,3 +258,5 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - Pricing: audit row Free Not included (was 30 days), Enterprise 2 years (was Custom, which had no mechanism). FAQ and downgrade FAQ updated; docs organizations-and-projects#audit-log.
 
 Hardening (19 Oct 2026): management API with a secret key is rate limited per key (API_RATE_LIMIT_PER_MINUTE, default 120, in-memory like the SDK limiter). Popup and survey [id] routes scope the plan check and audit entry to the owner org (ownerScope in lib/popupRoutes.ts). next.config.js sets security headers on every route; /share/* sends no referrer.
+
+Hot paths (19 Oct 2026): migration 0029 adds idx_popup_daily_popup, idx_survey_daily_survey, idx_audit_created, idx_survey_responses_day. Retention deletes prefilter on the newest per-plan cutoff (latestCutoff in lib/db/index.ts). /sdk.js and the helper scripts send Cache-Control public, max-age=300, stale-while-revalidate=86400. SDK is 24.6 KB gzipped (claim: under 30 KB).

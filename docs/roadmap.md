@@ -72,6 +72,8 @@ JavaScript error tracking per version (paid)
 
 Hardening pass 1 (19 Oct 2026): security fixes, PR fix/security-hardening.
 
+Hardening pass 2 (19 Oct 2026): query indexes and script caching, PR perf/indexes.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
