@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import fs from 'node:fs';
 import { NextRequest } from 'next/server';
 import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
-import { computeFunnel, funnelSchema } from '@/lib/funnels';
+import { computeFunnel, computeFunnelTrend, funnelSchema, periodOf, pickBucket, MAX_TREND_POINTS } from '@/lib/funnels';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => session.current) }));
@@ -35,6 +35,41 @@ describe('computeFunnel', () => {
         expect(funnelSchema.safeParse({ name: '', steps: ['a', 'b'] }).success).toBe(false);
         expect(funnelSchema.safeParse({ name: 'F', steps: Array.from({ length: 11 }, (_, i) => `g${i}`) }).success).toBe(false);
         expect(funnelSchema.safeParse({ name: 'F', steps: ['a', 'b'] }).success).toBe(true);
+    });
+});
+
+describe('computeFunnelTrend', () => {
+    const steps = [{ id: 'g1' }, { id: 'g2' }];
+    const vars = [{ id: 'c', name: 'Control', is_control: true }, { id: 'v', name: 'B', is_control: false }];
+    const hit = (variation_id: string, user_id: string, goal_id: string, t: string) => ({ variation_id, user_id, goal_id, t });
+    it('buckets by UTC day or Monday week', () => {
+        expect(periodOf('2026-10-14T23:59:00.000Z', 'day')).toBe('2026-10-14');
+        expect(periodOf('2026-10-14T10:00:00.000Z', 'week')).toBe('2026-10-12'); // Wednesday -> Monday
+        expect(periodOf('2026-10-18T10:00:00.000Z', 'week')).toBe('2026-10-12'); // Sunday -> Monday
+        expect(periodOf('2026-10-19T00:00:00.000Z', 'week')).toBe('2026-10-19');
+        expect(pickBucket('2026-01-01T00:00:00Z', '2026-02-15T00:00:00Z')).toBe('day');
+        expect(pickBucket('2026-01-01T00:00:00Z', '2026-04-15T00:00:00Z')).toBe('week');
+        expect(pickBucket('2026-01-01T00:00:00Z', '2026-04-15T00:00:00Z', 'day')).toBe('day');
+        expect(pickBucket(null, null)).toBe('day');
+    });
+    it('counts starters by first step period and completions in order, filling gaps', () => {
+        const r = computeFunnelTrend(steps, vars, [
+            hit('c', 'a', 'g1', '2026-10-10T09:00:00Z'), hit('c', 'a', 'g2', '2026-10-12T09:00:00Z'), // finished later, counted on the 10th
+            hit('c', 'b', 'g1', '2026-10-10T10:00:00Z'),
+            hit('c', 'd', 'g2', '2026-10-11T08:00:00Z'), hit('c', 'd', 'g1', '2026-10-12T09:00:00Z'), // out of order
+            hit('v', 'e', 'g1', '2026-10-12T09:00:00Z'), hit('v', 'e', 'g2', '2026-10-12T09:30:00Z'),
+            hit('c', 'z', 'g2', '2026-10-09T09:00:00Z'), // never started
+        ], 'day', new Date('2026-10-13T12:00:00Z'));
+        expect(r.periods).toEqual(['2026-10-10', '2026-10-11', '2026-10-12', '2026-10-13']);
+        expect(r.variations[0].points.map((p) => [p.started, p.completed])).toEqual([[2, 1], [0, 0], [1, 0], [0, 0]]);
+        expect(r.variations[0].points[0].rate).toBe(0.5);
+        expect(r.variations[1].points[2]).toEqual({ period: '2026-10-12', started: 1, completed: 1, rate: 1 });
+    });
+    it('keeps only the latest periods and handles no data', () => {
+        const r = computeFunnelTrend(steps, vars, [hit('c', 'a', 'g1', '2026-01-01T00:00:00Z')], 'day', new Date('2026-10-01T00:00:00Z'));
+        expect(r.periods).toHaveLength(MAX_TREND_POINTS);
+        expect(r.periods[r.periods.length - 1]).toBe('2026-10-01');
+        expect(computeFunnelTrend(steps, vars, [], 'week').periods).toEqual([]);
     });
 });
 
@@ -92,6 +127,12 @@ describe('funnel routes', () => {
         expect(v0.visitors).toBe(4);
         expect(v0.steps.map((s: { users: number }) => s.users)).toEqual([3, 2, 1]);
         expect(v0.completion).toBeCloseTo(0.25);
+        const today = new Date().toISOString().slice(0, 10);
+        expect(f.trend.bucket).toBe('day');
+        const tp = f.trend.variations.find((v: { variation_id: string }) => v.variation_id === vars[0]).points.find((x: { period: string }) => x.period === today);
+        expect(tp).toMatchObject({ started: 3, completed: 1 });
+        const weekly = (await (await list(req('GET', `/api/experiments/${expId}/funnels?trend=week`), p(expId))).json()).funnels[0];
+        expect(weekly.trend.bucket).toBe('week');
 
         // Removing a goal drops it from the funnel and says so.
         await db.deleteGoal(expId, goals[1]);

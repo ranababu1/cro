@@ -38,7 +38,7 @@ const availableToday = [
     'Click, form submit, page visit and custom event goals', 'Wilson intervals with a z-test against the control', 'Sample ratio mismatch warning',
     'Edit running tests safely', 'Shareable results links', 'Google Tag Manager and WordPress install guides', 'Google Analytics 4 events for every test', 'WordPress plugin on paid plans',
     'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks and filters by traffic source and conversion',
-    'Funnels on paid plans, built from your goals',
+    'Funnels on paid plans, built from your goals, with a completion trend',
     'Revenue goals on paid plans: revenue per visitor and average order value',
     'Auto-shift traffic to the winner on Growth and above',
     'Visual editor on Growth and above: change text, colors, links and images, or hide elements, without code',

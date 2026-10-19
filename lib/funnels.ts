@@ -74,3 +74,85 @@ export function computeFunnel(
         };
     });
 }
+
+/** Funnel trend: visitors who started the funnel (first step) in each period, and how many of them finished it. */
+export type TrendBucket = 'day' | 'week';
+export const MAX_TREND_POINTS = 90;
+export interface TrendPoint { period: string; started: number; completed: number; rate: number }
+export interface FunnelTrend { bucket: TrendBucket; periods: string[]; variations: { variation_id: string; name: string; is_control: boolean; points: TrendPoint[] }[] }
+
+const DAY_MS = 86_400_000;
+/** UTC day, or the Monday that starts its UTC week. */
+export function periodOf(iso: string, bucket: TrendBucket): string {
+    const day = iso.slice(0, 10);
+    if (bucket === 'day') return day;
+    const t = Date.parse(`${day}T00:00:00Z`);
+    const dow = (new Date(t).getUTCDay() + 6) % 7;
+    return new Date(t - dow * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** Day buckets up to 60 days of data, weeks beyond that. */
+export function pickBucket(firstIso: string | null, lastIso: string | null, asked?: string | null): TrendBucket {
+    if (asked === 'day' || asked === 'week') return asked;
+    if (!firstIso || !lastIso) return 'day';
+    return (Date.parse(lastIso) - Date.parse(firstIso)) / DAY_MS > 60 ? 'week' : 'day';
+}
+
+/**
+ * Same step rule as computeFunnel. Each visitor is counted in the period of their first step and counts as
+ * completed when they finished every step in order (whenever that happened). Gaps are filled with zeros,
+ * and only the latest MAX_TREND_POINTS periods are kept.
+ */
+export function computeFunnelTrend(
+    steps: { id: string }[],
+    variations: { id: string; name: string; is_control: boolean }[],
+    hits: FirstHit[],
+    bucket: TrendBucket,
+    now = new Date(),
+): FunnelTrend {
+    const byUser = new Map<string, Map<string, string>>();
+    for (const h of hits) {
+        const k = `${h.variation_id}\u0000${h.user_id}`;
+        let m = byUser.get(k);
+        if (!m) byUser.set(k, (m = new Map()));
+        const cur = m.get(h.goal_id);
+        if (!cur || h.t < cur) m.set(h.goal_id, h.t);
+    }
+    const cells = new Map<string, { started: number; completed: number }>();
+    let first = '';
+    for (const [k, m] of byUser) {
+        const start = m.get(steps[0].id);
+        if (!start) continue;
+        let prev = start, done = true;
+        for (let i = 1; i < steps.length; i++) {
+            const t = m.get(steps[i].id);
+            if (!t || t < prev) { done = false; break; }
+            prev = t;
+        }
+        const p = periodOf(start, bucket);
+        if (!first || p < first) first = p;
+        const key = `${k.slice(0, k.indexOf('\u0000'))}\u0000${p}`;
+        const c = cells.get(key) ?? { started: 0, completed: 0 };
+        c.started++;
+        if (done) c.completed++;
+        cells.set(key, c);
+    }
+    const periods: string[] = [];
+    if (first) {
+        const step = bucket === 'day' ? DAY_MS : 7 * DAY_MS;
+        const last = periodOf(now.toISOString(), bucket);
+        for (let t = Date.parse(`${first}T00:00:00Z`); t <= Date.parse(`${last}T00:00:00Z`); t += step) periods.push(new Date(t).toISOString().slice(0, 10));
+    }
+    const kept = periods.slice(-MAX_TREND_POINTS);
+    return {
+        bucket,
+        periods: kept,
+        variations: variations.map((v) => ({
+            variation_id: v.id, name: v.name, is_control: v.is_control,
+            points: kept.map((p) => {
+                const c = cells.get(`${v.id}\u0000${p}`) ?? { started: 0, completed: 0 };
+                return { period: p, started: c.started, completed: c.completed, rate: c.started > 0 ? c.completed / c.started : 0 };
+            }),
+        })),
+    };
+}

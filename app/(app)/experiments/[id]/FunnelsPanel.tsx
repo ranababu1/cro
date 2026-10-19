@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Card, CardHeader, CardBody, Button, Input, Alert, Badge } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
-import { MAX_FUNNEL_STEPS, MIN_FUNNEL_STEPS, type FunnelVariation } from '@/lib/funnels';
+import { MAX_FUNNEL_STEPS, MIN_FUNNEL_STEPS, type FunnelVariation, type FunnelTrend as Trend, type TrendBucket } from '@/lib/funnels';
+import { FunnelTrend } from './FunnelTrend';
 
-type Funnel = { id: string; name: string; steps: { id: string; name: string }[]; removed_steps: number; variations: FunnelVariation[] };
+type Funnel = { id: string; name: string; steps: { id: string; name: string }[]; removed_steps: number; variations: FunnelVariation[]; trend?: Trend | null };
 const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
 const selectClass = 'h-9 rounded-lg border border-zinc-300 bg-white px-2 text-sm text-zinc-900 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 
@@ -16,23 +17,26 @@ export function FunnelsPanel({ experimentId, goals }: { experimentId: string; go
     const [steps, setSteps] = useState<string[]>([]);
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
+    // Trend period: automatic (days, or weeks past 60 days of data) until the user picks one.
+    const [bucket, setBucket] = useState<TrendBucket | ''>('');
+    const url = `/api/experiments/${experimentId}/funnels${bucket ? `?trend=${bucket}` : ''}`;
 
     const load = useCallback(async () => {
-        const res = await fetch(`/api/experiments/${experimentId}/funnels`);
+        const res = await fetch(url);
         if (res.status === 403) return setState({ allowed: false, funnels: [], max: 10 });
         const d = await res.json().catch(() => ({}));
         setState({ allowed: res.ok, funnels: d.funnels ?? [], max: d.max ?? 10 });
-    }, [experimentId]);
+    }, [url]);
     useEffect(() => {
         let live = true;
-        fetch(`/api/experiments/${experimentId}/funnels`).then(async (res) => {
+        fetch(url).then(async (res) => {
             if (!live) return;
             if (res.status === 403) return setState({ allowed: false, funnels: [], max: 10 });
             const d = await res.json().catch(() => ({}));
             setState({ allowed: res.ok, funnels: d.funnels ?? [], max: d.max ?? 10 });
         }).catch(() => undefined);
         return () => { live = false; };
-    }, [experimentId]);
+    }, [url]);
 
     async function create() {
         setBusy(true); setError('');
@@ -55,7 +59,7 @@ export function FunnelsPanel({ experimentId, goals }: { experimentId: string; go
     return (
         <div className="space-y-6" data-testid="funnels">
             <h2 className="pt-2 text-base font-semibold text-zinc-900">Funnels</h2>
-            {state.funnels.map((f) => <FunnelCard key={f.id} funnel={f} onRemove={() => void remove(f.id)} />)}
+            {state.funnels.map((f) => <FunnelCard key={f.id} funnel={f} onRemove={() => void remove(f.id)} onBucket={setBucket} />)}
             {goals.length < MIN_FUNNEL_STEPS ? (
                 <p className="text-sm text-zinc-500">Add at least {MIN_FUNNEL_STEPS} goals to this test to build a funnel.</p>
             ) : state.funnels.length < state.max && (
@@ -89,7 +93,7 @@ export function FunnelsPanel({ experimentId, goals }: { experimentId: string; go
     );
 }
 
-function FunnelCard({ funnel, onRemove }: { funnel: Funnel; onRemove: () => void }) {
+function FunnelCard({ funnel, onRemove, onBucket }: { funnel: Funnel; onRemove: () => void; onBucket: (b: TrendBucket) => void }) {
     const control = funnel.variations.find((v) => v.is_control);
     return (
         <Card>
@@ -127,6 +131,7 @@ function FunnelCard({ funnel, onRemove }: { funnel: Funnel; onRemove: () => void
                         </div>
                     </div>
                 ))}
+                {funnel.trend && funnel.variations.length > 0 && <FunnelTrend trend={funnel.trend} onBucket={onBucket} />}
             </CardBody>
         </Card>
     );
