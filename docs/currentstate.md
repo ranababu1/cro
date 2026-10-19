@@ -280,3 +280,5 @@ Results by segment: assignments carry segment_device, segment_source and segment
 Rollout: experiments.rollout_variation_id and rollout_at (migration 0032). POST/DELETE /api/experiments/[id]/rollout (running, paused or completed; running and paused are completed first; audit rollout:start and rollout:stop). Bootstrap checks db.getRolloutConfig (cached roll:<project>) only when no running test matches, counts the page view, and replies matched:false (redirect to the winner URL, visual changes on the control page, or none), so the existing SDK applies it without tracking, GA4 or modules beyond popups and surveys. /api/assign returns the winner with assigned:false, reason rollout. Targeting applies. No sdk.js change.
 
 Blog posts 01, 02 and 03 republished 2026-10-19, byte for byte from the content store.
+
+Docs guard: tests/sdkDocsMatch.test.ts checks every ABTest.<name> in lib/docs/content exists in window.ABTest (bootstrap, getUserId, init, track, trackConversion).
