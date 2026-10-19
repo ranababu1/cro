@@ -29,7 +29,7 @@ const testList: { text: string; note?: string }[] = [
     { text: 'Targeting by device, UTM and referrer' },
 ];
 
-// Verified against the built public/sdk.js (from sdk-src via npm run sdk:build): gzip is about 14504 bytes.
+// Verified against the built public/sdk.js (from sdk-src via npm run sdk:build): gzip is about 24.6 KB (tests/sdkSizeClaim.test.ts keeps it under 30 KB).
 // Paid plans allow a control plus 50 variations, each project has dev/staging/prod, results use 95% Wilson intervals.
 const stats = [
     { value: '<30 KB', label: ['gzipped SDK', 'snippet'] },

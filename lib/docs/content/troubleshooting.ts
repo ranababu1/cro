@@ -37,7 +37,7 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Do I need to write code?' },
         { type: 'p', text: 'No. Add the snippet once. Then either point each variation at its own page (a split URL test), or on Growth and above change the page itself with the [visual editor](/docs/variations#visual-editor).' },
         { type: 'h3', text: 'Will it slow my site down?' },
-        { type: 'p', text: 'The script is under 30 KB gzipped and loads asynchronously. It makes one small request on page load.' },
+        { type: 'p', text: 'The script is under 30 KB gzipped and loads asynchronously. It makes one small request on page load. A paid feature adds one more small script only on pages where it applies, such as a heatmap, popup, survey or visual change.' },
         { type: 'h3', text: 'Which statistics do you use?' },
         { type: 'p', text: 'A two-sided two-proportion z-test of the best variant against the control, at 95% confidence, and Wilson score intervals for each conversion rate. See [Reading results](/docs/results).' },
         { type: 'h3', text: 'Can I change variations after starting?' },

@@ -16,9 +16,9 @@ const limits: [string, string, string, string, string][] = [
     ['Running experiments at a time', '1', '20', 'Unlimited', 'Unlimited'],
     ['Total experiments', '10 over the life of the account', 'Unlimited', 'Unlimited', 'Unlimited'],
     ['Variations per experiment', 'Control plus 1 (A/B only)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
-    ['Projects', '1', '3', '10', 'Custom'],
-    ['Environments per project', '3 (dev, staging, production)', '3', '3', 'Custom'],
-    ['Team seats', '1', '5', '15', 'Unlimited'],
+    ['Projects', '1', '1 today, 3 coming soon', '1 today, 10 coming soon', '1 today, custom coming soon'],
+    ['Environments per project', '3 (dev, staging, production)', '3', '3', '3'],
+    ['Team seats', '1', '1 today, 5 coming soon', '1 today, 15 coming soon', '1 today, unlimited coming soon'],
     ['Survey answers kept', 'Not included', '12 months', '24 months', '24 months'],
     ['Individual heatmap clicks kept', 'Not included', '30 days (daily totals stay)', '30 days (daily totals stay)', '30 days (daily totals stay)'],
     ['WordPress plugin', 'Not included', 'Included', 'Included', 'Included'],
@@ -66,6 +66,8 @@ const availableToday: { name: string; tier: number }[] = [
 // p must match the phase that lists the item on the public /roadmap.
 const comingSoon: { name: string; p: number; tier: number }[] = [
     { name: 'Session recordings', p: 4, tier: 1 },
+    { name: 'Invite teammates', p: 6, tier: 1 },
+    { name: 'More projects from the dashboard', p: 6, tier: 1 },
 ];
 
 const faqs = [
@@ -79,9 +81,9 @@ const faqs = [
     { q: 'What data do you delete, and when?', a: 'Survey answers are deleted after 12 months on Starter and 24 months on Growth and Enterprise. Individual heatmap clicks are deleted after 30 days; heatmaps keep their daily totals. Audit log entries are deleted after 90 days on Starter, 1 year on Growth and 2 years on Enterprise (30 days on Free). Tests, visitor assignments, conversions, results and daily totals are kept while your account is active.' },
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
     { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
-    { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats. Enterprise has unlimited seats.' },
+    { q: 'Do you charge per seat?', a: 'No. Today each account has one user and one project. When teammate invites and more projects ship, paid plans include them at no extra cost: 5 seats and 3 projects on Starter, 15 seats and 10 projects on Growth, and custom on Enterprise.' },
     { q: 'What do I need to install?', a: 'A small JavaScript snippet, under 30 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. Paid plans also get a WordPress plugin that adds it for you.' },
-    { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need custom retention, a contract and DPA.' },
+    { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need a contract and DPA.' },
 ];
 
 const faqJsonLd = {
