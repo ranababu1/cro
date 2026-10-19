@@ -493,3 +493,44 @@ export const funnels = sqliteTable('funnels', {
     steps: text('steps').notNull(), // JSON array of goal ids, in order
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_funnels_experiment').on(t.experiment_id)]);
+
+/** Webhook endpoints (paid). Events are a JSON array of names from lib/webhooks.ts. The secret signs every delivery. */
+export const webhooks = sqliteTable('webhooks', {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    secret: text('secret').notNull(),
+    events: text('events').notNull(),
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+    created_by: text('created_by'),
+    created_at: text('created_at').notNull().default(now),
+    last_delivery_at: text('last_delivery_at'),
+    last_status: integer('last_status'),
+    last_error: text('last_error'),
+}, (t) => [index('idx_webhooks_org').on(t.org_id)]);
+
+/**
+ * Outbox: one row per event per endpoint. Written when an event happens (dedupe_key makes each event fire once),
+ * sent in small batches by the maintenance job with retries. Rows are deleted after 30 days.
+ */
+export const webhookDeliveries = sqliteTable('webhook_deliveries', {
+    id: text('id').primaryKey(),
+    webhook_id: text('webhook_id').notNull().references(() => webhooks.id, { onDelete: 'cascade' }),
+    org_id: text('org_id').notNull(),
+    event: text('event').notNull(),
+    dedupe_key: text('dedupe_key').notNull(),
+    payload: text('payload').notNull(),
+    status: text('status', { enum: ['pending', 'sending', 'sent', 'failed'] }).notNull().default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    next_attempt_at: text('next_attempt_at').notNull(),
+    locked_at: text('locked_at'),
+    response_status: integer('response_status'),
+    last_error: text('last_error'),
+    created_at: text('created_at').notNull().default(now),
+    sent_at: text('sent_at'),
+}, (t) => [
+    uniqueIndex('uq_webhook_deliveries_dedupe').on(t.webhook_id, t.dedupe_key),
+    index('idx_webhook_deliveries_due').on(t.status, t.next_attempt_at),
+    index('idx_webhook_deliveries_webhook').on(t.webhook_id, t.created_at),
+    index('idx_webhook_deliveries_created').on(t.created_at),
+]);

@@ -7,6 +7,7 @@ import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
 import { checkStart, afterStatusChange } from '@/lib/experimentStatus';
 import { scheduleSchedules } from '@/lib/schedule';
+import { scheduleWebhooks } from '@/lib/webhooks';
 import { serializeTargeting } from '@/lib/targeting';
 import { clientIpFromHeaders } from '@/lib/telemetry';
 
@@ -29,6 +30,7 @@ export async function GET(request: NextRequest, { params }: Params) {
         const { id } = await params;
         // Scheduled starts and stops also run from the dashboard, for sites with no traffic yet.
         scheduleSchedules();
+        scheduleWebhooks();
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();
         const variations = await db.getVariations(id);

@@ -6,6 +6,7 @@ import { checkDomainTests, countDomainTest } from './domainLedger';
 import { logAbuse } from './abuse';
 import { bumpMetric, METRICS, recordProductEvent } from './telemetry';
 import type { Experiment } from './types';
+import { emitTestCompleted } from './webhooks';
 
 /**
  * Shared start and stop rules for experiments, used by the dashboard PATCH and by scheduled starts and stops,
@@ -53,5 +54,6 @@ export async function afterStatusChange(
     if (to === 'completed' && experiment.status !== 'completed') {
         await bumpMetric(METRICS.tests_completed, base);
         await recordProductEvent({ action: 'experiment.complete', ...base, userId: actor.userId, ip: actor.ip ?? null });
+        await emitTestCompleted(orgId, experiment, actor.userId ? 'manual' : 'schedule');
     }
 }

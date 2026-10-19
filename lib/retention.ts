@@ -10,7 +10,8 @@ import { platformAdminEmails } from './platformAdmin';
  * instances (claimed atomically in maintenance_runs) one request deletes, after its response is sent:
  * - raw heatmap clicks and scroll rows older than 30 days (heatmaps keep their daily totals),
  * - survey answers older than the plan's data retention (Free 6 months, Starter 12, Growth and Enterprise 24),
- * - audit log entries older than the plan's audit period (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years).
+ * - audit log entries older than the plan's audit period (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years),
+ * - webhook delivery records older than 30 days.
  * Each run deletes a bounded number of rows, so a large backlog is cleared over several runs.
  */
 export const RETENTION_JOB = 'retention';
@@ -45,7 +46,7 @@ export function retentionCutoffs(now = new Date()) {
 }
 
 /** Runs the cleanup if no instance ran it in the last hour. Returns what was deleted, or null when not due. */
-export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number } | null> {
+export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number; webhookDeliveries: number } | null> {
     const claimed = await db.claimMaintenance(RETENTION_JOB, new Date(now.getTime() - RETENTION_EVERY_MS).toISOString(), now.toISOString());
     if (!claimed) return null;
     const c = retentionCutoffs(now);
@@ -55,7 +56,8 @@ export async function runRetention(now = new Date()): Promise<{ heatmapPoints: n
     const admins = [...new Set([SUPER_ADMIN_EMAIL, ...platformAdminEmails()])];
     const surveyAnswers = await db.deleteOldSurveyAnswers(c.surveyBefore, DELETE_LIMIT, admins);
     const auditEntries = await db.deleteOldAuditEntries(c.auditBefore, DELETE_LIMIT, admins);
-    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries };
+    const webhookDeliveries = await db.deleteOldWebhookDeliveries(new Date(now.getTime() - 30 * DAY_MS).toISOString(), DELETE_LIMIT);
+    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries, webhookDeliveries };
 }
 
 let lastLocalCheck = 0;

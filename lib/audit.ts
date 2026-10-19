@@ -5,7 +5,7 @@
  */
 export const AUDIT_RETENTION_DAYS = { free: 30, starter: 90, growth: 365, enterprise: 730 } as const;
 export const AUDIT_PAGE_SIZE = 50;
-export const AUDIT_ENTITIES = ['experiment', 'survey', 'popup', 'domain', 'api_key', 'organization', 'member', 'project'] as const;
+export const AUDIT_ENTITIES = ['experiment', 'survey', 'popup', 'domain', 'api_key', 'organization', 'member', 'project', 'webhook'] as const;
 
 /** Unknown paid plan names get the Starter period, a missing plan is Free. */
 export function auditRetentionDays(plan: string | null | undefined): number {
@@ -30,7 +30,7 @@ export function isCustomerVisible(entity: string, action: string): boolean {
     return true;
 }
 
-const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project' };
+const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project', webhook: 'Webhook' };
 const ACTION_NAMES: Record<string, string> = {
     create: 'created', update: 'updated', delete: 'deleted', revoke: 'revoked', rename: 'renamed',
     'invite:create': 'invite link created', 'invite:revoke': 'invite cancelled', join: 'joined', role: 'role changed', remove: 'removed', leave: 'left',
@@ -38,6 +38,7 @@ const ACTION_NAMES: Record<string, string> = {
     'funnel:add': 'funnel added', 'funnel:remove': 'funnel removed',
     'share:create': 'share link created', 'share:revoke': 'share link revoked',
     'rollout:start': 'winner rolled out to all visitors', 'rollout:stop': 'rollout stopped', 'schedule:set': 'schedule saved', 'schedule:clear': 'schedule removed', 'schedule:start': 'started on schedule', 'schedule:stop': 'stopped on schedule', 'schedule:start_failed': 'scheduled start cancelled',
+    'secret:rotate': 'signing secret replaced', ping: 'test delivery sent',
     'auto_shift:on': 'auto-shift turned on', 'auto_shift:off': 'auto-shift turned off',
     'heatmap:export': 'heatmap data downloaded', 'heatmaps:settings': 'heatmap sampling or stop rules changed', 'heatmaps:restart': 'new heatmap collection period started',
     allocation: 'traffic split changed', 'allocation:auto': 'traffic split changed by auto-shift', 'variation:changes': 'visual changes saved',

@@ -22,6 +22,7 @@ import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
 import { scheduleRetention } from '@/lib/retention';
 import { scheduleSchedules, effectiveAllocation } from '@/lib/schedule';
+import { scheduleWebhooks } from '@/lib/webhooks';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 import { previewReply } from '@/lib/preview';
@@ -43,6 +44,8 @@ export async function POST(request: NextRequest) {
         scheduleRetention();
         // Scheduled starts and stops: at most once a minute across instances, after the response.
         scheduleSchedules();
+        // Webhook deliveries and event checks (paid): after the response, at most once a minute across instances.
+        scheduleWebhooks();
 
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);

@@ -105,6 +105,8 @@ Demo page: removed; the hero demo button gets a video link later
 
 Flaky sdk.obfuscated test: fixed
 
+Webhooks for test events (signed, retried, paid): done (proposal 7)
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
