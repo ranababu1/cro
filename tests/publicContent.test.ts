@@ -152,7 +152,7 @@ const HOSTING_FORBIDDEN: RegExp[] = [
 ];
 
 describe('hosted-only copy on non-blog pages', () => {
-    const files = [...publicFiles, 'app/layout.tsx', 'public/demo.html'];
+    const files = [...publicFiles, 'app/layout.tsx'];
 
     it('page sources, metadata and chrome never imply self-hosting or open source', () => {
         for (const f of files) {
@@ -236,5 +236,25 @@ describe('blog rendering', () => {
         const mk = (slug: string, category: string, date: string) => ({ ...posts[0], slug, category, date });
         const all = [mk('a', 'X', '2026-01-03'), mk('b', 'Y', '2026-01-02'), mk('c', 'X', '2026-01-01')];
         expect(relatedPosts(all[0], all).map((p) => p.slug)).toEqual(['c', 'b']);
+    });
+});
+
+describe('demo page removed', () => {
+    it('has no files, no links in the site chrome, and the hero CTA points at #', () => {
+        expect(fs.existsSync(path.join(root, 'public/demo.html'))).toBe(false);
+        expect(fs.existsSync(path.join(root, 'public/demo'))).toBe(false);
+        expect(fs.existsSync(path.join(root, 'app/demo'))).toBe(false);
+        for (const f of ['app/page.tsx', 'app/components/landing/SiteChrome.tsx', 'app/sitemap.ts']) {
+            expect(fs.readFileSync(path.join(root, f), 'utf8'), f).not.toMatch(/\/demo(\.html|\/|['"])/);
+        }
+        const home = fs.readFileSync(path.join(root, 'app/page.tsx'), 'utf8');
+        expect(home).toMatch(/<a href="#"[^>]*>[\s\S]{0,400}See the demo/);
+    });
+    it('redirects old demo addresses to the homepage', () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const cfg = require(path.join(root, 'next.config.js'));
+        return cfg.redirects().then((r: { source: string; destination: string }[]) => {
+            for (const s of ['/demo', '/demo.html', '/demo/:path*']) expect(r.find((x) => x.source === s)?.destination).toBe('/');
+        });
     });
 });
