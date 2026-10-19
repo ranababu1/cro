@@ -40,7 +40,7 @@ const ACTION_NAMES: Record<string, string> = {
     'rollout:start': 'winner rolled out to all visitors', 'rollout:stop': 'rollout stopped', 'schedule:set': 'schedule saved', 'schedule:clear': 'schedule removed', 'schedule:start': 'started on schedule', 'schedule:stop': 'stopped on schedule', 'schedule:start_failed': 'scheduled start cancelled',
     'idea:start': 'turned into a test', 'secret:rotate': 'signing secret replaced', ping: 'test delivery sent',
     'auto_shift:on': 'auto-shift turned on', 'auto_shift:off': 'auto-shift turned off',
-    'heatmap:export': 'heatmap data downloaded', 'heatmaps:settings': 'heatmap sampling or stop rules changed', 'heatmaps:restart': 'new heatmap collection period started',
+    'results:export': 'results downloaded as CSV', 'heatmap:export': 'heatmap data downloaded', 'heatmaps:settings': 'heatmap sampling or stop rules changed', 'heatmaps:restart': 'new heatmap collection period started',
     allocation: 'traffic split changed', 'allocation:auto': 'traffic split changed by auto-shift', 'variation:changes': 'visual changes saved',
     'status:running': 'started', 'status:paused': 'paused', 'status:completed': 'stopped', 'status:draft': 'moved back to draft',
     'admin:suspend': 'suspended', 'admin:reactivate': 'reactivated', 'admin:update': 'plan or limits changed', 'admin:plan_override': 'plan assigned by an admin', 'admin:plan_override_removed': 'assigned plan removed',

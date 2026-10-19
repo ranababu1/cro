@@ -47,6 +47,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Edit running tests safely', tier: 0 },
     { name: 'Preview links to check every version before and during a test, never counted in results', tier: 0 },
     { name: 'Shareable results links', tier: 0 },
+    { name: 'Results download as CSV, per day, version and goal', tier: 0 },
     { name: 'Roll out the winner to every visitor with one click while you update your code', tier: 0 },
     { name: 'Scheduled start and stop, with a gradual traffic ramp', tier: 0 },
     { name: 'Test planner with hypotheses and a duration estimate', tier: 0 },
