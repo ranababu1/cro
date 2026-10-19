@@ -37,7 +37,7 @@ export const restApi: DocPage = {
   "variation_url": "https://example.com/b",
   "assigned": true
 }` },
-        { type: 'p', text: '`assigned` is `false` when the experiment is not running, the visitor is outside the traffic allocation, or the organization reached its monthly visitor limit (then `reason` is `"quota_exceeded"`). Visitors who already have an assignment keep it while the experiment runs, even after the limit is reached.' },
+        { type: 'p', text: '`assigned` is `false` when the experiment is not running, the visitor is outside the traffic allocation, or the organization reached its monthly visitor limit (then `reason` is `"quota_exceeded"`). When the winner of a stopped test is rolled out, every visitor gets that variation with `assigned: false` and `reason: "rollout"`, and nothing is stored. Visitors who already have an assignment keep it while the experiment runs, even after the limit is reached.' },
         { type: 'h3', text: 'POST /api/track', id: 'track' },
         { type: 'table', head: ['Field', 'Type', 'Notes'], rows: [
             ['`experiment_id`', 'string', 'Required.'],
@@ -80,6 +80,8 @@ export const restApi: DocPage = {
   -d '{"status": "running"}'` },
         { type: 'h3', text: 'DELETE /api/experiments/{id}', id: 'delete-experiment' },
         { type: 'p', text: 'Deletes a draft. Any other status returns 400.' },
+        { type: 'h3', text: 'POST /api/experiments/{id}/rollout', id: 'rollout' },
+        { type: 'p', text: 'Body `{ "variation_id": "var_456" }`. Sends every visitor in the test\'s audience to that variation and records nothing (see [Roll out the winner](/docs/choosing-a-winner#rollout)). A running or paused test is stopped first; a draft returns 400. `DELETE /api/experiments/{id}/rollout` stops the rollout, and the test stays stopped.' },
         { type: 'h3', text: 'POST /api/experiments/{id}/variations/{variationId}/preview', id: 'preview-link' },
         { type: 'p', text: 'Creates a QA preview link for one variation, for example to check every version in an automated browser test. Returns `{ "url": "...", "expires_at": "..." }`. The link opens the control page as that variation for 7 days and is never counted in results. A completed test returns 400.' },
         { type: 'h3', text: 'GET /api/experiments/{id}/results', id: 'results' },

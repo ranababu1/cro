@@ -46,6 +46,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Edit running tests safely', tier: 0 },
     { name: 'Preview links to check every version before and during a test, never counted in results', tier: 0 },
     { name: 'Shareable results links', tier: 0 },
+    { name: 'Roll out the winner to every visitor with one click while you update your code', tier: 0 },
     { name: 'Google Tag Manager and WordPress install guides', tier: 0 },
     { name: 'Google Analytics 4 events for every test', tier: 0 },
     { name: 'WordPress plugin on paid plans', tier: 1 },

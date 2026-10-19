@@ -138,6 +138,9 @@ export const experiments = sqliteTable('experiments', {
     updated_at: text('updated_at').notNull().default(now),
     started_at: text('started_at'),
     ended_at: text('ended_at'),
+    // Roll out the winner: a completed test that sends every visitor to this variation, with nothing counted. Null = off.
+    rollout_variation_id: text('rollout_variation_id'),
+    rollout_at: text('rollout_at'),
 }, (t) => [
     index('idx_experiments_project').on(t.project_id),
     index('idx_experiments_status').on(t.status),

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
+import { and, eq, inArray, isNull, isNotNull, desc, asc, sql, gte, lte, count, like } from 'drizzle-orm';
 import type { SegmentRow } from '../segments';
 import type { BatchItem } from 'drizzle-orm/batch';
 import { getDb } from './client';
@@ -319,7 +319,7 @@ export const db = {
 
     async updateExperiment(
         id: string,
-        updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at'>>,
+        updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at' | 'rollout_variation_id' | 'rollout_at'>>,
     ): Promise<void> {
         clearConfigCache();
         const d = await getDb();
@@ -633,6 +633,17 @@ export const db = {
             const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
             const out: Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }> = [];
             for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id), goals: await this.getGoals(experiment.id) });
+            return out;
+        });
+    },
+
+    /** Completed tests with a rolled-out variation, cached briefly like running tests. */
+    async getRolloutConfig(projectId: string): Promise<Array<{ experiment: Experiment; variations: Variation[] }>> {
+        return cached(`roll:${projectId}`, async () => {
+            const d = await getDb();
+            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'completed'), isNotNull(s.experiments.rollout_variation_id)));
+            const out: Array<{ experiment: Experiment; variations: Variation[] }> = [];
+            for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id) });
             return out;
         });
     },
