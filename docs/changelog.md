@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 12:06 IST | Blog: republished best free A/B testing tools, how long to run an A/B test and A/B testing with low traffic (updated 2026-10-19) to match peeking-safe stats and results by segment. |
 | pending | 2026-10-19 11:49 IST | Roll out the winner (all plans): one click on Results stops the test and sends every visitor in its audience to the chosen version, with nothing counted, until the rollout is stopped. Audited. Docs Choosing a winner rewritten (Stop, not Complete; no removed SDK calls). |
 | pending | 2026-10-19 11:26 IST | Results by segment (paid): each variation by device, landing source and new or returning visitors, with lift, chance to beat control and a peeking-safe test corrected across segments. Segments are stored on the assignment row (no extra writes); the SDK sends the session landing value. |
 | pending | 2026-10-19 11:05 IST | Peeking-safe statistics: every variant is compared with the control by a sequential test (mSPRT, always-valid p-value) at 5% split across the variants, and shows a chance to beat control. The winner, the dashboard verdict, live stats and share pages follow the sequential test. The fixed-sample z-test stays in the results API as statistical_significance. All plans. |

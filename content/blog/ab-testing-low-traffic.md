@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 19 October 2026. Sources checked 19 October 2026.
+By Imraan, freeabtest.com. Published 19 October 2026. Updated 19 October 2026. Sources checked 19 October 2026.
 
 With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference."
 
@@ -137,7 +137,7 @@ The important part is deciding before the test. Choosing 90% after you see p = 0
 
 ## What you should not do with low traffic
 
-- **Don't stop the test the first day it looks significant.** Checking repeatedly and stopping at the first p < 0.05 inflates false positives. In our simulation of 4,000 tests with no real difference, daily checking over 20 days produced a false winner 24.5% of the time. We cover this in [how long to run an A/B test](/blog/how-long-to-run-an-ab-test).
+- **Don't treat a fixed-sample p-value as a license to stop early.** Checking a classic z-test repeatedly and stopping at the first p < 0.05 inflates false positives (24.5% false winners in our 4,000 A/A simulation). freeabtest.com's peeking-safe sequential test is built for early stopping; still wait at least one full week. We cover this in [how long to run an A/B test](/blog/how-long-to-run-an-ab-test).
 - **Don't read small lifts as real.** If 9 of 300 visitors converted on control and 13 of 300 on the variant, that is a 44% relative lift, and it means very little. The 95% Wilson intervals are about 1.6% to 5.6% for control and 2.5% to 7.3% for the variant, which overlap heavily.
 - **Don't slice the results.** "It won on mobile in Germany" from a small test is almost always noise. The more segments you check, the more false winners you find.
 - **Don't run several tests on the same visitors and count them all as wins.** With little traffic, each test is already near its noise limit.
@@ -160,7 +160,7 @@ Then ship the fix that research points to, and watch your normal analytics. That
 3. **Use the MDE table above** (or a sample size calculator) to find the smallest lift your traffic can detect in 4 to 8 weeks.
 4. **Design a change big enough** that a lift of that size is plausible. If you can't imagine the change moving the goal by that much, test something bolder or don't test.
 5. **Run one challenger**, 50/50 split, for whole weeks.
-6. **Read the result once**, at the planned end. Check the split first, then the interval, then the z-test.
+6. **Read the sequential result** when it is significant, or at your planned sample. Check the split first, then the Wilson interval, then the peeking-safe sequential verdict (and chance to beat control once both versions have 100 visitors).
 7. **Write down what you learned**, including flat results. A flat test at a 25% MDE tells you the change probably does not have an effect that large, which is still useful.
 
 ## Frequently asked questions
