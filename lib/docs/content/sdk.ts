@@ -12,47 +12,49 @@ export const sdk: DocPage = {
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
         { type: 'p', text: 'Put the same tag on the control page and every variation page. The SDK reads the key from `data-key`, matches a running test by the current URL, and handles bucketing, redirects and click goals automatically.' },
         { type: 'callout', tone: 'later', title: 'Coming later', text: 'An npm package and server SDKs are planned. Today, load the script tag as shown.' },
-        { type: 'h2', text: 'init(options)', id: 'init' },
-        { type: 'p', text: 'Call once per page before anything else. It stores the configuration and makes no network request.' },
-        { type: 'table', head: ['Option', 'Required', 'Description'], rows: [
-            ['`apiUrl`', 'Yes', 'The base URL shown in your experiment\'s Setup snippet, with no trailing slash. Requests go to `apiUrl + /api/assign` and `apiUrl + /api/track`.'],
-            ['`apiKey`', 'Yes', 'An SDK key (`cro_pk_<env>_...`). The key decides which project and environment the data goes to.'],
-            ['`userId`', 'No', 'Your own stable visitor ID, such as a logged-in user ID. If omitted, the SDK generates one and keeps it in localStorage under `ab_user_id`.'],
+        { type: 'h2', text: 'What the snippet does on its own', id: 'automatic' },
+        { type: 'p', text: 'With `data-key` on the script tag, the SDK starts as soon as it loads. You do not call anything for a standard test:' },
+        { type: 'list', items: [
+            'It matches the current URL to a running test and puts the visitor in a variation. The visitor keeps that variation on every visit.',
+            'For a split URL test, it sends visitors in a variation with its own URL to that page.',
+            'For a visual editor variation, it applies the changes before the page shows.',
+            'It records the visit and counts click, form submit and page visit goals.',
+            'It hides the page for at most 0.8 seconds while it decides, so visitors do not see the original flash first.',
         ] },
-        { type: 'p', text: 'If `apiUrl` or `apiKey` is missing, `init` logs an error to the console and the SDK stays uninitialised.' },
-        { type: 'h3', text: 'Visitor IDs' },
-        { type: 'p', text: 'Generated IDs look like `user_1728912345678_k3j9x0abc`. They live in localStorage, so they survive reloads but not a different browser, device or a cleared storage. Pass `userId` if you want the same person to see the same variation across devices. IDs must be 1 to 200 printable ASCII characters with no spaces.' },
-        { type: 'h2', text: 'run(experimentId, callback, options)', id: 'run' },
-        { type: 'p', text: 'The main entry point. Gets the assignment, handles redirects for split URL tests, then calls your callback with the result. Returns a promise that resolves to the same object.' },
-        { type: 'code', label: 'JavaScript', code: `ABTest.run('exp_123', function (variation) {
-  if (!variation.assigned) return;
-  if (variation.variation_name === 'Variant B') {
-    document.body.classList.add('variant-b');
-  }
-});` },
-        { type: 'p', text: 'If the assigned variation has a redirect URL and the visitor is not already on it, `run` sends the browser there and does not call the callback. Pass `{ autoRedirect: false }` as the third argument to turn that off and handle `variation.variation_url` yourself.' },
-        { type: 'h2', text: 'getVariation(experimentId)', id: 'get-variation' },
-        { type: 'p', text: 'Lower level than `run`. Returns a promise with the assignment and never redirects. Results are cached for the life of the page, so calling it twice makes one request.' },
-        { type: 'code', label: 'Response', code: `{
+        { type: 'h2', text: 'track(eventName, options)', id: 'track' },
+        { type: 'p', text: 'Counts a custom event goal, such as a signup or purchase that happens in your own code. It counts for every running test that has an event goal with this name, once per visitor. On paid plans, pass `revenue` to record the order value (see [Revenue goals](/docs/goals#revenue)).' },
+        { type: 'code', label: 'JavaScript', code: `ABTest.track('signup');
+ABTest.track('purchase', { revenue: 49.99 });` },
+        { type: 'h2', text: 'trackConversion(experimentId, eventName)', id: 'track-conversion' },
+        { type: 'p', text: 'Records a conversion for one test, for the variation the visitor sees on this page. `eventName` is an optional label such as `signup`. It sends nothing if the visitor is not in that test on the current page. For most sites, an event goal with `ABTest.track` is simpler, because it also works on a thank-you page.' },
+        { type: 'code', label: 'JavaScript', code: `ABTest.trackConversion('exp_123', 'signup');` },
+        { type: 'h2', text: 'bootstrap()', id: 'bootstrap' },
+        { type: 'p', text: 'Runs the same check the snippet runs on load and returns a promise with the reply. Use it when your own code needs to know the variation, or after a route change in a single-page app. Each call makes one request.' },
+        { type: 'code', label: 'Reply when the visitor is in a test', code: `{
+  "matched": true,
+  "action": "stay",            // "redirect" when the SDK is sending the visitor to a variation URL
   "experiment_id": "exp_123",
   "variation_id": "var_456",
   "variation_name": "Variant B",
-  "variation_url": "https://example.com/pricing-b", // only for split URL tests
-  "assigned": true
+  "is_control": false
 }` },
-        { type: 'p', text: 'When the visitor is not in the experiment, `assigned` is `false` and the other fields are empty. Network errors also resolve to `{ assigned: false }`, so your page always falls back to the control.' },
-        { type: 'callout', tone: 'info', text: 'The first time a visitor is assigned on a page, the SDK automatically sends a `page_view` event. That is what counts them as a visitor in the results.' },
-        { type: 'h2', text: 'trackConversion(experimentId, eventName, metadata)', id: 'track-conversion' },
-        { type: 'p', text: 'Records a conversion for the visitor\'s current variation. `eventName` is an optional label such as `signup`. `metadata` is an optional object, up to 4 KB as JSON.' },
-        { type: 'code', label: 'JavaScript', code: `ABTest.trackConversion('exp_123', 'purchase', { plan: 'team', value: 49 });` },
-        { type: 'callout', tone: 'warning', title: 'Assignment first', text: 'trackConversion uses the assignment cached on this page. If you have not called `run` or `getVariation` for this experiment on the same page load, it logs a warning and sends nothing. On a thank-you page, call `getVariation` first, then track.' },
-        { type: 'code', label: 'Thank-you page', code: `ABTest.getVariation('exp_123').then(function () {
-  ABTest.trackConversion('exp_123', 'purchase');
+        { type: 'p', text: 'When no running test matches the page, or the visitor is not in it, `matched` is `false`. Network errors also resolve to `{ matched: false }`, so your page always falls back to the original.' },
+        { type: 'code', label: 'JavaScript', code: `ABTest.bootstrap().then(function (r) {
+  if (r.matched && r.variation_name === 'Variant B') {
+    document.body.classList.add('variant-b');
+  }
 });` },
-        { type: 'h2', text: 'trackEvent(experimentId, variationId, eventType, eventName, metadata)', id: 'track-event' },
-        { type: 'p', text: 'The raw call behind the other two. `eventType` must be `page_view` or `conversion`. You rarely need it directly.' },
-        { type: 'h2', text: 'runUrlTest(experimentId)', id: 'run-url-test' },
-        { type: 'p', text: 'Shorthand for `run(experimentId, null, { autoRedirect: true })`. Use it on the original page of a split URL test.' },
+        { type: 'h2', text: 'init(options)', id: 'init' },
+        { type: 'p', text: 'Only needed when you load `sdk.js` without `data-key`, for example in a test harness. It stores the settings and makes no request; call `bootstrap()` afterwards.' },
+        { type: 'table', head: ['Option', 'Description'], rows: [
+            ['`apiUrl`', 'The base URL, with no trailing slash. Defaults to the host that served `sdk.js`.'],
+            ['`apiKey`', 'An SDK key (`cro_pk_<env>_...`). The key decides which project and environment the data goes to.'],
+            ['`userId`', 'Your own stable visitor ID, such as a logged-in user ID. If omitted, the SDK generates one and keeps it in localStorage under `ab_user_id`.'],
+        ] },
+        { type: 'h3', text: 'Visitor IDs' },
+        { type: 'p', text: 'Generated IDs look like `user_1728912345678_k3j9x0abc`. They live in localStorage, so they survive reloads but not a different browser, device or cleared storage. Pass `userId` to `init` if you want the same person to see the same variation across devices.' },
+        { type: 'h2', text: 'getUserId()', id: 'get-user-id' },
+        { type: 'p', text: 'Returns the visitor ID the SDK is using. Handy for debugging and for joining with your own analytics.' },
         { type: 'h2', text: 'Google Analytics 4', id: 'ga4' },
         { type: 'p', text: 'On every plan, when a visitor sees a version of a running test, the snippet tells Google Analytics 4 once per page. With gtag.js on the page it sends a GA4 `experience_impression` event. With Google Tag Manager it pushes the same event to `dataLayer`, so you can forward it with a GA4 event tag. If neither is on the page, nothing is sent.' },
         { type: 'table', head: ['Parameter', 'Example'], rows: [
@@ -63,35 +65,18 @@ export const sdk: DocPage = {
             ['`is_control`', '`false`'],
         ] },
         { type: 'p', text: 'To compare versions in GA4, register `variation_name` (or `exp_variant_string`) as an event-scoped custom dimension. Test names are not sent, so internal names stay private. To turn this off, add `data-analytics="off"` to the script tag.' },
-        { type: 'h2', text: 'getUserId()', id: 'get-user-id' },
-        { type: 'p', text: 'Returns the visitor ID the SDK is using. Handy for debugging and for joining with your own analytics.' },
         { type: 'h2', text: 'Single-page apps', id: 'spa' },
-        { type: 'p', text: 'The SDK has no router integration yet. In React, Vue or similar, call `run` or `getVariation` when the relevant view mounts. Because results are cached for the page, route changes do not cause new requests, and the visitor keeps their variation.' },
+        { type: 'p', text: 'The snippet checks the page once, when it loads. If your app changes the URL without a full page load, call `ABTest.bootstrap()` after the route change so a test on the new URL runs. Visitors keep their variation.' },
         { type: 'code', label: 'React', code: `useEffect(() => {
-  window.ABTest.getVariation('exp_123').then((v) => {
-    setHeadline(v.assigned && v.variation_name === 'Variant B' ? 'New headline' : 'Old headline');
-  });
-}, []);` },
-        { type: 'p', text: 'The automatic page view is sent once per experiment per page load, not on every route change. That is fine for results, which count unique visitors.' },
+  window.ABTest?.bootstrap();
+}, [pathname]);` },
         { type: 'h2', text: 'Avoiding flicker', id: 'flicker' },
-        { type: 'p', text: 'Today the SDK makes one network request per experiment before it knows the variation. If the original content renders first, visitors may briefly see it change. To reduce this:' },
+        { type: 'p', text: 'The SDK hides the page until it knows the variation, for at most 0.8 seconds. To keep that short:' },
         { type: 'list', items: [
-            'Load `sdk.js` and call `run` in the `<head>`, not at the end of the body.',
-            'Hide only the element under test until the callback runs, with a short timeout so the page never stays hidden.',
-            'Prefer changes that do not shift layout, such as text and colour.',
+            'Put the script tag in the `<head>`, not at the end of the body.',
+            'Prefer changes that do not shift layout, such as text and color.',
         ] },
-        { type: 'code', label: 'Anti-flicker pattern', code: `<style>.ab-hide { opacity: 0 !important; }</style>
-<h1 class="ab-hide">Original headline</h1>
-<script>
-  var h1 = document.querySelector('h1');
-  var reveal = function () { h1.classList.remove('ab-hide'); };
-  setTimeout(reveal, 800); // never hide for long
-  ABTest.run('exp_123', function (v) {
-    if (v.assigned && v.variation_name === 'Variant B') h1.textContent = 'New headline';
-    reveal();
-  });
-</script>` },
         { type: 'h2', text: 'Rate limits and errors', id: 'errors' },
-        { type: 'p', text: 'Requests are limited per SDK key and client IP. All SDK methods catch errors and log them to the console with an `[ABTest]` prefix, so a failure never breaks your page.' },
+        { type: 'p', text: 'Requests are limited per SDK key and client IP. SDK calls catch their own errors and log them to the console with an `[ABTest]` prefix, so a failure never breaks your page.' },
     ],
 };

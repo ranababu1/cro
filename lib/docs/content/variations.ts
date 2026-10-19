@@ -52,14 +52,10 @@ export const variations: DocPage = {
         ] },
         { type: 'callout', tone: 'info', title: 'When to use it', text: 'Use auto-shift when you want to earn from the best version while the test runs, for example a short promotion. For the clearest answer to which version is better, keep a fixed split. Because the split changes over time, treat the significance test as a guide, and the visitor split warning is turned off while auto-shift is on.' },
         { type: 'h2', text: 'Naming variations' },
-        { type: 'p', text: 'Your code usually checks `variation.variation_name`, so pick short names you will not want to rename, such as "Control" and "Annual first". You can also add a description to remind your team what changed.' },
+        { type: 'p', text: 'Names show in results, share links and Google Analytics 4, and your own code may check `variation_name`, so pick short names you will not want to rename, such as "Control" and "Annual first". You can also add a description to remind your team what changed.' },
         { type: 'h2', text: 'Split URL tests' },
-        { type: 'p', text: 'Give a variation a **Redirect URL** when the change is a whole page rather than an element. On the original page, `ABTest.run` (or `runUrlTest`) sends visitors in that variation to the URL. Leave the control\'s URL empty so control visitors stay where they are.' },
-        { type: 'code', label: 'Original page', code: `<script>
-  ABTest.init({ apiUrl: 'https://YOUR-HOST', apiKey: 'cro_pk_prod_...' });
-  ABTest.runUrlTest('exp_123');
-</script>` },
-        { type: 'p', text: 'The SDK skips the redirect when the visitor is already on the variation\'s URL path, so it is safe to load the same snippet on both pages.' },
-        { type: 'callout', tone: 'warning', text: 'The redirect happens after the assign request returns, so visitors briefly see the original page. Load the snippet in the `<head>` to keep that short.' },
+        { type: 'p', text: 'Give a variation its own **URL** when the change is a whole page rather than an element. Put the snippet on the original page and on every variation page. When a visitor in that variation opens the original page, the SDK sends them to the variation URL and keeps the query string, such as UTM tags.' },
+        { type: 'p', text: 'The SDK skips the redirect when the visitor is already on the variation\'s page, so the same snippet is safe on both pages. A visitor in another version who opens a variation URL directly is not counted for that variation.' },
+        { type: 'callout', tone: 'info', text: 'The page stays hidden for at most 0.8 seconds while the SDK decides, so visitors rarely see the original page first. Load the snippet in the `<head>` to keep that short.' },
     ],
 };
