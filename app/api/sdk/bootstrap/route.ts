@@ -16,6 +16,7 @@ import { failedRule, parseTargeting } from '@/lib/targeting';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
+import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -61,7 +62,16 @@ export async function POST(request: NextRequest) {
         // JavaScript error tracking (paid) loads errors.js for visitors in a test version.
         const entitled = await canUseFeature(auth.ctx.orgId, 'heatmaps');
         const errorsOn = await canUseFeature(auth.ctx.orgId, 'error_tracking');
+        // Popups (paid): active popups whose page rule matches, from the short-lived config cache.
+        // popups.js loads only when at least one matches, on any page with the snippet (not on redirects).
+        const popups = (await canUseFeature(auth.ctx.orgId, 'popups'))
+            ? (await db.getActivePopups(auth.ctx.projectId)).flatMap((p) => {
+                const c = parsePopupConfig(p.config);
+                return c && popupMatchesUrl(c, url) ? [sdkPopup(p.id, c)] : [];
+            })
+            : [];
         const reply = (b: BootstrapResponse) => {
+            if (popups.length && b.action !== 'redirect') b = { ...b, popups, modules: [...(b.modules ?? []), 'popups'] };
             if ((!entitled && !errorsOn) || !b.matched || !b.variation_id || !b.experiment_id || b.action === 'guard' || b.action === 'redirect') return sdkJson(b);
             const rate = heatmapSampleRate();
             const extra: Partial<BootstrapResponse> = entitled ? { capture: { heatmaps: isSampled(user_id, b.experiment_id, rate), sample_rate: rate } } : {};

@@ -70,22 +70,28 @@ const trafficBuffer = new Map<string, TrafficBufRow>();
 export type ErrorBufRow = { day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number };
 const errorBuffer = new Map<string, ErrorBufRow>();
 
+/** Popup views, clicks and closes (paid), flushed in the same batch. */
+type PopupBufRow = { day: string; popup_id: string; metric: string; count: number };
+const popupBuffer = new Map<string, PopupBufRow>();
+
 export function pendingTelemetry(): number {
-    return buffer.size + trafficBuffer.size + errorBuffer.size;
+    return buffer.size + trafficBuffer.size + errorBuffer.size + popupBuffer.size;
 }
 
 export async function flushTelemetry(): Promise<void> {
     scheduledAfter = false;
     if (timer) { clearTimeout(timer); timer = null; }
-    if (!buffer.size && !trafficBuffer.size && !errorBuffer.size) return;
+    if (!buffer.size && !trafficBuffer.size && !errorBuffer.size && !popupBuffer.size) return;
     const rows = [...buffer.values()];
     const traffic = [...trafficBuffer.values()];
     const errors = [...errorBuffer.values()];
+    const popupRows = [...popupBuffer.values()];
+    popupBuffer.clear();
     buffer.clear();
     trafficBuffer.clear();
     errorBuffer.clear();
     try {
-        await db.bumpTelemetryBatch(rows, traffic, errors);
+        await db.bumpTelemetryBatch(rows, traffic, errors, popupRows);
     } catch (err) {
         console.error('telemetry flush failed', err);
     }
@@ -146,6 +152,16 @@ export async function bumpErrors(scope: { experimentId: string; variationId: str
         if (cur) cur.count += r.count;
         else errorBuffer.set(k, { ...r, day, experiment_id: scope.experimentId, variation_id: scope.variationId });
     }
+    if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
+    scheduleFlush();
+}
+
+/** Counts one popup view, click or close. */
+export async function bumpPopup(popupId: string, metric: string, day = utcDay()): Promise<void> {
+    const k = `${day}|${popupId}|${metric}`;
+    const cur = popupBuffer.get(k);
+    if (cur) cur.count += 1;
+    else popupBuffer.set(k, { day, popup_id: popupId, metric, count: 1 });
     if (process.env.TELEMETRY_SYNC === '1') return flushTelemetry();
     scheduleFlush();
 }

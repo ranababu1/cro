@@ -25,6 +25,7 @@ const limits: [string, string, string, string, string][] = [
     ['Revenue goals', 'Not included', 'Included', 'Included', 'Included'],
     ['Auto-shift traffic to the winner', 'Not included', 'Not included', 'Included', 'Included'],
     ['Traffic overview', 'Not included', 'Included', 'Included', 'Included'],
+    ['Popups and calls to action', 'Not included', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
     ['Audit log', '30 days', '90 days', '1 year', 'Custom'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
@@ -41,6 +42,7 @@ const availableToday = [
     'Visual editor on Growth and above: change text, colors, links and images, or hide elements, without code',
     'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
     'JavaScript error tracking on paid plans: errors per test version',
+    'Popups and calls to action on paid plans: center, corner or bar, with views and clicks',
     'Separate environments', 'Public and secret keys', 'REST API', 'Audit log',
 ];
 
