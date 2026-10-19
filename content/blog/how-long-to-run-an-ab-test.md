@@ -3,7 +3,7 @@ title: "How long should you run an A/B test? Worked examples"
 meta_description: "Run an A/B test until it reaches its planned sample size, in whole weeks, and for at least 2 weeks. Worked examples for 1,000 to 50,000 weekly visitors."
 slug: how-long-to-run-an-ab-test
 date: 2026-10-17
-updated: 2026-10-17
+updated: 2026-10-19
 author: "Imraan, freeabtest.com"
 keywords: ["how long to run an a/b test", "a/b test duration", "ab test sample size", "when to stop an ab test", "minimum detectable effect"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How long should you run an A/B test? Worked examples",
     "datePublished": "2026-10-17",
-    "dateModified": "2026-10-17",
+    "dateModified": "2026-10-19",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -23,9 +23,9 @@ faq_schema: |
     "@type": "FAQPage",
     "mainEntity": [
       {"@type": "Question", "name": "How long should an A/B test run?",
-       "acceptedAnswer": {"@type": "Answer", "text": "Until it reaches the sample size you calculated before launch, rounded up to whole weeks, and never less than 2 weeks. Divide the total visitors needed by your weekly traffic to the tested page to get the number of weeks."}},
+       "acceptedAnswer": {"@type": "Answer", "text": "Use a sample size calculated before launch as a planning estimate, round up to whole weeks, and never run less than 2 weeks. On freeabtest.com you can also stop earlier once the peeking-safe sequential verdict is significant. Divide the total visitors needed by your weekly traffic to the tested page to get a planning estimate in weeks."}},
       {"@type": "Question", "name": "Can I stop an A/B test as soon as it is significant?",
-       "acceptedAnswer": {"@type": "Answer", "text": "Not with a standard fixed-sample test. In our simulation of 4,000 tests with no real difference, checking a z-test every day for 20 days declared a false winner 24.5% of the time, compared with 4.7% when checking once at the end."}},
+       "acceptedAnswer": {"@type": "Answer", "text": "Not with a standard fixed-sample z-test: in our simulation of 4,000 tests with no real difference, checking every day for 20 days declared a false winner 24.5% of the time, compared with 4.7% when checking once at the end. freeabtest.com uses a peeking-safe sequential test on all plans, so you can stop when the sequential verdict is significant. Still run at least one full week."}},
       {"@type": "Question", "name": "How many visitors do I need for an A/B test?",
        "acceptedAnswer": {"@type": "Answer", "text": "At a 3% conversion rate, 95% confidence and 80% power, you need about 13,914 visitors per variant to detect a 20% relative lift and about 53,211 per variant to detect a 10% lift."}},
       {"@type": "Question", "name": "What is the minimum length of an A/B test?",
@@ -36,9 +36,9 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026.
+By Imraan, freeabtest.com. Published 17 October 2026. Updated 19 October 2026.
 
-Run an A/B test until it reaches the sample size you calculated before launch, rounded up to whole weeks, and for at least 2 weeks. To get the number of weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
+Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
 That answer hides one hard part: working out the sample size. This article does it step by step, with numbers you can check. All calculations use the standard two-proportion sample size formula at 95% confidence (two-sided) and 80% power, the same defaults as [Evan Miller's sample size calculator](https://www.evanmiller.org/ab-testing/sample-size.html). We ran them ourselves in Python with SciPy, using this formula for visitors per variant:
 
@@ -119,37 +119,37 @@ The 2-week floor is a convention, not a law. If your buying cycle is monthly, te
 
 ## Can I stop the test early if it is already significant?
 
-Not if you are using a standard fixed-sample test, which is what most tools report, including freeabtest.com. Checking results again and again and stopping the first time p drops below 0.05 is called peeking, and it inflates false positives. [Evan Miller's "How Not To Run an A/B Test"](https://www.evanmiller.org/how-not-to-run-an-ab-test.html) is the classic explanation.
+It depends on the test your tool runs.
 
-We simulated it. We ran 4,000 A/A tests, where both variants had the same 5% conversion rate, with 250 visitors per variant per day for 20 days. Any "winner" is a false positive.
+With a **standard fixed-sample z-test**, checking again and again and stopping the first time p drops below 0.05 is called peeking, and it inflates false positives. [Evan Miller's "How Not To Run an A/B Test"](https://www.evanmiller.org/how-not-to-run-an-ab-test.html) is the classic explanation. We simulated it: 4,000 A/A tests, both variants at the same 5% conversion rate, 250 visitors per variant per day for 20 days. Any "winner" is a false positive.
 
-| How we checked | False winner rate |
+| How we checked (fixed-sample z-test) | False winner rate |
 |---|---|
 | Once, on day 20 | 4.7% |
 | Every day, stopping at the first p < 0.05 | 24.5% |
 
-Checking daily made a false winner about 5 times more likely. The 5% error rate you think you chose only holds if you look once, at the planned end.
+Checking daily made a false winner about 5 times more likely. On a fixed-sample test, the 5% error rate you think you chose only holds if you look once, at the planned end.
 
-You can still look at the dashboard during a test. Look to catch bugs (a variant with zero conversions, a broken page, a traffic split far from 50/50). Don't look to make the ship decision.
+**freeabtest.com uses a peeking-safe sequential test** (a mixture sequential probability ratio test) on every plan, including Free. Its p-value stays valid however often you look, so you can check the dashboard and stop when the sequential verdict is significant. Chance to beat control also appears once each version has 100 visitors. Two habits still help: run for at least one full week so weekday and weekend visitors are both included, and pick the primary goal before you start.
 
-Sequential testing methods let you check results continuously and stay correct. freeabtest.com does not offer them, so decide the sample size first and read the result once.
+The worked sample-size tables in this article stay useful as **planning estimates**. They use the fixed-sample formula. Our [guide to reading results](https://www.freeabtest.com/docs/results) notes that the sequential test needs about 2 to 3 times as many visitors for the same observed lift, or you can stop earlier when the real lift is larger than you planned for. The results API still returns a fixed-sample z-test under `statistical_significance` if you prefer a single-look plan.
 
 ## What if I test more than two variants?
 
 Every extra variant adds visitors to the test. A test with 3 variants needs 3 times the per-variant sample, not 2.
 
-There is a second cost. With several challengers, each one is another chance for a false winner, so the chance that at least one "beats" the control by luck is higher than 5%. freeabtest.com does not apply a multiple-comparison correction, as our [guide to reading results](https://www.freeabtest.com/docs/results) says, so the correction is up to you. A simple fix is to split the 5% between comparisons: with 2 challengers, use 2.5% for each (the Bonferroni correction). At a 3% baseline and 20% MDE, that raises the sample from 13,914 to 16,850 per variant, so a 3-variant test needs about 50,550 visitors instead of 27,828 for a plain A/B test.
+There is a second cost. With several challengers, each one is another chance for a false winner, so the chance that at least one "beats" the control by luck is higher than 5% if you leave the threshold at 5% for every comparison. freeabtest.com splits the 5% across the variants compared with the control (Bonferroni), as our [guide to reading results](https://www.freeabtest.com/docs/results) describes: with one challenger the bar is 0.05; with three it is about 0.0167. That keeps A/B/n false positives under control, and it also means each comparison needs a larger sample. At a 3% baseline and 20% MDE, splitting 5% across 2 challengers raises the fixed-sample planning estimate from 13,914 to about 16,850 per variant, so a 3-variant test needs about 50,550 visitors instead of 27,828 for a plain A/B test.
 
 On our [free plan](https://www.freeabtest.com/pricing), tests have a control and 1 variation, so this does not come up. Keep the Free traffic cap in mind too (10,000 tested visitors a month, up to 300 a day): at 300 tested visitors a day, the 27,828-visitor test in the example above would take about 93 days, so on Free, test bigger changes or more frequent goals. Paid plans allow up to 50 variations, and our advice is to add variants only when your traffic can pay for them. If you are still choosing a tool, our comparison of the [best free A/B testing tools](https://www.freeabtest.com/blog/best-free-ab-testing-tools) covers the options and their limits.
 
 ## How do I read the result when the test ends?
 
-When the planned sample is reached:
+When the sequential verdict is significant, or when your planned sample is reached:
 
-1. **Check the split.** If you set 50/50 and got 52/48 on large numbers, something may be wrong with assignment or tracking. freeabtest.com shows a sample ratio mismatch (SRM) warning when traffic does not split the way you set it. Investigate before reading results.
-2. **Read the interval, not just the p-value.** Our results show a Wilson score interval for each variant. For example, 60 conversions from 2,000 visitors is 3.0%, with a 95% interval from 2.34% to 3.84%. If the intervals for control and variant overlap heavily, the lift is uncertain even if the point estimates differ.
-3. **Don't stop at the 100-visitor gate.** Our dashboard shows "Collecting data" until every variation has at least 100 visitors. That is the point where a significance test can start, not the point where your test is done. Your planned sample size is the finish line.
-4. **Decide.** If the z-test is significant and the lift is big enough to matter for your business, ship it. If not, the test is inconclusive at the MDE you chose. That is a result too. It tells you the change probably does not have an effect as large as your MDE.
+1. **Check the split.** If you set 50/50 and got 52/48 on large numbers, something may be wrong with assignment or tracking. freeabtest.com shows a sample ratio mismatch (SRM) warning when traffic does not split the way you set it (on every plan, including Free). Investigate before reading results.
+2. **Read the interval and chance to beat control, not just the p-value.** Our results show a Wilson score interval for each variant. For example, 60 conversions from 2,000 visitors is 3.0%, with a 95% interval from 2.34% to 3.84%. If the intervals for control and variant overlap heavily, the lift is uncertain even if the point estimates differ. Chance to beat control appears once both versions have 100 visitors.
+3. **Don't stop at the 100-visitor gate.** Our dashboard shows "Collecting data" until every variation has at least 100 visitors. That is the point where a significance test can start, not the point where your test is done. Prefer at least one full week, and use your planned sample size as a planning estimate for how long to expect.
+4. **Decide.** If the sequential test is significant and the lift is big enough to matter for your business, you can stop and ship it. If you reach the planned sample with no significant difference, the test is inconclusive at the MDE you chose. That is a result too. It tells you the change probably does not have an effect as large as your MDE.
 
 ## A pre-launch checklist for test duration
 
@@ -158,17 +158,17 @@ When the planned sample is reached:
 - Calculate visitors per variant, multiply by the number of variants.
 - Divide by weekly traffic to the tested page (not the whole site). Round up to whole weeks, minimum 2.
 - If the answer is longer than you are willing to wait, change the test before launch: a bigger change, a more frequent goal, or fewer variants.
-- Put the end date in your calendar and read the result then.
+- Put a review date in your calendar from your planning estimate. On freeabtest.com you can also stop when the sequential verdict is significant, after at least one full week.
 
 When the numbers work, the [quick start](https://www.freeabtest.com/docs/quick-start) walks you from sign-in to a running test in about 15 minutes.
 
 ## Frequently asked questions
 
 **How long should an A/B test run?**
-Until it reaches the sample size you calculated before launch, rounded up to whole weeks, and never less than 2 weeks. Divide total visitors needed by weekly traffic to the tested page.
+Use a sample size calculated before launch as a planning estimate, round up to whole weeks, and never run less than 2 weeks. On freeabtest.com you can also stop earlier once the peeking-safe sequential verdict is significant. Divide total visitors needed by weekly traffic to the tested page for the planning estimate.
 
 **Can I stop an A/B test as soon as it is significant?**
-Not with a standard fixed-sample test. In our simulation of 4,000 tests with no real difference, checking every day for 20 days produced a false winner 24.5% of the time, compared with 4.7% when checking once at the end.
+Not with a standard fixed-sample z-test. In our simulation of 4,000 tests with no real difference, checking every day for 20 days produced a false winner 24.5% of the time, compared with 4.7% when checking once at the end. freeabtest.com uses a peeking-safe sequential test on all plans, so you can stop when that verdict is significant. Still run at least one full week.
 
 **How many visitors do I need for an A/B test?**
 At a 3% conversion rate, 95% confidence and 80% power: about 13,914 per variant to detect a 20% relative lift, and 53,211 per variant for a 10% lift.
