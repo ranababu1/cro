@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { captureSchema, ingestCapture } from '@/lib/heatmaps';
+import { heatmapCollection } from '@/lib/heatmapRules';
 import { scheduleRetention } from '@/lib/retention';
 import { formatZodError } from '@/lib/validation';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
@@ -35,7 +36,11 @@ export async function POST(request: NextRequest) {
         }
         const variations = await db.getVariations(experiment.id);
         if (!variations.some((v) => v.id === b.variation_id)) return sdkJson({ error: 'Unknown variation' }, 400);
+        // Stop rules: once the test's heatmap reaches its day or page view limit, batches are dropped quietly.
+        if (!heatmapCollection(experiment).collecting) return sdkJson({ success: true, accepted: 0, stopped: true }, 202);
         const accepted = await ingestCapture(auth.ctx.orgId, b);
+        // One scroll entry is sent with the last batch of each page view, so it counts captured page views.
+        await db.addHeatmapViews(experiment.id, b.events.filter((e) => e.t === 's').length);
         // Retention cleanup (raw clicks past 30 days, old survey answers) runs at most hourly, after the response.
         scheduleRetention();
         return sdkJson({ success: true, accepted }, 202);

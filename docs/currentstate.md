@@ -231,3 +231,10 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - heatmapReport(exp, variation, device, days, filters): unfiltered uses rollups for 7/30/90 days; filtered reads raw tables over at most 30 days. Converted = visitor has a conversion event in the test (any goal); clicks without a visitor id are excluded from converted filters.
 - Report and export take days, source, converted; report returns sources (top 20 by clicks, 30 days), filters and days.
 - Retention deletes heatmap_scroll_points older than 30 days alongside raw clicks.
+
+## Heatmap sampling and stop rules (19 Oct 2026)
+- experiments gain heatmap_sample (percent, null = HEATMAP_SAMPLE_RATE default), heatmap_stop_days, heatmap_stop_views, heatmap_views (counter) and heatmap_since (null = test start). Migration 0028.
+- lib/heatmapRules.ts: heatmapCollection() computes sample, since, ends_at, collecting and stopped_by; heatmapRate() is 0 once stopped.
+- Page views = scroll entries (heatmap.js sends one with the final beacon of each page view). /api/capture adds them with one UPDATE per batch and returns 202 { accepted: 0, stopped: true } once a rule is reached.
+- Bootstrap uses the matched test's rate (from the cached running config, so a stop can lag the cache TTL; capture enforces it from the database).
+- GET/PATCH /api/experiments/:id/heatmaps/settings (paid; null clears; restart resets counter and since; audited heatmaps:settings or heatmaps:restart). UI: HeatmapCollection bar at the top of the Heatmaps tab.

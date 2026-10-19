@@ -349,6 +349,25 @@ export const db = {
     },
 
     /** Turns auto-shift on or off. Turning it on makes the next check due right away. */
+    /** Heatmap sample and stop rules. Only the given fields change; restart starts a new collection period. */
+    async setHeatmapSettings(experimentId: string, u: { sample_percent?: number | null; stop_days?: number | null; stop_views?: number | null; restart?: boolean }): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        const values: Partial<typeof s.experiments.$inferInsert> = { updated_at: nowIso() };
+        if (u.sample_percent !== undefined) values.heatmap_sample = u.sample_percent;
+        if (u.stop_days !== undefined) values.heatmap_stop_days = u.stop_days;
+        if (u.stop_views !== undefined) values.heatmap_stop_views = u.stop_views;
+        if (u.restart) { values.heatmap_since = nowIso(); values.heatmap_views = 0; }
+        await d.update(s.experiments).set(values).where(eq(s.experiments.id, experimentId));
+    },
+
+    /** Adds captured page views to the heatmap counter (one statement per capture batch that ends a page view). */
+    async addHeatmapViews(experimentId: string, n: number): Promise<void> {
+        if (n <= 0) return;
+        const d = await getDb();
+        await d.run(sql`UPDATE experiments SET heatmap_views = heatmap_views + ${n} WHERE id = ${experimentId}`);
+    },
+
     async setAutoShift(experimentId: string, enabled: boolean): Promise<void> {
         clearConfigCache();
         const d = await getDb();

@@ -113,6 +113,13 @@ export const experiments = sqliteTable('experiments', {
     // Auto-shift traffic to the winner (Growth+): weights are rewritten from Thompson sampling, see lib/autoShift.ts.
     auto_shift: integer('auto_shift', { mode: 'boolean' }).notNull().default(false),
     auto_shift_at: text('auto_shift_at'), // last time the weights were checked or rewritten
+    // Heatmap collection (paid): sample percent (null = default), stop rules (null = never) and page views captured
+    // since heatmap_since (null = test start). See lib/heatmapRules.ts.
+    heatmap_sample: integer('heatmap_sample'),
+    heatmap_stop_days: integer('heatmap_stop_days'),
+    heatmap_stop_views: integer('heatmap_stop_views'),
+    heatmap_views: integer('heatmap_views').notNull().default(0),
+    heatmap_since: text('heatmap_since'),
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),
     started_at: text('started_at'),

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardBody, CardHeader, Spinner, Select } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
+import { HeatmapCollection } from './HeatmapCollection';
 
 export type Report = {
     variation: { id: string; name: string; url: string | null };
@@ -91,6 +92,7 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
             <CardBody>
                 {allowed === null && <Spinner />}
                 {allowed === false && <UpgradeNote>Heatmaps are part of the paid plans. Upgrade to Starter or above to see them for this test.</UpgradeNote>}
+                {allowed && <HeatmapCollection experimentId={experimentId} />}
                 {allowed && error && <p className="text-sm text-red-600">{error}</p>}
                 {allowed && !data && !error && <Spinner />}
                 {allowed && data && (
