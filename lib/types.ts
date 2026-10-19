@@ -65,6 +65,8 @@ export interface BootstrapResponse {
     capture?: { heatmaps: boolean; sample_rate?: number };
     /** Lazy modules the SDK loads for this page, from a fixed list: public/<name>.js. */
     modules?: Array<'errors' | 'popups' | 'surveys'>;
+    /** Popups (paid) whose page rule matches this URL; shown by popups.js. */
+    popups?: import('./popups').SdkPopup[];
     experiment_id?: string;
     variation_id?: string;
     variation_name?: string;

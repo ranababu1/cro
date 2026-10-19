@@ -9,7 +9,7 @@ import { Logo } from '../ui/Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { cn } from '../ui/cn';
 import { setProjectCookie } from '@/lib/currentProject';
-import { HomeIcon, ChartIcon, FlaskIcon, KeyIcon, ShieldIcon, UserIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon } from './icons';
+import { HomeIcon, ChartIcon, FlaskIcon, KeyIcon, ShieldIcon, UserIcon, BookIcon, ChevronIcon, MenuIcon, XIcon, CheckIcon, MegaphoneIcon } from './icons';
 
 interface ShellProject { id: string; name: string; org_id: string; org_name: string }
 
@@ -25,6 +25,7 @@ const nav = [
     { href: '/dashboard', label: 'Overview', icon: HomeIcon },
     { href: '/experiments', label: 'Experiments', icon: FlaskIcon },
     { href: '/traffic', label: 'Traffic', icon: ChartIcon },
+    { href: '/popups', label: 'Popups', icon: MegaphoneIcon },
     { href: '/settings/domains', label: 'Domains', icon: ShieldIcon },
     { href: '/settings/keys', label: 'API keys', icon: KeyIcon },
     { href: '/settings/profile', label: 'Profile', icon: UserIcon },

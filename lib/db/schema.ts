@@ -225,6 +225,25 @@ export const trafficDaily = sqliteTable('traffic_daily', {
     index('idx_traffic_daily_env_dim').on(t.environment_id, t.dim, t.day),
 ]);
 
+/** Popups and calls to action (paid). Content and targeting live in config (JSON, validated by lib/popups.ts). */
+export const popups = sqliteTable('popups', {
+    id: text('id').primaryKey(),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['draft', 'active', 'paused'] }).notNull().default('draft'),
+    config: text('config').notNull(),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_popups_project').on(t.project_id)]);
+
+/** Popup views, clicks and closes per day, batched with telemetry. */
+export const popupDaily = sqliteTable('popup_daily', {
+    day: text('day').notNull(),
+    popup_id: text('popup_id').notNull().references(() => popups.id, { onDelete: 'cascade' }),
+    metric: text('metric').notNull(),
+    count: integer('count').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.day, t.popup_id, t.metric] })]);
+
 /** JavaScript errors per test version per day (paid). Batched with telemetry; distinct errors are capped per test per day. */
 export const errorDaily = sqliteTable('error_daily', {
     day: text('day').notNull(),

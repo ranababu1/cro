@@ -988,8 +988,9 @@ export const db = {
         rows: Array<{ day: string; scope_type: 'platform' | 'org' | 'user' | 'project' | 'experiment'; scope_id: string; metric: string; value: number }>,
         traffic: Array<{ day: string; environment_id: string; project_id: string; dim: string; key: string; views: number }> = [],
         errors: Array<{ day: string; experiment_id: string; variation_id: string; fingerprint: string; kind: string; message: string; source: string; line: number; count: number }> = [],
+        popupRows: Array<{ day: string; popup_id: string; metric: string; count: number }> = [],
     ): Promise<void> {
-        if (!rows.length && !traffic.length && !errors.length) return;
+        if (!rows.length && !traffic.length && !errors.length && !popupRows.length) return;
         const d = await getDb();
         const stmts: BatchItem<'sqlite'>[] = [
             ...rows.map((r) => d
@@ -1006,9 +1007,62 @@ export const db = {
                     target: [s.trafficDaily.day, s.trafficDaily.environment_id, s.trafficDaily.dim, s.trafficDaily.key],
                     set: { views: sql`${s.trafficDaily.views} + ${r.views}` },
                 })]),
+            // A popup deleted since the view was buffered is skipped instead of failing the whole batch.
+            ...popupRows.map((r) => d.run(sql`INSERT INTO popup_daily (day, popup_id, metric, count)
+                SELECT ${r.day}, ${r.popup_id}, ${r.metric}, ${r.count} WHERE EXISTS (SELECT 1 FROM popups WHERE id = ${r.popup_id})
+                ON CONFLICT (day, popup_id, metric) DO UPDATE SET count = count + excluded.count`)),
             ...errors.flatMap((r): BatchItem<'sqlite'>[] => r.fingerprint === PAGES_WITH_ERRORS || r.fingerprint === OTHER_ERRORS ? [plainErrorUpsert(d, r)] : cappedErrorUpsert(d, r)),
         ];
         await d.batch(stmts as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
+    },
+
+    // Popups (paid)
+    async listPopups(projectId: string) {
+        const d = await getDb();
+        return d.select().from(s.popups).where(eq(s.popups.project_id, projectId)).orderBy(desc(s.popups.created_at));
+    },
+
+    async getPopup(id: string) {
+        const d = await getDb();
+        return (await d.select().from(s.popups).where(eq(s.popups.id, id)))[0] ?? null;
+    },
+
+    async createPopup(p: { project_id: string; name: string; status: 'draft' | 'active' | 'paused'; config: string }) {
+        clearConfigCache();
+        const d = await getDb();
+        const id = generateId('pop');
+        await d.insert(s.popups).values({ id, ...p });
+        return (await this.getPopup(id))!;
+    },
+
+    async updatePopup(id: string, update: { name?: string; status?: 'draft' | 'active' | 'paused'; config?: string }) {
+        clearConfigCache();
+        const d = await getDb();
+        await d.update(s.popups).set({ ...update, updated_at: nowIso() }).where(eq(s.popups.id, id));
+        return this.getPopup(id);
+    },
+
+    async deletePopup(id: string): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.delete(s.popups).where(eq(s.popups.id, id));
+    },
+
+    /** Active popups of a project for the SDK, cached briefly like the running test config. */
+    async getActivePopups(projectId: string) {
+        return cached(`pop:${projectId}`, async () => {
+            const d = await getDb();
+            return d.select().from(s.popups).where(and(eq(s.popups.project_id, projectId), eq(s.popups.status, 'active')));
+        });
+    },
+
+    async getPopupStats(projectId: string, from: string, to: string) {
+        const d = await getDb();
+        const rows = await d.select({ popup_id: s.popupDaily.popup_id, metric: s.popupDaily.metric, count: sql<number>`sum(${s.popupDaily.count})` })
+            .from(s.popupDaily).innerJoin(s.popups, eq(s.popups.id, s.popupDaily.popup_id))
+            .where(and(eq(s.popups.project_id, projectId), gte(s.popupDaily.day, from), lte(s.popupDaily.day, to)))
+            .groupBy(s.popupDaily.popup_id, s.popupDaily.metric);
+        return rows.map((r) => ({ ...r, count: Number(r.count) }));
     },
 
     /** JavaScript errors for one test between two UTC days (inclusive), summed per version and error. */

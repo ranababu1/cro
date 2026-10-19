@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 00:23 IST | Popups and calls to action (paid): center, corner or bar popups with delay, scroll or exit triggers, page rules, frequency and devices; views, clicks and click rate per popup; popups.js loads only on matching pages. |
 | pending | 2026-10-19 00:08 IST | JavaScript error tracking on paid plans: a new Errors tab on each test shows uncaught errors and failed promises per version, with pages with errors, errors per 100 visitors and the top errors. Messages are cleaned of emails, long numbers and tokens. The Phase 5 roadmap is now in progress. |
 | pending | 2026-10-18 23:53 IST | Visual editor on Growth and above: a variation can run on the control page itself. Open the visual editor from Edit test, click elements on your page to change text, colors, font size, links and images or hide them, and save. Visitors in that variation get the changes before the page shows. Changes can also be added or removed by hand. The SDK snippet stays under 30 KB gzipped. |
 | pending | 2026-10-18 23:25 IST | Traffic overview keeps up to 500 different page addresses per environment per day. Views on further new addresses that day still count in the totals and show as Other pages in Top pages, so sites with many unique URLs stay fast. |

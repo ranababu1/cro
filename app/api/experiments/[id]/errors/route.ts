@@ -5,6 +5,7 @@ import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { canUseFeature, UPGRADE_NOTE } from '@/lib/entitlements';
 import { ERROR_RANGES, summarizeErrors } from '@/lib/jsErrors';
 import { lastDays } from '@/lib/traffic';
+import { flushTelemetry } from '@/lib/telemetry';
 
 // GET /api/experiments/:id/errors?days=7|30|90 - JavaScript errors per version. Paid plans only.
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -20,6 +21,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const asked = Number(request.nextUrl.searchParams.get('days') ?? 30);
         const range = (ERROR_RANGES as readonly number[]).includes(asked) ? asked : 30;
         const days = lastDays(range);
+        // Counts still in memory on this instance are written first, so a fresh error shows right away.
+        await flushTelemetry();
         const [rows, variations, visitors] = await Promise.all([
             db.getErrors(experiment.id, days[0], days[days.length - 1]),
             db.getVariations(experiment.id),

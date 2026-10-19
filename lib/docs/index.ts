@@ -6,6 +6,7 @@ import { sdk } from './content/sdk';
 import { experiments } from './content/experiments';
 import { variations } from './content/variations';
 import { goals } from './content/goals';
+import { popups } from './content/popups';
 import { results } from './content/results';
 import { winners } from './content/winners';
 import { restApi } from './content/restApi';
@@ -17,7 +18,7 @@ export type { Block, DocPage } from './types';
 
 /** Reading order. The sidebar groups pages by `group` in this order. */
 export const docPages: DocPage[] = [
-    introduction, quickStart, installGuides, sdk, experiments, variations, goals, results, winners, restApi, environments, organizations, troubleshooting,
+    introduction, quickStart, installGuides, sdk, experiments, variations, goals, popups, results, winners, restApi, environments, organizations, troubleshooting,
 ];
 
 export function getDocPage(slug: string): DocPage | undefined {
