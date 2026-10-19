@@ -21,6 +21,7 @@ import { parseChanges } from '@/lib/visualChanges';
 import { scheduleRetention } from '@/lib/retention';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
+import { previewReply } from '@/lib/preview';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
 
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
-        const { url, user_id, referrer, visitor } = parsed.data;
+        const { url, user_id, referrer, visitor, preview } = parsed.data;
         const page = normalizePageUrl(url);
         if (!page) return sdkJson({ error: 'Invalid url' }, 400);
 
@@ -49,6 +50,9 @@ export async function POST(request: NextRequest) {
         if (!origin.ok) {
             return sdkJson({ matched: false, action: 'none', reason: origin.reason } satisfies BootstrapResponse);
         }
+
+        // QA preview link: show the linked variation and record nothing (no assignment, counts or modules).
+        if (preview) return sdkJson(await previewReply(preview, auth.ctx.projectId, url));
 
         // Monthly pageview cap reached: pause collection. Visitors see the original page.
         if ((await getPageviewStatus(auth.ctx.orgId)).paused) {

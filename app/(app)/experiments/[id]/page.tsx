@@ -10,6 +10,7 @@ import { HeatmapsPanel } from './HeatmapsPanel';
 import { ErrorsPanel } from './ErrorsPanel';
 import { FunnelsPanel } from './FunnelsPanel';
 import { RevenuePanel } from './RevenuePanel';
+import { PreviewLinks } from './PreviewLinks';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -161,7 +162,7 @@ export default function ExperimentDetail() {
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'errors' && <ErrorsPanel experimentId={experiment.id} />}
-            {tab === 'setup' && <SetupPanel experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} />}
+            {tab === 'setup' && <SetupPanel experimentId={experiment.id} completed={experiment.status === 'completed'} variations={variations} goals={goals} targeting={experiment.targeting} />}
             {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} onSaved={() => void load()} />}
             {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
@@ -263,7 +264,7 @@ function ResultsPanel({ experiment, results, updatedAt, hasEventGoals }: { exper
     );
 }
 
-function SetupPanel({ variations, goals, targeting }: { targeting?: string | null; experimentId?: string; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
+function SetupPanel({ experimentId, completed, variations, goals, targeting }: { targeting?: string | null; experimentId: string; completed: boolean; variations: Variation[]; goals: { id: string; name: string; type?: string; selector: string; match_type?: string | null; is_primary: boolean }[] }) {
     return (
         <div className="space-y-6">
             <Card>
@@ -288,6 +289,7 @@ function SetupPanel({ variations, goals, targeting }: { targeting?: string | nul
                     </TBody>
                 </Table>
             </Card>
+            <PreviewLinks experimentId={experimentId} variations={variations} completed={completed} />
             {goals.length > 0 && (
             <Card>
                 <CardHeader title="Goals" description="What counts as a conversion in this test." />

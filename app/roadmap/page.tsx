@@ -22,7 +22,7 @@ const available = [
 type PhaseStatus = 'Done' | 'In progress' | 'Planned';
 
 const phases: { phase: string; name: string; status: PhaseStatus; items: string[] }[] = [
-    { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Live stats while a test runs', 'One-line install'] },
+    { phase: 'Phase 1', name: 'A/B testing core', status: 'Done', items: ['Split URL tests with sticky assignment', 'Click goals by CSS selector', 'Significance and confidence intervals', 'Live stats while a test runs', 'One-line install', 'Preview links for every version'] },
     { phase: 'Phase 2', name: 'More goals and targeting', status: 'Done', items: ['Page visit, form submit and custom event goals', 'Targeting by device, UTM, referrer and new or returning visitors', 'Edit running tests safely', 'Sample ratio mismatch warning', 'Shareable results links', 'Google Tag Manager and WordPress guides'] },
     { phase: 'Phase 3', name: 'Heatmaps', status: 'Done', items: ['Click, scroll, confetti and overlay heatmaps', 'Heatmaps per variation and device', 'Rage and dead click detection', 'Filters by traffic source, conversion and date range', 'Sampling and stop rules for each test'] },
     { phase: 'Phase 4', name: 'Recordings, funnels and visual editor', status: 'In progress', items: ['Session recordings with privacy masking', 'Traffic overview', 'Funnels built from your goals', 'Funnel completion trend over time', 'Revenue goals', 'Visual editor with move, page CSS and mobile preview', 'Auto-shift traffic to the winner'] },

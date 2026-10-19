@@ -80,6 +80,8 @@ export const restApi: DocPage = {
   -d '{"status": "running"}'` },
         { type: 'h3', text: 'DELETE /api/experiments/{id}', id: 'delete-experiment' },
         { type: 'p', text: 'Deletes a draft. Any other status returns 400.' },
+        { type: 'h3', text: 'POST /api/experiments/{id}/variations/{variationId}/preview', id: 'preview-link' },
+        { type: 'p', text: 'Creates a QA preview link for one variation, for example to check every version in an automated browser test. Returns `{ "url": "...", "expires_at": "..." }`. The link opens the control page as that variation for 7 days and is never counted in results. A completed test returns 400.' },
         { type: 'h3', text: 'GET /api/experiments/{id}/results', id: 'results' },
         { type: 'p', text: 'Optional query parameter `environment=dev|staging|prod`. Without it, all environments are combined.' },
         { type: 'code', label: '200 response', code: `{
