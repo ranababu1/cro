@@ -16,6 +16,7 @@ import { failedRule, parseTargeting } from '@/lib/targeting';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
+import { scheduleRetention } from '@/lib/retention';
 import { parsePopupConfig, popupMatchesUrl, sdkPopup } from '@/lib/popups';
 import { parseSurveyConfig, sdkSurvey } from '@/lib/surveys';
 
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
         const auth = await authenticateSdkRequest(request);
         if ('error' in auth) return auth.error;
         void bumpMetric(METRICS.sdk_bootstrap, { orgId: auth.ctx.orgId, projectId: auth.ctx.projectId });
+        // Retention cleanup without a cron: at most hourly across instances, after the response is sent.
+        scheduleRetention();
 
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);

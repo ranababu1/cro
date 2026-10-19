@@ -1076,6 +1076,34 @@ export const db = {
         return rows.map((r) => ({ ...r, count: Number(r.count) }));
     },
 
+    // Retention cleanup (lib/retention.ts)
+    /** Claims a maintenance job if it last ran before cutoffIso. True for exactly one caller per period. */
+    async claimMaintenance(job: string, cutoffIso: string, nowIsoValue: string): Promise<boolean> {
+        const d = await getDb();
+        const r = await d.run(sql`INSERT INTO maintenance_runs (job, ran_at) VALUES (${job}, ${nowIsoValue})
+            ON CONFLICT (job) DO UPDATE SET ran_at = excluded.ran_at WHERE maintenance_runs.ran_at < ${cutoffIso}`);
+        return Number(r.rowsAffected) > 0;
+    },
+
+    async deleteOldHeatmapPoints(beforeIso: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const r = await d.run(sql`DELETE FROM heatmap_points WHERE rowid IN (SELECT rowid FROM heatmap_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
+        return Number(r.rowsAffected);
+    },
+
+    /** Survey answers older than the owning organization's plan retention. Unknown paid plans use the Starter cutoff. */
+    async deleteOldSurveyAnswers(before: { free: string; starter: string; growth: string; enterprise: string }, limit: number): Promise<number> {
+        const d = await getDb();
+        const r = await d.run(sql`DELETE FROM survey_responses WHERE id IN (
+            SELECT r.id FROM survey_responses r
+            JOIN surveys sv ON sv.id = r.survey_id
+            JOIN projects p ON p.id = sv.project_id
+            JOIN organizations o ON o.id = p.org_id
+            WHERE r.day < CASE lower(o.plan) WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            LIMIT ${limit})`);
+        return Number(r.rowsAffected);
+    },
+
     // Surveys (paid)
     async listSurveys(projectId: string) {
         const d = await getDb();
