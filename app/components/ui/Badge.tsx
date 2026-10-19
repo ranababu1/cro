@@ -20,7 +20,7 @@ export function Badge({ tone = 'neutral', dot, className, children }: { tone?: T
     );
 }
 
-const statusTone: Record<string, Tone> = { draft: 'neutral', running: 'success', paused: 'warning', completed: 'info', active: 'success', suspended: 'danger' };
+const statusTone: Record<string, Tone> = { draft: 'neutral', running: 'success', paused: 'warning', completed: 'info', active: 'success', suspended: 'danger', stopped: 'info' };
 
 export function StatusBadge({ status }: { status: string }) {
     return (

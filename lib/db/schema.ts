@@ -534,3 +534,77 @@ export const webhookDeliveries = sqliteTable('webhook_deliveries', {
     index('idx_webhook_deliveries_webhook').on(t.webhook_id, t.created_at),
     index('idx_webhook_deliveries_created').on(t.created_at),
 ]);
+
+/**
+ * Page heatmaps (paid): heatmaps for pages without a test. A page rule picks the pages; the sample and stop rules
+ * work like a test's heatmap. Data goes to the page_heatmap_* tables below.
+ */
+export const pageHeatmaps = sqliteTable('page_heatmaps', {
+    id: text('id').primaryKey(),
+    project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    status: text('status', { enum: ['active', 'paused'] }).notNull().default('active'),
+    match: text('match', { enum: ['equals', 'starts_with', 'contains'] }).notNull(),
+    match_value: text('match_value').notNull(),
+    /** Address shown under the overlay view. */
+    preview_url: text('preview_url'),
+    heatmap_sample: integer('heatmap_sample'),
+    heatmap_stop_days: integer('heatmap_stop_days'),
+    heatmap_stop_views: integer('heatmap_stop_views'),
+    heatmap_views: integer('heatmap_views').notNull().default(0),
+    heatmap_since: text('heatmap_since'),
+    created_by: text('created_by'),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_page_heatmaps_project').on(t.project_id)]);
+
+// Page heatmap data. Same columns as the test heatmap tables, so lib/heatmaps.ts reads and writes both. The
+// code-side key experiment_id holds the page heatmap id (column heatmap_id) and variation_id is always 'page'.
+export const pageHeatmapPoints = sqliteTable('page_heatmap_points', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    org_id: text('org_id').notNull(),
+    experiment_id: text('heatmap_id').notNull().references(() => pageHeatmaps.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device', { enum: ['desktop', 'tablet', 'mobile'] }).notNull(),
+    x: integer('x').notNull(),
+    y: integer('y').notNull(),
+    selector: text('selector').notNull(),
+    rage: integer('rage', { mode: 'boolean' }).notNull().default(false),
+    dead: integer('dead', { mode: 'boolean' }).notNull().default(false),
+    source: text('source').notNull().default(''),
+    visitor: text('visitor').notNull().default(''),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_page_heatmap_points_hm').on(t.experiment_id, t.variation_id, t.device), index('idx_page_heatmap_points_created').on(t.created_at)]);
+
+export const pageHeatmapScrollPoints = sqliteTable('page_heatmap_scroll_points', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    experiment_id: text('heatmap_id').notNull().references(() => pageHeatmaps.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    depth: integer('depth').notNull(),
+    source: text('source').notNull().default(''),
+    visitor: text('visitor').notNull().default(''),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_page_heatmap_scroll_points_hm').on(t.experiment_id, t.variation_id, t.device), index('idx_page_heatmap_scroll_points_created').on(t.created_at)]);
+
+export const pageHeatmapClicksDaily = sqliteTable('page_heatmap_clicks_daily', {
+    experiment_id: text('heatmap_id').notNull().references(() => pageHeatmaps.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    gx: integer('gx').notNull(),
+    gy: integer('gy').notNull(),
+    selector: text('selector').notNull(),
+    clicks: integer('clicks').notNull().default(0),
+    rage: integer('rage').notNull().default(0),
+    dead: integer('dead').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.gx, t.gy, t.selector] })]);
+
+export const pageHeatmapScrollDaily = sqliteTable('page_heatmap_scroll_daily', {
+    experiment_id: text('heatmap_id').notNull().references(() => pageHeatmaps.id, { onDelete: 'cascade' }),
+    variation_id: text('variation_id').notNull(),
+    device: text('device').notNull(),
+    day: text('day').notNull(),
+    depth: integer('depth').notNull(),
+    sessions: integer('sessions').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.experiment_id, t.variation_id, t.device, t.day, t.depth] })]);

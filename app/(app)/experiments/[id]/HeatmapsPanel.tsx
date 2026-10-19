@@ -32,8 +32,12 @@ function heatColor(t: number): string {
     return `hsla(${h}, 85%, 50%, ${0.15 + 0.7 * Math.min(1, t)})`;
 }
 
-/** Heatmaps tab. Free plans see an upgrade note; the server enforces the same rule. */
-export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
+/**
+ * Heatmaps tab of a test, also used for page heatmaps (pages without a test) with base and page set.
+ * Free plans see an upgrade note; the server enforces the same rule.
+ */
+export function HeatmapsPanel({ experimentId, base: baseProp, page = false }: { experimentId: string; base?: string; page?: boolean }) {
+    const base = baseProp ?? `/api/experiments/${experimentId}/heatmaps`;
     const [allowed, setAllowed] = useState<boolean | null>(null);
     const [variation, setVariation] = useState('');
     const [device, setDevice] = useState<DeviceOpt>('all');
@@ -67,40 +71,42 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
         let live = true;
         const q = new URLSearchParams(filterQuery);
         if (variation) q.set('variation', variation);
-        fetch(`/api/experiments/${experimentId}/heatmaps?${q}`)
+        fetch(`${base}?${q}`)
             .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Could not load heatmaps'); return j as Report; })
             .then((j) => { if (live) { setData(j); setError(''); } })
             .catch((e: Error) => live && setError(e.message));
         return () => { live = false; };
-    }, [allowed, experimentId, variation, filterQuery]);
+    }, [allowed, base, variation, filterQuery]);
 
     const otherId = data ? (variationB && variationB !== data.variation.id ? variationB : data.variations.find((v) => v.id !== data.variation.id)?.id ?? '') : '';
     useEffect(() => {
         if (!allowed || !compare || !otherId) return;
         let live = true;
-        fetch(`/api/experiments/${experimentId}/heatmaps?${new URLSearchParams({ ...filterQuery, variation: otherId })}`)
+        fetch(`${base}?${new URLSearchParams({ ...filterQuery, variation: otherId })}`)
             .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Could not load heatmaps'); return j as Report; })
             .then((j) => { if (live) setDataB(j); })
             .catch((e: Error) => live && setError(e.message));
         return () => { live = false; };
-    }, [allowed, compare, experimentId, otherId, filterQuery]);
+    }, [allowed, compare, base, otherId, filterQuery]);
     const b = compare && dataB && dataB.variation.id === otherId ? dataB : null;
 
     return (
         <Card>
-            <CardHeader title="Heatmaps" description="Where visitors click and how far they scroll, for each version. Collected automatically from a sample of visitors." />
+            <CardHeader title="Heatmaps" description={page ? 'Where visitors click and how far they scroll on the matching pages, from a sample of visitors.' : 'Where visitors click and how far they scroll, for each version. Collected automatically from a sample of visitors.'} />
             <CardBody>
                 {allowed === null && <Spinner />}
-                {allowed === false && <UpgradeNote>Heatmaps are part of the paid plans. Upgrade to Starter or above to see them for this test.</UpgradeNote>}
-                {allowed && <HeatmapCollection experimentId={experimentId} />}
+                {allowed === false && <UpgradeNote>Heatmaps are part of the paid plans. Upgrade to Starter or above to see them{page ? '' : ' for this test'}.</UpgradeNote>}
+                {allowed && <HeatmapCollection url={`${base}/settings`} page={page} />}
                 {allowed && error && <p className="text-sm text-red-600">{error}</p>}
                 {allowed && !data && !error && <Spinner />}
                 {allowed && data && (
                     <div data-testid="heatmaps">
                         <div className="mb-4 flex flex-wrap items-center gap-3">
-                            <Select aria-label="Variation" value={data.variation.id} onChange={(e) => setVariation(e.target.value)} className="w-auto">
-                                {data.variations.map((v) => <option key={v.id} value={v.id}>{v.name}{v.is_control ? ' (control)' : ''}</option>)}
-                            </Select>
+                            {data.variations.length > 1 && (
+                                <Select aria-label="Variation" value={data.variation.id} onChange={(e) => setVariation(e.target.value)} className="w-auto">
+                                    {data.variations.map((v) => <option key={v.id} value={v.id}>{v.name}{v.is_control ? ' (control)' : ''}</option>)}
+                                </Select>
+                            )}
                             {data.variations.length > 1 && (
                                 <label className="flex items-center gap-2 text-sm text-zinc-700">
                                     <input type="checkbox" checked={compare} onChange={(e) => setCompare(e.target.checked)} /> Compare with
@@ -134,18 +140,18 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                                     {(data.sources ?? []).map((x) => <option key={x.source} value={x.source}>{x.source} ({x.clicks})</option>)}
                                 </Select>
                             </div>
-                            <div className="w-64">
+                            {!page && <div className="w-64">
                                 <Select aria-label="Visitors" value={converted} onChange={(e) => setConverted(e.target.value)}>
                                     <option value="">All visitors</option>
                                     <option value="yes">Visitors who converted</option>
                                     <option value="no">Visitors who did not convert</option>
                                 </Select>
-                            </div>
+                            </div>}
                             {filtered && <p className="text-xs text-zinc-500" data-testid="heat-filter-note">Filtered views use individual clicks, which are kept for 30 days{days === '90' ? ', so this shows the last 30 days' : ''}.</p>}
                         </div>
                         {!compare && <Totals data={data} />}
                         <div className="mb-4 flex flex-wrap items-center gap-2">
-                            <a href={`/api/experiments/${experimentId}/heatmaps/export?${new URLSearchParams(filterQuery)}`} download className="order-last ml-auto rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="heat-export">Download JSON</a>
+                            <a href={`${base}/export?${new URLSearchParams(filterQuery)}`} download className="order-last ml-auto rounded-md border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100" data-testid="heat-export">Download JSON</a>
                             {VIEWS.map((v) => (
                                 <button key={v.id} type="button" onClick={() => setView(v.id)} className={`rounded-md px-3 py-1.5 text-sm ${view === v.id ? 'bg-blue-50 font-medium text-blue-700' : 'text-zinc-600 hover:bg-zinc-100'}`}>{v.label}</button>
                             ))}
@@ -153,7 +159,7 @@ export function HeatmapsPanel({ experimentId }: { experimentId: string }) {
                         {compare ? (
                             b ? <CompareView a={data} b={b} view={view} width={WIDTH[device]} /> : <Spinner />
                         ) : data.totals.clicks === 0 && data.totals.sessions === 0
-                            ? <p className="text-sm text-zinc-500">{filtered ? 'No clicks match these filters in this range.' : 'No heatmap data yet for this version and device.'} Data appears a few seconds after sampled visitors leave the page.</p>
+                            ? <p className="text-sm text-zinc-500">{filtered ? 'No clicks match these filters in this range.' : page ? 'No heatmap data yet for this device.' : 'No heatmap data yet for this version and device.'} Data appears a few seconds after sampled visitors leave the page.</p>
                             : <HeatView data={data} view={view} width={WIDTH[device]} />}
                     </div>
                 )}

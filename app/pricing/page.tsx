@@ -54,6 +54,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'WordPress plugin on paid plans', tier: 1 },
     { name: 'Webhooks for winners, finished tests, sample ratio warnings and plan limits, on paid plans', tier: 1 },
     { name: 'Heatmaps on paid plans: click, scroll, confetti and overlay, with rage and dead clicks and filters by traffic source and conversion', tier: 1 },
+    { name: 'Heatmaps for pages without a test, on paid plans', tier: 1 },
     { name: 'Funnels on paid plans, built from your goals, with a completion trend', tier: 1 },
     { name: 'Revenue goals on paid plans: revenue per visitor and average order value', tier: 1 },
     { name: 'Results by segment on paid plans: device, traffic source and new or returning visitors', tier: 1 },

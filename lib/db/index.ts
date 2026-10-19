@@ -1260,6 +1260,64 @@ export const db = {
         await d.delete(s.popups).where(eq(s.popups.id, id));
     },
 
+    // Page heatmaps (lib/pageHeatmaps.ts)
+    async listPageHeatmaps(projectId: string) {
+        const d = await getDb();
+        return d.select().from(s.pageHeatmaps).where(eq(s.pageHeatmaps.project_id, projectId)).orderBy(desc(s.pageHeatmaps.created_at));
+    },
+
+    async getPageHeatmap(id: string) {
+        const d = await getDb();
+        return (await d.select().from(s.pageHeatmaps).where(eq(s.pageHeatmaps.id, id)))[0] ?? null;
+    },
+
+    async createPageHeatmap(p: { project_id: string; name: string; match: 'equals' | 'starts_with' | 'contains'; match_value: string; preview_url: string | null; created_by: string | null }) {
+        clearConfigCache();
+        const d = await getDb();
+        const id = generateId('phm');
+        await d.insert(s.pageHeatmaps).values({ id, ...p });
+        return (await this.getPageHeatmap(id))!;
+    },
+
+    /** Name, page rule, status, sample and stop rules. restart starts a new collection period (data is kept). */
+    async updatePageHeatmap(id: string, u: {
+        name?: string; status?: 'active' | 'paused'; match?: 'equals' | 'starts_with' | 'contains'; match_value?: string; preview_url?: string | null;
+        sample_percent?: number | null; stop_days?: number | null; stop_views?: number | null; restart?: boolean;
+    }) {
+        clearConfigCache();
+        const d = await getDb();
+        const { sample_percent, stop_days, stop_views, restart, ...rest } = u;
+        const values: Partial<typeof s.pageHeatmaps.$inferInsert> = { ...rest, updated_at: nowIso() };
+        if (sample_percent !== undefined) values.heatmap_sample = sample_percent;
+        if (stop_days !== undefined) values.heatmap_stop_days = stop_days;
+        if (stop_views !== undefined) values.heatmap_stop_views = stop_views;
+        if (restart) { values.heatmap_since = nowIso(); values.heatmap_views = 0; }
+        await d.update(s.pageHeatmaps).set(values).where(eq(s.pageHeatmaps.id, id));
+        return this.getPageHeatmap(id);
+    },
+
+    /** Deletes a page heatmap and its data (the data tables cascade). */
+    async deletePageHeatmap(id: string): Promise<void> {
+        clearConfigCache();
+        const d = await getDb();
+        await d.delete(s.pageHeatmaps).where(eq(s.pageHeatmaps.id, id));
+    },
+
+    /** Active page heatmaps of a project for the SDK, cached briefly like popups. */
+    async getActivePageHeatmaps(projectId: string) {
+        return cached(`phm:${projectId}`, async () => {
+            const d = await getDb();
+            return d.select().from(s.pageHeatmaps).where(and(eq(s.pageHeatmaps.project_id, projectId), eq(s.pageHeatmaps.status, 'active')));
+        });
+    },
+
+    /** Adds captured page views to a page heatmap's counter (one statement per batch that ends a page view). */
+    async addPageHeatmapViews(id: string, n: number): Promise<void> {
+        if (n <= 0) return;
+        const d = await getDb();
+        await d.run(sql`UPDATE page_heatmaps SET heatmap_views = heatmap_views + ${n} WHERE id = ${id}`);
+    },
+
     /** Active popups of a project for the SDK, cached briefly like the running test config. */
     async getActivePopups(projectId: string) {
         return cached(`pop:${projectId}`, async () => {
@@ -1368,13 +1426,16 @@ export const db = {
     async deleteOldHeatmapPoints(beforeIso: string, limit: number): Promise<number> {
         const d = await getDb();
         const r = await d.run(sql`DELETE FROM heatmap_points WHERE rowid IN (SELECT rowid FROM heatmap_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
-        return Number(r.rowsAffected);
+        // Page heatmaps (pages without a test) keep raw clicks for the same 30 days.
+        const p = await d.run(sql`DELETE FROM page_heatmap_points WHERE id IN (SELECT id FROM page_heatmap_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
+        return Number(r.rowsAffected) + Number(p.rowsAffected);
     },
 
     async deleteOldHeatmapScrolls(beforeIso: string, limit: number): Promise<number> {
         const d = await getDb();
         const r = await d.run(sql`DELETE FROM heatmap_scroll_points WHERE id IN (SELECT id FROM heatmap_scroll_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
-        return Number(r.rowsAffected);
+        const p = await d.run(sql`DELETE FROM page_heatmap_scroll_points WHERE id IN (SELECT id FROM page_heatmap_scroll_points WHERE created_at < ${beforeIso} LIMIT ${limit})`);
+        return Number(r.rowsAffected) + Number(p.rowsAffected);
     },
 
     /** Survey answers older than the owning organization's plan retention. Unknown paid plans use the Starter cutoff. */
