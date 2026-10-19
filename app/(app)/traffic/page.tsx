@@ -57,7 +57,7 @@ export default function TrafficPage() {
                         <CardHeader title="Page views per day" description="Days are in UTC." />
                         <CardBody><DayChart days={d.days} /></CardBody>
                     </Card>
-                    <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         <TopTable title="Top pages" head="Page" rows={d.pages.map((r) => (r.key === OTHER_PAGES ? { ...r, key: 'Other pages', hint: `Pages past the first ${TRAFFIC_MAX_PAGES_PER_DAY} different pages seen in a day` } : r))} total={d.totals.views} />
                         <TopTable title="Sources" head="Source" description="Where entrances came from: the utm_source value, the referring site, or direct." rows={d.sources} total={d.totals.entries} />
                         <TopTable title="Devices" head="Device" rows={d.devices.map((r) => ({ ...r, key: DEVICE[r.key] ?? r.key }))} total={d.totals.views} />

@@ -110,7 +110,7 @@ function Editor({ initial, onDone }: { initial: { id: string | null; name: strin
     };
 
     return (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <Card>
                 <CardHeader title={initial.id ? 'Edit popup' : 'New popup'} description={initial.id ? 'Changes reach your site within a minute.' : 'New popups start as drafts. Turn them on from the list.'} />
                 <CardBody className="space-y-4">

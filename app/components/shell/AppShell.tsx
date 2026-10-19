@@ -198,6 +198,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                             </button>
                         </div>
                         <NavLinks isPlatformAdmin={isPlatformAdmin} onNavigate={() => setMobileOpen(false)} />
+                        <div className="mt-auto border-t border-zinc-200 px-5 py-4 sm:hidden"><ThemeToggle /></div>
                     </aside>
                 </div>
             )}
@@ -209,7 +210,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                     </button>
                     <ProjectSwitcher projects={projects} currentProjectId={currentProjectId} />
                     <div className="ml-auto flex items-center gap-3">
-                        <ThemeToggle />
+                        <div className="hidden sm:block"><ThemeToggle /></div>
                         <UserMenu user={user} />
                     </div>
                 </header>

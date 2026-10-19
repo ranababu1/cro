@@ -25,7 +25,7 @@ export function BillingCards() {
         <div>
             <div className="mt-8 inline-flex rounded-full border border-zinc-200 bg-white p-1 text-sm font-medium" role="group" aria-label="Billing period">
                 <button type="button" onClick={() => setYearly(false)} aria-pressed={!yearly} className={`rounded-full px-4 py-2 ${!yearly ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Monthly</button>
-                <button type="button" onClick={() => setYearly(true)} aria-pressed={yearly} className={`rounded-full px-4 py-2 ${yearly ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Yearly <span className={yearly ? 'text-teal-100' : 'text-teal-600'}>(2 months free)</span></button>
+                <button type="button" onClick={() => setYearly(true)} aria-pressed={yearly} className={`rounded-full px-4 py-2 ${yearly ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Yearly <span className={yearly ? 'text-teal-100' : 'text-teal-700'}>(2 months free)</span></button>
             </div>
             <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
                 {tiers.map((t) => {

@@ -195,7 +195,7 @@ export function CompareView({ a, b, view, width }: { a: Report; b: Report; view:
     }
     return (
         <div data-testid="heat-compare">
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {[a, b].map((d) => (
                     <div key={d.variation.id}>
                         <p className="mb-2 text-sm font-medium text-zinc-900">{d.variation.name}{d.variations.find((v) => v.id === d.variation.id)?.is_control ? ' (control)' : ''}</p>
