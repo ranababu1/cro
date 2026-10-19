@@ -41,7 +41,7 @@ const availableToday = [
     'Funnels on paid plans, built from your goals, with a completion trend',
     'Revenue goals on paid plans: revenue per visitor and average order value',
     'Auto-shift traffic to the winner on Growth and above',
-    'Visual editor on Growth and above: change text, colors, links and images, or hide elements, without code',
+    'Visual editor on Growth and above: change text, colors, links and images, move or hide elements, or add page CSS, with mobile and tablet preview',
     'Traffic overview on paid plans: page views, top pages, sources, devices and countries',
     'JavaScript error tracking on paid plans: errors per test version',
     'Popups and calls to action on paid plans: center, corner or bar, with views and clicks',

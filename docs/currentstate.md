@@ -243,3 +243,9 @@ Error tracking: entitlement error_tracking (HEAVY, starter+, special friend togg
 - lib/funnels.ts computeFunnelTrend(): cohort = period of a visitor's first step-1 hit (UTC day or Monday week); completed = finished every step in order (same rule as computeFunnel), at any later time. Gaps filled with zeros, latest 90 periods kept (MAX_TREND_POINTS).
 - GET /api/experiments/:id/funnels returns trend per funnel; ?trend=day|week, default days up to 60 days of data, else weeks. Computed from the same first-hit rows, no extra query or writes.
 - UI: FunnelTrend SVG line chart under each funnel card, gaps where nobody started, point tooltips with counts.
+
+## Visual editor extras (19 Oct 2026)
+- lib/visualChanges.ts: new actions move { selector, target, position before|after } and css { selector: 'page', value } (max 10,000 chars, UNSAFE_CSS blocks url(, @import, expression(, javascript:, behavior:, -moz-binding, image-set(, < and backslash). One css change per variation.
+- public/visual.js: changes replay in list order. Visitor mode caches the elements each change matched (so nth-of-type selectors keep hitting the same elements after a move) and runs each move once. Page CSS goes into one style element as textContent. Editor: Move up/down records selectors from the page state just before the move, page CSS textarea when nothing is selected, window width line, Fold button; restore undoes moves and removes the CSS.
+- VisualChangesCard: editor window size select (desktop tab, 820 or 390 px popup window), hand-added moves, Page CSS box.
+- No sdk.js change.

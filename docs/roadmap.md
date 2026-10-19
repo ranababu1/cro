@@ -93,7 +93,8 @@ Kept off the public roadmap wording; public /roadmap stays high level.
 6. JavaScript error tracking, popup CTAs, surveys (lazy SDK modules, no recording links). Error tracking done 19 Oct 2026 (paid, errors.js, error_daily counters batched with telemetry, 200 distinct per test per day). Popups done 19 Oct 2026 (paid, popups.js on matching pages only, popup_daily counters batched with telemetry). Surveys done 19 Oct 2026 (paid, surveys.js shares a build-time kit with popups.js, answers batched and capped at 500 per survey per day).
 7. Done 19 Oct 2026: Heatmap filters (date range, traffic source, converted or not; raw clicks, 30 days max when filtered).
 8. Done 19 Oct 2026: Per-heatmap sampling and stop rules (sample percent, days or page views, new collection period).
-9. Done 19 Oct 2026: Funnel trend (completion by start day or week, per variation). Next: visual editor extras, then customer audit log view and audit log retention.
+9. Done 19 Oct 2026: Funnel trend (completion by start day or week, per variation).
+10. Done 19 Oct 2026: Visual editor extras (move, page CSS, tablet and mobile editor windows). Next: customer audit log view (paid) and audit log retention per the pricing table.
 
 ## Approved phases
 
