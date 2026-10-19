@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { EMAIL_RE, TOKEN_RE } from './redact';
 
 /**
  * JavaScript error tracking (paid): errors on pages in a running test, counted per test version per day.
@@ -32,9 +33,9 @@ export type ErrorReport = z.infer<typeof errorReportSchema>;
 /** Removes details that could identify a person (emails, long numbers, tokens) and query strings. */
 export function cleanMessage(message: string): string {
     const m = message
-        .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[email]')
+        .replace(EMAIL_RE, '[email]')
         .replace(/https?:\/\/[^\s'")]+/g, (u) => u.split(/[?#]/)[0])
-        .replace(/\b[A-Za-z0-9_-]{32,}\b/g, '[token]')
+        .replace(TOKEN_RE, '[token]')
         .replace(/\d{4,}/g, 'N')
         .replace(/\s+/g, ' ')
         .trim();

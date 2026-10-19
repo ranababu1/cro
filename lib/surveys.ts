@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { checkDisplayRules, displayRules, POPUP_STATUSES } from './popups';
+import { redactText } from './redact';
 
 /**
  * Simple surveys (paid). One question per survey: multiple choice, a 1 to 5 rating, a 0 to 10 NPS question or a short text answer, with an
@@ -72,7 +73,8 @@ export function parseSurveyConfig(raw: string): SurveyConfig | null {
     }
 }
 
-const clean = (t: string, max = MAX_ANSWER) => t.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
+/** Written text: control characters dropped, emails, long numbers and tokens replaced, then trimmed to the limit. */
+const clean = (t: string, max = MAX_ANSWER) => redactText(t.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')).trim().slice(0, max);
 
 /** Checks an answer against the question. Returns the stored answer and comment, or null when it does not fit. */
 export function normalizeAnswer(c: SurveyConfig, answer: unknown, comment?: string): { answer: string; comment: string | null } | null {

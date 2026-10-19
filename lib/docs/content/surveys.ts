@@ -33,13 +33,14 @@ export const surveys: DocPage = {
         ] },
         { type: 'h2', text: 'Answers' },
         { type: 'p', text: 'Choose **Answers** in the list to see the share of each answer, the average rating or the NPS, and the latest written answers or comments, for the last 7, 30 or 90 days. **Download answers (CSV)** exports every kept answer with its time in UTC and the page path.' },
-        { type: 'p', text: 'Each answer stores the answer, the comment and the page path only. No visitor ID, query string or page content is stored. Do not ask visitors for personal details such as email addresses in a survey.' },
+        { type: 'p', text: 'Each answer stores the answer, the comment and the page path only. No visitor ID, query string or page content is stored. Email addresses, numbers of 6 or more digits (such as phone, card or order numbers) and long tokens in written answers are replaced with `[email]`, `[number]` and `[token]` before they are saved, so do not ask visitors for contact details in a survey.' },
         { type: 'h3', text: 'Limits' },
         { type: 'table', head: ['Limit', 'Value'], rows: [
             ['Surveys per project', '20'],
             ['Answers kept per survey per day', '500. Answers past this still count in the answer total and rate.'],
             ['Written answer or comment', '1,000 characters'],
+            ['How long answers are kept', '12 months on Starter, 24 months on Growth and Enterprise (6 months after a downgrade to Free). Older answers are deleted automatically.'],
         ] },
-        { type: 'callout', tone: 'warning', title: 'After a downgrade', text: 'On the free plan, surveys stop showing and the Surveys page asks you to upgrade. Your surveys and answers are kept, and surveys show again when you upgrade.' },
+        { type: 'callout', tone: 'warning', title: 'After a downgrade', text: 'On the free plan, surveys stop showing and the Surveys page asks you to upgrade. Your surveys are kept and show again when you upgrade. Answers older than 6 months are deleted while you are on the free plan.' },
     ],
 };

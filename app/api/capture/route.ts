@@ -1,6 +1,7 @@
-import { NextRequest, after } from 'next/server';
+import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
-import { captureSchema, ingestCapture, pruneHeatmapPoints } from '@/lib/heatmaps';
+import { captureSchema, ingestCapture } from '@/lib/heatmaps';
+import { scheduleRetention } from '@/lib/retention';
 import { formatZodError } from '@/lib/validation';
 import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/requestAuth';
 import { checkSdkOrigin } from '@/lib/sdkOrigin';
@@ -35,11 +36,8 @@ export async function POST(request: NextRequest) {
         const variations = await db.getVariations(experiment.id);
         if (!variations.some((v) => v.id === b.variation_id)) return sdkJson({ error: 'Unknown variation' }, 400);
         const accepted = await ingestCapture(auth.ctx.orgId, b);
-        if (Math.random() < 0.02) {
-            const prune = () => pruneHeatmapPoints().catch((err) => console.error('heatmap prune failed', err));
-            // after() throws outside a request scope (tests, scripts); prune inline then instead of failing the ingest.
-            try { after(prune); } catch { void prune(); }
-        }
+        // Retention cleanup (raw clicks past 30 days, old survey answers) runs at most hourly, after the response.
+        scheduleRetention();
         return sdkJson({ success: true, accepted }, 202);
     } catch (error) {
         console.error('capture failed', error);

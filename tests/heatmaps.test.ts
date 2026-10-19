@@ -164,8 +164,8 @@ describe('capture module', () => {
 });
 
 describe('capture ingest outside a request scope', () => {
-    it('does not fail when the occasional prune runs without a request scope', () => {
-        const src = fs.readFileSync('app/api/capture/route.ts', 'utf8');
-        expect(src).toMatch(/try \{ after\(prune\); \} catch \{ void prune\(\); \}/);
+    it('does not fail when the retention cleanup runs without a request scope', () => {
+        expect(fs.readFileSync('app/api/capture/route.ts', 'utf8')).toMatch(/scheduleRetention\(\);/);
+        expect(fs.readFileSync('lib/retention.ts', 'utf8')).toMatch(/try \{ after\(run\); \} catch \{ void run\(\); \}/);
     });
 });

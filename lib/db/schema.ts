@@ -244,6 +244,12 @@ export const popupDaily = sqliteTable('popup_daily', {
     count: integer('count').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.day, t.popup_id, t.metric] })]);
 
+/** Last run of each background maintenance job (retention cleanup). One row per job, claimed atomically so one instance runs it. */
+export const maintenanceRuns = sqliteTable('maintenance_runs', {
+    job: text('job').primaryKey(),
+    ran_at: text('ran_at').notNull(),
+});
+
 /** Simple surveys (paid). Question, answers and targeting live in config (JSON, validated by lib/surveys.ts). */
 export const surveys = sqliteTable('surveys', {
     id: text('id').primaryKey(),

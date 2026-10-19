@@ -52,7 +52,12 @@ describe('survey rules', () => {
         for (const bad of [0, 6, 2.5, 'x']) expect(normalizeAnswer(rating, bad)).toBeNull();
         const text = cfg({ type: 'text', options: [] });
         expect(normalizeAnswer(text, '   ')).toBeNull();
-        expect(normalizeAnswer(text, 'a\u0000b ' + 'x'.repeat(2000))!.answer).toHaveLength(1000);
+        expect(normalizeAnswer(text, 'a\u0000b ' + 'word '.repeat(400))!.answer).toHaveLength(1000);
+        expect(normalizeAnswer(text, 'ab\u0000c')!.answer).toBe('abc');
+        // Personal details in written answers are replaced, like in error messages. Years and prices stay.
+        expect(normalizeAnswer(text, 'Mail me at jane.doe+x@example.com or call +91 98765 43210.\nPaid 2,500 in 2024, order 4111-1111-1111-1111')!.answer)
+            .toBe('Mail me at [email] or call [number].\nPaid 2,500 in 2024, order [number]');
+        expect(normalizeAnswer(cfg({ comment: true }), 'Ad', 'key eyJhbGciOiJIUzI1NiJ9abcdefghijklmnopqrstuvwxyz')!.comment).toBe('key [token]');
         expect(answerPath('https://a.com/pricing?email=x#y')).toBe('/pricing');
         expect(answerPath('nope')).toBe('');
     });
