@@ -218,6 +218,13 @@
       "when": 1791985000000,
       "tag": "0030_team_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1792000000000,
+      "tag": "0031_assignment_segments",
+      "breakpoints": true
     }
   ]
 }

@@ -15,6 +15,7 @@ import { trafficDimensions } from '@/lib/traffic';
 import { scheduleAutoShift } from '@/lib/autoShiftRun';
 import { recordGoalHits } from '@/lib/goalHits';
 import { failedRule, parseTargeting } from '@/lib/targeting';
+import { segmentOf } from '@/lib/segments';
 import { countPageview, getPageviewStatus } from '@/lib/pageviewQuota';
 import { canUseFeature } from '@/lib/entitlements';
 import { parseChanges } from '@/lib/visualChanges';
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
         const parsed = bootstrapSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
-        const { url, user_id, referrer, visitor, preview } = parsed.data;
+        const { url, user_id, referrer, visitor, preview, src } = parsed.data;
         const page = normalizePageUrl(url);
         if (!page) return sdkJson({ error: 'Invalid url' }, 400);
 
@@ -150,9 +151,10 @@ export async function POST(request: NextRequest) {
                 variation_id: assigned.id,
                 user_id,
                 environment_id: auth.ctx.environmentId,
+                ...segmentOf({ url, userAgent: request.headers.get('user-agent'), referrer, src, visitor }),
             })) await recordNewVisitor(auth.ctx.orgId, user_id);
             variation = assigned;
-            assignment = { id: '', experiment_id: experiment.id, variation_id: assigned.id, user_id, environment_id: auth.ctx.environmentId, assigned_at: '' };
+            assignment = { id: '', experiment_id: experiment.id, variation_id: assigned.id, user_id, environment_id: auth.ctx.environmentId, assigned_at: '', segment_device: null, segment_source: null, segment_visitor: null };
         }
 
         if (!variation) {

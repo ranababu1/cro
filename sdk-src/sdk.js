@@ -236,6 +236,21 @@
         } catch (e) { /* analytics must never break the page */ }
     }
 
+    // Session landing value for results by segment: the first page's utm_source, else its referrer. The server reads it.
+    function landingSource() {
+        try {
+            var s = sessionStorage.getItem('fabt_land');
+            if (s === null) {
+                var m = /[?&]utm_source=([^&#]*)/.exec(window.location.search);
+                s = m ? 'utm:' + m[1] : 'ref:' + document.referrer;
+                sessionStorage.setItem('fabt_land', s);
+            }
+            return s.slice(0, 300);
+        } catch {
+            return '';
+        }
+    }
+
     function bootstrap() {
         if (!config.apiUrl || !config.apiKey) {
             console.error('[ABTest] Missing apiUrl or data-key');
@@ -243,7 +258,7 @@
             return Promise.resolve({ matched: false, action: 'none' });
         }
         hide();
-        var req = { url: window.location.href, user_id: getUserId(), referrer: document.referrer || '', visitor: visitorType() };
+        var req = { url: window.location.href, user_id: getUserId(), referrer: document.referrer || '', visitor: visitorType(), src: landingSource() };
         if (previewToken) req.preview = previewToken;
         return send('/api/sdk/bootstrap', req)
             .then(function (res) {
