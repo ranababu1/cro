@@ -67,7 +67,7 @@ const availableToday: { name: string; tier: number }[] = [
 // tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise).
 // p must match the phase that lists the item on the public /roadmap.
 const comingSoon: { name: string; p: number; tier: number }[] = [
-    { name: 'Session recordings', p: 4, tier: 1 },
+    { name: 'Session recordings', p: 7, tier: 1 },
 ];
 
 const faqs = [

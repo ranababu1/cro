@@ -270,3 +270,5 @@ Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
 
 Blog posts support article_schema, faq_schema and breadcrumb_schema frontmatter, each rendered as JSON-LD. Three posts live.
+
+Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.

@@ -65,7 +65,7 @@ const ROADMAP_FORBIDDEN: RegExp[] = [
 describe('roadmap stays high level', () => {
     const roadmapSrc = fs.readFileSync(path.join(root, 'app/roadmap/page.tsx'), 'utf8');
 
-    it('lists five phases with a status each', () => {
+    it('lists the phases with a status each', () => {
         for (let i = 1; i <= 5; i++) expect(roadmapSrc).toContain(`phase: 'Phase ${i}'`);
         expect(roadmapSrc).toMatch(/status: 'Done'/);
         expect(roadmapSrc).toMatch(/status: '(Planned|In progress)'/);

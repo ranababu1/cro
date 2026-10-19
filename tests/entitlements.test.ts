@@ -87,7 +87,7 @@ describe('pricing page', () => {
     it('lists heatmaps and recordings as paid only with coming soon tags', () => {
         const src = fs.readFileSync('app/pricing/page.tsx', 'utf8');
         expect(src).toMatch(/'Heatmaps on paid plans/);
-        expect(src).toMatch(/name: 'Session recordings', p: 4, tier: 1/);
+        expect(src).toMatch(/name: 'Session recordings', p: 7, tier: 1/);
         expect(src).toContain('paid plans only (Starter and up)');
         expect(src).not.toContain('—');
     });
