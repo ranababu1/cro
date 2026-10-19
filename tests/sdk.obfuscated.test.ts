@@ -1,6 +1,9 @@
 /**
  * @vitest-environment happy-dom
+ * @vitest-environment-options {"settings":{"disableJavaScriptFileLoading":true,"disableCSSFileLoading":true,"handleDisabledFileLoadingAsSuccess":true}}
  */
+// The script tag gets a same-origin src so the SDK can find its own URL. File loading is off, so happy-dom never
+// tries to fetch it from localhost:3000 (that stray request used to crash the test worker now and then).
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
