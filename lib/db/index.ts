@@ -55,6 +55,11 @@ export function monthStartIso(now = new Date()): string {
     return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
 }
 
+/** The newest of the per-plan cutoffs, so cleanup reads only rows old enough for some plan (through the date index). */
+function latestCutoff(before: Record<string, string>): string {
+    return Object.values(before).reduce((a, b) => (b > a ? b : a));
+}
+
 export const db = {
     // Users and tenancy
     async getUserByEmail(email: string): Promise<User | null> {
@@ -893,7 +898,7 @@ export const db = {
         const r = await d.run(sql`DELETE FROM audit_log WHERE id IN (
             SELECT a.id FROM audit_log a
             JOIN organizations o ON o.id = a.org_id
-            WHERE a.created_at < CASE coalesce(lower(o.plan), 'free') WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            WHERE a.created_at < ${latestCutoff(before)} AND a.created_at < CASE coalesce(lower(o.plan), 'free') WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
             LIMIT ${limit})`);
         return Number(r.rowsAffected);
     },
@@ -1153,7 +1158,7 @@ export const db = {
             JOIN surveys sv ON sv.id = r.survey_id
             JOIN projects p ON p.id = sv.project_id
             JOIN organizations o ON o.id = p.org_id
-            WHERE r.day < CASE lower(o.plan) WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
+            WHERE r.day < ${latestCutoff(before)} AND r.day < CASE lower(o.plan) WHEN 'free' THEN ${before.free} WHEN 'growth' THEN ${before.growth} WHEN 'enterprise' THEN ${before.enterprise} ELSE ${before.starter} END
             LIMIT ${limit})`);
         return Number(r.rowsAffected);
     },

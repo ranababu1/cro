@@ -201,7 +201,7 @@ export const auditLog = sqliteTable('audit_log', {
     action: text('action').notNull(),
     diff: text('diff'),
     created_at: text('created_at').notNull().default(now),
-}, (t) => [index('idx_audit_org_created').on(t.org_id, t.created_at)]);
+}, (t) => [index('idx_audit_org_created').on(t.org_id, t.created_at), index('idx_audit_created').on(t.created_at)]);
 
 /** Daily aggregated platform telemetry counters. scope_type+scope_id identify platform/org/user/project/experiment. */
 export const telemetryDaily = sqliteTable('telemetry_daily', {
@@ -249,7 +249,7 @@ export const popupDaily = sqliteTable('popup_daily', {
     popup_id: text('popup_id').notNull().references(() => popups.id, { onDelete: 'cascade' }),
     metric: text('metric').notNull(),
     count: integer('count').notNull().default(0),
-}, (t) => [primaryKey({ columns: [t.day, t.popup_id, t.metric] })]);
+}, (t) => [primaryKey({ columns: [t.day, t.popup_id, t.metric] }), index('idx_popup_daily_popup').on(t.popup_id, t.day)]);
 
 /** Last run of each background maintenance job (retention cleanup). One row per job, claimed atomically so one instance runs it. */
 export const maintenanceRuns = sqliteTable('maintenance_runs', {
@@ -274,7 +274,7 @@ export const surveyDaily = sqliteTable('survey_daily', {
     survey_id: text('survey_id').notNull().references(() => surveys.id, { onDelete: 'cascade' }),
     metric: text('metric').notNull(),
     count: integer('count').notNull().default(0),
-}, (t) => [primaryKey({ columns: [t.day, t.survey_id, t.metric] })]);
+}, (t) => [primaryKey({ columns: [t.day, t.survey_id, t.metric] }), index('idx_survey_daily_survey').on(t.survey_id, t.day)]);
 
 /** Individual answers (no visitor id), written in the telemetry batch and capped per survey per day. */
 export const surveyResponses = sqliteTable('survey_responses', {
@@ -285,7 +285,7 @@ export const surveyResponses = sqliteTable('survey_responses', {
     comment: text('comment'),
     path: text('path').notNull().default(''),
     created_at: text('created_at').notNull().default(now),
-}, (t) => [index('idx_survey_responses_survey_day').on(t.survey_id, t.day)]);
+}, (t) => [index('idx_survey_responses_survey_day').on(t.survey_id, t.day), index('idx_survey_responses_day').on(t.day)]);
 
 /** JavaScript errors per test version per day (paid). Batched with telemetry; distinct errors are capped per test per day. */
 export const errorDaily = sqliteTable('error_daily', {
