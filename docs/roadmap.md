@@ -98,6 +98,8 @@ Gap proposal 1 done (19 Oct 2026): teammate invites, roles and multiple projects
 
 Admin-assigned plans and Enterprise for platform admin orgs: done
 
+Blog breadcrumbs on posts 01 and 02: done
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

@@ -17,6 +17,16 @@ article_schema: |
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
   }
+breadcrumb_schema: |
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Blog", "item": "https://www.freeabtest.com/blog"},
+      {"@type": "ListItem", "position": 2, "name": "A/B testing statistics"},
+      {"@type": "ListItem", "position": 3, "name": "How long should you run an A/B test?", "item": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test"}
+    ]
+  }
 faq_schema: |
   {
     "@context": "https://schema.org",
