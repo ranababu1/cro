@@ -4,14 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { PageHeader, Card, CardHeader, CardBody, Table, THead, TBody, TR, TH, TD, Button, Input, Select, Field, StatusBadge, Alert, EmptyState } from '@/app/components/ui';
 import { UpgradeNote } from '@/app/components/UpgradeNote';
 import { DisplayRuleFields, rulesText } from '../popups/DisplayRules';
-import type { SurveyConfig, SurveyStats } from '@/lib/surveys';
+import { SURVEY_TEMPLATES, type NpsSummary, type SurveyConfig, type SurveyStats } from '@/lib/surveys';
 
 interface Survey { id: string; name: string; status: 'draft' | 'active' | 'paused'; config: SurveyConfig | null; stats: SurveyStats }
 interface Data { surveys: Survey[]; max: number }
 interface Results {
     range: number;
     stats: SurveyStats;
-    answers: { total: number; breakdown: Array<{ answer: string; count: number; share: number }>; average: number | null };
+    answers: { total: number; breakdown: Array<{ answer: string; count: number; share: number }>; average: number | null; nps: NpsSummary | null };
     recent: Array<{ created_at: string; answer: string; comment: string | null; path: string }>;
 }
 
@@ -20,7 +20,7 @@ const BLANK: SurveyConfig = {
     comment: true, comment_label: 'Anything else you want to tell us?', button_text: 'Send', thanks: 'Thanks for your answer!',
     position: 'bottom-right', color: '#2563eb', trigger: 'delay', trigger_value: 10, frequency: 'once', device: 'all', match: 'all', match_value: '',
 };
-const TYPE: Record<SurveyConfig['type'], string> = { choice: 'Pick one answer', rating: 'Rating from 1 to 5', text: 'Short written answer' };
+const TYPE: Record<SurveyConfig['type'], string> = { choice: 'Pick one answer', rating: 'Rating from 1 to 5', nps: 'Net Promoter Score (0 to 10)', text: 'Short written answer' };
 const POSITION: Record<SurveyConfig['position'], string> = { 'bottom-right': 'Bottom right corner', 'bottom-left': 'Bottom left corner', center: 'Center of the page' };
 const pct = (n: number | null) => (n === null ? '-' : `${(n * 100).toFixed(1)}%`);
 
@@ -59,7 +59,7 @@ export default function SurveysPage() {
         <div className="space-y-6">
             <PageHeader
                 title="Surveys"
-                description="Ask visitors one question on the pages you choose: pick an answer, a rating from 1 to 5 or a short written answer. Works on any page with the install snippet."
+                description="Ask visitors one question on the pages you choose: pick an answer, a rating, a Net Promoter Score or a short written answer. Works on any page with the install snippet."
                 actions={state.status === 'ok' && idle ? <Button onClick={() => setEditing({ id: null, name: 'Signup feedback', config: BLANK })} disabled={full}>New survey</Button> : undefined}
             />
             {state.status === 'locked' && <UpgradeNote>Surveys are part of the paid plans. Upgrade to Starter or above to ask visitors a question on your site and see their answers.</UpgradeNote>}
@@ -133,9 +133,10 @@ function ResultsView({ survey, onBack }: { survey: Survey; onBack: () => void })
                     <CardHeader title={c.question} description={`${survey.name}. ${r.stats.views.toLocaleString()} views, ${r.stats.responses.toLocaleString()} answers (${pct(r.stats.rate)}).${r.answers.average !== null ? ` Average rating ${r.answers.average.toFixed(2)} of 5.` : ''}`} />
                     <CardBody className="space-y-3">
                         {r.answers.total === 0 && <p className="text-sm text-zinc-500">No answers in this period yet.</p>}
+                        {r.answers.nps && <NpsCard nps={r.answers.nps} />}
                         {r.answers.breakdown.map((b) => (
                             <div key={b.answer}>
-                                <div className="mb-1 flex justify-between text-sm"><span className="text-zinc-800">{c.type === 'rating' ? `${b.answer} of 5` : b.answer}</span><span className="tabular-nums text-zinc-600">{b.count.toLocaleString()} ({pct(b.share)})</span></div>
+                                <div className="mb-1 flex justify-between text-sm"><span className="text-zinc-800">{c.type === 'rating' ? `${b.answer} of 5` : c.type === 'nps' ? `${b.answer} of 10` : b.answer}</span><span className="tabular-nums text-zinc-600">{b.count.toLocaleString()} ({pct(b.share)})</span></div>
                                 <div className="h-2 rounded bg-zinc-100"><div className="h-2 rounded bg-gradient-to-r from-blue-600 to-teal-500" style={{ width: `${b.share * 100}%` }} /></div>
                             </div>
                         ))}
@@ -161,6 +162,19 @@ function ResultsView({ survey, onBack }: { survey: Survey; onBack: () => void })
                     </Table>
                 </Card>
             )}
+        </div>
+    );
+}
+
+function NpsCard({ nps }: { nps: NpsSummary }) {
+    const total = nps.promoters + nps.passives + nps.detractors;
+    const part = (n: number) => `${Math.round((n / total) * 100)}%`;
+    return (
+        <div data-testid="nps-score" className="mb-2 grid gap-3 sm:grid-cols-4">
+            <div className="rounded-lg border border-zinc-200 p-3"><p className="text-xs text-zinc-500">Net Promoter Score</p><p className="text-2xl font-semibold tabular-nums text-zinc-900">{nps.score > 0 ? `+${nps.score}` : nps.score}</p></div>
+            <div className="rounded-lg border border-zinc-200 p-3"><p className="text-xs text-zinc-500">Promoters (9 to 10)</p><p className="text-lg font-semibold tabular-nums text-emerald-700">{part(nps.promoters)}</p></div>
+            <div className="rounded-lg border border-zinc-200 p-3"><p className="text-xs text-zinc-500">Passives (7 to 8)</p><p className="text-lg font-semibold tabular-nums text-zinc-700">{part(nps.passives)}</p></div>
+            <div className="rounded-lg border border-zinc-200 p-3"><p className="text-xs text-zinc-500">Detractors (0 to 6)</p><p className="text-lg font-semibold tabular-nums text-red-700">{part(nps.detractors)}</p></div>
         </div>
     );
 }
@@ -193,6 +207,14 @@ function Editor({ initial, onDone }: { initial: { id: string | null; name: strin
                 <CardHeader title={initial.id ? 'Edit survey' : 'New survey'} description={initial.id ? 'Changes reach your site within a minute.' : 'New surveys start as drafts. Turn them on from the list.'} />
                 <CardBody className="space-y-4">
                     <Field label="Name" hint="Only you see this.">{(id) => <Input id={id} value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />}</Field>
+                    {!initial.id && (
+                        <Field label="Start from a template" hint="Fills in the question and answers. You can change them after.">{(id) => (
+                            <Select id={id} defaultValue="" onChange={(e) => { const t = SURVEY_TEMPLATES.find((x) => x.id === e.target.value); if (t) setC((x) => ({ ...x, ...t.fields })); }}>
+                                <option value="" disabled>Choose a template</option>
+                                {SURVEY_TEMPLATES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
+                            </Select>
+                        )}</Field>
+                    )}
                     <Field label="Question">{(id) => <Input id={id} value={c.question} maxLength={200} onChange={(e) => set('question', e.target.value)} />}</Field>
                     <Field label="Answer type">{(id) => <Select id={id} value={c.type} onChange={(e) => set('type', e.target.value as SurveyConfig['type'])}>{Object.entries(TYPE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</Select>}</Field>
                     {c.type === 'choice' && (
@@ -237,7 +259,8 @@ function Editor({ initial, onDone }: { initial: { id: string | null; name: strin
 }
 
 function Preview({ c }: { c: SurveyConfig }) {
-    const values = c.type === 'rating' ? ['1', '2', '3', '4', '5'] : c.options.filter((o) => o.trim());
+    const scale = c.type === 'rating' || c.type === 'nps';
+    const values = c.type === 'rating' ? ['1', '2', '3', '4', '5'] : c.type === 'nps' ? Array.from({ length: 11 }, (_, i) => String(i)) : c.options.filter((o) => o.trim());
     const box = (
         <div className="relative w-full max-w-[340px] rounded-xl bg-white p-5 text-left shadow-xl">
             <span aria-hidden className="absolute right-3 top-2 text-lg text-zinc-400">×</span>
@@ -245,8 +268,8 @@ function Preview({ c }: { c: SurveyConfig }) {
             {c.type === 'text' ? (
                 <div className="mb-3 h-16 rounded-lg border border-zinc-300" />
             ) : (
-                <div className={`mb-3 flex gap-2 ${c.type === 'rating' ? '' : 'flex-col'}`}>
-                    {values.map((v, i) => <span key={i} className={`rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 ${c.type === 'rating' ? 'flex-1 text-center' : ''}`}>{v}</span>)}
+                <div className={`mb-3 flex ${c.type === 'nps' ? 'gap-0.5' : 'gap-2'} ${scale ? '' : 'flex-col'}`}>
+                    {values.map((v, i) => <span key={i} className={`rounded-lg border border-zinc-300 py-2 text-sm text-zinc-800 ${scale ? 'flex-1 text-center' : 'px-3'} ${c.type === 'nps' ? 'text-xs' : ''}`}>{v}</span>)}
                 </div>
             )}
             {c.type !== 'text' && c.comment && <><p className="mb-1 text-xs text-zinc-500">{c.comment_label}</p><div className="mb-3 h-12 rounded-lg border border-zinc-300" /></>}

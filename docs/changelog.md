@@ -5,6 +5,7 @@ For the commit that adds a row, write "pending" as the ID, then fill in the shor
 
 | Commit | Date and time (IST) | Summary |
 |---|---|---|
+| pending | 2026-10-19 00:47 IST | Surveys: Net Promoter Score questions (0 to 10) with the score, promoters, passives and detractors in the answers view, and five templates to start a survey from (NPS, what almost stopped you, how did you hear about us, was this page helpful, open question). |
 | pending | 2026-10-19 00:39 IST | Surveys on paid plans: ask one question (pick an answer, a 1 to 5 rating or a written answer, with an optional comment) on the pages you choose. See the share of each answer, the average rating and the latest comments, and download answers as CSV. A visitor sees at most one popup or survey per page view. |
 | pending | 2026-10-19 00:23 IST | Popups and calls to action (paid): center, corner or bar popups with delay, scroll or exit triggers, page rules, frequency and devices; views, clicks and click rate per popup; popups.js loads only on matching pages. |
 | pending | 2026-10-19 00:08 IST | JavaScript error tracking on paid plans: a new Errors tab on each test shows uncaught errors and failed promises per version, with pages with errors, errors per 100 visitors and the top errors. Messages are cleaned of emails, long numbers and tokens. The Phase 5 roadmap is now in progress. |

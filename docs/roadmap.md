@@ -66,6 +66,8 @@ JavaScript error tracking per version (paid)
 
 - 19 Oct 2026: Surveys shipped (paid). Phase 5 engagement extras complete.
 
+- 19 Oct 2026: Survey NPS question type and templates shipped (paid).
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
