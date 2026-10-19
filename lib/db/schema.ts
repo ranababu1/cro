@@ -145,9 +145,19 @@ export const experiments = sqliteTable('experiments', {
     // Roll out the winner: a completed test that sends every visitor to this variation, with nothing counted. Null = off.
     rollout_variation_id: text('rollout_variation_id'),
     rollout_at: text('rollout_at'),
+    // Scheduling (lib/schedule.ts): start and stop at these times (UTC ISO, null = none). schedule_error says why a scheduled start was cancelled.
+    schedule_start_at: text('schedule_start_at'),
+    schedule_stop_at: text('schedule_stop_at'),
+    schedule_error: text('schedule_error'),
+    // Traffic ramp: begin at ramp_start percent and add ramp_step every ramp_every_hours from the first start, up to traffic_allocation. Null = no ramp.
+    ramp_start: integer('ramp_start'),
+    ramp_step: integer('ramp_step'),
+    ramp_every_hours: integer('ramp_every_hours'),
 }, (t) => [
     index('idx_experiments_project').on(t.project_id),
     index('idx_experiments_status').on(t.status),
+    index('idx_experiments_schedule_start').on(t.schedule_start_at),
+    index('idx_experiments_schedule_stop').on(t.schedule_stop_at),
     check('ck_experiments_traffic', sql`${t.traffic_allocation} >= 0 AND ${t.traffic_allocation} <= 100`),
 ]);
 

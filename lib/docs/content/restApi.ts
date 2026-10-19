@@ -80,6 +80,8 @@ export const restApi: DocPage = {
   -d '{"status": "running"}'` },
         { type: 'h3', text: 'DELETE /api/experiments/{id}', id: 'delete-experiment' },
         { type: 'p', text: 'Deletes a draft. Any other status returns 400.' },
+        { type: 'h3', text: 'PUT /api/experiments/{id}/schedule', id: 'schedule' },
+        { type: 'p', text: 'Body `{ "start_at": "2026-11-01T09:00:00Z", "stop_at": null, "ramp": { "start": 10, "step": 10, "every_hours": 24 } }`. Replaces the schedule. Times are ISO 8601 with a time zone and must be in the future, within a year; `start_at` applies to drafts and paused tests only. Use `null` to leave a part unset. `GET` returns the schedule with `traffic_now`, the share of new visitors entering the test right now. `DELETE` removes the schedule. See [Scheduling and ramping traffic](/docs/experiments#schedule).' },
         { type: 'h3', text: 'POST /api/experiments/{id}/rollout', id: 'rollout' },
         { type: 'p', text: 'Body `{ "variation_id": "var_456" }`. Sends every visitor in the test\'s audience to that variation and records nothing (see [Roll out the winner](/docs/choosing-a-winner#rollout)). A running or paused test is stopped first; a draft returns 400. `DELETE /api/experiments/{id}/rollout` stops the rollout, and the test stays stopped.' },
         { type: 'h3', text: 'POST /api/experiments/{id}/variations/{variationId}/preview', id: 'preview-link' },

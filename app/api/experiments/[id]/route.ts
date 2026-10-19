@@ -5,12 +5,10 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { updateExperimentSchema, formatZodError } from '@/lib/validation';
 import type { ExperimentStatus } from '@/lib/types';
-import { checkExperimentStartQuota, quotaMessage } from '@/lib/quotas';
-import { getOrgEntitlements } from '@/lib/entitlements';
-import { checkDomainTests, countDomainTest } from '@/lib/domainLedger';
-import { logAbuse } from '@/lib/abuse';
+import { checkStart, afterStatusChange } from '@/lib/experimentStatus';
+import { scheduleSchedules } from '@/lib/schedule';
 import { serializeTargeting } from '@/lib/targeting';
-import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
+import { clientIpFromHeaders } from '@/lib/telemetry';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -29,6 +27,8 @@ export async function GET(request: NextRequest, { params }: Params) {
         const ctx = await requireUserContext(request);
         if (ctx instanceof NextResponse) return ctx;
         const { id } = await params;
+        // Scheduled starts and stops also run from the dashboard, for sites with no traffic yet.
+        scheduleSchedules();
         const experiment = await getAccessibleExperiment(ctx, id);
         if (!experiment) return notFound();
         const variations = await db.getVariations(id);
@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const { targeting, ...rest } = parsed.data;
         const updates: Parameters<typeof db.updateExperiment>[1] = { ...rest };
-        let countDomain: string | null = null;
+        let start: { startedAt: string | null; countDomain: string | null } | null = null;
         // Targeting applies to new visitors only; people already in the test keep their version.
         if (targeting !== undefined) updates.targeting = serializeTargeting(targeting);
 
@@ -67,43 +67,21 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             if (updates.status === 'running') {
                 const gate = await profileGate(ctx);
                 if (gate) return gate;
-                // Plan limits: running tests at a time on every start or resume; lifetime and monthly limits on first start.
-                const firstStart = !experiment.started_at;
-                const quota = await checkExperimentStartQuota(await orgIdForProject(experiment.project_id), firstStart);
-                if (!quota.allowed) {
-                    return NextResponse.json({ error: quotaMessage(quota), reason: quota.reason }, { status: 403 });
-                }
-                if (firstStart) {
-                    const orgId = await orgIdForProject(experiment.project_id);
-                    if ((await getOrgEntitlements(orgId)).freeTierRules) {
-                        const dom = await checkDomainTests(experiment.control_url);
-                        if (!dom.ok) {
-                            await logAbuse(orgId, 'domain_exhausted', { domain: dom.domain, experiment: id }, ctx.userId);
-                            return NextResponse.json({ error: dom.message, reason: 'domain_exhausted' }, { status: 403 });
-                        }
-                        countDomain = dom.domain;
-                    }
-                    updates.started_at = new Date().toISOString();
-                }
+                const check = await checkStart(experiment, ctx.userId);
+                if (!check.ok) return NextResponse.json({ error: check.error, reason: check.reason }, { status: 403 });
+                start = check;
+                if (check.startedAt) updates.started_at = check.startedAt;
+                // A manual start replaces a pending scheduled start.
+                updates.schedule_start_at = null;
+                updates.schedule_error = null;
             }
             if (updates.status === 'completed' && !experiment.ended_at) updates.ended_at = new Date().toISOString();
+            if (updates.status === 'completed') { updates.schedule_start_at = null; updates.schedule_stop_at = null; }
         }
 
         await db.updateExperiment(id, updates);
-        if (updates.started_at) {
-            const orgId = await orgIdForProject(experiment.project_id);
-            await db.incrementExperimentsStarted(orgId);
-            if (countDomain) await countDomainTest(countDomain, orgId);
-        }
-        if (updates.status === 'running' && experiment.status !== 'running') {
-            const orgId = await orgIdForProject(experiment.project_id);
-            await bumpMetric(METRICS.tests_started, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
-            await recordProductEvent({ action: 'experiment.start', userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id, ip: clientIpFromHeaders(request.headers) });
-        }
-        if (updates.status === 'completed' && experiment.status !== 'completed') {
-            const orgId = await orgIdForProject(experiment.project_id);
-            await bumpMetric(METRICS.tests_completed, { userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id });
-            await recordProductEvent({ action: 'experiment.complete', userId: ctx.userId, orgId, projectId: experiment.project_id, experimentId: id, ip: clientIpFromHeaders(request.headers) });
+        if (updates.status && updates.status !== experiment.status) {
+            await afterStatusChange(experiment, updates.status, start, { userId: ctx.userId, ip: clientIpFromHeaders(request.headers) });
         }
         await db.audit({
             orgId: await orgIdForProject(experiment.project_id),

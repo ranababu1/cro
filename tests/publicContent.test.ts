@@ -249,6 +249,7 @@ describe('demo page removed', () => {
         }
         const home = fs.readFileSync(path.join(root, 'app/page.tsx'), 'utf8');
         expect(home).toMatch(/<a href="#"[^>]*>[\s\S]{0,400}See the demo/);
+        expect(home).not.toContain('Sample page');
     });
     it('redirects old demo addresses to the homepage', () => {
         // eslint-disable-next-line @typescript-eslint/no-require-imports

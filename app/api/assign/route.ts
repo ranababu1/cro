@@ -10,6 +10,7 @@ import { formatZodError } from '@/lib/validation';
 import { checkVisitorQuota, recordNewVisitor } from '@/lib/quotas';
 import { bumpMetric, METRICS } from '@/lib/telemetry';
 import { scheduleAutoShift } from '@/lib/autoShiftRun';
+import { scheduleSchedules, effectiveAllocation, pastStop } from '@/lib/schedule';
 
 const assignBody = z.object({
     experiment_id: z.string().min(1).max(100),
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
         const { experiment_id: experimentId, user_id: userId } = parsed.data;
 
+        scheduleSchedules();
         const experiment = await db.getExperiment(experimentId);
         if (!experiment || experiment.project_id !== auth.ctx.projectId) {
             return sdkJson({ error: 'Experiment not found' }, 404);
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
         const existing = await db.getAssignment(experimentId, userId);
         if (existing) {
             const variation = variations.find((v) => v.id === existing.variation_id);
-            if (variation && experiment.status === 'running') {
+            if (variation && experiment.status === 'running' && !pastStop(experiment)) {
                 return sdkJson({
                     experiment_id: experimentId,
                     variation_id: variation.id,
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (!isExperimentEligible(experiment.status, experiment.traffic_allocation)) {
+        if (!isExperimentEligible(experiment.status, effectiveAllocation(experiment))) {
             return sdkJson(notAssigned(experimentId));
         }
         scheduleAutoShift(experiment, auth.ctx.orgId);
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
         }
 
         const active = variations.filter((v) => !v.paused && v.weight > 0);
-        const assigned = active.length ? assignUserToVariation(userId, experimentId, experiment.traffic_allocation, active) : null;
+        const assigned = active.length ? assignUserToVariation(userId, experimentId, effectiveAllocation(experiment), active) : null;
         if (!assigned) return sdkJson(notAssigned(experimentId));
 
         const quota = await checkVisitorQuota(auth.ctx.orgId, userId);
