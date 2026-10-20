@@ -22,11 +22,11 @@ export const sdk: DocPage = {
             'It hides the page for at most 0.8 seconds while it decides, so visitors do not see the original flash first.',
         ] },
         { type: 'h2', text: 'track(eventName, options)', id: 'track' },
-        { type: 'p', text: 'Counts a custom event goal, such as a signup or purchase that happens in your own code. It counts for every running test that has an event goal with this name, once per visitor. On paid plans, pass `revenue` to record the order value (see [Revenue goals](/docs/goals#revenue)).' },
+        { type: 'p', text: 'On paid plans, counts a custom event goal, such as a signup or purchase that happens in your own code. On the free plan it is refused with `403`. It counts for every running test that has an event goal with this name, once per visitor. On paid plans, pass `revenue` to record the order value (see [Revenue goals](/docs/goals#revenue)).' },
         { type: 'code', label: 'JavaScript', code: `ABTest.track('signup');
 ABTest.track('purchase', { revenue: 49.99 });` },
         { type: 'h2', text: 'trackConversion(experimentId, eventName)', id: 'track-conversion' },
-        { type: 'p', text: 'Records a conversion for one test, for the variation the visitor sees on this page. `eventName` is an optional label such as `signup`. It sends nothing if the visitor is not in that test on the current page. For most sites, an event goal with `ABTest.track` is simpler, because it also works on a thank-you page.' },
+        { type: 'p', text: 'Paid plans. Records a conversion for one test, for the variation the visitor sees on this page. `eventName` is an optional label such as `signup`. It sends nothing if the visitor is not in that test on the current page. For most sites, an event goal with `ABTest.track` is simpler, because it also works on a thank-you page.' },
         { type: 'code', label: 'JavaScript', code: `ABTest.trackConversion('exp_123', 'signup');` },
         { type: 'h2', text: 'bootstrap()', id: 'bootstrap' },
         { type: 'p', text: 'Runs the same check the snippet runs on load and returns a promise with the reply. Use it when your own code needs to know the variation, or after a route change in a single-page app. Each call makes one request.' },

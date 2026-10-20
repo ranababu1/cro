@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardBody, Field, Input, Button, Alert } from '@/app/components/ui';
 import type { Allowances } from '@/lib/allowances';
 
-type NumKey = 'monthly_visitors' | 'daily_visitors' | 'lifetime_experiments' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats' | 'domains';
+type NumKey = 'monthly_visitors' | 'daily_visitors' | 'monthly_tests' | 'max_goals' | 'monthly_pageviews' | 'max_variations' | 'active_experiments' | 'projects' | 'seats' | 'domains';
 const NUM_FIELDS: { key: NumKey; label: string }[] = [
     { key: 'monthly_visitors', label: 'Tested visitors per month' },
     { key: 'daily_visitors', label: 'Tested visitors per day' },
-    { key: 'lifetime_experiments', label: 'Experiments (lifetime)' },
+    { key: 'monthly_tests', label: 'New tests per month' },
+    { key: 'max_goals', label: 'Goals per test' },
     { key: 'monthly_pageviews', label: 'Pageviews per month' },
     { key: 'max_variations', label: 'Max variations' },
     { key: 'active_experiments', label: 'Active experiments' },
@@ -46,6 +47,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
     const [popupsT, setPopupsT] = useState<Toggle>(toToggle(allowances.popups));
     const [surveysT, setSurveysT] = useState<Toggle>(toToggle(allowances.surveys));
     const [auditT, setAuditT] = useState<Toggle>(toToggle(allowances.audit_log));
+    const [advGoals, setAdvGoals] = useState<Toggle>(toToggle(allowances.advanced_goals));
     const [msg, setMsg] = useState<{ tone: 'success' | 'danger'; text: string } | null>(null);
     const [busy, setBusy] = useState(false);
 
@@ -70,6 +72,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
         const pp = fromToggle(popupsT); if (pp !== undefined) out.popups = pp;
         const sv = fromToggle(surveysT); if (sv !== undefined) out.surveys = sv;
         const au = fromToggle(auditT); if (au !== undefined) out.audit_log = au;
+        const ag = fromToggle(advGoals); if (ag !== undefined) out.advanced_goals = ag;
         if (!out.flags) delete out.flags;
         const res = await fetch(`/api/admin/orgs/${orgId}/allowances`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ special_friend: enabled, allowances: out }) });
         setBusy(false);
@@ -109,6 +112,7 @@ export default function SpecialFriendPanel({ orgId, specialFriend, allowances }:
                     <Field label="Popups">{(id) => select(id, popupsT, setPopupsT)}</Field>
                     <Field label="Surveys">{(id) => select(id, surveysT, setSurveysT)}</Field>
                     <Field label="Audit log">{(id) => select(id, auditT, setAuditT)}</Field>
+                    <Field label="Advanced goals (form, page, custom events)">{(id) => select(id, advGoals, setAdvGoals)}</Field>
                 </div>
                 <div className="flex justify-end"><Button onClick={() => void save()} disabled={busy}>Save allowances</Button></div>
             </CardBody>

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain } from './helpers';
+import { useTempDatabase, seedProjectDomain, makePaid } from './helpers';
 
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => null) }));
 
@@ -35,6 +35,7 @@ beforeAll(async () => {
     cleanup = useTempDatabase();
     const u1 = await db.createUser({ email: 'one@example.com', name: 'One' });
     const ws1 = await db.ensureWorkspace(u1);
+    await makePaid(ws1.orgId); // conversions without a click goal are a paid feature
     await seedProjectDomain(ws1.projectId, 'localhost');
     const env1 = (await db.getEnvironments(ws1.projectId)).find((e) => e.key === 'dev')!;
     sdkKey = (await db.createApiKey({ environmentId: env1.id, type: 'sdk' })).key;

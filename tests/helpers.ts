@@ -34,3 +34,17 @@ export function flowExperimentBody(overrides: Record<string, unknown> = {}) {
         ...overrides,
     };
 }
+
+/** Free accounts create 1 test a month: clears the monthly counters so a test can create several. */
+export async function resetFreeTestUsage() {
+    const { getDb } = await import('@/lib/db/client');
+    const { sql } = await import('drizzle-orm');
+    await (await getDb()).run(sql`delete from free_test_usage`);
+}
+
+/** Puts an org on a paid plan, for tests of features the free plan does not include (custom conversions, more goals). */
+export async function makePaid(orgId: string, plan = 'starter') {
+    await db.updateOrganization(orgId, { plan });
+    const { clearConfigCache } = await import('@/lib/configCache');
+    clearConfigCache();
+}

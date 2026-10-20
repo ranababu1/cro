@@ -3,15 +3,15 @@ import { and, eq, sql } from 'drizzle-orm';
 import { getDb } from './db/client';
 import * as s from './db/schema';
 import { db } from './db';
-import { FREE_LIFETIME_EXPERIMENTS } from './plans';
+import { FREE_MONTHLY_TESTS } from './plans';
 import { normalizeHost } from './domains';
 
 /**
  * Free-tier anti-abuse. Every free org's domains are tracked by registrable domain (eTLD+1, from
  * the public suffix list), globally across orgs:
  *   - one free org holds a registrable domain at a time (first claim wins);
- *   - the 10 lifetime free tests are counted per domain as well as per account;
- *   - a domain that has used its free tests cannot be added by another free org.
+ *   - the free plan's new tests per month are counted per domain as well as per account (lib/freeTests.ts);
+ *   - a domain that has used this month's free test cannot be moved to another free org until the month resets.
  * Paid orgs, special friends and admins are exempt (entitlements.freeTierRules = false).
  */
 
@@ -31,7 +31,7 @@ export function registrableDomain(input: string | null | undefined): string | nu
     return getDomain(bare, { allowPrivateDomains: false }) ?? null;
 }
 
-export const DOMAIN_FREE_TESTS = FREE_LIFETIME_EXPERIMENTS;
+export const DOMAIN_FREE_TESTS = FREE_MONTHLY_TESTS;
 
 export type ClaimResult = { ok: true; domain: string | null } | { ok: false; reason: 'domain_taken' | 'domain_exhausted'; domain: string; message: string };
 
@@ -46,8 +46,11 @@ export async function claimDomain(orgId: string, host: string): Promise<ClaimRes
     if (!domain) return { ok: true, domain: null };
     const d = await getDb();
     const row = await getLedgerEntry(domain);
-    if (row && row.experiments_used >= DOMAIN_FREE_TESTS && row.org_id !== orgId) {
-        return { ok: false, reason: 'domain_exhausted', domain, message: `${domain} has already used the free plan's ${DOMAIN_FREE_TESTS} tests. Upgrade to a paid plan to test it.` };
+    if (row && row.org_id !== orgId) {
+        const { testsCreatedThisMonth, monthResetAt, formatResetDate } = await import('./freeTests');
+        if ((await testsCreatedThisMonth('domain', domain)) >= DOMAIN_FREE_TESTS) {
+            return { ok: false, reason: 'domain_exhausted', domain, message: `${domain} has already had this month's free test on another account. It can be added to a free account again on ${formatResetDate(monthResetAt())}, or upgrade to a paid plan to test it now.` };
+        }
     }
     if (row?.org_id && row.org_id !== orgId) {
         return { ok: false, reason: 'domain_taken', domain, message: `${domain} is already set up on another free account. Each domain can be on one free account at a time. Upgrade to a paid plan to use it here.` };
@@ -72,23 +75,6 @@ export async function releaseDomainIfUnused(orgId: string, host: string): Promis
     }
     const d = await getDb();
     await d.update(s.domainLedger).set({ org_id: null, updated_at: new Date().toISOString() }).where(and(eq(s.domainLedger.domain, domain), eq(s.domainLedger.org_id, orgId)));
-}
-
-/** Before a free org's first start of a test on this URL. */
-export async function checkDomainTests(controlUrl: string | null | undefined): Promise<{ ok: true; domain: string | null } | { ok: false; domain: string; message: string }> {
-    const domain = registrableDomain(controlUrl);
-    if (!domain) return { ok: true, domain: null };
-    const row = await getLedgerEntry(domain);
-    if (row && row.experiments_used >= DOMAIN_FREE_TESTS) {
-        return { ok: false, domain, message: `${domain} has used all ${DOMAIN_FREE_TESTS} tests the free plan includes for a domain. Upgrade to keep testing it.` };
-    }
-    return { ok: true, domain };
-}
-
-export async function countDomainTest(domain: string, orgId: string): Promise<void> {
-    const d = await getDb();
-    await d.insert(s.domainLedger).values({ domain, org_id: orgId, claimed_at: new Date().toISOString(), experiments_used: 1 })
-        .onConflictDoUpdate({ target: s.domainLedger.domain, set: { experiments_used: sql`${s.domainLedger.experiments_used} + 1`, updated_at: new Date().toISOString() } });
 }
 
 /** Registered non-local hosts across the org. */

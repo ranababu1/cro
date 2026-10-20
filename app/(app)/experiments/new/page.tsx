@@ -10,6 +10,8 @@ import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Fiel
 import { GOAL_TYPES, GOAL_TYPE_LABELS, describeGoal, type GoalType, type PageMatchType } from '@/lib/goals';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
+import { LockedGoalTypes } from '@/app/components/LockedGoalTypes';
+import { formatResetDate } from '@/lib/monthReset';
 import { TargetingFields } from '@/app/components/TargetingFields';
 import { describeTargeting, type Targeting } from '@/lib/targeting';
 
@@ -53,6 +55,10 @@ export default function NewExperimentWizard() {
     const [plan, setPlan] = useState('free');
     const [maxVars, setMaxVars] = useState(1);
     const [visualOk, setVisualOk] = useState(false);
+    // Goals per test (null: MAX_GOALS) and whether form, page and custom event goals are included (paid plans).
+    const [maxGoals, setMaxGoals] = useState<number | null>(1);
+    const [advancedGoals, setAdvancedGoals] = useState(false);
+    const [monthly, setMonthly] = useState<{ limit: number; used: number; resets_at: string } | null>(null);
     const [name, setName] = useState('');
     const [controlUrl, setControlUrl] = useState('');
     const [vars, setVars] = useState<VarDraft[]>([
@@ -104,11 +110,16 @@ export default function NewExperimentWizard() {
                 setPlan(p.plan || 'free');
                 setMaxVars(p.max_variations === null ? 50 : p.max_variations || 1);
                 setVisualOk(!!p.features?.visual_editor);
+                setMaxGoals(p.max_goals === undefined ? null : p.max_goals);
+                setAdvancedGoals(!!p.features?.advanced_goals);
+                setMonthly(p.monthly_tests ?? null);
             }
         })();
     }, []);
 
     const nonControlCount = vars.filter((v) => !v.is_control).length;
+    const goalCap = maxGoals === null ? MAX_GOALS : Math.min(maxGoals, MAX_GOALS);
+    const monthlyUsed = !!monthly && monthly.used >= monthly.limit;
     const stepIndex = STEPS.findIndex((s) => s.id === step);
 
     function setWeightsEqual() {
@@ -197,10 +208,10 @@ export default function NewExperimentWizard() {
         if (step === 'domain') return domains.length > 0;
         if (step === 'control') return !!controlUrl && !!name;
         if (step === 'variations') return vars.every((v) => (v.url || (v.visual && !v.is_control)) && v.name) && Math.abs(vars.reduce((a, v) => a + v.weight, 0) - 100) < 0.05;
-        if (step === 'goals') return goals.length > 0 && goals.length <= MAX_GOALS && goals.every((g) => g.name.trim() && g.selector.trim() && !goalProblem(g)) && goals.filter((g) => g.is_primary).length === 1;
+        if (step === 'goals') return goals.length > 0 && goals.length <= goalCap && goals.every((g) => g.name.trim() && g.selector.trim() && !goalProblem(g) && (advancedGoals || g.type === 'click')) && goals.filter((g) => g.is_primary).length === 1;
         if (step === 'traffic') return traffic >= 0 && traffic <= 100;
         return true;
-    }, [step, domains, controlUrl, name, vars, goals, traffic]);
+    }, [step, domains, controlUrl, name, vars, goals, traffic, goalCap, advancedGoals]);
 
     function goNext() {
         if (!canNext) return;
@@ -237,6 +248,11 @@ export default function NewExperimentWizard() {
 
             {(profileMissing || error === PROFILE_REQUIRED_MESSAGE) && <ProfileRequired next="/experiments/new" className="mb-4" />}
             {error && error !== PROFILE_REQUIRED_MESSAGE && <Alert tone="danger" className="mb-4">{error}</Alert>}
+            {monthlyUsed && monthly && (
+                <Alert tone="warning" className="mb-4" title="You have created this month's free test" data-testid="monthly-limit">
+                    The free plan includes {monthly.limit} new test a month, and deleting a test does not give it back. You can create the next one on {formatResetDate(monthly.resets_at)}, or <Link href="/pricing" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:underline">upgrade to Starter or above</Link> to create more now.
+                </Alert>
+            )}
 
             {step === 'domain' && (
                 <Card>
@@ -307,9 +323,9 @@ export default function NewExperimentWizard() {
 
             {step === 'goals' && (
                 <Card>
-                    <CardHeader title="Goals" description="Add goals one at a time. Each goal has a name and one CSS selector (or a page or custom event), and gets its own numbers in results." actions={<Button variant="secondary" size="sm" disabled={goals.length >= MAX_GOALS} onClick={() => setGoals((g) => [...g, { name: '', type: 'click', selector: '', match_type: 'equals', is_primary: false }])}>Add goal</Button>} />
+                    <CardHeader title="Goals" description={advancedGoals ? 'Add goals one at a time. Each goal has a name and one CSS selector (or a page or custom event), and gets its own numbers in results.' : 'Name the goal and give the CSS selector of the element visitors click, like a button or link.'} actions={<Button variant="secondary" size="sm" disabled={goals.length >= goalCap} onClick={() => setGoals((g) => [...g, { name: '', type: 'click', selector: '', match_type: 'equals', is_primary: false }])}>Add goal</Button>} />
                     <CardBody className="space-y-4">
-                        <p className="text-sm text-zinc-500" data-testid="goal-count">{goals.length} of {MAX_GOALS} goals</p>
+                        <p className="text-sm text-zinc-500" data-testid="goal-count">{goals.length} of {goalCap} goal{goalCap === 1 ? '' : 's'}</p>
                         {goals.map((g, i) => (
                             <div key={i} className="space-y-1">
                             <div className="grid gap-3 rounded-xl border border-zinc-200 p-4 sm:grid-cols-[auto_1fr_9rem_auto_1.4fr_auto_auto]">
@@ -319,7 +335,7 @@ export default function NewExperimentWizard() {
                                 </div>
                                 <Input aria-label="Goal name" placeholder="Primary CTA" value={g.name} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
                                 <select aria-label="Goal type" className={selectClass} value={g.type} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, type: e.target.value as GoalType } : x))}>
-                                    {GOAL_TYPES.map((t) => <option key={t} value={t}>{GOAL_TYPE_LABELS[t]}</option>)}
+                                    {GOAL_TYPES.map((t) => <option key={t} value={t} disabled={!advancedGoals && t !== 'click'}>{GOAL_TYPE_LABELS[t]}{!advancedGoals && t !== 'click' ? ' (paid plans)' : ''}</option>)}
                                 </select>
                                 {g.type === 'page' ? (
                                     <select aria-label="URL match" className={selectClass} value={g.match_type} onChange={(e) => setGoals((gs) => gs.map((x, j) => j === i ? { ...x, match_type: e.target.value as PageMatchType } : x))}>
@@ -339,6 +355,7 @@ export default function NewExperimentWizard() {
                             {goalProblem(g) && <p className="px-1 text-sm text-red-600">{goalProblem(g)}</p>}
                             </div>
                         ))}
+                        {!advancedGoals && <LockedGoalTypes maxGoals={maxGoals} />}
                         {goals.some((g) => g.type === 'event') && (
                             <p className="text-sm text-zinc-500">For custom events, call <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;{goals.find((g) => g.type === 'event')?.selector || 'signup'}&apos;)</code> on your page when the action happens. On paid plans, add the order value to track revenue: <code className="rounded bg-zinc-100 px-1">ABTest.track(&apos;purchase&apos;, {'{'} revenue: 49.99 {'}'})</code>.</p>
                         )}

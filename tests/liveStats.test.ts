@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody, makePaid } from './helpers';
 import { buildLiveStats, goalStatus, upliftInterval, type LiveCounts } from '@/lib/liveStats';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
@@ -99,6 +99,7 @@ describe('live stats end to end', () => {
         cleanup = useTempDatabase();
         const u = await db.createUser({ email: 'live@example.com', name: 'Live' });
         const ws = await db.ensureWorkspace(u);
+        await makePaid(ws.orgId); // several goals per test are a paid feature
         await seedProjectDomain(ws.projectId, 'localhost');
         const env = (await db.getEnvironments(ws.projectId)).find((e) => e.key === 'dev')!;
         sdkKey = (await db.createApiKey({ environmentId: env.id, type: 'sdk' })).key;

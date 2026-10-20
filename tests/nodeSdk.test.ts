@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain } from './helpers';
+import { useTempDatabase, seedProjectDomain, makePaid } from './helpers';
 
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => null) }));
 
@@ -51,6 +51,7 @@ beforeAll(async () => {
     const u = await db.createUser({ email: 'node@example.com', name: 'Node' });
     const ws = await db.ensureWorkspace(u);
     projectId = ws.projectId;
+    await makePaid(ws.orgId); // conversions sent from code are a paid feature
     await seedProjectDomain(ws.projectId, 'localhost');
     const env = (await db.getEnvironments(ws.projectId)).find((e) => e.key === 'prod')!;
     secretKey = (await db.createApiKey({ environmentId: env.id, type: 'secret' })).key;

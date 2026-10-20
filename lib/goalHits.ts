@@ -25,6 +25,8 @@ interface HitInput {
  * Returns the number of events recorded.
  */
 export async function recordGoalHits(input: HitInput): Promise<number> {
+    // Page visit and custom event goals are paid (advanced goals); the free plan counts click goals only.
+    if (!(await canUseFeature(input.orgId, 'advanced_goals'))) return 0;
     const running = await db.getRunningExperimentGoals(input.projectId);
     let recorded = 0;
     // Resolved on the first matching test: the amount, or null when the plan does not include revenue goals.

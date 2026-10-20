@@ -50,7 +50,7 @@ export const organizations = sqliteTable('organizations', {
     // Tracked pageviews per month. null = plan default, -1 = unlimited. See lib/pageviewQuota.ts.
     monthly_pageview_limit: integer('monthly_pageview_limit'),
     // Special friend: custom allowances (JSON, see lib/allowances.ts) override the plan. Admin only, never shown to tenants.
-    // Experiments ever started in this org. Never decreases, so deleting tests does not reset the free lifetime limit.
+    // Experiments ever started in this org (telemetry). Plan limits use free_test_usage instead.
     experiments_started_total: integer('experiments_started_total').notNull().default(0),
     special_friend: integer('special_friend', { mode: 'boolean' }).notNull().default(false),
     custom_allowances: text('custom_allowances'),
@@ -417,15 +417,29 @@ export const rollupState = sqliteTable('rollup_state', {
 
 /**
  * Free-tier usage per registrable domain (eTLD+1), across all orgs. Survives org and domain deletion.
- * org_id is the free org currently holding the domain (null when released). experiments_used never decreases.
+ * org_id is the free org currently holding the domain (null when released).
  */
 export const domainLedger = sqliteTable('domain_ledger', {
     domain: text('domain').primaryKey(),
     org_id: text('org_id').references(() => organizations.id, { onDelete: 'set null' }),
     claimed_at: text('claimed_at'),
+    // Not used for limits any more (free tests are counted per month in free_test_usage). Kept so no data is dropped.
     experiments_used: integer('experiments_used').notNull().default(0),
     updated_at: text('updated_at').notNull().default(now),
 }, (t) => [index('idx_domain_ledger_org').on(t.org_id)]);
+
+/**
+ * Free plan: new tests created per calendar month (UTC, month = YYYY-MM), counted per org (scope 'org', key org id)
+ * and per registrable domain of the test page (scope 'domain', key eTLD+1). Never decreases, so deleting a test
+ * does not give the allowance back. See lib/freeTests.ts.
+ */
+export const freeTestUsage = sqliteTable('free_test_usage', {
+    scope: text('scope', { enum: ['org', 'domain'] }).notNull(),
+    key: text('key').notNull(),
+    month: text('month').notNull(),
+    tests: integer('tests').notNull().default(0),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [primaryKey({ columns: [t.scope, t.key, t.month] })]);
 
 // Heatmaps (paid plans). Raw points are kept 30 days for confetti; reports read the daily rollups.
 export const heatmapPoints = sqliteTable('heatmap_points', {

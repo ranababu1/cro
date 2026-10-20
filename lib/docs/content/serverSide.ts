@@ -24,7 +24,7 @@ export const serverSide: DocPage = {
     {"experiment_id": "exp_123", "variation_id": "var_b", "user_id": "user_42", "event_type": "page_view"},
     {"experiment_id": "exp_123", "variation_id": "var_b", "user_id": "user_42", "event_type": "conversion", "goal_id": "goal_1"}
   ]}'` },
-        { type: 'p', text: 'Events use the same fields as [POST /api/track](/docs/rest-api#track). Send one event or up to 50 in `events`; group events and send them together rather than one request per event. Conversions count once per visitor per goal. A page view for a variation other than the visitor\'s assigned one is refused with `409`. When the organization reaches its monthly page view limit, the reply is `202` with `paused: true` and nothing is stored.' },
+        { type: 'p', text: 'Events use the same fields as [POST /api/track](/docs/rest-api#track). Send one event or up to 50 in `events`; group events and send them together rather than one request per event. Conversions count once per visitor per goal. On the free plan a conversion needs the `goal_id` of the test\'s click goal; other conversions are refused with `403`. A page view for a variation other than the visitor\'s assigned one is refused with `409`. When the organization reaches its monthly page view limit, the reply is `202` with `paused: true` and nothing is stored.' },
         { type: 'h2', text: 'Limits' },
         { type: 'list', items: [
             'Rate limited per secret key, like the browser SDK endpoints per key and IP. A `429` reply has a `Retry-After` header.',

@@ -32,7 +32,12 @@ const json = (method: string, url: string, body?: unknown) => new NextRequest(`h
 });
 const p = (id: string) => ({ params: Promise.resolve({ id }) });
 let n = 0;
-async function newTest(who: T) {
+/** Free accounts create 1 test a month; most tests here start from a fresh allowance. */
+async function resetMonthly() {
+    await (await getDb()).run(sql`delete from free_test_usage`);
+}
+async function newTest(who: T, opts: { keepUsage?: boolean } = {}) {
+    if (!opts.keepUsage) await resetMonthly();
     session.current = { user: who.user };
     n++;
     const res = await createExperiment(json('POST', '/api/experiments', flowExperimentBody({
@@ -62,15 +67,21 @@ afterAll(() => { delete process.env.PLATFORM_ADMIN_EMAILS; cleanup(); });
 describe('free plan defaults', () => {
     it('come from the entitlement helper; paid, admins and special friends differ', () => {
         expect(computeEntitlements({ plan: 'free' }, []).limits).toMatchObject({
-            monthlyVisitors: 10_000, dailyVisitors: 300, activeExperiments: 1, lifetimeExperiments: 10, projects: 1, maxVariations: 1, monthlyPageviews: null,
+            monthlyVisitors: 10_000, dailyVisitors: 300, activeExperiments: 1, monthlyTests: 1, maxGoals: 1, projects: 1, domains: 1, maxVariations: 1, monthlyPageviews: null,
         });
+        expect(computeEntitlements({ plan: 'free' }, []).features.advanced_goals).toBe(false);
         expect(computeEntitlements({ plan: 'starter' }, []).limits).toMatchObject({
-            monthlyVisitors: null, dailyVisitors: null, activeExperiments: null, lifetimeExperiments: null, projects: 3, seats: 5, maxVariations: 50,
+            monthlyVisitors: null, dailyVisitors: null, activeExperiments: null, monthlyTests: null, maxGoals: null, projects: 3, seats: 5, maxVariations: 50,
         });
+        expect(computeEntitlements({ plan: 'starter' }, []).features.advanced_goals).toBe(true);
+        expect(computeEntitlements({ plan: 'free' }, []).limits).not.toHaveProperty('lifetimeExperiments');
         const admin = computeEntitlements({ plan: 'free' }, ['imrn.dev@gmail.com']).limits;
         expect(Object.values(admin).every((v) => v === null)).toBe(true);
-        expect(computeEntitlements({ plan: 'free', special_friend: true, custom_allowances: JSON.stringify({ daily_visitors: null, lifetime_experiments: 100 }) }, []).limits)
-            .toMatchObject({ dailyVisitors: null, lifetimeExperiments: 100, monthlyVisitors: 10_000 });
+        expect(computeEntitlements({ plan: 'free', special_friend: true, custom_allowances: JSON.stringify({ daily_visitors: null, monthly_tests: 5, max_goals: null }) }, []).limits)
+            .toMatchObject({ dailyVisitors: null, monthlyTests: 5, maxGoals: null, monthlyVisitors: 10_000 });
+        const friend = computeEntitlements({ plan: 'free', special_friend: true, custom_allowances: JSON.stringify({ advanced_goals: true }) }, []);
+        expect(friend.features.advanced_goals).toBe(true);
+        expect(friend.freeTierRules).toBe(false);
     });
 });
 
@@ -123,7 +134,7 @@ describe('tested visitor caps', () => {
 describe('experiment limits', () => {
     it('allows 1 running test at a time on free, with a clear message', async () => {
         const a = await newTest(t.free);
-        const b = await newTest(t.free);
+        const b = await newTest(t.free); // a fresh monthly allowance, to test the running limit alone
         expect((await setStatus(t.free, a.id!, 'running')).status).toBe(200);
         const res = await setStatus(t.free, b.id!, 'running');
         expect(res.status).toBe(403);
@@ -133,27 +144,6 @@ describe('experiment limits', () => {
         // Resuming also respects the running limit.
         expect((await setStatus(t.free, a.id!, 'running')).status).toBe(403);
         await setStatus(t.free, b.id!, 'completed');
-    });
-
-    it('counts 10 started tests over the lifetime; deleting does not reset it', async () => {
-        const before = (await db.getOrganization(t.free.orgId))!.experiments_started_total;
-        const x = await newTest(t.free);
-        await setStatus(t.free, x.id!, 'running');
-        await setStatus(t.free, x.id!, 'completed');
-        session.current = { user: t.free.user };
-        await deleteExperiment(json('DELETE', `/api/experiments/${x.id}`), p(x.id!));
-        expect((await db.getOrganization(t.free.orgId))!.experiments_started_total).toBe(before + 1);
-
-        const d = await getDb();
-        await d.run(sql`update organizations set experiments_started_total = 9 where id = ${t.free.orgId}`);
-        clearConfigCache();
-        const last = await newTest(t.free);
-        expect(last.res.status).toBe(201);
-        expect((await setStatus(t.free, last.id!, 'running')).status).toBe(200);
-        await setStatus(t.free, last.id!, 'completed');
-        const over = await newTest(t.free);
-        expect(over.res.status).toBe(403);
-        expect((await over.res.json()).error).toMatch(/all 10 tests/);
     });
 
     it('does not apply to paid orgs, admins or special friends with an override', async () => {
@@ -172,8 +162,7 @@ describe('experiment limits', () => {
 
     it('free is A/B only: a second variation is refused', async () => {
         session.current = { user: t.free.user };
-        const d = await getDb();
-        await d.run(sql`update organizations set experiments_started_total = 0 where id = ${t.free.orgId}`);
+        await resetMonthly();
         clearConfigCache();
         const res = await createExperiment(json('POST', '/api/experiments', flowExperimentBody({
             name: 'ABn', control_url: 'http://localhost/abn.html',

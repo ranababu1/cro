@@ -175,6 +175,7 @@ describe('quota hooks', () => {
             await db.createExperiment(
                 { id, project_id: projectId, user_id: users.tenant.id, name: id, status: 'draft', traffic_allocation: 100 },
                 [{ name: 'Control', weight: 50, is_control: true }, { name: 'B', weight: 50, is_control: false }],
+                [{ name: 'CTA', selector: '#cta', is_primary: true }],
             );
         }
         as('tenant');

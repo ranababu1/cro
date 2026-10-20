@@ -9,7 +9,8 @@ import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { upgradeHintForVariations } from '@/lib/plans';
 import { getOrgEntitlements, UPGRADE_NOTE } from '@/lib/entitlements';
-import { quotaMessage } from '@/lib/quotas';
+import { checkNewTest, recordNewTest } from '@/lib/freeTests';
+import { goalPlanError } from '@/lib/goals';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { serializeTargeting } from '@/lib/targeting';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
@@ -59,11 +60,9 @@ export async function POST(request: NextRequest) {
         }
 
         const orgId = await orgIdForProject(projectId);
-        const org = await db.getOrganization(orgId);
         const ent = await getOrgEntitlements(orgId);
-        if (ent.limits.lifetimeExperiments !== null && (org?.experiments_started_total ?? 0) >= ent.limits.lifetimeExperiments) {
-            return NextResponse.json({ error: quotaMessage({ allowed: false, limit: ent.limits.lifetimeExperiments, used: org?.experiments_started_total ?? 0, reason: 'lifetime_experiments' }), reason: 'lifetime_experiments' }, { status: 403 });
-        }
+        const goalError = goalPlanError({ maxGoals: ent.limits.maxGoals, advancedGoals: ent.features.advanced_goals }, body.goals);
+        if (goalError) return NextResponse.json({ error: goalError, upgrade: UPGRADE_NOTE.advanced_goals, reason: 'goals' }, { status: 403 });
         const maxVars = ent.limits.maxVariations;
         const nonControl = body.variations.filter((v) => !v.is_control);
         if (maxVars !== null && nonControl.length > maxVars) {
@@ -102,6 +101,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Each variation needs its own URL' }, { status: 400 });
         }
 
+        // Free plan: new tests per calendar month (UTC), per account and per domain. Deleting a test does not give it back.
+        const monthly = await checkNewTest(orgId, body.control_url);
+        if (!monthly.ok) {
+            return NextResponse.json({ error: monthly.error, reason: monthly.reason, resets_at: monthly.resets_at, limit: monthly.limit }, { status: 403 });
+        }
+
         const experimentId = generateId('exp');
         await db.createExperiment(
             {
@@ -118,6 +123,7 @@ export async function POST(request: NextRequest) {
             body.variations.map((v) => ({ ...v, url: v.url ? normalizePageUrl(v.url) : null })),
             body.goals,
         );
+        if (monthly.limit !== null) await recordNewTest(orgId, monthly.domain);
         await db.audit({
             orgId,
             actorId: ctx.userId,

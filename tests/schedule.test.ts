@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody, resetFreeTestUsage } from './helpers';
 import { rampAllocation, effectiveAllocation, pastStop, rampFullAt, runSchedules } from '@/lib/schedule';
 import type { Experiment } from '@/lib/types';
 
@@ -53,6 +53,7 @@ describe('scheduled start, stop and ramp', () => {
     const as = (id: string | null) => { session.current = id ? { user: { id } } : null; };
     const newTest = async (name: string) => {
         as(userId);
+        await resetFreeTestUsage();
         const r = await create(json('POST', '/api/experiments', flowExperimentBody({ name })));
         return (await r.json()).experiment.id as string;
     };

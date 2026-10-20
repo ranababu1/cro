@@ -4,6 +4,7 @@ import { orgIdForProject } from '@/lib/access';
 import { PROJECT_COOKIE } from '@/lib/currentProject';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { getOrgEntitlements } from '@/lib/entitlements';
+import { testsCreatedThisMonth, monthResetAt } from '@/lib/freeTests';
 
 export async function GET(request: NextRequest) {
     const ctx = await requireUserContext(request);
@@ -14,5 +15,6 @@ export async function GET(request: NextRequest) {
     const orgId = await orgIdForProject(projectId);
     const pv = await getPageviewStatus(orgId, { fresh: true });
     const ent = await getOrgEntitlements(orgId);
-    return NextResponse.json({ plan: ent.plan, features: ent.features, max_variations: ent.limits.maxVariations, pageviews: { used: pv.used, limit: pv.limit, paused: pv.paused } });
+    const monthly = ent.limits.monthlyTests === null ? null : { limit: ent.limits.monthlyTests, used: await testsCreatedThisMonth('org', orgId), resets_at: monthResetAt() };
+    return NextResponse.json({ plan: ent.plan, features: ent.features, max_variations: ent.limits.maxVariations, max_goals: ent.limits.maxGoals, monthly_tests: monthly, pageviews: { used: pv.used, limit: pv.limit, paused: pv.paused } });
 }

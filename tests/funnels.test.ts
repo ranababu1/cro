@@ -82,12 +82,16 @@ describe('funnel routes', () => {
     async function tenant(name: string, plan: string) {
         const u = await db.createUser({ email: `${name}@example.com`, name });
         const ws = await db.ensureWorkspace(u);
-        await db.updateOrganization(ws.orgId, { plan });
+        // Created on a paid plan (several goals), then moved to the plan under test.
+        await db.updateOrganization(ws.orgId, { plan: 'starter' });
+        clearConfigCache();
         await seedProjectDomain(ws.projectId, 'localhost');
         session.current = { user: { id: u.id } };
         const body = flowExperimentBody({ goals: [{ name: 'Pricing', selector: '#pricing', is_primary: true }, { name: 'Signup start', selector: '#start', is_primary: false }, { name: 'Signup done', selector: '#done', is_primary: false }] });
         const data = await (await create(req('POST', '/api/experiments', body))).json();
         const goals = (await db.getGoals(data.experiment.id)).map((g) => g.id);
+        await db.updateOrganization(ws.orgId, { plan });
+        clearConfigCache();
         return { userId: u.id, orgId: ws.orgId, expId: data.experiment.id, goals, vars: data.variations.map((v: { id: string }) => v.id) };
     }
     beforeAll(async () => {

@@ -9,6 +9,7 @@ import { WordPressCard } from '@/app/components/WordPressCard';
 import { PageviewUsage } from '@/app/components/PageviewUsage';
 import { getPageviewStatus } from '@/lib/pageviewQuota';
 import { PlanUsage, type UsageRow } from '@/app/components/PlanUsage';
+import { testsCreatedThisMonth, monthResetAt, formatResetDate } from '@/lib/freeTests';
 import { getOrgEntitlements } from '@/lib/entitlements';
 import { getVisitorUsage } from '@/lib/quotas';
 
@@ -27,6 +28,7 @@ export default async function Dashboard() {
     const org = project ? await db.getOrganization(project.org_id) : null;
     const count = (s: string) => experiments.filter((e) => e.status === s).length;
     let usageRows: UsageRow[] = [];
+    let planNote: string | undefined;
     // Effective plan: Enterprise for orgs a platform admin owns, else an admin-assigned plan, else billing.
     const plan = org ? (await getOrgEntitlements(org.id)).plan : 'free';
     if (project && org) {
@@ -34,11 +36,13 @@ export default async function Dashboard() {
         const v = await getVisitorUsage(org.id);
         const running = await db.countRunningExperiments(org.id);
         const projects = (await db.getOrgProjects(org.id)).length;
+        const newTests = await testsCreatedThisMonth('org', org.id);
+        if (limits.maxGoals !== null && limits.maxGoals <= 1 && limits.maxVariations === 1) planNote = 'Each test: 1 page URL, A/B only (control plus 1 variation) and 1 goal, a click on a CSS selector.';
         usageRows = [
             { label: 'Tested visitors this month', used: v.month, limit: limits.monthlyVisitors, atLimit: 'New visitors see your original page and are not counted until next month. Visitors already in a test keep their version.' },
             { label: 'Tested visitors today', used: v.day, limit: limits.dailyVisitors, atLimit: 'New visitors see your original page and are not counted until tomorrow (UTC). Visitors already in a test keep their version.' },
             { label: 'Running tests', used: running, limit: limits.activeExperiments, atLimit: 'Pause or complete it before you start another.', capacity: true },
-            { label: 'Tests used (all time)', used: org.experiments_started_total, limit: limits.lifetimeExperiments, atLimit: 'You have started every test the free plan includes. Deleting tests does not free them up.' },
+            { label: 'New tests this month', used: newTests, limit: limits.monthlyTests, atLimit: `You can create your next test on ${formatResetDate(monthResetAt())}. Deleting a test does not give it back.` },
             { label: 'Projects', used: projects, limit: limits.projects, atLimit: limits.projects === 1 ? 'Your plan includes one project. Upgrade to add more.' : `Your plan includes ${limits.projects} projects. Upgrade to add more.`, capacity: true },
         ];
     }
@@ -66,7 +70,7 @@ export default async function Dashboard() {
                 <Stat label="Visitors this month" value={usage.visitors.toLocaleString()} hint="Across your organization" />
             </div>
 
-            <PlanUsage rows={usageRows} plan={plan} />
+            <PlanUsage rows={usageRows} plan={plan} note={planNote} />
             {pageviews && pageviews.limit !== null && <PageviewUsage status={pageviews} plan={plan} />}
 
             {project && (

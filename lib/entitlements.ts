@@ -1,7 +1,7 @@
 import { db } from './db';
 import {
     isPaidPlan, planTier, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
-    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_LIFETIME_EXPERIMENTS, FREE_DOMAINS, PLAN_PROJECTS, PLAN_SEATS,
+    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_MONTHLY_TESTS, FREE_MAX_GOALS, FREE_DOMAINS, PLAN_PROJECTS, PLAN_SEATS,
 } from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
 import { cached } from './configCache';
@@ -20,7 +20,7 @@ export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
  * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
  * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
  */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys', 'audit_log', 'segments', 'webhooks'] as const;
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys', 'audit_log', 'segments', 'webhooks', 'advanced_goals'] as const;
 export const GROWTH_FEATURES: readonly string[] = ['auto_shift', 'visual_editor'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
@@ -28,8 +28,10 @@ export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 export interface Limits {
     monthlyVisitors: number | null;
     dailyVisitors: number | null;
-    /** Experiments started over the account's lifetime (deleting does not give any back). */
-    lifetimeExperiments: number | null;
+    /** New tests created per calendar month (UTC), per account and per domain on Free. Deleting does not give any back. */
+    monthlyTests: number | null;
+    /** Goals per test. */
+    maxGoals: number | null;
     monthlyPageviews: number | null;
     maxVariations: number | null;
     activeExperiments: number | null;
@@ -83,7 +85,8 @@ function planLimits(org: OrgForEntitlements | null): Limits {
     return {
         monthlyVisitors: org?.monthly_visitor_limit ?? (free ? FREE_MONTHLY_VISITORS : null),
         dailyVisitors: free ? FREE_DAILY_VISITORS : null,
-        lifetimeExperiments: free ? FREE_LIFETIME_EXPERIMENTS : null,
+        monthlyTests: free ? FREE_MONTHLY_TESTS : null,
+        maxGoals: free ? FREE_MAX_GOALS : null,
         monthlyPageviews: pv === UNLIMITED ? null : pv ?? planMonthlyPageviews(plan),
         maxVariations: maxVariationUrlsForPlan(plan),
         activeExperiments: free ? FREE_RUNNING_EXPERIMENTS : null,
@@ -98,7 +101,8 @@ function applyAllowances(limits: Limits, a: Allowances): Limits {
     return {
         monthlyVisitors: pick(a.monthly_visitors, limits.monthlyVisitors),
         dailyVisitors: pick(a.daily_visitors, limits.dailyVisitors),
-        lifetimeExperiments: pick(a.lifetime_experiments, limits.lifetimeExperiments),
+        monthlyTests: pick(a.monthly_tests, limits.monthlyTests),
+        maxGoals: pick(a.max_goals, limits.maxGoals),
         monthlyPageviews: pick(a.monthly_pageviews, limits.monthlyPageviews),
         maxVariations: pick(a.max_variations, limits.maxVariations),
         activeExperiments: pick(a.active_experiments, limits.activeExperiments),
@@ -122,7 +126,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         return {
             plan, planSource, billingPlan, paid, unlimited, specialFriend,
             features: Object.fromEntries(HEAVY_FEATURES.map((f) => [f, true])) as Record<HeavyFeature, boolean>,
-            limits: { monthlyVisitors: null, dailyVisitors: null, lifetimeExperiments: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null, domains: null },
+            limits: { monthlyVisitors: null, dailyVisitors: null, monthlyTests: null, maxGoals: null, monthlyPageviews: null, maxVariations: null, activeExperiments: null, projects: null, seats: null, domains: null },
             flags: {},
             freeTierRules: false,
         };
@@ -147,6 +151,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.audit_log !== undefined) features.audit_log = a.audit_log;
         if (a.segments !== undefined) features.segments = a.segments;
         if (a.webhooks !== undefined) features.webhooks = a.webhooks;
+        if (a.advanced_goals !== undefined) features.advanced_goals = a.advanced_goals;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -193,5 +198,6 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     revenue_goals: 'Revenue goals are part of the paid plans. Upgrade to Starter or above to track order values.',
     webhooks: 'Webhooks are part of the paid plans. Upgrade to Starter or above to get a signed POST when a test finds a winner, finishes, shows a sample ratio warning or reaches a plan limit.',
     segments: 'Results by segment are part of the paid plans. Upgrade to Starter or above to compare variations by device, traffic source and new or returning visitors.',
+    advanced_goals: 'The free plan has one goal per test: a click on a CSS selector. Upgrade to Starter or above for more goals, form, page visit and custom event goals, and conversions sent from your code.',
     wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',
 };
