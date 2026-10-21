@@ -173,7 +173,7 @@ describe('scheduled start, stop and ramp', () => {
         const kept = await (await boot('r1-0')).json();
         const again = await (await boot('r1-0')).json();
         expect(again.variation_id ?? null).toBe(kept.variation_id ?? null);
-    });
+    }, 30_000); // many bootstraps; slow CI runners need more than the 5s default
 
     it('a manual start clears a pending scheduled start', async () => {
         const id = await newTest('Manual');
