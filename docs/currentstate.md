@@ -329,3 +329,7 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - "1 page URL" = one test page (control URL plus its variation). Multi-page tests stay Growth and above.
 - UI: wizard and Edit test show the other goal types locked (`app/components/LockedGoalTypes.tsx`) and the monthly banner; /api/plan returns max_goals and monthly_tests; Overview shows "New tests this month" and a per-test note. Admin abuse page shows domain use this month.
 - Public: pricing Free card lists every limit, comparison rows for new tests a month, pages, goals and domains, paid-only labels, FAQ "What happens when I hit a limit?". Docs (troubleshooting, organizations, goals, sdk, rest API, server-side, quick start) and blog posts updated.
+
+## Blog post 04 (2026-10-21)
+- content/blog/ab-test-javascript.md (from the content store, already on the new Free plan). lib/blog.ts reads `howto_schema` and the post page renders it as JSON-LD. Posts 01, 02 and 03 link to it (updated 2026-10-21). tests/blogPost04.test.ts.
+- Docs: troubleshooting 'Is it really free?' no longer says there is no billing system; introduction lists goals by plan; SDK page drops the planned npm package note and labels the React SPA snippet as an example.

@@ -3,7 +3,7 @@ title: "How long should you run an A/B test? Worked examples"
 meta_description: "Run an A/B test until it reaches its planned sample size, in whole weeks, and for at least 2 weeks. Worked examples for 1,000 to 50,000 weekly visitors."
 slug: how-long-to-run-an-ab-test
 date: 2026-10-17
-updated: 2026-10-19
+updated: 2026-10-21
 author: "Imraan, freeabtest.com"
 keywords: ["how long to run an a/b test", "a/b test duration", "ab test sample size", "when to stop an ab test", "minimum detectable effect"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How long should you run an A/B test? Worked examples",
     "datePublished": "2026-10-17",
-    "dateModified": "2026-10-19",
+    "dateModified": "2026-10-21",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Updated 19 October 2026.
+By Imraan, freeabtest.com. Published 17 October 2026. Updated 21 October 2026.
 
 Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
@@ -156,7 +156,7 @@ On our [free plan](https://www.freeabtest.com/pricing), tests have a control and
 
 When the sequential verdict is significant, or when your planned sample is reached:
 
-1. **Check the split.** If you set 50/50 and got 52/48 on large numbers, something may be wrong with assignment or tracking. freeabtest.com shows a sample ratio mismatch (SRM) warning when traffic does not split the way you set it (on every plan, including Free). Investigate before reading results.
+1. **Check the split.** If you set 50/50 and got 52/48 on large numbers, something may be wrong with assignment or tracking. freeabtest.com shows a sample ratio mismatch (SRM) warning when traffic does not split the way you set it (on every plan, including Free). Investigate before reading results. If you built the test yourself, our guide to [A/B testing with plain JavaScript](/blog/ab-test-javascript) includes the same split check.
 2. **Read the interval and chance to beat control, not just the p-value.** Our results show a Wilson score interval for each variant. For example, 60 conversions from 2,000 visitors is 3.0%, with a 95% interval from 2.34% to 3.84%. If the intervals for control and variant overlap heavily, the lift is uncertain even if the point estimates differ. Chance to beat control appears once both versions have 100 visitors.
 3. **Don't stop at the 100-visitor gate.** Our dashboard shows "Collecting data" until every variation has at least 100 visitors. That is the point where a significance test can start, not the point where your test is done. Prefer at least one full week, and use your planned sample size as a planning estimate for how long to expect.
 4. **Decide.** If the sequential test is significant and the lift is big enough to matter for your business, you can stop and ship it. If you reach the planned sample with no significant difference, the test is inconclusive at the MDE you chose. That is a result too. It tells you the change probably does not have an effect as large as your MDE.
