@@ -131,7 +131,7 @@ describe('traffic wiring', () => {
     const read = (f: string) => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
     it('bootstrap records traffic only for entitled orgs and pricing lists it', () => {
         expect(read('app/api/sdk/bootstrap/route.ts')).toMatch(/canUseFeature\(auth\.ctx\.orgId, 'traffic'\)/);
-        expect(read('app/pricing/page.tsx')).toMatch(/\['Traffic overview', 'Paid plans only', 'Included'/);
+        expect(read('app/pricing/page.tsx')).toMatch(/\['Traffic overview', 'Not included \(paid plans only\)', 'Included'/);
         expect(read('app/components/shell/AppShell.tsx')).toMatch(/href: '\/traffic'/);
     });
     it('migration is newer than every earlier one', () => {
