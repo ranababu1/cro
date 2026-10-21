@@ -13,16 +13,7 @@ const tiers: Tier[] = [
 ];
 
 const highlights: Record<string, string[]> = {
-    Free: [
-        '10,000 tested visitors a month, up to 300 a day',
-        '1 running test at a time',
-        '1 new test a month',
-        '1 page URL per test',
-        '1 goal per test: a click on a CSS selector',
-        '1 project',
-        '1 domain',
-        'A/B only: control plus 1 variation',
-    ],
+    Free: ['Up to 10,000 tested visitors a month', '1 project', '1 domain'],
     Starter: ['250,000 tested visitors a month', '20 active experiments', '3 projects and 5 team seats', 'Heatmaps, funnels, popups and surveys'],
     Growth: ['1,000,000 tested visitors a month', '10 projects and 15 team seats', 'Visual editor', 'Auto-shift traffic to the winner'],
     Enterprise: ['Custom tested visitors', 'Unlimited team seats', 'Audit log kept 2 years', 'Named contact with an SLA'],
@@ -51,6 +42,7 @@ export function BillingCards() {
                             <ul className="mt-4 flex-1 space-y-1.5 text-sm leading-5 text-zinc-700" data-testid={`plan-${t.name.toLowerCase()}-limits`}>
                                 {highlights[t.name].map((i) => <li key={i} className="flex gap-2"><span className="text-teal-600" aria-hidden>✓</span>{i}</li>)}
                             </ul>
+                            <a href="#compare" className="mt-4 text-sm font-medium text-blue-700 hover:underline">See all plan limits</a>
                             <Link href={t.href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold ${t.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-zinc-300 text-zinc-900 hover:bg-zinc-50'}`}>{t.cta}</Link>
                         </div>
                     );

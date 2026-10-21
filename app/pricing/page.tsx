@@ -12,29 +12,30 @@ const plans = ['Free', 'Starter', 'Growth', 'Enterprise'];
 
 const limits: [string, string, string, string, string][] = [
     ['Who it\'s for', 'Trying it out and side projects', 'One growing site', 'Teams testing every week', 'High traffic and compliance needs'],
-    ['Monthly tested visitors', '10,000 (up to 300 a day)', '250,000', '1,000,000', 'Custom'],
+    ['Tested visitors a month', '10,000', '250,000', '1,000,000', 'Custom'],
+    ['Tested visitors a day', '300', 'No daily limit', 'No daily limit', 'No daily limit'],
     ['Running experiments at a time', '1', '20', 'Unlimited', 'Unlimited'],
     ['New experiments per month', '1 (resets on the 1st, UTC)', 'No monthly limit', 'No monthly limit', 'No monthly limit'],
-    ['Pages per experiment', '1 page URL', '1 page URL', 'Several (multi-page tests)', 'Several (multi-page tests)'],
-    ['Goals per experiment', '1: a click on a CSS selector', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event'],
-    ['Variations per experiment', 'Control plus 1 (A/B only)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
+    ['Page URLs per experiment', '1', '1', 'Several (multi-page tests)', 'Several (multi-page tests)'],
+    ['Goals per experiment', '1 (a click on a CSS selector)', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event'],
+    ['Variations per experiment', 'A/B only (control plus 1 variation)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
     ['Projects', '1', '3', '10', 'Custom'],
     ['Domains', '1', 'No limit', 'No limit', 'No limit'],
     ['Environments per project', '3 (dev, staging, production)', '3', '3', '3'],
     ['Team seats', '1', '5', '15', 'Unlimited'],
-    ['Survey answers kept', 'Paid plans only', '12 months', '24 months', '24 months'],
-    ['Individual heatmap clicks kept', 'Paid plans only', '30 days (daily totals stay)', '30 days (daily totals stay)', '30 days (daily totals stay)'],
-    ['WordPress plugin', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Funnels', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Revenue goals', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Results by segment', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Webhooks', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Auto-shift traffic to the winner', 'Growth and above', 'Growth and above', 'Included', 'Included'],
-    ['Traffic overview', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Popups and calls to action', 'Paid plans only', 'Included', 'Included', 'Included'],
-    ['Surveys', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Survey answers kept', 'Not included (paid plans only)', '12 months', '24 months', '24 months'],
+    ['Individual heatmap clicks kept', 'Not included (paid plans only)', '30 days (daily totals stay)', '30 days (daily totals stay)', '30 days (daily totals stay)'],
+    ['WordPress plugin', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Funnels', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Revenue goals', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Results by segment', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Webhooks', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Auto-shift traffic to the winner', 'Not included (Growth and above)', 'Not included (Growth and above)', 'Included', 'Included'],
+    ['Traffic overview', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Popups and calls to action', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
+    ['Surveys', 'Not included (paid plans only)', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
-    ['Audit log', 'Paid plans only', '90 days', '1 year', '2 years'],
+    ['Audit log', 'Not included (paid plans only)', '90 days', '1 year', '2 years'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
 ];
 
@@ -108,6 +109,7 @@ const faqJsonLd = {
 };
 
 const Check = () => <span className="font-bold text-teal-600" aria-label="Included">✓</span>;
+const NotIncluded = () => <span className="text-xs text-zinc-500">Not included</span>;
 const PaidBadge = ({ tier }: { tier: number }) => <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
 const Soon = ({ p }: { p: number }) => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon, Phase {p}</span>;
 
@@ -123,20 +125,21 @@ export default function PricingPage() {
 
                 <BillingCards />
 
-                <section className="mt-20">
+                <section id="compare" className="mt-20 scroll-mt-6">
                     <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Compare plans</h2>
+                    <p className="mt-2 text-sm text-zinc-600">Every limit of every plan, in plain numbers. Not included means the feature is only on the paid plans shown.</p>
                     <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white" tabIndex={0}>
                         <table className="w-full min-w-[760px] text-left text-sm">
                             <thead className="bg-zinc-50 text-zinc-900">
-                                <tr><th className="p-4 font-semibold">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
+                                <tr><th className="sticky left-0 z-10 bg-zinc-50 p-4 font-semibold">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100">
                                 {limits.map(([label, ...vals]) => (
-                                    <tr key={label}><td className="p-4 font-medium text-zinc-900">{label}</td>{vals.map((v, i) => <td key={i} className="p-4 text-zinc-600">{v}</td>)}</tr>
+                                    <tr key={label}><td className="sticky left-0 z-10 bg-white p-4 font-medium text-zinc-900">{label}</td>{vals.map((v, i) => <td key={i} className="p-4 text-zinc-600">{v}</td>)}</tr>
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Available today</td></tr>
                                 {availableToday.map((f) => (
-                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}{f.tier > 0 && <PaidBadge tier={f.tier} />}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
+                                    <tr key={f.name}><td className="sticky left-0 z-10 bg-white p-4 text-zinc-900">{f.name}{f.tier > 0 && <PaidBadge tier={f.tier} />}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <NotIncluded />}</td>)}</tr>
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Coming soon</td></tr>
                                 {comingSoon.map((f) => (

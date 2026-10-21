@@ -175,7 +175,7 @@ describe('revenue goals wiring', () => {
     });
     it('pricing lists revenue goals as available on paid plans', () => {
         const pricing = read('app/pricing/page.tsx');
-        expect(pricing).toMatch(/\['Revenue goals', 'Paid plans only', 'Included'/);
+        expect(pricing).toMatch(/\['Revenue goals', 'Not included \(paid plans only\)', 'Included'/);
         expect(pricing).not.toMatch(/\{ name: 'Revenue goals'/);
     });
     it('migration adds the revenue column with a newer timestamp', () => {
