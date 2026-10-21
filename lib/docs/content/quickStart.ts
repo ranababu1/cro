@@ -19,7 +19,7 @@ export const quickStart: DocPage = {
         { type: 'list', items: [
             'The control URL is your original page on the registered domain.',
             'Each variation is a full URL on the same domain. The free plan allows 1 variation; paid plans allow up to 50.',
-            'Goals can be clicks (CSS selectors such as `#headerCTA` or `.bodyCTA`), form submits, page visits or custom events. Mark one as primary. See [Goals](/docs/goals).',
+            'On the free plan a test has 1 goal: a click on a CSS selector such as `#headerCTA` or `.bodyCTA`. Paid plans add more goals per test, form submits, page visits and custom events; mark one as primary. See [Goals](/docs/goals).',
             'Weights must sum to 100. Traffic allocation is the share of visitors who enter the test.',
         ] },
         { type: 'h2', text: '5. Install the SDK', id: 'install' },

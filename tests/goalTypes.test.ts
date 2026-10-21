@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody, makePaid } from './helpers';
 import { matchesPageGoal, describeGoal } from '@/lib/goals';
 import { goalSchema } from '@/lib/validation';
 
@@ -60,6 +60,7 @@ describe('page, form and custom event goals end to end', () => {
         cleanup = useTempDatabase();
         const u = await db.createUser({ email: 'goals@example.com', name: 'G' });
         const ws = await db.ensureWorkspace(u);
+        await makePaid(ws.orgId); // form, page and custom event goals are paid features
         await seedProjectDomain(ws.projectId, 'localhost');
         const env = (await db.getEnvironments(ws.projectId)).find((e) => e.key === 'dev')!;
         sdkKey = (await db.createApiKey({ environmentId: env.id, type: 'sdk' })).key;

@@ -10,7 +10,7 @@ export interface QuotaCheck {
     allowed: boolean;
     limit: number | null;
     used: number;
-    reason?: 'monthly_visitors' | 'daily_visitors' | 'lifetime_experiments' | 'running_experiments' | 'monthly_experiments';
+    reason?: 'monthly_visitors' | 'daily_visitors' | 'running_experiments' | 'monthly_experiments';
 }
 
 const VISITOR_CACHE_MS = 10_000;
@@ -66,7 +66,7 @@ export async function recordNewVisitor(orgId: string, userId: string): Promise<v
 
 /**
  * Checks before an experiment goes to running. firstStart = it has never run before.
- * Running limit applies to every start and resume; lifetime and monthly limits only to first starts.
+ * Running limit applies to every start and resume; the admin-set monthly start limit only to first starts.
  */
 export async function checkExperimentStartQuota(orgId: string, firstStart = true): Promise<QuotaCheck> {
     const { limits } = await getOrgEntitlements(orgId);
@@ -76,10 +76,6 @@ export async function checkExperimentStartQuota(orgId: string, firstStart = true
         if (running >= limits.activeExperiments) return { allowed: false, limit: limits.activeExperiments, used: running, reason: 'running_experiments' };
     }
     if (!firstStart) return { allowed: true, limit: null, used: 0 };
-    if (limits.lifetimeExperiments !== null) {
-        const used = org?.experiments_started_total ?? 0;
-        if (used >= limits.lifetimeExperiments) return { allowed: false, limit: limits.lifetimeExperiments, used, reason: 'lifetime_experiments' };
-    }
     const monthly = org?.monthly_experiment_limit ?? null;
     if (monthly !== null) {
         const used = await db.countExperimentsStartedSince(orgId, monthStartIso());
@@ -93,8 +89,6 @@ export function quotaMessage(q: QuotaCheck): string {
     switch (q.reason) {
         case 'running_experiments':
             return `Your plan allows ${q.limit} running test${q.limit === 1 ? '' : 's'} at a time. Pause or complete a running test first, or upgrade to run more.`;
-        case 'lifetime_experiments':
-            return `You have used all ${q.limit} tests included in the free plan. Deleting tests does not free them up. Upgrade to keep testing.`;
         case 'monthly_experiments':
             return `Monthly experiment limit reached (${q.used} of ${q.limit}). Contact support to upgrade.`;
         case 'monthly_visitors':

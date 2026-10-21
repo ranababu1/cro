@@ -118,7 +118,8 @@ describe('profile gate on create and start', () => {
     it('blocks starting an existing draft until the profile is complete, then allows it', async () => {
         const id = 'exp_gate_draft';
         await db.createExperiment({ id, project_id: u.fresh.projectId, user_id: u.fresh.id, name: 'Old draft', status: 'draft', traffic_allocation: 100, control_url: 'http://localhost/a' },
-            [{ name: 'Control', weight: 50, is_control: true, url: 'http://localhost/a' }, { name: 'B', weight: 50, is_control: false, url: 'http://localhost/b' }]);
+            [{ name: 'Control', weight: 50, is_control: true, url: 'http://localhost/a' }, { name: 'B', weight: 50, is_control: false, url: 'http://localhost/b' }],
+            [{ name: 'CTA', selector: '#cta', is_primary: true }]);
         session.current = { user: { id: u.fresh.id, email: u.fresh.email } };
         const blocked = await patchExperiment(json('PATCH', `/api/experiments/${id}`, { status: 'running' }), p(id));
         expect(blocked.status).toBe(403);

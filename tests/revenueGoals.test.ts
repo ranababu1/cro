@@ -73,7 +73,9 @@ describe('revenue goals end to end', () => {
     async function tenant(name: string, plan: string) {
         const u = await db.createUser({ email: `${name}@example.com`, name });
         const ws = await db.ensureWorkspace(u);
-        await db.updateOrganization(ws.orgId, { plan });
+        // Created on a paid plan (event goal), then moved to the plan under test.
+        await db.updateOrganization(ws.orgId, { plan: 'starter' });
+        clearConfigCache();
         await seedProjectDomain(ws.projectId, 'localhost');
         const env = (await db.getEnvironments(ws.projectId)).find((e) => e.key === 'dev')!;
         const sdkKey = (await db.createApiKey({ environmentId: env.id, type: 'sdk' })).key;
@@ -87,6 +89,8 @@ describe('revenue goals end to end', () => {
         const expId = data.experiment.id;
         await patch(json('PATCH', `/api/experiments/${expId}`, { status: 'running' }), p(expId));
         const goalId = data.goals.find((g: { type: string }) => g.type === 'event').id;
+        await db.updateOrganization(ws.orgId, { plan });
+        clearConfigCache();
         return { expId, userId: u.id, sdkKey, goalId };
     }
     const boot = (key: string, user: string) => bootstrap(json('POST', '/api/sdk/bootstrap', { url: 'http://localhost/demo/control.html', user_id: user }, { 'X-API-Key': key }));
@@ -100,11 +104,12 @@ describe('revenue goals end to end', () => {
     });
     afterAll(() => cleanup());
 
-    it('free plans count the conversion but drop the amount, and cannot read revenue', async () => {
+    it('free plans refuse custom events with revenue, store nothing, and cannot read revenue', async () => {
         await boot(t.free.sdkKey, 'f1');
         const res = await track(t.free.sdkKey, { user_id: 'f1', event_name: 'purchase', revenue: 50 });
-        expect((await res.json()).recorded).toBe(1);
-        expect((await track(t.free.sdkKey, { user_id: 'f1', event_name: 'purchase', revenue: 50 })).status).toBe(200);
+        expect(res.status).toBe(403);
+        expect((await res.json()).reason).toBe('custom_conversion');
+        expect(await db.hasConversion(t.free.expId, 'f1', t.free.goalId)).toBe(false);
         expect(await db.getRevenueStats(t.free.expId, undefined, [t.free.goalId])).toEqual([]);
         expect(await db.countRevenueEvents(t.free.expId, 'f1', t.free.goalId)).toBe(0);
         session.current = { user: { id: t.free.userId } };
@@ -170,7 +175,7 @@ describe('revenue goals wiring', () => {
     });
     it('pricing lists revenue goals as available on paid plans', () => {
         const pricing = read('app/pricing/page.tsx');
-        expect(pricing).toMatch(/\['Revenue goals', 'Not included', 'Included'/);
+        expect(pricing).toMatch(/\['Revenue goals', 'Paid plans only', 'Included'/);
         expect(pricing).not.toMatch(/\{ name: 'Revenue goals'/);
     });
     it('migration adds the revenue column with a newer timestamp', () => {

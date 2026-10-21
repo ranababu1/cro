@@ -4,6 +4,8 @@ import { authenticateSdkRequest, sdkJson, SDK_CORS_HEADERS } from '@/lib/request
 import { customEventSchema, formatZodError } from '@/lib/validation';
 import { checkSdkOrigin } from '@/lib/sdkOrigin';
 import { recordGoalHits } from '@/lib/goalHits';
+import { canUseFeature } from '@/lib/entitlements';
+import { CUSTOM_CONVERSION_REFUSED } from '@/lib/sdkFlows';
 
 export function OPTIONS() {
     return new Response(null, { status: 204, headers: SDK_CORS_HEADERS });
@@ -19,6 +21,8 @@ export async function POST(request: NextRequest) {
         if ((await getPageviewStatus(auth.ctx.orgId)).paused) return sdkJson({ success: true, paused: true }, 202);
         const parsed = customEventSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return sdkJson({ error: formatZodError(parsed.error) }, 400);
+        // Custom events and revenue are paid features; the free plan counts clicks on the goal selector only.
+        if (!(await canUseFeature(auth.ctx.orgId, 'advanced_goals'))) return sdkJson({ error: CUSTOM_CONVERSION_REFUSED, reason: 'custom_conversion' }, 403);
         const recorded = await recordGoalHits({
             orgId: auth.ctx.orgId,
             projectId: auth.ctx.projectId,

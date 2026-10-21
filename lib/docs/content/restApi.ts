@@ -46,20 +46,21 @@ export const restApi: DocPage = {
             ['`user_id`', 'string', 'Required. 1 to 200 printable ASCII characters.'],
             ['`event_type`', '`page_view` or `conversion`', 'Required.'],
             ['`event_name`', 'string', 'Optional, up to 200 characters.'],
+            ['`goal_id`', 'string', 'Optional. The goal a conversion counts for.'],
             ['`metadata`', 'object', 'Optional, under 4096 bytes as JSON.'],
         ] },
         { type: 'code', label: 'curl', code: `curl -X POST https://YOUR-HOST/api/track \\
   -H 'Content-Type: application/json' \\
   -H 'X-API-Key: cro_pk_prod_...' \\
   -d '{"experiment_id":"exp_123","variation_id":"var_456","user_id":"user_42","event_type":"conversion","event_name":"purchase"}'` },
-        { type: 'p', text: 'Returns `201` with `{ "success": true }`.' },
+        { type: 'p', text: 'Returns `201` with `{ "success": true }`. On the free plan a conversion must carry the `goal_id` of the test\'s click goal; other conversions return `403`. Paid plans accept any conversion.' },
         { type: 'h2', text: 'Experiments' },
         { type: 'h3', text: 'GET /api/experiments', id: 'list-experiments' },
         { type: 'p', text: 'Lists experiments you can access: `{ "experiments": [...] }`.' },
         { type: 'code', label: 'curl', code: `curl https://YOUR-HOST/api/experiments \\
   -H 'Authorization: Bearer cro_sk_prod_...'` },
         { type: 'h3', text: 'POST /api/experiments', id: 'create-experiment' },
-        { type: 'p', text: 'Creates a draft experiment. Weights must add up to 100 and exactly one variation must be the control. Requires a dashboard session: creating experiments with a secret key returns 403 for now.' },
+        { type: 'p', text: 'Creates a draft experiment. Weights must add up to 100 and exactly one variation must be the control. Requires a dashboard session: creating experiments with a secret key returns 403 for now. On the free plan you can create 1 new test per calendar month (UTC), with 1 click goal; past that the reply is `403` with `resets_at`.' },
         { type: 'code', label: 'Request body', code: `{
   "name": "Pricing page headline",
   "description": "A benefit-led headline will increase plan selections.",

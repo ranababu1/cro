@@ -3,7 +3,7 @@ title: "A/B testing with low traffic: what you can and can't learn"
 meta_description: "With under 10,000 monthly visitors, a 4-week A/B test can only detect lifts of about 36% or more on a 3% conversion rate. Here is what to do instead."
 slug: ab-testing-low-traffic
 date: 2026-10-19
-updated: 2026-10-19
+updated: 2026-10-20
 author: "Imraan, freeabtest.com"
 keywords: ["a/b testing low traffic", "ab testing small website", "minimum traffic for ab testing", "ab test small sample size", "low traffic conversion optimization"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B testing with low traffic: what you can and can't learn",
     "datePublished": "2026-10-19",
-    "dateModified": "2026-10-19",
+    "dateModified": "2026-10-20",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-testing-low-traffic",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 19 October 2026. Updated 19 October 2026. Sources checked 19 October 2026.
+By Imraan, freeabtest.com. Published 19 October 2026. Updated 20 October 2026. Sources checked 19 October 2026.
 
 With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference."
 
@@ -94,7 +94,7 @@ The click goal needs about one sixth of the visitors.
 
 The trade-off is real. A lift in clicks to pricing does not prove a lift in revenue. Some changes push more people to click and the same number to buy. Treat the higher-funnel goal as your primary metric, and keep an eye on the final conversion as a check. If the click goal goes up and signups go clearly down, don't ship.
 
-A note on the product: freeabtest.com supports page visit, click, form submit and custom event goals today, so a click on your "See pricing" button (picked by CSS selector) can be its own goal without extra code. You can also send conversions from your own code with `ABTest.trackConversion()`, which is how you would count a paid signup after checkout. The [goals docs](https://www.freeabtest.com/docs/goals) list every goal type, and the [quick start](https://www.freeabtest.com/docs/quick-start) walks through a first test.
+A note on the product: on freeabtest.com a click on your "See pricing" button (picked by CSS selector) can be the goal without extra code, on every plan including Free, where each test has that one click goal. Paid plans add page visit, form submit and custom event goals, and conversions sent from your own code with `ABTest.trackConversion()`, which is how you would count a paid signup after checkout. The [goals docs](https://www.freeabtest.com/docs/goals) list every goal type and the plans they are on, and the [quick start](https://www.freeabtest.com/docs/quick-start) walks through a first test.
 
 ## Tactic 2: Test bigger changes
 
@@ -113,7 +113,7 @@ Bigger changes have a cost. When a big redesign wins, you know the package worke
 
 Every variant divides your traffic. A test with 3 variants needs 3 times the per-variant sample, and if you pick the best of 2 challengers you should also tighten the significance threshold to keep false positives at 5% (with a Bonferroni split of 2.5% per comparison, the sample per variant at 3% baseline and 20% lift rises from 13,914 to 16,850).
 
-On low traffic, run one challenger against the control. Our [Free plan](https://www.freeabtest.com/pricing) allows a control plus 1 variation, with 1 test running at a time, which suits this kind of site. Paid plans allow up to 50, but on a small site we would not use more than 2.
+On low traffic, run one challenger against the control. Our [Free plan](https://www.freeabtest.com/pricing) allows a control plus 1 variation, with 1 test running at a time and 1 new test a month, which suits this kind of site. Paid plans allow up to 50, but on a small site we would not use more than 2.
 
 ## Tactic 4: Run longer, within limits
 

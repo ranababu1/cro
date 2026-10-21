@@ -22,7 +22,9 @@ export const organizations: DocPage = {
         { type: 'h2', text: 'Plan limits', id: 'limits' },
         { type: 'table', head: ['Limit', 'What happens when you reach it'], rows: [
             ['Tested visitors per month (and per day on Free)', 'New visitors are not enrolled (`assigned: false`, reason `quota_exceeded`) and see your default page. Visitors already in an experiment keep their variation.'],
-            ['Running tests at a time, and tests over the life of a Free account', 'Starting another test returns `403` with the reason. Pause or complete a running test first.'],
+            ['Running tests at a time', 'Starting another test returns `403` with the reason. Pause or complete a running test first.'],
+            ['New tests per month on Free (1, per account and per domain)', 'Creating another test returns `403` with the reason and `resets_at`, the 1st of next month (UTC). Deleting a test does not give it back.'],
+            ['Goals on Free (1 per test, a click on a CSS selector)', 'Adding a second goal or another goal type returns `403` with an upgrade note. Custom events and conversions without a click goal return `403`.'],
             ['Experiment starts per month, when your plan has one', 'Starting a new experiment returns `403`. Resuming a paused one is not a new start.'],
             ['Projects and team seats', 'Adding a project or creating an invite returns `403` with an upgrade note. Existing projects and members are kept after a downgrade.'],
         ] },

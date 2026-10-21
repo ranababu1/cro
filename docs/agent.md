@@ -55,3 +55,11 @@ Plain language, short sentences, no em dashes, no filler.
 
 ## Telemetry
 Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dashboard actions in `product_events` (hashed IP). Never expose visitor PII.
+
+## Free plan rules
+- Read plan limits only from `getOrgEntitlements()` (`limits.monthlyTests`, `limits.maxGoals`, `features.advanced_goals`), never from `lib/plans.ts` in routes.
+- Free: 1 new test per calendar month (UTC), counted when the test is created, per account and per domain, in `free_test_usage`. Never decrement it. Use `checkNewTest` before and `recordNewTest` after creating a test, in any new create path.
+- Free: 1 goal per test, a click on a CSS selector. Any new goal type or conversion path must check `advanced_goals` (see `goalPlanError`, `ingestTrack`, `/api/sdk/event`, `recordGoalHits`).
+- Public copy: the Free card on /pricing lists every free limit in plain numbers with no footnotes. Never call Free "unlimited", "all features free" or a "free trial". Label paid-only features. `tests/publicCopyMatchesApp.test.ts` checks this.
+- Tests that are not about the free plan should put their org on a paid plan with `makePaid` (tests/helpers.ts), or clear the monthly counter with `resetFreeTestUsage`.
+

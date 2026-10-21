@@ -109,9 +109,10 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - Precedence in `computeEntitlements`: admin member (everything, no caps) > special friend allowance (each set field) > plan. Pageview cap, visitor quota and max variations now come from `limits`. Active experiments, projects and seats are stored and exposed in `limits`; enforcement for them lands with the free-tier limits. `flags` is reserved for future feature flags.
 
 ## Free tier limits (2026-10-15)
-- Defaults in `lib/plans.ts`, effective values only from `getOrgEntitlements().limits`: monthlyVisitors 10,000, dailyVisitors 300, activeExperiments 1, lifetimeExperiments 10, projects 1, maxVariations 1 for free; paid: maxVariations 50, others unlimited (pageviews 500,000). Free pageview cap removed.
+- Defaults in `lib/plans.ts`, effective values only from `getOrgEntitlements().limits`: monthlyVisitors 10,000, dailyVisitors 300, activeExperiments 1, monthlyTests 1, maxGoals 1, projects 1, domains 1, maxVariations 1 for free; paid: maxVariations 50, others unlimited (pageviews 500,000). Free pageview cap removed.
 - Visitors: `usage_daily` counter (migration 0012) bumped with the monthly first-seen row. `checkVisitorQuota(org, user)` lets visitors already counted this month through.
-- Experiments: `checkExperimentStartQuota(org, firstStart)` in PATCH /api/experiments/[id]: running limit on every start/resume, lifetime and monthly limits on first start. Create is refused once the lifetime limit is used. `experiments_started_total` increments on first start and never decreases.
+- Experiments: `checkExperimentStartQuota(org, firstStart)` in PATCH /api/experiments/[id]: running limit on every start/resume, the admin-set `monthly_experiment_limit` on first start. A start also needs at least one goal. `experiments_started_total` is telemetry only.
+- New tests per month (Free, 2026-10-20): see "Free plan reshape" below. The old 10-tests-lifetime cap is gone.
 - Projects: limit exposed (1 on free); there is no project-create API yet, so nothing else to enforce.
 - Overview: `app/components/PlanUsage.tsx`. Errors from the API use `quotaMessage`.
 ## Blog (2026-10-15)
@@ -128,8 +129,8 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 
 ## Free-tier domain rules
 - Free orgs (not paid, not special friends, not admins) get 1 registered domain; localhost does not count. Special friends can override via allowances.domains.
-- Global ledger domain_ledger keyed on eTLD+1 (tldts, public suffix list). First free claim wins; removing a domain releases the claim but keeps experiments_used.
-- A first start of a free test on a domain whose ledger count is 10 is refused; a domain with 10 used tests cannot be added by another free org.
+- Global ledger domain_ledger keyed on eTLD+1 (tldts, public suffix list). First free claim wins; removing a domain releases the claim. `experiments_used` is no longer used (kept, not dropped).
+- The free monthly test is counted per domain in `free_test_usage` (scope domain). A domain whose monthly test is used cannot be added by another free org until the 1st of next month UTC (`domain_exhausted`).
 - bootstrap, assign, track, sdk/event and capture require Origin or Referer on a registered domain; development keys also accept localhost. Missing headers are refused.
 - Abuse attempts are audited as abuse:* (origin logs throttled per org and host hourly) and listed with the ledger at /admin/abuse.
 - No backfill: tests started before this change are not on the ledger.
@@ -319,3 +320,12 @@ Webhooks (feature 'webhooks', paid; lib/webhooks.ts): tables webhooks and webhoo
 Server-side testing: /api/server/{config,assign,track} take a secret key (Bearer cro_sk_), via authenticateServerRequest in lib/requestAuth.ts. Shared cores in lib/sdkFlows.ts (assignVisitor, ingestTrack with storeExposureAssignments, serverConfig). Node package in integrations/node is private and unpublished; its hash must match lib/assignment.ts (tests/nodeSdk.test.ts checks 2,000 ids). Targeting rules are not applied server-side. Public docs (/docs/server-side) cover assign and track only: /api/server/config and the local hash stay undocumented publicly because the hash algorithm is internal (tests/publicContent.test.ts bans it); the docs say the Node package with local decisions is coming later.
 
 Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used by bootstrap, preview and rolloutReply; extra pages need visual-only tests) and lib/mvt.ts (buildMvtSchema, buildCombos with page CSS merged into one block, factorEffects). Routes /api/experiments/[id]/pages and /api/experiments/[id]/mvt, loader lib/mvtRoutes.ts, gate visual_editor. Combinations store their level indexes in variations.combo and the factors in experiments.mvt; replaceVariations spaces created_at to keep order. Changes apply on every page in the test (no per-page changes yet). Test heatmaps of a multi-page test mix clicks from all its pages.
+
+## Free plan reshape (2026-10-20)
+- Free: 1 new test per calendar month (UTC), counted at create in `free_test_usage` (migration 0039, PK scope+key+month, scope org or domain). Counted per org and, under `freeTierRules`, per registrable domain of control_url. Never decremented: deleting a test does not give it back. `lib/freeTests.ts` (checkNewTest, recordNewTest, testsCreatedThisMonth); date helpers in `lib/monthReset.ts` (client safe). POST /api/experiments refuses with 403, reason `monthly_tests` or `domain_monthly_tests`, `resets_at` and a message with the reset date.
+- Limits: `monthlyTests` and `maxGoals` (Free 1 and 1, else null) replace `lifetimeExperiments`. Special friend allowances `monthly_tests`, `max_goals`, `advanced_goals`. Admins have no limits.
+- Goals: new paid feature `advanced_goals` (form, page and event goals, more than one goal). `goalPlanError` in lib/goals.ts used by create and POST /goals. A draft may remove its only goal (to swap it); a start needs a goal.
+- Conversions on Free: ingestTrack (/api/track, /api/server/track) accepts a conversion only with the goal_id of a click goal, else 403 `custom_conversion`; /api/sdk/event returns 403; recordGoalHits records nothing without advanced_goals.
+- "1 page URL" = one test page (control URL plus its variation). Multi-page tests stay Growth and above.
+- UI: wizard and Edit test show the other goal types locked (`app/components/LockedGoalTypes.tsx`) and the monthly banner; /api/plan returns max_goals and monthly_tests; Overview shows "New tests this month" and a per-test note. Admin abuse page shows domain use this month.
+- Public: pricing Free card lists every limit, comparison rows for new tests a month, pages, goals and domains, paid-only labels, FAQ "What happens when I hit a limit?". Docs (troubleshooting, organizations, goals, sdk, rest API, server-side, quick start) and blog posts updated.

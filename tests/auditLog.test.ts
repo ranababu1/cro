@@ -131,7 +131,7 @@ describe('public copy', () => {
     it('pricing matches the enforced periods and the view is paid only', async () => {
         const fs = await import('node:fs');
         const pricing = fs.readFileSync('app/pricing/page.tsx', 'utf8');
-        expect(pricing).toContain("['Audit log', 'Not included', '90 days', '1 year', '2 years']");
+        expect(pricing).toContain("['Audit log', 'Paid plans only', '90 days', '1 year', '2 years']");
         expect(pricing).not.toContain("'Custom'],\n    ['Support'");
         expect(fs.readFileSync('lib/docs/content/experiments.ts', 'utf8')).not.toContain('coming later.');
     });

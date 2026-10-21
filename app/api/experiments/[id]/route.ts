@@ -55,7 +55,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const { targeting, ...rest } = parsed.data;
         const updates: Parameters<typeof db.updateExperiment>[1] = { ...rest };
-        let start: { startedAt: string | null; countDomain: string | null } | null = null;
+        let start: { startedAt: string | null } | null = null;
         // Targeting applies to new visitors only; people already in the test keep their version.
         if (targeting !== undefined) updates.targeting = serializeTargeting(targeting);
 

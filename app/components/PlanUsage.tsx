@@ -5,7 +5,7 @@ import { Card, Alert } from '@/app/components/ui';
 export interface UsageRow { label: string; used: number; limit: number | null; atLimit: string; capacity?: boolean }
 
 /** Plan usage on Overview: one bar per limit, with a plain note at each limit. */
-export function PlanUsage({ rows, plan }: { rows: UsageRow[]; plan: string }) {
+export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string; note?: string }) {
     const limited = rows.filter((r) => r.limit !== null);
     if (!limited.length) {
         // Unlimited plans (Enterprise, platform admin orgs) still show which plan applies.
@@ -43,6 +43,7 @@ export function PlanUsage({ rows, plan }: { rows: UsageRow[]; plan: string }) {
                     );
                 })}
             </dl>
+            {note && <p className="mt-4 text-sm text-zinc-600" data-testid="plan-note">{note}</p>}
             {hit.map((r) => (
                 <Alert key={r.label} tone="warning" className="mt-4" title={`${r.label}: limit reached`}>
                     {r.atLimit} <Link href="/pricing" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:underline">See plans</Link>

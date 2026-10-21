@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody, makePaid } from './helpers';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => session.current) }));
@@ -30,6 +30,7 @@ beforeAll(async () => {
     const a = await db.createUser({ email: 'alice@example.com', name: 'Alice' });
     const b = await db.createUser({ email: 'bob@example.com', name: 'Bob' });
     const wsA = await db.ensureWorkspace(a);
+    await makePaid(wsA.orgId); // creates several tests; the free monthly limit has its own tests
     await db.ensureWorkspace(b);
     await seedProjectDomain(wsA.projectId, 'localhost');
     alice = a.id;

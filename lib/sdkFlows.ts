@@ -10,6 +10,10 @@ import { scheduleAutoShift } from './autoShiftRun';
 import { scheduleSchedules, effectiveAllocation, pastStop } from './schedule';
 import { scheduleWebhooks } from './webhooks';
 import { getPageviewStatus } from './pageviewQuota';
+import { canUseFeature } from './entitlements';
+
+/** Free plan: conversions count only for the test's click goal (goal_id); custom conversions and revenue need a paid plan. */
+export const CUSTOM_CONVERSION_REFUSED = 'Custom conversion events need Starter or above. On the free plan a test counts clicks on its goal selector only.';
 
 /**
  * Shared cores of the browser SDK endpoints (/api/assign, /api/track) and the server endpoints
@@ -84,12 +88,16 @@ export interface TrackOptions {
     storeExposureAssignments?: boolean;
 }
 
-async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>, opts: TrackOptions): Promise<Outcome> {
+async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>, opts: TrackOptions, advancedGoals: boolean): Promise<Outcome> {
     const metadata = body.metadata ? JSON.stringify(body.metadata) : null;
     if (metadata && metadata.length > MAX_METADATA_BYTES) return { status: 400, body: { error: `metadata must be under ${MAX_METADATA_BYTES} bytes` } };
     const config = await db.getExperimentConfig(body.experiment_id);
     if (!config || config.experiment.project_id !== ctx.projectId) return { status: 404, body: { error: 'Experiment not found' } };
     if (!config.variations.some((v) => v.id === body.variation_id)) return { status: 404, body: { error: 'Variation not found' } };
+    if (body.event_type === 'conversion' && !advancedGoals) {
+        const goal = body.goal_id ? config.goals.find((g) => g.id === body.goal_id) : undefined;
+        if (!goal || goal.type !== 'click') return { status: 403, body: { error: CUSTOM_CONVERSION_REFUSED, reason: 'custom_conversion' } };
+    }
     if (body.event_type === 'conversion' && body.goal_id) {
         if (!config.goals.some((g) => g.id === body.goal_id)) return { status: 404, body: { error: 'Goal not found' } };
         // Dedupe: one conversion per visitor per goal (also within one batch).
@@ -154,7 +162,8 @@ export async function ingestTrack(ctx: SdkKeyContext, raw: unknown, opts: TrackO
 
     const seen = new Set<string>();
     const outcomes: Outcome[] = [];
-    for (const item of items) outcomes.push(await checkEvent(item, ctx, seen, opts));
+    const advancedGoals = items.some((i) => i.event_type === 'conversion') ? await canUseFeature(ctx.orgId, 'advanced_goals') : true;
+    for (const item of items) outcomes.push(await checkEvent(item, ctx, seen, opts, advancedGoals));
     const events = outcomes.flatMap((o) => (o.event ? [o.event] : []));
     await db.createEvents(events);
 

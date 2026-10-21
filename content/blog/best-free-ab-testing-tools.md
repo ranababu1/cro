@@ -3,7 +3,7 @@ title: "Best free A/B testing tools in 2026, compared honestly"
 meta_description: "A free-forever A/B testing plan at freeabtest.com versus VWO, Convert, Optimizely, Crazy Egg and other paid tools. Prices checked 15 Oct 2026."
 slug: best-free-ab-testing-tools
 date: 2026-10-15
-updated: 2026-10-19
+updated: 2026-10-20
 author: "Imraan, freeabtest.com"
 keywords:
   - free a/b testing tool
@@ -39,14 +39,14 @@ faq_schema: |
       {"@type": "Question", "name": "Is Crazy Egg free for A/B testing?",
        "acceptedAnswer": {"@type": "Answer", "text": "Crazy Egg's Starter plan at $29 a month billed annually does not include A/B testing. Plans with A/B testing start at Plus, $99 a month billed annually, with a 30-day free trial. There is no month-to-month option on the published pricing page."}},
       {"@type": "Question", "name": "What does freeabtest.com include for free?",
-       "acceptedAnswer": {"@type": "Answer", "text": "The free-forever plan includes 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests over the life of the account, 1 project, 1 team seat, and a control plus 1 variation. Goals for page visits, clicks, form submits and custom events are included, along with targeting, SRM alerts, peeking-safe sequential significance, chance to beat control, Wilson intervals, QA preview links and a GA4 experience_impression event. Heatmaps, funnels, results by segment, the WordPress plugin and the visual editor start on paid plans. Bayesian analysis is not offered."}},
+       "acceptedAnswer": {"@type": "Answer", "text": "The free-forever plan includes 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 1 new test a month, 1 page URL and 1 goal per test (a click on a CSS selector), 1 project, 1 domain, 1 team seat, and a control plus 1 variation. Targeting, SRM alerts, peeking-safe sequential significance, chance to beat control, Wilson intervals, QA preview links and a GA4 experience_impression event are included too. Form submit, page visit and custom event goals, revenue goals, heatmaps, funnels, results by segment, the WordPress plugin and the visual editor start on paid plans. Bayesian analysis is not offered."}},
       {"@type": "Question", "name": "What is a monthly tested user?",
        "acceptedAnswer": {"@type": "Answer", "text": "A monthly tested user (or tested visitor) is a unique visitor who is assigned to at least one running experiment in a calendar month. Visitors to pages without a test do not count, and a visitor in several tests usually counts once."}}
     ]
   }
 ---
 
-By Imraan, freeabtest.com. Published 15 October 2026. Updated 19 October 2026. Competitor prices were checked on each vendor's pricing page on 15 October 2026. freeabtest.com features below match the live product as of 19 October 2026.
+By Imraan, freeabtest.com. Published 15 October 2026. Updated 20 October 2026. Competitor prices were checked on each vendor's pricing page on 15 October 2026. freeabtest.com features below match the live product as of 19 October 2026.
 
 The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
 
@@ -68,7 +68,7 @@ Prices are what each vendor published on 15 October 2026. Where a page only offe
 
 | Tool | Free or trial | Published paid entry (A/B) | Main catch | Best for |
 |---|---|---|---|---|
-| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 10 tests lifetime, control plus 1 variation | Starter $10/month (250,000 visitors, 20 active experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test and one variation at a time. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $10 |
+| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 1 new test a month, 1 click goal per test, control plus 1 variation | Starter $10/month (250,000 visitors, 20 active experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test a month, one variation and one click goal. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $10 |
 | Convert Experiences | 15-day free trial, no card | Growth $399/month monthly or $299/month billed annually for 100,000 MTU | Starts near $300 a month even on annual billing | Teams that want a published enterprise-style suite and can pay for it |
 | Crazy Egg | 30-day free trial | Plus $99/month billed annually (A/B starts here; 150,000 tracked pageviews) | Starter at $29 has no A/B. All plans billed annually | Marketers who want session recordings bundled with A/B |
 | Kameleoon (PBX Starter) | 30-day free trial, up to 3 experiments, no card | From $495/month for up to 10 experiments and 50,000 tested visitors | Entry paid plan is nearly 50× freeabtest Starter | Teams buying prompt-based experimentation |
@@ -87,7 +87,7 @@ This is our product, so here is what it does today. Plan limits match our [prici
 
 - A/B tests and split URL tests, set up with a JavaScript snippet of under 30 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
 - Sticky assignment: each visitor ID is hashed with the experiment ID, so the same visitor always sees the same variant. You can change the traffic split on a running test; visitors already in the test keep their variant
-- Page visit, click (by CSS selector), form submit and custom event goals, plus conversions you send from your own code
+- Click goals by CSS selector. Paid plans add page visit, form submit and custom event goals, more goals per test, and conversions you send from your own code
 - Targeting by device, UTM, referrer and new or returning visitors
 - Sample ratio mismatch alerts, safe edits to running tests, shareable results links and QA preview links
 - Results with conversion rate, lift, a Wilson 95% interval for each variation, peeking-safe sequential significance (mixture SPRT) of each variant against the control, and chance to beat control once both versions have 100 visitors. The winner is the best-converting variant whose sequential test is significant. Live stats flag each variant that differs from the control. Significance is only tested once every variant has at least 100 visitors. Sample ratio mismatch (SRM) alerts are on every plan, including Free
@@ -96,9 +96,9 @@ This is our product, so here is what it does today. Plan limits match our [prici
 
 ### Free plan limits
 
-10,000 tested visitors a month and 300 a day, 1 running test at a time, 10 tests in total, 1 project, 1 team seat, and a control plus 1 variation. Over the limit, new visitors see the control and are not counted. We never upgrade you or bill you automatically.
+10,000 tested visitors a month and 300 a day, 1 running test at a time, 1 new test a month (deleting a test does not give it back), 1 page URL and 1 goal per test (a click on a CSS selector), 1 project, 1 domain, 1 team seat, and a control plus 1 variation. Over the visitor limits, new visitors see the control and are not counted. We never upgrade you or bill you automatically.
 
-On Free, a revenue goal still counts the conversion event, but revenue is not stored. Heatmaps, funnels, popups, surveys, JS error tracking, the WordPress plugin, the visual editor and auto-shift are paid features.
+Form submit, page visit and custom event goals, revenue goals and conversions sent from your own code are paid features, and so are heatmaps, funnels, popups, surveys, JS error tracking, the WordPress plugin, the visual editor and auto-shift are paid features.
 
 ### Starter ($10/month) and Growth ($50/month)
 
@@ -201,7 +201,7 @@ Growth starts at $399 per month billed monthly, or $299 per month billed annuall
 No. Starter at $29 a month billed annually does not include A/B testing. Plans with A/B start at Plus, $99 a month billed annually. There is a 30-day free trial.
 
 **What does freeabtest.com include for free?**
-10,000 tested visitors a month (up to 300 a day), 1 running test, 10 tests lifetime, 1 project, 1 team seat, control plus 1 variation, page/click/form/custom goals, targeting, SRM alerts, peeking-safe sequential significance, chance to beat control, Wilson intervals, QA preview links and a GA4 experience_impression event. Heatmaps, funnels, results by segment, the WordPress plugin and the visual editor start on paid plans. Bayesian analysis is not offered. Details are on our [pricing](https://www.freeabtest.com/pricing) page.
+10,000 tested visitors a month (up to 300 a day), 1 running test, 1 new test a month, 1 page URL and 1 click goal (on a CSS selector) per test, 1 project, 1 domain, 1 team seat, control plus 1 variation, targeting, SRM alerts, peeking-safe sequential significance, chance to beat control, Wilson intervals, QA preview links and a GA4 experience_impression event. Form submit, page visit and custom event goals, revenue goals, heatmaps, funnels, results by segment, the WordPress plugin and the visual editor start on paid plans. Bayesian analysis is not offered. Details are on our [pricing](https://www.freeabtest.com/pricing) page.
 
 **What is a monthly tested user?**
 A unique visitor ID assigned to at least one running experiment in a calendar month. Pages without a running test do not count. One visitor in three tests usually counts once.

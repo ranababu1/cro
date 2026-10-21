@@ -119,6 +119,8 @@ Server-side SDK: Done. Endpoints and docs live; Node package kept in integration
 
 Multi-page and multivariate tests: Done (Growth+). Postponed: per-page changes within one multi-page test, and a separate significance test per factor (factor view is descriptive; the verdict is per combination with Bonferroni).
 
+Free plan reshape: 1 new test a month, 1 click goal, no custom conversions on Free (20 Oct 2026).
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning

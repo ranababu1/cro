@@ -72,3 +72,23 @@ export function checkGoalSelector(selector: string): string | null {
     if (groups.length !== 1) return 'Use one CSS selector per goal. Add another goal for each extra element.';
     return null;
 }
+
+/** Goal types a plan without advanced goals (Free) may use: one click on a CSS selector. */
+export const BASIC_GOAL_TYPES: readonly GoalType[] = ['click'];
+
+/**
+ * Plan rule for adding goals to a test. Free: at most FREE_MAX_GOALS goals per test, click goals only.
+ * Returns the message to show, or null when allowed.
+ */
+export function goalPlanError(rule: { maxGoals: number | null; advancedGoals: boolean }, adding: { type?: string | null }[], existing = 0): string | null {
+    if (!rule.advancedGoals && adding.some((g) => !BASIC_GOAL_TYPES.includes((g.type || 'click') as GoalType))) {
+        return 'The free plan has one goal per test: a click on a CSS selector. Form submit, page visit and custom event goals need Starter or above.';
+    }
+    if (rule.maxGoals !== null && existing + adding.length > rule.maxGoals) {
+        const allows = `Your plan allows ${rule.maxGoals} goal${rule.maxGoals === 1 ? '' : 's'} per test.`;
+        return existing > 0
+            ? `${allows} Remove a goal first, or upgrade to Starter or above for up to ${MAX_GOALS}.`
+            : `${allows} Upgrade to Starter or above for up to ${MAX_GOALS}.`;
+    }
+    return null;
+}

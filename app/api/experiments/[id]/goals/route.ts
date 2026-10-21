@@ -3,7 +3,8 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment, orgIdForProject } from '@/lib/access';
 import { goalSchema, formatZodError } from '@/lib/validation';
-import { MAX_GOALS } from '@/lib/goals';
+import { MAX_GOALS, goalPlanError } from '@/lib/goals';
+import { getOrgEntitlements, UPGRADE_NOTE } from '@/lib/entitlements';
 import { z } from 'zod';
 
 type Params = { params: Promise<{ id: string }> };
@@ -22,7 +23,11 @@ export async function POST(request: NextRequest, { params }: Params) {
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const existing = await db.getGoals(id);
         if (existing.length >= MAX_GOALS) return NextResponse.json({ error: `A test can have up to ${MAX_GOALS} goals` }, { status: 400 });
-        const goal = await db.addGoal(id, parsed.data);
+        const ent = await getOrgEntitlements(await orgIdForProject(experiment.project_id));
+        const planError = goalPlanError({ maxGoals: ent.limits.maxGoals, advancedGoals: ent.features.advanced_goals }, [parsed.data], existing.length);
+        if (planError) return NextResponse.json({ error: planError, upgrade: UPGRADE_NOTE.advanced_goals, reason: 'goals' }, { status: 403 });
+        // The first goal of a test without one is its primary goal.
+        const goal = await db.addGoal(id, existing.length === 0 ? { ...parsed.data, is_primary: true } : parsed.data);
         await db.audit({
             orgId: await orgIdForProject(experiment.project_id),
             actorId: ctx.userId,
@@ -64,7 +69,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
 }
 
-/** DELETE /api/experiments/[id]/goals?goal=ID: remove a goal. The last goal cannot be removed. */
+/**
+ * DELETE /api/experiments/[id]/goals?goal=ID: remove a goal. A draft may remove its only goal (so a one-goal plan can
+ * swap it); a test that has started keeps at least one, and a test needs a goal to start.
+ */
 export async function DELETE(request: NextRequest, { params }: Params) {
     try {
         const ctx = await requireUserContext(request);
@@ -76,7 +84,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
         const goalId = request.nextUrl.searchParams.get('goal') ?? '';
         const existing = await db.getGoals(id);
         if (!existing.some((g) => g.id === goalId)) return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
-        if (existing.length <= 1) return NextResponse.json({ error: 'A test needs at least one goal' }, { status: 400 });
+        if (existing.length <= 1 && experiment.status !== 'draft') return NextResponse.json({ error: 'A test needs at least one goal' }, { status: 400 });
         await db.deleteGoal(id, goalId);
         await db.audit({ orgId: await orgIdForProject(experiment.project_id), actorId: ctx.userId, entity: 'experiment', entityId: id, action: 'goal:remove', diff: { goal_id: goalId } });
         return NextResponse.json({ goals: await db.getGoals(id) });

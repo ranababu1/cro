@@ -14,24 +14,27 @@ const limits: [string, string, string, string, string][] = [
     ['Who it\'s for', 'Trying it out and side projects', 'One growing site', 'Teams testing every week', 'High traffic and compliance needs'],
     ['Monthly tested visitors', '10,000 (up to 300 a day)', '250,000', '1,000,000', 'Custom'],
     ['Running experiments at a time', '1', '20', 'Unlimited', 'Unlimited'],
-    ['Total experiments', '10 over the life of the account', 'Unlimited', 'Unlimited', 'Unlimited'],
+    ['New experiments per month', '1 (resets on the 1st, UTC)', 'No monthly limit', 'No monthly limit', 'No monthly limit'],
+    ['Pages per experiment', '1 page URL', '1 page URL', 'Several (multi-page tests)', 'Several (multi-page tests)'],
+    ['Goals per experiment', '1: a click on a CSS selector', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event', 'Up to 50: click, form submit, page visit and custom event'],
     ['Variations per experiment', 'Control plus 1 (A/B only)', 'Control plus up to 50', 'Control plus up to 50', 'Control plus up to 50'],
     ['Projects', '1', '3', '10', 'Custom'],
+    ['Domains', '1', 'No limit', 'No limit', 'No limit'],
     ['Environments per project', '3 (dev, staging, production)', '3', '3', '3'],
     ['Team seats', '1', '5', '15', 'Unlimited'],
-    ['Survey answers kept', 'Not included', '12 months', '24 months', '24 months'],
-    ['Individual heatmap clicks kept', 'Not included', '30 days (daily totals stay)', '30 days (daily totals stay)', '30 days (daily totals stay)'],
-    ['WordPress plugin', 'Not included', 'Included', 'Included', 'Included'],
-    ['Funnels', 'Not included', 'Included', 'Included', 'Included'],
-    ['Revenue goals', 'Not included', 'Included', 'Included', 'Included'],
-    ['Results by segment', 'Not included', 'Included', 'Included', 'Included'],
-    ['Webhooks', 'Not included', 'Included', 'Included', 'Included'],
-    ['Auto-shift traffic to the winner', 'Not included', 'Not included', 'Included', 'Included'],
-    ['Traffic overview', 'Not included', 'Included', 'Included', 'Included'],
-    ['Popups and calls to action', 'Not included', 'Included', 'Included', 'Included'],
-    ['Surveys', 'Not included', 'Included', 'Included', 'Included'],
+    ['Survey answers kept', 'Paid plans only', '12 months', '24 months', '24 months'],
+    ['Individual heatmap clicks kept', 'Paid plans only', '30 days (daily totals stay)', '30 days (daily totals stay)', '30 days (daily totals stay)'],
+    ['WordPress plugin', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Funnels', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Revenue goals', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Results by segment', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Webhooks', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Auto-shift traffic to the winner', 'Growth and above', 'Growth and above', 'Included', 'Included'],
+    ['Traffic overview', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Popups and calls to action', 'Paid plans only', 'Included', 'Included', 'Included'],
+    ['Surveys', 'Paid plans only', 'Included', 'Included', 'Included'],
     ['REST API', 'Included', 'Included', 'Included', 'Included'],
-    ['Audit log', 'Not included', '90 days', '1 year', '2 years'],
+    ['Audit log', 'Paid plans only', '90 days', '1 year', '2 years'],
     ['Support', 'Docs and email', 'Email', 'Priority email', 'Named contact with an SLA'],
 ];
 
@@ -41,7 +44,8 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Flicker-free snippet', tier: 0 },
     { name: 'Sticky assignment', tier: 0 },
     { name: 'Targeting by device, UTM, referrer and new or returning visitors', tier: 0 },
-    { name: 'Click, form submit, page visit and custom event goals', tier: 0 },
+    { name: 'Click goals on a CSS selector', tier: 0 },
+    { name: 'Form submit, page visit and custom event goals, and several goals per test, on paid plans', tier: 1 },
     { name: 'Peeking-safe significance and chance to beat control, with Wilson intervals', tier: 0 },
     { name: 'Sample ratio mismatch warning', tier: 0 },
     { name: 'Edit running tests safely', tier: 0 },
@@ -51,7 +55,7 @@ const availableToday: { name: string; tier: number }[] = [
     { name: 'Roll out the winner to every visitor with one click while you update your code', tier: 0 },
     { name: 'Scheduled start and stop, with a gradual traffic ramp', tier: 0 },
     { name: 'Test planner with hypotheses and a duration estimate', tier: 0 },
-    { name: 'Server-side tests from your backend with a secret key', tier: 0 },
+    { name: 'Server-side assignment from your backend with a secret key (conversions sent from your code need a paid plan)', tier: 0 },
     { name: 'Google Tag Manager and WordPress install guides', tier: 0 },
     { name: 'Google Analytics 4 events for every test', tier: 0 },
     { name: 'WordPress plugin on paid plans', tier: 1 },
@@ -82,16 +86,16 @@ const comingSoon: { name: string; p: number; tier: number }[] = [
 ];
 
 const faqs = [
-    { q: 'Is the free plan actually free?', a: 'Yes. No card, no trial clock. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 10 tests in total, 1 project on 1 domain, and A/B tests with a control plus 1 variation, for as long as you use it.' },
+    { q: 'Is the free plan actually free?', a: 'Yes. Free forever, no card and no time limit. You get 10,000 tested visitors a month (up to 300 a day), 1 running test at a time, 1 new test a month, 1 page URL per test, 1 goal per test (a click on a CSS selector), 1 project, 1 domain, and A/B tests with a control plus 1 variation, for as long as you use it.' },
     { q: 'What counts as a tested visitor?', a: 'A unique visitor ID that gets assigned to at least one running experiment in a calendar month. Pages without a running test don\'t count. One visitor in three tests counts once.' },
-    { q: 'What happens if I go over my limit?', a: 'New visitors see your original page and aren\'t counted or added to results. Visitors already in a test keep their variant. On the free plan this applies past 10,000 tested visitors in a month or 300 in a day. We never upgrade you or bill you automatically.' },
+    { q: 'What happens when I hit a limit?', a: 'We never upgrade you or bill you automatically, and your running test keeps running. On the free plan: past 10,000 tested visitors in a month or 300 in a day, new visitors see your original page and aren\'t counted or added to results until the count resets (the daily count at midnight UTC, the monthly count on the 1st). Visitors already in a test keep their version, and visitors already counted that month can still join. Once you have created this month\'s test, creating another is refused with a message that gives the date it comes back, the 1st of next month (UTC); deleting a test doesn\'t give it back. Starting a second test while one is running is refused until you pause or complete it. A second goal, a goal that isn\'t a click, a second variation, a second project or a second domain can\'t be added, and the app shows what upgrading adds. Conversions sent from your code (custom events and revenue) are refused on Free, while clicks on your goal\'s selector still count. Overview shows your usage against each limit.' },
     { q: 'How are visitors assigned to a variant?', a: 'The SDK sends a visitor ID, and we hash it together with the experiment ID. The same visitor always lands in the same variant. Raising traffic allocation doesn\'t move people who are already in the test.' },
     { q: 'Which statistics do you use?', a: 'A sequential test of each variant against the control, at 95% confidence split across the variants, so the verdict stays valid however often you check. Each variant also shows its chance to beat the control, and each conversion rate a Wilson score interval. Significance is only tested once every variation has at least 100 visitors.' },
     { q: 'Are the coming soon features included in my price?', a: 'When a feature ships, it\'s included in the plan listed for it at no extra cost. Until then it\'s marked coming soon. Don\'t buy a plan for a feature that isn\'t built yet.' },
     { q: 'Can I change or cancel my plan?', a: 'Yes, anytime. Upgrades apply right away. Downgrades and cancellations take effect at the end of the billing period. Your tests and results are kept. Survey answers follow the retention of the plan you are on, and on the free plan answers older than 6 months are deleted. Audit log entries also follow your current plan, so moving to a plan with a shorter period deletes older entries.' },
     { q: 'What data do you delete, and when?', a: 'Survey answers are deleted after 12 months on Starter and 24 months on Growth and Enterprise. Individual heatmap clicks are deleted after 30 days; heatmaps keep their daily totals. Audit log entries are deleted after 90 days on Starter, 1 year on Growth and 2 years on Enterprise (30 days on Free). Tests, visitor assignments, conversions, results and daily totals are kept while your account is active.' },
     { q: 'Is there an annual discount?', a: 'Yes. Pay yearly and get 2 months free.' },
-    { q: 'How many tests can I run on the free plan?', a: 'One running test at a time and 10 tests over the life of the account. A test counts once you start it, and deleting it does not give it back. Each test compares a control with 1 variation. Paid plans remove these limits and allow up to 50 variations.' },
+    { q: 'How many tests can I run on the free plan?', a: 'One running test at a time, and you can create 1 new test each calendar month (UTC). The allowance comes back on the 1st of the month, and deleting a test doesn\'t give it back. It is counted per account and per website domain, so several free accounts on one domain share it. Each test covers 1 page URL, compares a control with 1 variation and has 1 goal: a click on a CSS selector. Paid plans have no monthly test limit, allow up to 50 variations and add form submit, page visit and custom event goals.' },
     { q: 'Do you charge per seat?', a: 'No. Each plan includes a set number of seats and projects at no extra cost: 1 of each on Free, 5 seats and 3 projects on Starter, 15 seats and 10 projects on Growth, and unlimited seats with a custom number of projects on Enterprise. Invite people with a link from Team and projects. After a downgrade, existing members and projects stay, but you cannot add more above the plan.' },
     { q: 'What do I need to install?', a: 'A small JavaScript snippet, under 30 KB gzipped. It works on any site, including through Google Tag Manager or WordPress. Paid plans also get a WordPress plugin that adds it for you.' },
     { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need a contract and DPA.' },
@@ -104,6 +108,7 @@ const faqJsonLd = {
 };
 
 const Check = () => <span className="font-bold text-teal-600" aria-label="Included">✓</span>;
+const PaidBadge = ({ tier }: { tier: number }) => <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
 const Soon = ({ p }: { p: number }) => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon, Phase {p}</span>;
 
 export default function PricingPage() {
@@ -111,10 +116,10 @@ export default function PricingPage() {
         <div className="min-h-screen bg-[#f8faff] text-zinc-950">
             <SiteHeader />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-            <main className="mx-auto max-w-[1200px] px-5 pb-20 pt-10 sm:px-8">
+            <main className="mx-auto max-w-[1200px] px-5 pb-20 pt-4 sm:px-8">
                 <p className="text-[13px] font-semibold tracking-[0.2em] text-blue-600">PRICING</p>
-                <h1 className="mt-4 max-w-3xl text-[40px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[52px]">Simple plans. A free tier you can actually use.</h1>
-                <p className="mt-4 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
+                <h1 className="mt-3 text-[34px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[44px]">Simple plans. A free tier you can actually use.</h1>
+                <p className="mt-3 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
 
                 <BillingCards />
 
@@ -131,7 +136,7 @@ export default function PricingPage() {
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Available today</td></tr>
                                 {availableToday.map((f) => (
-                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
+                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}{f.tier > 0 && <PaidBadge tier={f.tier} />}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Coming soon</td></tr>
                                 {comingSoon.map((f) => (

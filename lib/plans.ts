@@ -8,10 +8,12 @@ export const PAID_MAX_VARIATIONS = 50;
 /** Free tier: tested visitors (new visitors enrolled in a test). */
 export const FREE_MONTHLY_VISITORS = 10_000;
 export const FREE_DAILY_VISITORS = 300;
-/** Free tier: concurrently running experiments, experiments started over the account's lifetime, projects. */
+/** Free tier: concurrently running experiments, new tests created per calendar month (UTC), projects. */
 export const FREE_RUNNING_EXPERIMENTS = 1;
-export const FREE_LIFETIME_EXPERIMENTS = 10;
+export const FREE_MONTHLY_TESTS = 1;
 export const FREE_PROJECTS = 1;
+/** Free tier: goals per test. The one goal is a click on a CSS selector (other goal types need a paid plan). */
+export const FREE_MAX_GOALS = 1;
 /** Free tier: registered domains per account (localhost for development does not count). */
 export const FREE_DOMAINS = 1;
 

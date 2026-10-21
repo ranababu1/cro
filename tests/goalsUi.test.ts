@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createClient } from '@libsql/client';
 import { NextRequest } from 'next/server';
-import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
+import { useTempDatabase, seedProjectDomain, flowExperimentBody, makePaid } from './helpers';
 import { checkGoalSelector, MAX_GOALS } from '@/lib/goals';
 import { createExperimentSchema } from '@/lib/validation';
 
@@ -50,6 +50,7 @@ describe('goal routes', () => {
         cleanup = useTempDatabase();
         const u = await db.createUser({ email: 'g@example.com', name: 'G' });
         const ws = await db.ensureWorkspace(u);
+        await makePaid(ws.orgId); // several goals per test are a paid feature
         await seedProjectDomain(ws.projectId, 'localhost');
         session.current = { user: { id: u.id } };
         expId = (await (await create(req('POST', '/api/experiments', flowExperimentBody()))).json()).experiment.id;
@@ -96,12 +97,14 @@ describe('goal routes', () => {
         expect((await removeGoal(req('DELETE', `/api/experiments/${expId}/goals?goal=nope`), p(expId))).status).toBe(404);
     });
 
-    it('will not remove the last goal', async () => {
+    it('will not remove the last goal once the test has started (a draft may, to swap it)', async () => {
+        await db.updateExperiment(expId, { status: 'paused' });
         const goals = await db.getGoals(expId);
         for (const g of goals.slice(1)) await removeGoal(req('DELETE', `/api/experiments/${expId}/goals?goal=${g.id}`), p(expId));
         const last = await removeGoal(req('DELETE', `/api/experiments/${expId}/goals?goal=${goals[0].id}`), p(expId));
         expect(last.status).toBe(400);
         expect(await db.getGoals(expId)).toHaveLength(1);
+        await db.updateExperiment(expId, { status: 'draft' });
     });
 
     it('results list every named goal with its own conversions, from grouped stats', async () => {
