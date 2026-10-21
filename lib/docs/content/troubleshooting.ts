@@ -53,6 +53,6 @@ export const troubleshooting: DocPage = {
         { type: 'h3', text: 'Is there a WordPress plugin, GA4 integration or React package?' },
         { type: 'p', text: 'Paid plans get a WordPress plugin. On every plan the snippet sends a GA4 event for each test version a visitor sees (see [Google Analytics 4](/docs/sdk#ga4)). A React package is not available yet. The script tag works on any site today, and [Install guides](/docs/install-guides) cover Google Tag Manager and WordPress.' },
         { type: 'h3', text: 'Is it really free?' },
-        { type: 'p', text: 'There is a free plan and no billing system yet. Pricing for larger plans has not been set.' },
+        { type: 'p', text: 'Yes. The free plan is free forever with no card, within its limits (see [What are the free plan limits?](#free-limits)). Paid plans and their prices are on [Pricing](/pricing). To move to a paid plan, contact support.' },
     ],
 };

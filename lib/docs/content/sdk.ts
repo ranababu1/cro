@@ -11,7 +11,7 @@ export const sdk: DocPage = {
         { type: 'p', text: 'When you are signed in, Overview, Domains, and each experiment Setup tab show a pre-filled snippet with your public SDK key and `https://www.freeabtest.com`. Copy it as-is. Use the Production / Development toggle to swap keys; you do not paste a key yourself.' },
         { type: 'code', label: 'HTML', code: `<script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>` },
         { type: 'p', text: 'Put the same tag on the control page and every variation page. The SDK reads the key from `data-key`, matches a running test by the current URL, and handles bucketing, redirects and click goals automatically.' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'An npm package for the browser SDK is planned. Today, load the script tag as shown. To run tests from your backend, see [Server-side testing](/docs/server-side).' },
+        { type: 'callout', tone: 'info', title: 'Script tag only', text: 'The browser SDK is the script tag shown above; there is no npm package for it. To run tests from your backend, see [Server-side testing](/docs/server-side).' },
         { type: 'h2', text: 'What the snippet does on its own', id: 'automatic' },
         { type: 'p', text: 'With `data-key` on the script tag, the SDK starts as soon as it loads. You do not call anything for a standard test:' },
         { type: 'list', items: [
@@ -74,8 +74,8 @@ ABTest.track('purchase', { revenue: 49.99 });` },
         ] },
         { type: 'p', text: 'Audiences only fill from the day you create them, so set them up before or right when the test starts.' },
         { type: 'h2', text: 'Single-page apps', id: 'spa' },
-        { type: 'p', text: 'The snippet checks the page once, when it loads. If your app changes the URL without a full page load, call `ABTest.bootstrap()` after the route change so a test on the new URL runs. Visitors keep their variation.' },
-        { type: 'code', label: 'React', code: `useEffect(() => {
+        { type: 'p', text: 'The snippet checks the page once, when it loads. If your app changes the URL without a full page load, call `ABTest.bootstrap()` after the route change so a test on the new URL runs. Visitors keep their variation. Any framework works the same way; here is an example for a React router.' },
+        { type: 'code', label: 'React example', code: `useEffect(() => {
   window.ABTest?.bootstrap();
 }, [pathname]);` },
         { type: 'h2', text: 'Avoiding flicker', id: 'flicker' },
