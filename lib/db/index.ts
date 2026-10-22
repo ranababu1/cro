@@ -1257,6 +1257,24 @@ export const db = {
         const d = await getDb();
         await d.update(s.users).set({ signup_ip_hash: ipHash }).where(eq(s.users.id, userId));
     },
+    /** Members with the fields duplicate detection needs (phone, sign-up IP hash), one row per user and org. */
+    async listMembersForDuplicates(): Promise<{ user_id: string; email: string; phone: string | null; country: string | null; signup_ip_hash: string | null; org_id: string; org_name: string; org_plan: string; org_status: 'active' | 'suspended'; created_at: string }[]> {
+        const d = await getDb();
+        return d.select({
+            user_id: s.users.id, email: s.users.email, phone: s.users.phone, country: s.users.country, signup_ip_hash: s.users.signup_ip_hash,
+            org_id: s.organizations.id, org_name: s.organizations.name, org_plan: s.organizations.plan, org_status: s.organizations.status, created_at: s.users.created_at,
+        }).from(s.memberships)
+            .innerJoin(s.users, eq(s.users.id, s.memberships.user_id))
+            .innerJoin(s.organizations, eq(s.organizations.id, s.memberships.org_id));
+    },
+    /** Every registered host with its org. */
+    async listOrgHosts(): Promise<{ host: string; org_id: string; org_name: string; org_plan: string; org_status: 'active' | 'suspended' }[]> {
+        const d = await getDb();
+        return d.select({ host: s.projectDomains.host, org_id: s.organizations.id, org_name: s.organizations.name, org_plan: s.organizations.plan, org_status: s.organizations.status })
+            .from(s.projectDomains)
+            .innerJoin(s.projects, eq(s.projects.id, s.projectDomains.project_id))
+            .innerJoin(s.organizations, eq(s.organizations.id, s.projects.org_id));
+    },
     async getAbuseLog(limit = 200) {
         const d = await getDb();
         const [org, other] = await Promise.all([

@@ -4,6 +4,7 @@ import { requirePlatformAdmin } from '@/lib/platformAdmin';
 import { getTenantSummary } from '@/lib/admin';
 import { db, type OrgUpdate } from '@/lib/db';
 import { adminUpdateOrgSchema, formatZodError } from '@/lib/validation';
+import { logSuspensionAbuse } from '@/lib/suspension';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -58,6 +59,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     let action = 'admin:update';
     if (update.status && update.status !== org.status) action = update.status === 'suspended' ? 'admin:suspend' : 'admin:reactivate';
     await db.audit({ orgId: id, actorId: admin.userId, entity: 'organization', entityId: id, action, diff: { before, after: rest, by: admin.email } });
+    if (action === 'admin:suspend' || action === 'admin:reactivate') {
+        await logSuspensionAbuse(id, action === 'admin:suspend', admin, { reason: rest.suspended_reason ?? null, source: 'tenant' });
+    }
 
     return NextResponse.json({ tenant: await getTenantSummary(id) });
 }

@@ -21,6 +21,8 @@ const LABELS: Record<string, string> = {
     'abuse:signup_ip_limit': 'Sign-up refused: daily limit for this IP',
     'abuse:signup_range_limit': 'Sign-up refused: daily limit for this network range',
     'abuse:signup_limits_changed': 'Sign-up limits changed by an admin',
+    'abuse:org_suspended': 'Organization suspended by an admin',
+    'abuse:org_unsuspended': 'Organization unsuspended by an admin',
 };
 
 const when = (iso: string) => new Date(iso.endsWith('Z') || iso.includes('T') ? iso : `${iso.replace(' ', 'T')}Z`).toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST';
