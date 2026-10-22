@@ -14,6 +14,7 @@ export const dynamic = 'force-dynamic';
 const errors: Record<string, string> = {
     OAuthAccountNotLinked: 'This email is already linked to another sign-in method.',
     BotCheck: 'We could not confirm you are a person. Complete the check below and try again.',
+    SignupLimit: 'We cannot create more new accounts from your network today. Please try again tomorrow. If you already have an account, sign in with it.',
     AccessDenied: 'Access was denied. Try another account.',
     Default: 'Sign-in failed. Please try again.',
 };

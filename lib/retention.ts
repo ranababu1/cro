@@ -4,6 +4,7 @@ import { RAW_RETENTION_DAYS } from './heatmaps';
 import { AUDIT_RETENTION_DAYS } from './audit';
 import { SUPER_ADMIN_EMAIL } from './entitlements';
 import { platformAdminEmails } from './platformAdmin';
+import { ABUSE_EVENT_RETENTION_DAYS, SIGNUP_COUNT_RETENTION_DAYS } from './signupLimits';
 
 /**
  * Retention cleanup without a cron. Busy SDK routes call scheduleRetention(); at most once an hour across all
@@ -11,7 +12,8 @@ import { platformAdminEmails } from './platformAdmin';
  * - raw heatmap clicks and scroll rows older than 30 days (heatmaps keep their daily totals),
  * - survey answers older than the plan's data retention (Free 6 months, Starter 12, Growth and Enterprise 24),
  * - audit log entries older than the plan's audit period (Free 30 days, Starter 90, Growth 1 year, Enterprise 2 years),
- * - webhook delivery records older than 30 days.
+ * - webhook delivery records older than 30 days,
+ * - sign-up counters older than 30 days and abuse events without an org older than 180 days.
  * Each run deletes a bounded number of rows, so a large backlog is cleared over several runs.
  */
 export const RETENTION_JOB = 'retention';
@@ -46,7 +48,7 @@ export function retentionCutoffs(now = new Date()) {
 }
 
 /** Runs the cleanup if no instance ran it in the last hour. Returns what was deleted, or null when not due. */
-export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number; webhookDeliveries: number } | null> {
+export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number; webhookDeliveries: number; signupCounts: number; abuseEvents: number } | null> {
     const claimed = await db.claimMaintenance(RETENTION_JOB, new Date(now.getTime() - RETENTION_EVERY_MS).toISOString(), now.toISOString());
     if (!claimed) return null;
     const c = retentionCutoffs(now);
@@ -57,7 +59,9 @@ export async function runRetention(now = new Date()): Promise<{ heatmapPoints: n
     const surveyAnswers = await db.deleteOldSurveyAnswers(c.surveyBefore, DELETE_LIMIT, admins);
     const auditEntries = await db.deleteOldAuditEntries(c.auditBefore, DELETE_LIMIT, admins);
     const webhookDeliveries = await db.deleteOldWebhookDeliveries(new Date(now.getTime() - 30 * DAY_MS).toISOString(), DELETE_LIMIT);
-    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries, webhookDeliveries };
+    const signupCounts = await db.deleteOldSignupCounts(dayOf(now.getTime() - SIGNUP_COUNT_RETENTION_DAYS * DAY_MS), DELETE_LIMIT);
+    const abuseEvents = await db.deleteOldAbuseEvents(new Date(now.getTime() - ABUSE_EVENT_RETENTION_DAYS * DAY_MS).toISOString(), DELETE_LIMIT);
+    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries, webhookDeliveries, signupCounts, abuseEvents };
 }
 
 let lastLocalCheck = 0;

@@ -1207,9 +1207,60 @@ export const db = {
             .limit(limit);
     },
 
+    // Sign-up limits (lib/signupLimits.ts)
+    /** Adds one sign-up for a hashed key and day and returns the new count (atomic, shared by every server). */
+    async bumpSignupCount(scope: 'ip' | 'range', keyHash: string, day: string, by = 1): Promise<number> {
+        const d = await getDb();
+        const rows = await d.insert(s.signupCounts).values({ scope, key_hash: keyHash, day, count: by })
+            .onConflictDoUpdate({ target: [s.signupCounts.scope, s.signupCounts.key_hash, s.signupCounts.day], set: { count: sql`${s.signupCounts.count} + ${by}`, updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))` } })
+            .returning({ count: s.signupCounts.count });
+        return rows[0]?.count ?? 0;
+    },
+    async getSignupCount(scope: 'ip' | 'range', keyHash: string, day: string): Promise<number> {
+        const d = await getDb();
+        const row = await d.query.signupCounts.findFirst({ where: and(eq(s.signupCounts.scope, scope), eq(s.signupCounts.key_hash, keyHash), eq(s.signupCounts.day, day)) });
+        return row?.count ?? 0;
+    },
+    async deleteOldSignupCounts(beforeDay: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const res = await d.run(sql`delete from signup_counts where rowid in (select rowid from signup_counts where day < ${beforeDay} limit ${limit})`);
+        return res.rowsAffected;
+    },
+    async getPlatformSetting(key: string): Promise<string | null> {
+        const d = await getDb();
+        const row = await d.query.platformSettings.findFirst({ where: eq(s.platformSettings.key, key) });
+        return row?.value ?? null;
+    },
+    async setPlatformSetting(key: string, value: string, updatedBy: string | null): Promise<void> {
+        const d = await getDb();
+        await d.insert(s.platformSettings).values({ key, value, updated_by: updatedBy })
+            .onConflictDoUpdate({ target: s.platformSettings.key, set: { value, updated_by: updatedBy, updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))` } });
+    },
+    async addAbuseEvent(e: { kind: string; orgId?: string | null; actorId?: string | null; ipHash?: string | null; detail?: Record<string, unknown> }): Promise<void> {
+        const d = await getDb();
+        await d.insert(s.abuseEvents).values({ id: generateId('abu'), kind: e.kind, org_id: e.orgId ?? null, actor_id: e.actorId ?? null, ip_hash: e.ipHash ?? null, detail: e.detail ? JSON.stringify(e.detail) : null });
+    },
+    async deleteOldAbuseEvents(beforeIso: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const res = await d.run(sql`delete from abuse_events where rowid in (select rowid from abuse_events where created_at < ${beforeIso} limit ${limit})`);
+        return res.rowsAffected;
+    },
+    async setUserSignupIpHash(userId: string, ipHash: string | null): Promise<void> {
+        const d = await getDb();
+        await d.update(s.users).set({ signup_ip_hash: ipHash }).where(eq(s.users.id, userId));
+    },
     async getAbuseLog(limit = 200) {
         const d = await getDb();
-        return d.select().from(s.auditLog).where(like(s.auditLog.action, 'abuse:%')).orderBy(desc(s.auditLog.created_at)).limit(limit);
+        const [org, other] = await Promise.all([
+            d.select({ id: s.auditLog.id, created_at: s.auditLog.created_at, action: s.auditLog.action, org_id: s.auditLog.org_id, diff: s.auditLog.diff })
+                .from(s.auditLog).where(like(s.auditLog.action, 'abuse:%')).orderBy(desc(s.auditLog.created_at)).limit(limit),
+            d.select().from(s.abuseEvents).orderBy(desc(s.abuseEvents.created_at)).limit(limit),
+        ]);
+        const merged: { id: string; created_at: string; action: string; org_id: string | null; diff: string | null }[] = [
+            ...org,
+            ...other.map((e) => ({ id: e.id, created_at: e.created_at, action: `abuse:${e.kind}`, org_id: e.org_id, diff: e.detail })),
+        ];
+        return merged.sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0)).slice(0, limit);
     },
     // Platform telemetry
     async bumpTelemetry(day: string, scopeType: 'platform' | 'org' | 'user' | 'project' | 'experiment', scopeId: string, metric: string, by = 1): Promise<void> {

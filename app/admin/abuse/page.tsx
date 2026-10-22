@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { db } from '@/lib/db';
 import { listLedger, DOMAIN_FREE_TESTS } from '@/lib/domainLedger';
 import { testsCreatedThisMonth } from '@/lib/freeTests';
+import { getSignupCaps } from '@/lib/signupLimits';
+import SignupCapsForm from './SignupCapsForm';
 import { PageHeader, Card, CardHeader, CardBody, ButtonLink } from '@/app/components/ui';
 
 export const metadata: Metadata = { title: 'Abuse and domain ledger' };
@@ -16,6 +18,9 @@ const LABELS: Record<string, string> = {
     'abuse:origin_missing': 'SDK call without Origin or Referer',
     'abuse:plugin_unpaid': 'WordPress plugin traffic from an unpaid org',
     'abuse:plugin_verify_refused': 'WordPress plugin connect refused',
+    'abuse:signup_ip_limit': 'Sign-up refused: daily limit for this IP',
+    'abuse:signup_range_limit': 'Sign-up refused: daily limit for this network range',
+    'abuse:signup_limits_changed': 'Sign-up limits changed by an admin',
 };
 
 const when = (iso: string) => new Date(iso.endsWith('Z') || iso.includes('T') ? iso : `${iso.replace(' ', 'T')}Z`).toLocaleString('en-GB', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) + ' IST';
@@ -31,7 +36,7 @@ function detail(diff: string | null): string {
 }
 
 export default async function AbusePage() {
-    const [events, ledger] = await Promise.all([db.getAbuseLog(200), listLedger(200)]);
+    const [events, ledger, caps] = await Promise.all([db.getAbuseLog(200), listLedger(200), getSignupCaps()]);
     const monthUse = new Map(await Promise.all(ledger.map(async (l) => [l.domain, await testsCreatedThisMonth('domain', l.domain)] as const)));
     return (
         <>
@@ -40,17 +45,18 @@ export default async function AbusePage() {
                 description={`Free accounts get one domain and ${DOMAIN_FREE_TESTS} new test per month per domain (UTC month, shared by every free account on it). Blocked attempts are listed here.`}
                 actions={<ButtonLink href="/admin" variant="secondary" size="sm">Back to tenants</ButtonLink>}
             />
+            <SignupCapsForm caps={caps} />
             <Card className="mb-6">
                 <CardHeader title={`Abuse attempts (${events.length})`} />
                 <CardBody>
                     {events.length === 0 ? <p className="text-sm text-zinc-500">No blocked attempts yet.</p> : (
                         <table className="w-full text-sm" data-testid="abuse-table">
-                            <thead><tr className="text-left text-zinc-500"><th className="py-2">When</th><th>Type</th><th>Org</th><th>Details</th></tr></thead>
+                            <thead><tr className="text-left text-zinc-500"><th className="py-2 pr-4">When</th><th className="pr-4">Type</th><th className="pr-4">Org</th><th>Details</th></tr></thead>
                             <tbody>
                                 {events.map((e) => (
                                     <tr key={e.id} className="border-t border-zinc-100">
-                                        <td className="py-2 whitespace-nowrap">{when(e.created_at)}</td>
-                                        <td>{LABELS[e.action] ?? e.action}</td>
+                                        <td className="py-2 pr-4 whitespace-nowrap">{when(e.created_at)}</td>
+                                        <td className="pr-4">{LABELS[e.action] ?? e.action}</td>
                                         <td>{e.org_id ? <Link className="text-blue-700 hover:underline" href={`/admin/orgs/${e.org_id}`}>{e.org_id.slice(0, 8)}</Link> : '-'}</td>
                                         <td className="text-zinc-600">{detail(e.diff)}</td>
                                     </tr>
