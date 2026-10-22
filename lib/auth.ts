@@ -2,6 +2,8 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 import { cleanText, splitName } from "./profile";
+import { currentAuthRequest } from "./authRequest";
+import { BOT_CHECK_ERROR, botCheckPassed, PASS_COOKIE } from "./turnstile";
 import { bumpMetric, METRICS, touchUserActivity, recordProductEvent } from "./telemetry";
 
 export const authOptions: NextAuthOptions = {
@@ -18,6 +20,8 @@ export const authOptions: NextAuthOptions = {
             // Store user in database and make sure they have an org, project and environments
             const existingUser = await db.getUserByEmail(user.email);
             const isSignup = !existingUser;
+            // New accounts need the Turnstile pass set before the OAuth start (skipped when the keys are not set).
+            if (isSignup && !botCheckPassed(currentAuthRequest()?.cookies[PASS_COOKIE])) return `/signin?error=${BOT_CHECK_ERROR}`;
             // New accounts are prefilled from Google and see onboarding before the dashboard.
             const g = (profile ?? {}) as { given_name?: string; family_name?: string };
             const split = splitName(user.name);
