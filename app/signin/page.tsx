@@ -6,11 +6,14 @@ import { authOptions } from '@/lib/auth';
 import { Logo } from '../components/ui/Logo';
 import { Alert } from '../components/ui';
 import GoogleButton from './GoogleButton';
+import { turnstileEnabled, turnstileSiteKey } from '@/lib/turnstile';
 
 export const metadata: Metadata = { title: 'Sign in' };
+export const dynamic = 'force-dynamic';
 
 const errors: Record<string, string> = {
     OAuthAccountNotLinked: 'This email is already linked to another sign-in method.',
+    BotCheck: 'We could not confirm you are a person. Complete the check below and try again.',
     AccessDenied: 'Access was denied. Try another account.',
     Default: 'Sign-in failed. Please try again.',
 };
@@ -31,7 +34,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
                         <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Sign in to freeabtest.com</h1>
                         <p className="mt-1 text-sm text-zinc-500">Use your work Google account. A workspace is created on first sign-in.</p>
                         {error && <Alert tone="danger" className="mt-5">{errors[error] ?? errors.Default}</Alert>}
-                        <div className="mt-6"><GoogleButton callbackUrl={target} /></div>
+                        <div className="mt-6"><GoogleButton callbackUrl={target} siteKey={turnstileEnabled() ? turnstileSiteKey() : null} /></div>
                     </div>
                     <p className="mt-6 text-center text-xs text-zinc-500">
                         <Link href="/" className="underline hover:text-zinc-800">Back to home</Link>

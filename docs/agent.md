@@ -60,6 +60,11 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Read plan limits only from `getOrgEntitlements()` (`limits.monthlyTests`, `limits.maxGoals`, `features.advanced_goals`), never from `lib/plans.ts` in routes.
 - Free: 1 new test per calendar month (UTC), counted when the test is created, per account and per domain, in `free_test_usage`. Never decrement it. Use `checkNewTest` before and `recordNewTest` after creating a test, in any new create path.
 - Free: 1 goal per test, a click on a CSS selector. Any new goal type or conversion path must check `advanced_goals` (see `goalPlanError`, `ingestTrack`, `/api/sdk/event`, `recordGoalHits`).
-- Public copy: the Free card on /pricing lists every free limit in plain numbers with no footnotes. Never call Free "unlimited", "all features free" or a "free trial". Label paid-only features. `tests/publicCopyMatchesApp.test.ts` checks this.
+- Public copy: the Free card on /pricing shows three ticks and links to the comparison table (#compare), which lists every free limit in plain numbers with no footnotes. Never call Free "unlimited", "all features free" or a "free trial". Label paid-only features. `tests/publicCopyMatchesApp.test.ts` checks this.
 - Tests that are not about the free plan should put their org on a paid plan with `makePaid` (tests/helpers.ts), or clear the monthly counter with `resetFreeTestUsage`.
 
+
+## Sign-up protection
+- Bot check: Cloudflare Turnstile runs on /signin before the Google button is enabled. Env vars: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (widget, public) and `TURNSTILE_SECRET_KEY` (server only). Both must be set to turn it on; with either missing the check is skipped and one warning is logged per process.
+- Flow (`lib/turnstile.ts`): the widget token goes to POST /api/auth/turnstile, which checks it with Cloudflare siteverify (with the client IP) and sets the `fat_bot_pass` cookie (HttpOnly, path /api/auth, 10 minutes, HMAC signed with NEXTAUTH_SECRET). The auth route wrapper refuses POST /api/auth/signin/<provider> without a valid pass, and the NextAuth signIn callback refuses to create a new account without it (request info reaches the callback through `lib/authRequest.ts`). Refusals land on /signin?error=BotCheck.
+- Only the widget is used. The domain is not behind the Cloudflare proxy and no DNS change is needed. Keep these names out of public docs.

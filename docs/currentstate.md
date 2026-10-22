@@ -333,3 +333,6 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 ## Blog post 04 (2026-10-21)
 - content/blog/ab-test-javascript.md (from the content store, already on the new Free plan). lib/blog.ts reads `howto_schema` and the post page renders it as JSON-LD. Posts 01, 02 and 03 link to it (updated 2026-10-21). tests/blogPost04.test.ts.
 - Docs: troubleshooting 'Is it really free?' no longer says there is no billing system; introduction lists goals by plan; SDK page drops the planned npm package note and labels the React SPA snippet as an example.
+
+## Sign-up protection (22 Oct 2026)
+- Bot check: Cloudflare Turnstile on /signin (widget only, no proxy or DNS change). The Google button is enabled after the widget passes; POST /api/auth/turnstile verifies the token with Cloudflare siteverify and sets a signed, HttpOnly 10-minute pass cookie on /api/auth. POST /api/auth/signin/<provider> and new-account creation in the signIn callback require it (errors go to /signin?error=BotCheck). With NEXT_PUBLIC_TURNSTILE_SITE_KEY or TURNSTILE_SECRET_KEY unset the check is skipped and a warning is logged. lib/turnstile.ts, lib/authRequest.ts, tests/turnstile.test.ts.
