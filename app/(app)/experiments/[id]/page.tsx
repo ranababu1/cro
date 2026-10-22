@@ -16,6 +16,7 @@ import { RolloutCard } from './RolloutCard';
 import { ScheduleCard } from './ScheduleCard';
 import { PreviewLinks } from './PreviewLinks';
 import { FactorEffects } from './FactorEffects';
+import { SiteVerifyCard, type SiteState } from './SiteVerifyCard';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -47,6 +48,7 @@ export default function ExperimentDetail() {
     const [tab, setTab] = useState('results');
     const [busy, setBusy] = useState(false);
     const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+    const [site, setSite] = useState<SiteState | null>(null);
 
     const load = useCallback(async () => {
         try {
@@ -56,6 +58,12 @@ export default function ExperimentDetail() {
             setExperiment(data.experiment);
             setVariations(data.variations);
             setGoals(data.goals || []);
+            if (data.experiment.status === 'draft' || data.experiment.status === 'paused') {
+                const sc = await fetch(`/api/experiments/${id}/site-check`).catch(() => null);
+                setSite(sc?.ok ? (await sc.json()).site : null);
+            } else {
+                setSite(null);
+            }
             if (data.experiment.status !== 'draft') {
                 const r = await fetch(`/api/experiments/${id}/results`);
                 if (r.ok) { setResults(await r.json()); setUpdatedAt(new Date()); }
@@ -124,11 +132,12 @@ export default function ExperimentDetail() {
     }
 
     const s = experiment.status;
+    const siteBlocked = !!site && !site.verified;
     const actions = (
         <>
-            {s === 'draft' && <><Button variant="danger" onClick={remove} disabled={busy}>Delete</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment started.')} disabled={busy}>Start experiment</Button></>}
+            {s === 'draft' && <><Button variant="danger" onClick={remove} disabled={busy}>Delete</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment started.')} disabled={busy || siteBlocked} title={siteBlocked ? 'Install the snippet to verify your site first' : undefined}>Start experiment</Button></>}
             {s === 'running' && <><Button variant="secondary" onClick={() => patch({ status: 'paused' }, 'Experiment paused.')} disabled={busy}>Pause</Button><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button></>}
-            {s === 'paused' && <><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment resumed.')} disabled={busy}>Resume</Button></>}
+            {s === 'paused' && <><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment resumed.')} disabled={busy || siteBlocked} title={siteBlocked ? 'Install the snippet to verify your site first' : undefined}>Resume</Button></>}
         </>
     );
 
@@ -142,6 +151,7 @@ export default function ExperimentDetail() {
             />
             {error && (error === PROFILE_REQUIRED_MESSAGE ? <ProfileRequired next={`/experiments/${id}`} className="mb-4" /> : <Alert tone="danger" className="mb-4">{error}</Alert>)}
             {notice && <Alert tone="success" className="mb-4">{notice}</Alert>}
+            {siteBlocked && (s === 'draft' || s === 'paused') && <SiteVerifyCard experimentId={experiment.id} site={site} onChange={setSite} />}
 
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Traffic allocation" value={`${experiment.traffic_allocation}%`} />

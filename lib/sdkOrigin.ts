@@ -4,6 +4,7 @@ import { hostFromRequestHeaders, isHostAllowed } from './domains';
 import { isLocalHost } from './domainLedger';
 import { logAbuse } from './abuse';
 import { getOrgEntitlements } from './entitlements';
+import { recordSdkSeen } from './siteVerification';
 
 export type OriginCheck = { ok: true; host: string } | { ok: false; reason: 'no_domains' | 'domain_not_allowed' | 'origin_missing' | 'plan_required'; message: string };
 
@@ -31,7 +32,10 @@ export async function checkSdkOrigin(request: NextRequest, ctx: SdkKeyContext): 
         void logAbuse(ctx.orgId, 'origin_mismatch', { host, project: ctx.projectId });
         return { ok: false, reason: 'domain_not_allowed', message: 'Domain not allowed' };
     }
-    return pluginGate(request, ctx, host);
+    const gate = await pluginGate(request, ctx, host);
+    // Proof the script is live on this registered domain (free tests need it before they start).
+    if (gate.ok) void recordSdkSeen(ctx.projectId, host);
+    return gate;
 }
 
 async function pluginGate(request: NextRequest, ctx: SdkKeyContext, host: string): Promise<OriginCheck> {

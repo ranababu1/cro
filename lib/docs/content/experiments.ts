@@ -30,6 +30,7 @@ export const experiments: DocPage = {
             ['Completed', 'No', 'Final. Read only, and cannot be restarted. Results stay available.'],
         ] },
         { type: 'p', text: 'Use the buttons at the top of the experiment page: **Start experiment** (draft), **Pause** and **Complete** (running), **Resume** and **Complete** (paused). Any other change, such as completed back to running, is rejected.' },
+        { type: 'p', text: 'Free plan: **Start experiment** and **Resume** stay off until the install snippet has loaded on the test\'s site in the last 7 days. Load a page with the snippet, then choose **Re-check** on the experiment page.' },
         { type: 'callout', tone: 'info', text: 'Starting an experiment for the first time sets its start date and counts against your organization\'s monthly experiment limit, if one is set. Resuming a paused experiment does not count again.' },
         { type: 'h2', text: 'Editing' },
         { type: 'p', text: 'On the **Settings** tab you can change the name, the description and the traffic allocation. The **Edit test** tab lets you make safe changes, even while the test runs:' },
