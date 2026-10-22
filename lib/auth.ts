@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 import { cleanText, splitName } from "./profile";
 import { currentAuthRequest } from "./authRequest";
+import { reserveSignup, SIGNUP_LIMIT_ERROR } from "./signupLimits";
 import { BOT_CHECK_ERROR, botCheckPassed, PASS_COOKIE } from "./turnstile";
 import { bumpMetric, METRICS, touchUserActivity, recordProductEvent } from "./telemetry";
 
@@ -22,6 +23,13 @@ export const authOptions: NextAuthOptions = {
             const isSignup = !existingUser;
             // New accounts need the Turnstile pass set before the OAuth start (skipped when the keys are not set).
             if (isSignup && !botCheckPassed(currentAuthRequest()?.cookies[PASS_COOKIE])) return `/signin?error=${BOT_CHECK_ERROR}`;
+            // Daily caps on new accounts per IP and IP range, shared through the database.
+            let signupIpHash: string | null = null;
+            if (isSignup) {
+                const check = await reserveSignup(currentAuthRequest()?.ip, user.email);
+                if (!check.ok) return `/signin?error=${SIGNUP_LIMIT_ERROR}`;
+                signupIpHash = check.ipHash;
+            }
             // New accounts are prefilled from Google and see onboarding before the dashboard.
             const g = (profile ?? {}) as { given_name?: string; family_name?: string };
             const split = splitName(user.name);
@@ -33,6 +41,7 @@ export const authOptions: NextAuthOptions = {
                 last_name: cleanText(g.family_name ?? '') || split.last || null,
                 onboarding_pending: true,
             });
+            if (isSignup && signupIpHash) await db.setUserSignupIpHash(dbUser.id, signupIpHash);
             const ws = await db.ensureWorkspace(dbUser);
             if (isSignup) {
                 await bumpMetric(METRICS.signups, { userId: dbUser.id, orgId: ws.orgId });

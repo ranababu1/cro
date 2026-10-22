@@ -29,6 +29,8 @@ export const users = sqliteTable('users', {
     // Set for users who sign up after onboarding shipped; they see /onboarding before the dashboard.
     onboarding_pending: integer('onboarding_pending', { mode: 'boolean' }).notNull().default(false),
     profile_prompt_dismissed_at: text('profile_prompt_dismissed_at'),
+    // Salted hash of the IP the account was created from (lib/telemetry hashIp). Never the raw IP.
+    signup_ip_hash: text('signup_ip_hash'),
 });
 
 export const organizations = sqliteTable('organizations', {
@@ -440,6 +442,40 @@ export const freeTestUsage = sqliteTable('free_test_usage', {
     tests: integer('tests').notNull().default(0),
     updated_at: text('updated_at').notNull().default(now),
 }, (t) => [primaryKey({ columns: [t.scope, t.key, t.month] })]);
+
+/**
+ * New accounts per hashed IP or hashed IP range (/24 IPv4, /48 IPv6) per UTC day, shared by every server.
+ * Kept SIGNUP_COUNT_RETENTION_DAYS (lib/signupLimits.ts).
+ */
+export const signupCounts = sqliteTable('signup_counts', {
+    scope: text('scope', { enum: ['ip', 'range'] }).notNull(),
+    key_hash: text('key_hash').notNull(),
+    day: text('day').notNull(),
+    count: integer('count').notNull().default(0),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [primaryKey({ columns: [t.scope, t.key_hash, t.day] }), index('idx_signup_counts_day').on(t.day)]);
+
+/** Platform-wide settings an admin can change in /admin (JSON values). */
+export const platformSettings = sqliteTable('platform_settings', {
+    key: text('key').primaryKey(),
+    value: text('value').notNull(),
+    updated_by: text('updated_by'),
+    updated_at: text('updated_at').notNull().default(now),
+});
+
+/**
+ * Abuse events that have no org to attach to (refused sign-ups, platform setting changes).
+ * Org-scoped abuse stays in audit_log as abuse:<kind>; /admin/abuse lists both. Kept ABUSE_EVENT_RETENTION_DAYS.
+ */
+export const abuseEvents = sqliteTable('abuse_events', {
+    id: text('id').primaryKey(),
+    kind: text('kind').notNull(),
+    org_id: text('org_id'),
+    actor_id: text('actor_id'),
+    ip_hash: text('ip_hash'),
+    detail: text('detail'),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_abuse_events_created').on(t.created_at)]);
 
 // Heatmaps (paid plans). Raw points are kept 30 days for confetti; reports read the daily rollups.
 export const heatmapPoints = sqliteTable('heatmap_points', {
