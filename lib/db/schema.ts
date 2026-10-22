@@ -92,6 +92,8 @@ export const projectDomains = sqliteTable('project_domains', {
     project_id: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
     host: text('host').notNull(), // lowercase hostname, no port, e.g. example.com or www.example.com
     created_at: text('created_at').notNull().default(now),
+    // Last time an SDK request passed the origin check from this host (lib/siteVerification.ts). Free tests need it recent.
+    last_seen_at: text('last_seen_at'),
 }, (t) => [uniqueIndex('uq_project_domains_host').on(t.project_id, t.host), index('idx_project_domains_project').on(t.project_id)]);
 
 export const ENVIRONMENT_KEYS = ['dev', 'staging', 'prod'] as const;

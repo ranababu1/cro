@@ -1,3 +1,4 @@
+import { siteCheck, siteNotVerifiedMessage } from './siteVerification';
 import { db } from './db';
 import { orgIdForProject } from './access';
 import { checkExperimentStartQuota, quotaMessage } from './quotas';
@@ -21,6 +22,8 @@ export type StartCheck =
 export async function checkStart(experiment: Experiment, _actorId: string | null, _opts: { dryRun?: boolean } = {}): Promise<StartCheck> {
     const orgId = await orgIdForProject(experiment.project_id);
     if ((await db.getGoals(experiment.id)).length === 0) return { ok: false, error: 'Add a goal before starting this test', reason: 'no_goal' };
+    const site = await siteCheck(experiment);
+    if (!site.verified) return { ok: false, error: siteNotVerifiedMessage(site.domain), reason: 'site_not_verified' };
     const firstStart = !experiment.started_at;
     const quota = await checkExperimentStartQuota(orgId, firstStart);
     if (!quota.allowed) return { ok: false, error: quotaMessage(quota), reason: quota.reason ?? 'quota' };

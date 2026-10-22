@@ -30,6 +30,7 @@ export const quickStart: DocPage = {
         { type: 'p', text: 'That is the only install step. The SDK matches the test by URL, buckets visitors, redirects variation traffic without flicker, records page views, and listens for your click goals.' },
         { type: 'h2', text: '6. Start the test', id: 'start' },
         { type: 'p', text: 'On the review step choose **Start test**, or open the draft and choose **Start experiment**. You can pause, resume and stop from the experiment page.' },
+        { type: 'p', text: 'On the Free plan a test starts once the install snippet has loaded on its site in the last 7 days. Until then the test page shows **Install the snippet to verify your site**: add the snippet, open a page that has it in your browser, then choose **Re-check**. Paid plans skip this step.' },
         { type: 'h2', text: '7. Read results', id: 'results' },
         { type: 'p', text: 'Open the **Results** tab. Switch between goals to see visitors, conversions, conversion rate, lift, 95% intervals and significance for each variation.' },
     ],

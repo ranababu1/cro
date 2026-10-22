@@ -806,6 +806,14 @@ export const db = {
         await d.delete(s.projectDomains).where(eq(s.projectDomains.id, domainId));
     },
 
+    /** Records that the SDK was seen live on a registered host. Writes at most once per minGapMs per host. */
+    async markDomainSeen(projectId: string, host: string, nowIso: string, minGapMs: number): Promise<void> {
+        const d = await getDb();
+        const before = new Date(new Date(nowIso).getTime() - minGapMs).toISOString();
+        await d.update(s.projectDomains).set({ last_seen_at: nowIso })
+            .where(and(eq(s.projectDomains.project_id, projectId), eq(s.projectDomains.host, host), or(isNull(s.projectDomains.last_seen_at), sql`${s.projectDomains.last_seen_at} < ${before}`)));
+    },
+
     async getDomainHosts(projectId: string): Promise<string[]> {
         return cached(`dom:${projectId}`, async () => (await this.listDomains(projectId)).map((d) => d.host));
     },
