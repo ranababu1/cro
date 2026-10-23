@@ -270,7 +270,7 @@ Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with
 
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
 
-Blog posts support article_schema, faq_schema and breadcrumb_schema frontmatter, each rendered as JSON-LD. Three posts live.
+Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Five posts live (2026-10-23).
 
 Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.
 
@@ -339,3 +339,6 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Sign-up caps: new accounts per IP (default 3) and per /24 IPv4 or /48 IPv6 range (default 10) per UTC day, stored in signup_counts (database, shared by all servers; only salted hashes, never raw IPs). Refused sign-ups see "We cannot create more new accounts from your network today" and are logged to abuse_events, which /admin/abuse lists with the org abuse entries. Admins set the caps on /admin/abuse (platform_settings key signup_limits). users.signup_ip_hash records the sign-up IP hash. Retention: counters 30 days, abuse_events 180 days. lib/signupLimits.ts, tests/signupLimits.test.ts.
 - Free site verification: free tests start or resume only after the SDK has been seen on the test's domain in the last 7 days (project_domains.last_seen_at, written by the SDK origin check, throttled to one write per host per 5 minutes). The experiment page shows "Install the snippet to verify your site" with Re-check and the snippet; Start and Resume are disabled until then, and the API refuses with reason site_not_verified. Scheduled starts use the same check. Paid, special friend and platform admin orgs and localhost test pages skip it. The domain ledger rules are unchanged. lib/siteVerification.ts, tests/siteVerification.test.ts.
 - Duplicate accounts: /admin/duplicates (linked from /admin) groups orgs whose members share a phone number (E.164, masked), a hashed sign-up IP or a registrable domain. Each org has a one-click Suspend or Unsuspend. Suspended orgs: SDK and secret keys get 403 This account is suspended (the SDK does nothing), dashboard APIs 403, the app shows the suspended notice. Each change goes to the audit log and to abuse_events (shown on /admin/abuse). lib/duplicates.ts, lib/suspension.ts, tests/duplicates.test.ts.
+
+## Blog post 05 (2026-10-23)
+- content/blog/google-optimize-alternatives-developers.md (from the content store, one missing full stop added). lib/blog.ts reads `itemlist_schema` and the post page renders it as JSON-LD. Posts 01 (best-free-ab-testing-tools) and 04 (ab-test-javascript) link to it; their `updated` dates are unchanged. tests/blogPost05.test.ts.

@@ -33,6 +33,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             {p.faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.faqSchema) }} />}
             {p.breadcrumbSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.breadcrumbSchema) }} />}
             {p.howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.howtoSchema) }} />}
+            {p.itemListSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.itemListSchema) }} />}
             <ReadingProgress target="article-body" />
             <SiteHeader />
             <main>

@@ -156,7 +156,7 @@ Use Unbounce when the pages you test live inside Unbounce. It is not a general s
 
 **AB Tasty** states that pricing is custom, based on traffic volume, domains, modules and implementation scope, with no fixed plans on the pricing page. Their documentation also says platform access is created by their commercial team, not through a public signup.
 
-These three are built for teams that already have a CRO budget and a procurement process. They are usually stronger on personalization, governance and support SLAs. They are a poor match if you want to start a first test this afternoon without a sales call.
+These three are built for teams that already have a CRO budget and a procurement process. They are usually stronger on personalization, governance and support SLAs. They are a poor match if you want to start a first test this afternoon without a sales call. They are also the three providers Google named as integration partners when Optimize shut down; our guide to [Google Optimize alternatives for developers](https://www.freeabtest.com/blog/google-optimize-alternatives-developers) covers how each option connects to GA4.
 
 ## How do I pick an affordable A/B testing tool?
 
