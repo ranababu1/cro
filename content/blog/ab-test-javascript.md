@@ -262,8 +262,9 @@ The limits, plainly: our [Free plan](https://www.freeabtest.com/pricing) allows 
 | Statistics | You write the z-test or sequential test | Sequential test, Wilson intervals, chance to beat control |
 | SRM check | You run it | Warning in the results |
 | Control over data | Every raw event is yours | Results in the dashboard, CSV download and REST API |
+| GA4 | You send your own event | `experience_impression` sent on every plan |
 
-Build it yourself to learn how testing works, for a variant no tool can render, or for one test a year that you will analyse by hand. Use a snippet when you test regularly and would rather spend the time on what to test than on plumbing.
+Build it yourself to learn how testing works, for a variant no tool can render, or for one test a year that you will analyse by hand. Use a snippet when you test regularly and would rather spend the time on what to test than on plumbing. If you are replacing Google Optimize and want results in GA4, our guide to [Google Optimize alternatives for developers](https://www.freeabtest.com/blog/google-optimize-alternatives-developers) compares the options.
 
 ## Frequently asked questions
 

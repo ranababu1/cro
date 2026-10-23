@@ -11,7 +11,7 @@ export type Post = {
     slug: string; title: string; description: string; date: string; updated: string; author: string;
     /** Name shown on the page, e.g. "Imraan" from "Imraan, freeabtest.com". */
     authorName: string; category: string;
-    keywords: string[]; readingMinutes: number; markdown: string; articleSchema?: string; faqSchema?: string; breadcrumbSchema?: string; howtoSchema?: string;
+    keywords: string[]; readingMinutes: number; markdown: string; articleSchema?: string; faqSchema?: string; breadcrumbSchema?: string; howtoSchema?: string; itemListSchema?: string;
 };
 
 const iso = (v: unknown) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v ?? ''));
@@ -57,7 +57,7 @@ export function parsePost(file: string, raw: string): Post {
     return {
         ...base, authorName: author.split(',')[0].trim(), category: deriveCategory(data.category, keywords),
         readingMinutes: Math.max(1, Math.round(words / 220)), markdown: content,
-        articleSchema: json(data.article_schema) ?? JSON.stringify(defaultArticleSchema(base)), faqSchema: json(data.faq_schema), breadcrumbSchema: json(data.breadcrumb_schema), howtoSchema: json(data.howto_schema),
+        articleSchema: json(data.article_schema) ?? JSON.stringify(defaultArticleSchema(base)), faqSchema: json(data.faq_schema), breadcrumbSchema: json(data.breadcrumb_schema), howtoSchema: json(data.howto_schema), itemListSchema: json(data.itemlist_schema),
     };
 }
 
