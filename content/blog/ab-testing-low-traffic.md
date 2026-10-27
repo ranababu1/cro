@@ -3,7 +3,7 @@ title: "A/B testing with low traffic: what you can and can't learn"
 meta_description: "With under 10,000 monthly visitors, a 4-week A/B test can only detect lifts of about 36% or more on a 3% conversion rate. Here is what to do instead."
 slug: ab-testing-low-traffic
 date: 2026-10-19
-updated: 2026-10-21
+updated: 2026-10-27
 author: "Imraan, freeabtest.com"
 keywords: ["a/b testing low traffic", "ab testing small website", "minimum traffic for ab testing", "ab test small sample size", "low traffic conversion optimization"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B testing with low traffic: what you can and can't learn",
     "datePublished": "2026-10-19",
-    "dateModified": "2026-10-21",
+    "dateModified": "2026-10-27",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-testing-low-traffic",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,9 +46,9 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 19 October 2026. Updated 21 October 2026. Sources checked 19 October 2026.
+By Imraan, freeabtest.com. Published 19 October 2026. Updated 27 October 2026. Sources checked 19 October 2026.
 
-With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference."
+With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference." Our guide to [what statistical significance means in an A/B test](https://www.freeabtest.com/blog/statistical-significance-ab-test) shows why "not significant" usually means "not enough data to tell" rather than "no effect".
 
 That does not mean small sites should never test. It means they should test differently: bigger changes, more frequent goals, longer tests, and a clear idea in advance of what the test can and cannot tell them. This article gives the numbers, then the tactics.
 

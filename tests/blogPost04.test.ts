@@ -27,7 +27,7 @@ describe('post: How to run an A/B test with plain JavaScript', () => {
         for (const slug of ['best-free-ab-testing-tools', 'how-long-to-run-an-ab-test', 'ab-testing-low-traffic']) {
             const post = getPost(slug)!;
             expect(post.markdown).toContain('](/blog/ab-test-javascript)');
-            expect(post.updated).toBe('2026-10-21');
+            expect(post.updated >= '2026-10-21').toBe(true);
         }
     });
     it('no blog post puts form, page visit or custom event goals, or trackConversion, on Free', () => {
