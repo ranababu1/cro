@@ -270,7 +270,7 @@ Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with
 
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
 
-Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Six posts live (2026-10-25).
+Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Seven posts live (2026-10-27).
 
 Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.
 
@@ -345,3 +345,6 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 
 ## Blog post 06 (2026-10-25)
 - content/blog/statistical-significance-ab-test.md, copied unchanged from the content store. Describes the shipped statistics (mSPRT at 5% with a Bonferroni split, 100-visitor floor, Wilson intervals, chance to beat control, fixed-sample z-test under `statistical_significance` in the results API). Links to how-long-to-run-an-ab-test, ab-testing-low-traffic, /docs/results, /docs/quick-start and /pricing. tests/blogPost06.test.ts.
+
+## Blog post 07 (2026-10-27)
+- content/blog/ab-test-sample-size.md from the content store, with one sentence reworded: the ramp grows the share of new visitors entering the test (up to the traffic allocation), it does not change the split. Every table checked with the post's own JavaScript calculator; tests/blogPost07.test.ts runs it. Posts 02 (how-long-to-run-an-ab-test) and 03 (ab-testing-low-traffic) link to post 06 and show Updated 27 October 2026.

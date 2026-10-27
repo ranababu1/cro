@@ -3,7 +3,7 @@ title: "How long should you run an A/B test? Worked examples"
 meta_description: "Run an A/B test until it reaches its planned sample size, in whole weeks, and for at least 2 weeks. Worked examples for 1,000 to 50,000 weekly visitors."
 slug: how-long-to-run-an-ab-test
 date: 2026-10-17
-updated: 2026-10-21
+updated: 2026-10-27
 author: "Imraan, freeabtest.com"
 keywords: ["how long to run an a/b test", "a/b test duration", "ab test sample size", "when to stop an ab test", "minimum detectable effect"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How long should you run an A/B test? Worked examples",
     "datePublished": "2026-10-17",
-    "dateModified": "2026-10-21",
+    "dateModified": "2026-10-27",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Updated 21 October 2026.
+By Imraan, freeabtest.com. Published 17 October 2026. Updated 27 October 2026.
 
 Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
@@ -131,7 +131,7 @@ The 2-week floor is a convention, not a law. If your buying cycle is monthly, te
 
 It depends on the test your tool runs.
 
-With a **standard fixed-sample z-test**, checking again and again and stopping the first time p drops below 0.05 is called peeking, and it inflates false positives. [Evan Miller's "How Not To Run an A/B Test"](https://www.evanmiller.org/how-not-to-run-an-ab-test.html) is the classic explanation. We simulated it: 4,000 A/A tests, both variants at the same 5% conversion rate, 250 visitors per variant per day for 20 days. Any "winner" is a false positive.
+With a **standard fixed-sample z-test**, checking again and again and stopping the first time p drops below 0.05 is called peeking, and it inflates false positives. [Evan Miller's "How Not To Run an A/B Test"](https://www.evanmiller.org/how-not-to-run-an-ab-test.html) is the classic explanation. We simulated it: 4,000 A/A tests, both variants at the same 5% conversion rate, 250 visitors per variant per day for 20 days. Any "winner" is a false positive. For what the p-value itself does and does not tell you, see our guide to [what statistical significance means in an A/B test](https://www.freeabtest.com/blog/statistical-significance-ab-test).
 
 | How we checked (fixed-sample z-test) | False winner rate |
 |---|---|
