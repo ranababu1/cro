@@ -360,3 +360,12 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Test page: Duplicate, Archive and Unarchive actions, tags, Hypothesis card on Results and Setup, notes and tags form on Settings (editable after completion), History tab (GET /api/experiments/[id]/history, feature audit_log, plan retention window, 50 per page with cursor; Free gets 403 and an upgrade note).
 - New test wizard: optional hypothesis, expected outcome and tags on the control step. From a planner idea the hypothesis and expected lift fill these fields (no longer the description); PATCH /api/ideas/[id] with experiment_id also fills empty notes on the test.
 
+
+## AI suggestions (2026-10-29)
+- Growth and Enterprise only (`ai` in GROWTH_FEATURES; admins and the super admin count as Enterprise). Customers bring their own key for OpenAI, Gemini, DeepSeek or Claude. Image generation is not built.
+- Keys: table ai_keys (migration 0043), encrypted with AES-256-GCM using AI_KEYS_ENCRYPTION_KEY (32 bytes, base64; generate with `openssl rand -base64 32`), AAD `ai-key:<org>:<provider>`, never returned after save, last 4 shown. Each key is tested with a models list call on save (quota and rate limit errors still save). Add, replace and remove are audited without the key. Without the env var every AI route answers 503 not_configured and the UI shows "not available yet".
+- Settings: /settings/ai (owners). ai_settings holds the text provider and model (any model id matching the MODEL_ID pattern; suggested list in lib/ai/providers.ts). Removing the chosen provider's key clears the choice.
+- Limits: ai_usage hourly counters per org, 60 an hour and 300 a day, cleaned after 72 hours by retention.
+- Routes: GET/PUT /api/ai, POST /api/ai/keys, DELETE /api/ai/keys/[provider], POST /api/ai/ideas (url and objective, page fetched server-side with lib/ai/pageText.ts, private hosts refused, redirects re-checked, 8 s and 1.5 MB caps), POST /api/ai/hypothesis, POST /api/experiments/[id]/ai (summary or followups; followups only for completed tests), POST /api/sdk/visual/ai (visual editor copy, CORS). maxDuration 60.
+- Results summary is built from the same verdict as the results page (lib/ai/features.ts verdictOf); an answer that claims a winner the stats did not find, or denies one they did, is refused with a retry message.
+- Homepage hero, AI section and meta switch to the AI copy only when AI_KEYS_ENCRYPTION_KEY is set at build time.

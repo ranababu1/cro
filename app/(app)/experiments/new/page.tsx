@@ -15,6 +15,7 @@ import { LockedGoalTypes } from '@/app/components/LockedGoalTypes';
 import { formatResetDate } from '@/lib/monthReset';
 import { TargetingFields } from '@/app/components/TargetingFields';
 import { describeTargeting, type Targeting } from '@/lib/targeting';
+import { HypothesisSuggest } from '@/app/components/ai/HypothesisSuggest';
 
 type Step = 'domain' | 'control' | 'variations' | 'goals' | 'traffic' | 'review';
 
@@ -293,6 +294,7 @@ export default function NewExperimentWizard() {
                         <Field label="Hypothesis (optional)" hint="What you change, for whom, and why you expect it to help.">
                             {(id) => <Textarea id={id} rows={3} maxLength={2000} value={hypothesis} onChange={(e) => setHypothesis(e.target.value)} placeholder="If we shorten the signup form, more visitors will finish it, because fewer fields take less effort." />}
                         </Field>
+                        <HypothesisSuggest name={name} pageUrl={controlUrl} goals={goals.map((g) => g.name)} onPick={(x) => { setHypothesis(x.hypothesis); setExpected(x.expected_outcome); }} />
                         <Field label="Expected outcome (optional)" hint="The result you would call a win.">
                             {(id) => <Textarea id={id} rows={2} maxLength={2000} value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="Signups rise by at least 10%." />}
                         </Field>

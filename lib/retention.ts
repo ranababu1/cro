@@ -1,4 +1,5 @@
 import { after } from 'next/server';
+import { aiUsageCutoff } from './ai/usage';
 import { db } from './db';
 import { RAW_RETENTION_DAYS } from './heatmaps';
 import { AUDIT_RETENTION_DAYS } from './audit';
@@ -48,7 +49,7 @@ export function retentionCutoffs(now = new Date()) {
 }
 
 /** Runs the cleanup if no instance ran it in the last hour. Returns what was deleted, or null when not due. */
-export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number; webhookDeliveries: number; signupCounts: number; abuseEvents: number } | null> {
+export async function runRetention(now = new Date()): Promise<{ heatmapPoints: number; heatmapScrolls: number; surveyAnswers: number; auditEntries: number; webhookDeliveries: number; signupCounts: number; abuseEvents: number; aiUsage: number } | null> {
     const claimed = await db.claimMaintenance(RETENTION_JOB, new Date(now.getTime() - RETENTION_EVERY_MS).toISOString(), now.toISOString());
     if (!claimed) return null;
     const c = retentionCutoffs(now);
@@ -61,7 +62,8 @@ export async function runRetention(now = new Date()): Promise<{ heatmapPoints: n
     const webhookDeliveries = await db.deleteOldWebhookDeliveries(new Date(now.getTime() - 30 * DAY_MS).toISOString(), DELETE_LIMIT);
     const signupCounts = await db.deleteOldSignupCounts(dayOf(now.getTime() - SIGNUP_COUNT_RETENTION_DAYS * DAY_MS), DELETE_LIMIT);
     const abuseEvents = await db.deleteOldAbuseEvents(new Date(now.getTime() - ABUSE_EVENT_RETENTION_DAYS * DAY_MS).toISOString(), DELETE_LIMIT);
-    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries, webhookDeliveries, signupCounts, abuseEvents };
+    const aiUsage = await db.deleteOldAiUsage(aiUsageCutoff(now), DELETE_LIMIT);
+    return { heatmapPoints, heatmapScrolls, surveyAnswers, auditEntries, webhookDeliveries, signupCounts, abuseEvents, aiUsage };
 }
 
 let lastLocalCheck = 0;

@@ -12,6 +12,7 @@ import { surveys } from './content/surveys';
 import { results } from './content/results';
 import { winners } from './content/winners';
 import { webhooks } from './content/webhooks';
+import { ai } from './content/ai';
 import { restApi } from './content/restApi';
 import { environments } from './content/environments';
 import { organizations } from './content/organizations';
@@ -21,7 +22,7 @@ export type { Block, DocPage } from './types';
 
 /** Reading order. The sidebar groups pages by `group` in this order. */
 export const docPages: DocPage[] = [
-    introduction, quickStart, installGuides, sdk, serverSide, experiments, variations, goals, popups, surveys, results, winners, webhooks, restApi, environments, organizations, troubleshooting,
+    introduction, quickStart, installGuides, sdk, serverSide, experiments, variations, goals, popups, surveys, results, winners, webhooks, ai, restApi, environments, organizations, troubleshooting,
 ];
 
 export function getDocPage(slug: string): DocPage | undefined {
