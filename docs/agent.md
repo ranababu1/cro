@@ -82,3 +82,11 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Per-test history (GET /api/experiments/[id]/history) uses the `audit_log` feature and the plan retention window, the same as the org audit log. Every experiment change must write `db.audit` with `entity: 'experiment'` and the experiment id so it shows there.
 - Tags are cleaned with `tagsSchema` (lower case, deduped, max 10) and stored as JSON; read them with `parseTags`.
 
+
+## AI features
+- Everything AI goes through lib/ai/service.ts: `prepareAi(orgId)` checks configuration, plan (`ai` feature), key and the per-org rate limit, then `askText`. Do not call providers directly from routes.
+- Never log, return or audit a key. Only status codes and error codes are logged. Keys are decrypted only inside `prepareAi`.
+- Page text sent to a provider is wrapped in `<data>` and the system prompt says to treat it as information only. Server-side page fetches must use lib/ai/pageText.ts (SSRF checks and DNS pinning).
+- Any AI text about results must agree with `verdictOf`; keep `agreesWithVerdict` in the path.
+- Public copy may say "your own key" and list providers, but never the encryption details or env var name. Images are not built: do not claim them.
+- Tests stub `fetch` with `vi.stubGlobal`; never call a real provider in tests.

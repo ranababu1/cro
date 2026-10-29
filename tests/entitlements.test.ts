@@ -39,12 +39,13 @@ afterAll(() => { delete process.env.PLATFORM_ADMIN_EMAILS; cleanup(); });
 
 describe('entitlement rule', () => {
     it('gives heavy features to paid plans only', () => {
-        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false, wordpress_plugin: false, funnels: false, revenue_goals: false, auto_shift: false, traffic: false, visual_editor: false, error_tracking: false, popups: false, surveys: false, audit_log: false, segments: false, webhooks: false, advanced_goals: false });
+        expect(computeEntitlements({ plan: 'free' }, ['a@x.com']).features).toEqual({ heatmaps: false, recordings: false, raw_capture: false, wordpress_plugin: false, funnels: false, revenue_goals: false, auto_shift: false, traffic: false, visual_editor: false, error_tracking: false, popups: false, surveys: false, audit_log: false, segments: false, webhooks: false, advanced_goals: false, ai: false });
         expect(computeEntitlements({ plan: null }, []).features.heatmaps).toBe(false);
         for (const plan of ['starter', 'growth', 'enterprise', 'team']) {
             const e = computeEntitlements({ plan }, []);
             expect(HEAVY_FEATURES.filter((f) => !GROWTH_FEATURES.includes(f)).every((f) => e.features[f])).toBe(true);
             expect(e.features.auto_shift).toBe(plan === 'growth' || plan === 'enterprise');
+            expect(e.features.ai).toBe(plan === 'growth' || plan === 'enterprise');
             expect(e.unlimited).toBe(false);
         }
     });

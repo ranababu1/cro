@@ -282,7 +282,10 @@
             var bg = current(selected.selector, 'style', 'background-color');
             var fs = current(selected.selector, 'style', 'font-size');
             html += '<div class="m">Selected element</div><input type="text" data-f="selector" value="' + esc(selected.selector) + '" aria-label="CSS selector">';
-            if (leaf) html += '<label>Text</label><textarea data-f="text">' + esc(txt ? txt.value : el.textContent) + '</textarea>';
+            if (leaf) {
+                html += '<label>Text</label><textarea data-f="text">' + esc(txt ? txt.value : el.textContent) + '</textarea>';
+                if (info && info.ai) html += '<div class="row" style="margin-top:6px"><button data-a="ai-copy" title="Ask your AI provider for other versions of this text">Suggest text</button></div><div data-ai-out></div>';
+            }
             else html += '<div class="m" style="margin-top:8px">This element contains other elements. Click the exact text you want to change to edit its words.</div>';
             html += '<label>Text color</label><div class="row"><input type="color" data-f="color-pick" value="' + esc(color ? color.value : toHex(cs.color) || '#000000') + '"><input type="text" data-f="color" value="' + esc(color ? color.value : '') + '" placeholder="Unchanged"></div>' +
                 '<label>Background</label><div class="row"><input type="color" data-f="bg-pick" value="' + esc(bg ? bg.value : toHex(cs.backgroundColor) || '#ffffff') + '"><input type="text" data-f="bg" value="' + esc(bg ? bg.value : '') + '" placeholder="Unchanged"></div>' +
@@ -433,12 +436,41 @@
         if (a === 'cancel') { selected = null; place(selBox, null); render(); }
         if (a === 'remove') { changes.splice(Number(b.getAttribute('data-i')), 1); dirty = true; restoreAndApply(); render(); }
         if (a === 'save') save();
+        if (a === 'ai-copy') suggestCopy(b);
+        if (a === 'ai-pick') { var t = field('text'); if (t) t.value = b.getAttribute('data-v') || ''; }
         if (a === 'exit') {
             if (dirty && !window.confirm('Leave without saving your changes?')) return;
             try { sessionStorage.removeItem('fabt_editor'); } catch (err) { /* ignore */ }
             window.location.reload();
         }
     });
+
+    // AI copy suggestions (Growth and above, with the organization's own provider key). Picking one fills the
+    // text box; Apply still decides. Suggestions are written as text, never as HTML.
+    function suggestCopy(btn) {
+        var t = field('text');
+        var out = panel.querySelector('[data-ai-out]');
+        if (!t || !out || !selected) return;
+        btn.disabled = true; btn.textContent = 'Thinking...';
+        out.innerHTML = '';
+        fetch(cfg.apiUrl + '/api/sdk/visual/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Editor-Token': token },
+            body: JSON.stringify({ text: t.value.slice(0, 1000), tag: selected.el.tagName.toLowerCase(), page_title: document.title.slice(0, 300) }),
+        }).then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (j) { return { ok: res.ok, body: j }; });
+        }).then(function (r) {
+            btn.disabled = false; btn.textContent = 'Suggest text';
+            if (!r.ok) { out.innerHTML = '<div class="warn" style="margin-top:6px">' + esc(r.body.error || 'No suggestions right now. Try again.') + '</div>'; return; }
+            var list = r.body.suggestions || [];
+            var html = '<div class="m" style="margin-top:6px">Click one to put it in the text box, then Apply.</div>';
+            for (var i = 0; i < list.length; i++) html += '<button data-a="ai-pick" data-v="' + esc(list[i]) + '" style="display:block;width:100%;text-align:left;margin-top:4px;white-space:normal">' + esc(list[i]) + '</button>';
+            out.innerHTML = html;
+        }).catch(function () {
+            btn.disabled = false; btn.textContent = 'Suggest text';
+            out.innerHTML = '<div class="warn" style="margin-top:6px">Could not reach the server. Try again.</div>';
+        });
+    }
 
     function save() {
         render('Saving...');

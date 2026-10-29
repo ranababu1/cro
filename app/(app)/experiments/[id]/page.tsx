@@ -32,6 +32,7 @@ import { IntervalChart } from './IntervalChart';
 import { LiveStats } from './LiveStats';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
 import { formatChance } from '@/lib/sequential';
+import { AiResults } from '@/app/components/ai/AiResults';
 
 const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-');
 const pct = (v: number, digits = 2) => `${(v * 100).toFixed(digits)}%`;
@@ -277,6 +278,7 @@ function ResultsPanel({ experiment, variations, results, updatedAt, hasEventGoal
             {results.live && <LiveStats live={results.live} running={experiment.status === 'running'} updatedAt={updatedAt} />}
             <h2 className="pt-2 text-base font-semibold text-zinc-900">Detailed results</h2>
             {summary}
+            <AiResults experimentId={experiment.id} completed={experiment.status === 'completed'} />
             {goalList.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                     {goalList.map((g) => (

@@ -698,3 +698,34 @@ export const testIdeas = sqliteTable('test_ideas', {
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),
 }, (t) => [index('idx_test_ideas_project').on(t.project_id)]);
+
+/**
+ * AI provider keys an organization brings (Growth and above). The key is encrypted with AES-256-GCM (lib/ai/crypto.ts)
+ * and never sent back to the browser; only the last 4 characters are shown. One key per provider.
+ */
+export const aiKeys = sqliteTable('ai_keys', {
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    provider: text('provider', { enum: ['openai', 'gemini', 'deepseek', 'anthropic'] }).notNull(),
+    key_enc: text('key_enc').notNull(),
+    last4: text('last4').notNull(),
+    created_by: text('created_by'),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [primaryKey({ columns: [t.org_id, t.provider] })]);
+
+/** Default AI provider and model for text (and later images) per organization. */
+export const aiSettings = sqliteTable('ai_settings', {
+    org_id: text('org_id').primaryKey().references(() => organizations.id, { onDelete: 'cascade' }),
+    text_provider: text('text_provider'),
+    text_model: text('text_model'),
+    image_provider: text('image_provider'),
+    image_model: text('image_model'),
+    updated_by: text('updated_by'),
+    updated_at: text('updated_at').notNull().default(now),
+});
+
+/** AI requests per organization per UTC hour ("2026-10-29T17"), shared by every server. Kept 3 days (lib/ai/usage.ts). */
+export const aiUsage = sqliteTable('ai_usage', {
+    org_id: text('org_id').notNull(),
+    hour: text('hour').notNull(),
+    count: integer('count').notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.org_id, t.hour] }), index('idx_ai_usage_hour').on(t.hour)]);

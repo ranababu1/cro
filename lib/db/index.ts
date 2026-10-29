@@ -1257,6 +1257,55 @@ export const db = {
         const res = await d.run(sql`delete from signup_counts where rowid in (select rowid from signup_counts where day < ${beforeDay} limit ${limit})`);
         return res.rowsAffected;
     },
+    // AI keys and settings (lib/ai). Keys are stored encrypted; callers decrypt only on the server.
+    async listAiKeys(orgId: string) {
+        const d = await getDb();
+        return d.select().from(s.aiKeys).where(eq(s.aiKeys.org_id, orgId)).orderBy(asc(s.aiKeys.created_at));
+    },
+    async getAiKey(orgId: string, provider: (typeof s.aiKeys.$inferSelect)['provider']) {
+        const d = await getDb();
+        return (await d.select().from(s.aiKeys).where(and(eq(s.aiKeys.org_id, orgId), eq(s.aiKeys.provider, provider))).limit(1))[0] ?? null;
+    },
+    async upsertAiKey(row: { org_id: string; provider: (typeof s.aiKeys.$inferSelect)['provider']; key_enc: string; last4: string; created_by: string | null }): Promise<void> {
+        const d = await getDb();
+        await d.insert(s.aiKeys).values(row).onConflictDoUpdate({
+            target: [s.aiKeys.org_id, s.aiKeys.provider],
+            set: { key_enc: row.key_enc, last4: row.last4, created_by: row.created_by, created_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))` },
+        });
+    },
+    async deleteAiKey(orgId: string, provider: (typeof s.aiKeys.$inferSelect)['provider']): Promise<boolean> {
+        const d = await getDb();
+        const res = await d.delete(s.aiKeys).where(and(eq(s.aiKeys.org_id, orgId), eq(s.aiKeys.provider, provider))).returning({ p: s.aiKeys.provider });
+        return res.length > 0;
+    },
+    async getAiSettings(orgId: string) {
+        const d = await getDb();
+        return (await d.select().from(s.aiSettings).where(eq(s.aiSettings.org_id, orgId)).limit(1))[0] ?? null;
+    },
+    async setAiSettings(orgId: string, v: { text_provider: string | null; text_model: string | null; image_provider?: string | null; image_model?: string | null }, updatedBy: string | null): Promise<void> {
+        const d = await getDb();
+        const set = { ...v, updated_by: updatedBy, updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))` };
+        await d.insert(s.aiSettings).values({ org_id: orgId, ...v, updated_by: updatedBy }).onConflictDoUpdate({ target: s.aiSettings.org_id, set });
+    },
+    /** Adds `by` to the org's count for the hour and returns the new count (atomic, shared by every server). */
+    async bumpAiUsage(orgId: string, hour: string, by = 1): Promise<number> {
+        const d = await getDb();
+        const rows = await d.insert(s.aiUsage).values({ org_id: orgId, hour, count: by })
+            .onConflictDoUpdate({ target: [s.aiUsage.org_id, s.aiUsage.hour], set: { count: sql`${s.aiUsage.count} + ${by}` } })
+            .returning({ count: s.aiUsage.count });
+        return rows[0]?.count ?? 0;
+    },
+    /** Requests in the hours from `fromHour` (inclusive), for example the last 24. */
+    async sumAiUsage(orgId: string, fromHour: string): Promise<number> {
+        const d = await getDb();
+        const row = (await d.select({ n: sql<number>`coalesce(sum(${s.aiUsage.count}), 0)` }).from(s.aiUsage).where(and(eq(s.aiUsage.org_id, orgId), gte(s.aiUsage.hour, fromHour))))[0];
+        return Number(row?.n ?? 0);
+    },
+    async deleteOldAiUsage(beforeHour: string, limit: number): Promise<number> {
+        const d = await getDb();
+        const res = await d.run(sql`delete from ai_usage where rowid in (select rowid from ai_usage where hour < ${beforeHour} limit ${limit})`);
+        return res.rowsAffected;
+    },
     async getPlatformSetting(key: string): Promise<string | null> {
         const d = await getDb();
         const row = await d.query.platformSettings.findFirst({ where: eq(s.platformSettings.key, key) });

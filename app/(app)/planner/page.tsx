@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { PageHeader, Card, CardHeader, CardBody, Button, Input, Textarea, Select, Field, Alert, Badge, EmptyState } from '@/app/components/ui';
+import { IdeasFromPage } from '@/app/components/ai/IdeasFromPage';
 import { planEstimate, estimateText, IDEA_STATUSES, type IdeaJson } from '@/lib/planner';
 
 type Status = (typeof IDEA_STATUSES)[number];
@@ -63,6 +64,7 @@ export default function PlannerPage() {
                 actions={state.status === 'ok' && !editing ? <Button onClick={() => setEditing({ ...BLANK })} disabled={ideas.length >= (state.max ?? 0)}>New idea</Button> : undefined}
             />
             {state.status === 'error' && <p className="text-sm text-red-600">Could not load the test planner. Try again in a moment.</p>}
+            {state.status === 'ok' && !editing && <IdeasFromPage onAdded={reload} />}
             {editing && <Editor initial={editing} onDone={() => { setEditing(null); reload(); }} />}
             {state.status === 'ok' && !editing && (ideas.length === 0 ? (
                 <Card><EmptyState title="No ideas yet" description="Write down what you want to change, why you think it helps, and the lift you hope for. The planner tells you how long the test needs." /></Card>

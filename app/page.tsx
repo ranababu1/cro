@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { aiConfigured } from '@/lib/ai/crypto';
 import { Blobs } from './components/landing/Blobs';
 import { DashboardMock } from './components/landing/DashboardMock';
 import { TestIllustration } from './components/landing/TestIllustration';
@@ -50,7 +52,27 @@ const ticks = [
     { label: 'Set up in minutes', d: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12l3 3 5-6' },
 ];
 
+// AI suggestions (Growth and Enterprise, with the customer's own provider key). The homepage only talks about them
+// once they are switched on for the site, so the claim never goes live before the feature does.
+const aiFeatures = [
+    { title: 'Test ideas from any page', body: 'Enter a page and a goal. Get up to 5 test ideas with a hypothesis, the change to make and a priority, ready for your test planner.' },
+    { title: 'Hypotheses in one click', body: 'The new test wizard suggests a hypothesis and an expected outcome from the test name, page and goals.' },
+    { title: 'Headlines and button copy', body: 'Select text in the visual editor and get other versions to test against it.' },
+    { title: 'Results in plain words', body: 'A short summary of what your numbers mean, built on the statistical verdict and never against it.' },
+    { title: 'Follow-up tests', body: 'When a test ends, get ideas for the next one based on what it showed.' },
+];
+
+const HOME_TITLE = 'freeabtest.com: A/B testing and experimentation';
+const HOME_TITLE_AI = 'freeabtest.com: AI-powered A/B testing platform';
+const HOME_DESCRIPTION_AI = 'Run A/B and split tests with a small JavaScript SDK and statistically sound results. On Growth and Enterprise, get test ideas, hypotheses, copy and result summaries from your own OpenAI, Gemini, DeepSeek or Claude key.';
+
+export function generateMetadata(): Metadata {
+    if (!aiConfigured()) return { title: { absolute: HOME_TITLE } };
+    return { title: { absolute: HOME_TITLE_AI }, description: HOME_DESCRIPTION_AI, openGraph: { title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI } };
+}
+
 export default function LandingPage() {
+    const aiLive = aiConfigured();
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#f8faff] text-zinc-950">
             <div className="relative isolate">
@@ -62,14 +84,16 @@ export default function LandingPage() {
                     <div className="lg:pt-6">
                         <span className="inline-flex items-center gap-2 rounded-lg bg-blue-100/70 px-3.5 py-2 text-[13px] font-semibold tracking-[0.02em] text-blue-800">
                             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-teal-600"><span className="h-1.5 w-1.5 rounded-full bg-white" /></span>
-                            A/B TESTING, MADE SIMPLE
+                            {aiLive ? 'AI-POWERED A/B TESTING' : 'A/B TESTING, MADE SIMPLE'}
                         </span>
                         <h1 className="mt-8 text-[60px] font-bold leading-[0.98] tracking-[-0.04em] text-[#0b1630] sm:text-[80px] xl:text-[96px]">
                             Build,<br />test and<br />
                             <span className="bg-gradient-to-r from-blue-600 from-15% via-sky-600 via-45% to-teal-500 to-85% bg-clip-text pb-2 text-transparent">grow faster.</span>
                         </h1>
                         <p className="mt-6 max-w-[500px] text-[19px] leading-[1.5] text-zinc-700 sm:text-[21px]">
-                            Run A/B tests, split tests and experiments to understand what converts, improve your product and make data-driven decisions without the complexity.
+                            {aiLive
+                                ? 'The AI-powered A/B testing platform. Run A/B tests, split tests and experiments, get test ideas and plain-words result summaries from your own AI provider, and make data-driven decisions without the complexity.'
+                                : 'Run A/B tests, split tests and experiments to understand what converts, improve your product and make data-driven decisions without the complexity.'}
                         </p>
                         <div className="mt-10 flex flex-wrap gap-5">
                             <Link href="/signin" className="inline-flex h-[66px] items-center gap-3 rounded-xl bg-[#0b1630] px-10 text-[18px] font-medium text-white shadow-[0_12px_24px_-12px_rgb(11_22_48/0.6)] hover:bg-[#13224a]">Start testing for free <Arrow /></Link>
@@ -137,6 +161,35 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            {/* AI suggestions, shown once they are switched on */}
+            {aiLive && (
+                <section id="ai" className="scroll-mt-6 pb-12 pt-10" aria-labelledby="ai-heading">
+                    <div className="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-10">
+                        <div className="rounded-3xl bg-[#0b1630] px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
+                            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                                <div>
+                                    <span className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-[11px] font-semibold tracking-[0.18em] text-teal-300">AI-POWERED</span>
+                                    <h2 id="ai-heading" className="mt-5 text-[34px] font-bold leading-[1.12] tracking-[-0.025em] sm:text-[42px]">Plan better tests.<br className="hidden sm:block" /> Read results faster.</h2>
+                                </div>
+                                <p className="max-w-[440px] pb-2 text-[17px] leading-[1.55] text-zinc-300">On Growth and Enterprise, bring your own OpenAI, Gemini, DeepSeek or Claude key. You pick the model and pay your provider directly, with no extra charge from us.</p>
+                            </div>
+                            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                                {aiFeatures.map((f) => (
+                                    <li key={f.title} className="rounded-2xl bg-white/[0.06] p-5 ring-1 ring-white/10">
+                                        <h3 className="text-[17px] font-semibold tracking-tight">{f.title}</h3>
+                                        <p className="mt-2 text-[15px] leading-[1.55] text-zinc-300">{f.body}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className="mt-8 flex flex-wrap gap-4">
+                                <Link href="/docs/ai" className="inline-flex h-[50px] items-center gap-3 rounded-xl bg-white px-7 text-[16px] font-medium text-[#0b1630] hover:bg-zinc-100">How AI suggestions work <Arrow /></Link>
+                                <Link href="/pricing" className="inline-flex h-[50px] items-center gap-3 rounded-xl px-5 text-[16px] font-medium text-white ring-1 ring-white/30 hover:bg-white/10">See plans</Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Test anything */}
             <section id="test-anything" className="relative isolate scroll-mt-6 overflow-hidden pb-6 pt-4">

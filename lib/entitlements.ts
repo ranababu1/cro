@@ -20,8 +20,8 @@ export const SUPER_ADMIN_EMAIL = 'imrn.dev@gmail.com';
  * Features that are only for paid plans. Add new raw-capture, heavy or paid-only features here.
  * Most come with any paid plan; GROWTH_FEATURES need Growth or above.
  */
-export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys', 'audit_log', 'segments', 'webhooks', 'advanced_goals'] as const;
-export const GROWTH_FEATURES: readonly string[] = ['auto_shift', 'visual_editor'];
+export const HEAVY_FEATURES = ['heatmaps', 'recordings', 'raw_capture', 'wordpress_plugin', 'funnels', 'revenue_goals', 'auto_shift', 'traffic', 'visual_editor', 'error_tracking', 'popups', 'surveys', 'audit_log', 'segments', 'webhooks', 'advanced_goals', 'ai'] as const;
+export const GROWTH_FEATURES: readonly string[] = ['auto_shift', 'visual_editor', 'ai'];
 export type HeavyFeature = (typeof HEAVY_FEATURES)[number];
 
 /** null means unlimited. */
@@ -152,6 +152,7 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
         if (a.segments !== undefined) features.segments = a.segments;
         if (a.webhooks !== undefined) features.webhooks = a.webhooks;
         if (a.advanced_goals !== undefined) features.advanced_goals = a.advanced_goals;
+        if (a.ai !== undefined) features.ai = a.ai;
         // Raw capture backs heatmaps and recordings, so it follows them.
         if (a.heatmaps !== undefined || a.recordings !== undefined) features.raw_capture = features.heatmaps || features.recordings;
         limits = applyAllowances(limits, a);
@@ -200,4 +201,5 @@ export const UPGRADE_NOTE: Record<HeavyFeature, string> = {
     segments: 'Results by segment are part of the paid plans. Upgrade to Starter or above to compare variations by device, traffic source and new or returning visitors.',
     advanced_goals: 'The free plan has one goal per test: a click on a CSS selector. Upgrade to Starter or above for more goals, form, page visit and custom event goals, and conversions sent from your code.',
     wordpress_plugin: 'The WordPress plugin is available to paid users only. Upgrade to Starter or above to download and use it.',
+    ai: 'AI suggestions are part of the Growth plan and above. Upgrade to Growth to get test ideas, hypotheses, copy and result summaries with your own AI provider key.',
 };

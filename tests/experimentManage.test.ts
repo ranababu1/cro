@@ -237,7 +237,7 @@ describe('experiment management wiring', () => {
     it('migration adds the columns with a newer timestamp', () => {
         const j = JSON.parse(read('drizzle/meta/_journal.json')) as { entries: { tag: string; when: number }[] };
         const i = j.entries.findIndex((x) => x.tag === '0042_experiment_manage');
-        expect(i).toBe(j.entries.length - 1);
+        expect(i).toBeGreaterThan(0);
         expect(j.entries[i].when).toBeGreaterThan(j.entries[i - 1].when);
         const sqlText = read('drizzle/0042_experiment_manage.sql');
         for (const c of ['hypothesis', 'expected_outcome', 'tags', 'archived_at']) expect(sqlText).toContain(`\`${c}\``);

@@ -501,11 +501,11 @@ Goal: credible for a team running many tests in parallel, with server-side use, 
 - Secure handling of customer identifiers
 - Data retention policies
 
-12. AI basics
-- Explain experiment outcomes in plain language
-- AI-generated experiment reports
-- Guardrails against unsupported statistical conclusions (AI text constrained to computed stats; refuses to call winners the stats engine did not)
-- AI-assisted experiment ideation
+12. AI basics (done 2026-10-29, Growth and Enterprise, customer's own key: OpenAI, Gemini, DeepSeek, Claude)
+- Explain experiment outcomes in plain language (done: Explain these results)
+- AI-generated experiment reports (done as the results summary)
+- Guardrails against unsupported statistical conclusions (done: answers that contradict verdictOf are refused)
+- AI-assisted experiment ideation (done: ideas from a page and objective, hypothesis suggestions in the wizard)
 - Prioritize experiments by impact, confidence, effort (ICE scoring with AI suggestions)
 
 13. Admin
@@ -560,11 +560,12 @@ Phase 2 exit criteria
 12. AI-Powered
 - Generate test hypotheses from analytics data
 - Suggest high-impact pages and opportunities
-- AI-generated copy and CTA variants
+- AI-generated copy and CTA variants (done 2026-10-29: Suggest text in the visual editor)
 - AI-assisted HTML and CSS changes (inside the visual editor)
 - Automated experiment setup
 - Conversion funnel anomaly detection
-- Recommend follow-up experiments
+- Recommend follow-up experiments (done 2026-10-29 for completed tests)
+- AI image generation for variations (OpenAI and Gemini, own key): postponed, needs file storage for generated images
 - Identify audience segments with differing responses (heterogeneous effect analysis)
 
 13. Admin and Billing
