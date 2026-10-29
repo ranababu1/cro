@@ -93,6 +93,8 @@ async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>
     if (metadata && metadata.length > MAX_METADATA_BYTES) return { status: 400, body: { error: `metadata must be under ${MAX_METADATA_BYTES} bytes` } };
     const config = await db.getExperimentConfig(body.experiment_id);
     if (!config || config.experiment.project_id !== ctx.projectId) return { status: 404, body: { error: 'Experiment not found' } };
+    // Archived tests are never served, so nothing more is counted for them.
+    if (config.experiment.archived_at) return { status: 404, body: { error: 'Experiment not found' } };
     if (!config.variations.some((v) => v.id === body.variation_id)) return { status: 404, body: { error: 'Variation not found' } };
     if (body.event_type === 'conversion' && !advancedGoals) {
         const goal = body.goal_id ? config.goals.find((g) => g.id === body.goal_id) : undefined;

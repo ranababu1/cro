@@ -60,6 +60,7 @@ export async function PUT(request: NextRequest, { params }: Params): Promise<Nex
         const parsed = scheduleSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const { start_at, stop_at, ramp } = parsed.data;
+        if (e.archived_at) return NextResponse.json({ error: 'Unarchive this test before scheduling it.' }, { status: 400 });
         if (e.status === 'completed') return NextResponse.json({ error: 'This test is completed. Schedules apply to drafts, running and paused tests.' }, { status: 400 });
         const now = Date.now();
         const start = start_at ? Date.parse(start_at) : null;

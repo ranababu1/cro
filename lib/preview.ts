@@ -15,6 +15,7 @@ export function controlUrlOf(experiment: Experiment, variations: Variation[]): s
 export function previewBlocker(experiment: Experiment, variations: Variation[], variationId: string): string | null {
     if (!variations.some((v) => v.id === variationId)) return 'Variation not found';
     if (experiment.status === 'completed') return 'A completed test cannot be previewed';
+    if (experiment.archived_at) return 'An archived test cannot be previewed. Unarchive it first';
     if (!controlUrlOf(experiment, variations)) return 'This test has no control URL';
     return null;
 }

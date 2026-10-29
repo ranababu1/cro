@@ -13,6 +13,7 @@ import { checkNewTest, recordNewTest } from '@/lib/freeTests';
 import { goalPlanError } from '@/lib/goals';
 import { normalizeHost, normalizePageUrl, urlsMatch } from '@/lib/domains';
 import { serializeTargeting } from '@/lib/targeting';
+import { noteOrNull, serializeTags } from '@/lib/experimentManage';
 import { bumpMetric, METRICS, recordProductEvent, clientIpFromHeaders } from '@/lib/telemetry';
 
 export async function GET(request: NextRequest) {
@@ -115,6 +116,9 @@ export async function POST(request: NextRequest) {
                 user_id: ctx.userId,
                 name: body.name,
                 description: body.description,
+                hypothesis: noteOrNull(body.hypothesis),
+                expected_outcome: noteOrNull(body.expected_outcome),
+                tags: serializeTags(body.tags ?? []),
                 status: 'draft',
                 traffic_allocation: body.traffic_allocation ?? 100,
                 control_url: normalizePageUrl(body.control_url),

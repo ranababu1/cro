@@ -14,7 +14,7 @@ a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and 
 
 ## Data model
 users, organizations (with status, suspended_at, suspended_reason, plan, monthly_visitor_limit, monthly_experiment_limit), memberships (owner or member), projects, environments (dev, staging, prod), api_keys,
-experiments (belong to a project, owned by a user), variations, assignments, events (tagged with environment), audit_log.
+experiments (belong to a project, owned by a user; hypothesis, expected_outcome, tags, archived_at), variations, assignments, events (tagged with environment), audit_log.
 
 ## UI
 - Light, neutral B2B design with a blue primary and teal secondary accent (green kept for status only), branded freeabtest.com (leaf logo). The landing page matches the homepage mockup section by section and contains only: nav, hero with an example-data dashboard mock and handwritten annotation, "Works with your stack" row (only JavaScript and HTML available, the rest marked soon), How it works, Test anything with the layered illustration, a stats strip of verified facts (1 script tag to install, 50 variations on paid plans, 3 environments, 95% Wilson intervals), and a footer. Pricing plus FAQ live at /pricing, features and roadmap at /roadmap. Shared marketing header and footer in app/components/landing/SiteChrome.tsx.
@@ -76,7 +76,7 @@ experiments (belong to a project, owned by a user), variations, assignments, eve
 - CORS allows any origin. Per-project domain allowlists come in M2 with the new ingest endpoint.
 - SDK still makes a server call per visitor, has no anti-flicker, no batching or retries. Rebuilt in M1.
 - No targeting, goal definitions, revenue metrics, SRM check, sample size page or CSV export (M1 to M3).
-- Audit log is visible only to platform admins. No org or member management UI for tenants, org roles are owner or member only.
+- No org roles beyond owner or member.
 - Quota checks run a count query per new visitor. Cache usage or move it to the rollup job before heavy traffic.
 - Platform admin is env-based only: no admin UI to grant it, and no impersonation (not planned).
 - Not a monorepo yet; no Playwright tests yet.
@@ -351,3 +351,12 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 
 ## Blog post 08 (2026-10-29)
 - content/blog/split-url-testing.md, copied unchanged from the content store, with HowTo JSON-LD (howto_schema). Describes the shipped URL split flow: SDK redirect keeps the query string, skips the redirect on the variation page, hides the page for at most 0.8 s; Free limits from lib/plans.ts; rollout of a URL winner per lib/rollout.ts. tests/blogPost08.test.ts runs the post's own redirect script. Posts 02, 03 and 06 link to post 07 (ab-test-sample-size) and show Updated 29 October 2026.
+
+## Experiment management (2026-10-29)
+- Migration 0042_experiment_manage: experiments.hypothesis, expected_outcome (text, up to 2,000 characters), tags (JSON list, up to 10, each up to 30 characters, lower case, letters, digits, spaces and - _ . /), archived_at; index idx_audit_entity_created on audit_log(entity_id, created_at). Helpers in lib/experimentManage.ts.
+- Duplicate (POST /api/experiments/[id]/duplicate, session only): new draft "Copy of <name>" with the variations, weights, visual changes and combos, goals in order, funnels (goal ids remapped by position, only with the funnels feature), targeting, pages, MVT, notes, tags, ramp and heatmap settings (heatmap settings only with heatmaps). Not copied: results, schedule, rollout, share links. Counts as a new test (checkNewTest/recordNewTest, so Free gets 1 a month, admins and special friends follow their limits) and re-checks the plan (goals, variations, visual_editor for visual, multi-page or MVT tests; auto_shift dropped when not allowed). URLs must be on a registered domain. Audit: create on the copy (diff duplicated_from), duplicate on the source.
+- Archive (POST/DELETE /api/experiments/[id]/archive): paused or completed only, refused while a rollout is active; clears schedules. Archived tests are excluded from getRunningConfig, getRolloutConfig, getDueSchedules, rolloutVariation, track (404) and preview, and status changes, schedules and rollouts are refused until unarchived. Results, notes and tags stay readable and editable. Audit archive and unarchive.
+- List /experiments: status tabs plus Archived (?status=archived), search (?q, every word must match name, description, hypothesis or tags) and tag filter (?tag). The dashboard counts are unchanged.
+- Test page: Duplicate, Archive and Unarchive actions, tags, Hypothesis card on Results and Setup, notes and tags form on Settings (editable after completion), History tab (GET /api/experiments/[id]/history, feature audit_log, plan retention window, 50 per page with cursor; Free gets 403 and an upgrade note).
+- New test wizard: optional hypothesis, expected outcome and tags on the control step. From a planner idea the hypothesis and expected lift fill these fields (no longer the description); PATCH /api/ideas/[id] with experiment_id also fills empty notes on the test.
+

@@ -17,6 +17,8 @@ import { ScheduleCard } from './ScheduleCard';
 import { PreviewLinks } from './PreviewLinks';
 import { FactorEffects } from './FactorEffects';
 import { SiteVerifyCard, type SiteState } from './SiteVerifyCard';
+import { HistoryPanel } from './HistoryPanel';
+import { canArchive, parseTags, MAX_TAGS, MAX_TAG_LENGTH } from '@/lib/experimentManage';
 import { SrmWarning } from '@/app/components/SrmWarning';
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -116,6 +118,38 @@ export default function ExperimentDetail() {
         }
     };
 
+    const archive = async (on: boolean) => {
+        if (on && !confirm('Archive this test? It leaves the main list and never runs on your site while archived. Results stay available, and you can unarchive it at any time.')) return;
+        setBusy(true); setError(''); setNotice('');
+        try {
+            const res = await fetch(`/api/experiments/${id}/archive`, { method: on ? 'POST' : 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Update failed');
+            setNotice(on ? 'Test archived.' : 'Test unarchived.');
+            await load();
+            router.refresh();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const duplicate = async () => {
+        if (!confirm('Copy this test into a new draft? The copy has the same setup and no results. It counts as a new test on your plan.')) return;
+        setBusy(true); setError(''); setNotice('');
+        try {
+            const res = await fetch(`/api/experiments/${id}/duplicate`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Could not copy the test');
+            router.push(`/experiments/${data.experiment.id}`);
+            router.refresh();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
+            setBusy(false);
+        }
+    };
+
     const remove = async () => {
         if (!confirm('Delete this draft experiment? This cannot be undone.')) return;
         const res = await fetch(`/api/experiments/${id}`, { method: 'DELETE' });
@@ -133,8 +167,17 @@ export default function ExperimentDetail() {
 
     const s = experiment.status;
     const siteBlocked = !!site && !site.verified;
-    const actions = (
+    const archived = !!experiment.archived_at;
+    const tags = parseTags(experiment.tags);
+    const actions = archived ? (
         <>
+            <Button variant="secondary" onClick={duplicate} disabled={busy}>Duplicate</Button>
+            <Button onClick={() => archive(false)} disabled={busy}>Unarchive</Button>
+        </>
+    ) : (
+        <>
+            <Button variant="secondary" onClick={duplicate} disabled={busy} data-testid="duplicate-test">Duplicate</Button>
+            {canArchive(experiment) && <Button variant="secondary" onClick={() => archive(true)} disabled={busy} data-testid="archive-test">Archive</Button>}
             {s === 'draft' && <><Button variant="danger" onClick={remove} disabled={busy}>Delete</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment started.')} disabled={busy || siteBlocked} title={siteBlocked ? 'Install the snippet to verify your site first' : undefined}>Start experiment</Button></>}
             {s === 'running' && <><Button variant="secondary" onClick={() => patch({ status: 'paused' }, 'Experiment paused.')} disabled={busy}>Pause</Button><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button></>}
             {s === 'paused' && <><Button variant="secondary" onClick={() => confirm('Stop this experiment? It cannot be restarted.') && patch({ status: 'completed' }, 'Experiment stopped.')} disabled={busy}>Stop</Button><Button onClick={() => patch({ status: 'running' }, 'Experiment resumed.')} disabled={busy || siteBlocked} title={siteBlocked ? 'Install the snippet to verify your site first' : undefined}>Resume</Button></>}
@@ -145,13 +188,19 @@ export default function ExperimentDetail() {
         <>
             <PageHeader
                 breadcrumb={<Link href="/experiments" className="hover:text-zinc-900">Experiments</Link>}
-                title={<span className="flex flex-wrap items-center gap-3">{experiment.name}<StatusBadge status={s} /></span>}
+                title={<span className="flex flex-wrap items-center gap-3">{experiment.name}<StatusBadge status={s} />{archived && <Badge>Archived</Badge>}</span>}
                 description={experiment.description || undefined}
                 actions={actions}
             />
             {error && (error === PROFILE_REQUIRED_MESSAGE ? <ProfileRequired next={`/experiments/${id}`} className="mb-4" /> : <Alert tone="danger" className="mb-4">{error}</Alert>)}
             {notice && <Alert tone="success" className="mb-4">{notice}</Alert>}
-            {siteBlocked && (s === 'draft' || s === 'paused') && <SiteVerifyCard experimentId={experiment.id} site={site} onChange={setSite} />}
+            {archived && <Alert tone="neutral" className="mb-4" title="This test is archived">It does not run on your site and is hidden from the main list. Results stay available. Unarchive it to change its status or schedule.</Alert>}
+            {tags.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-1" data-testid="experiment-tags">
+                    {tags.map((t) => <Link key={t} href={`/experiments?tag=${encodeURIComponent(t)}`}><Badge>{t}</Badge></Link>)}
+                </div>
+            )}
+            {!archived && siteBlocked && (s === 'draft' || s === 'paused') && <SiteVerifyCard experimentId={experiment.id} site={site} onChange={setSite} />}
 
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <Stat label="Traffic allocation" value={`${experiment.traffic_allocation}%`} />
@@ -169,20 +218,23 @@ export default function ExperimentDetail() {
                     { id: 'setup', label: 'Setup' },
                     { id: 'heatmaps', label: 'Heatmaps' },
                     { id: 'errors', label: 'Errors' },
-                    ...(experiment.status !== 'completed' ? [{ id: 'edit', label: 'Edit test' }] : []),
+                    ...(experiment.status !== 'completed' && !archived ? [{ id: 'edit', label: 'Edit test' }] : []),
+                    { id: 'history', label: 'History' },
                     { id: 'settings', label: 'Settings' },
                 ]}
             />
 
-            {tab === 'results' && experiment.status !== 'draft' && variations.length > 0 && <div className="mb-6"><RolloutCard key={`${experiment.rollout_variation_id ?? ''}${experiment.updated_at}`} experiment={experiment} variations={variations} winnerId={results?.winner} onChanged={() => { void load(); router.refresh(); }} /></div>}
+            {(tab === 'results' || tab === 'setup') && <NotesCard hypothesis={experiment.hypothesis} expected={experiment.expected_outcome} onEdit={() => setTab('settings')} />}
+            {tab === 'results' && experiment.status !== 'draft' && !archived && variations.length > 0 && <div className="mb-6"><RolloutCard key={`${experiment.rollout_variation_id ?? ''}${experiment.updated_at}`} experiment={experiment} variations={variations} winnerId={results?.winner} onChanged={() => { void load(); router.refresh(); }} /></div>}
             {tab === 'results' && <ResultsPanel experiment={experiment} variations={variations} results={results} updatedAt={updatedAt} hasEventGoals={goals.some((g) => g.type === 'event')} />}
             {tab === 'results' && experiment.status !== 'draft' && <div className="mt-6"><ShareResults experimentId={experiment.id} /></div>}
             {tab === 'heatmaps' && <HeatmapsPanel experimentId={experiment.id} />}
             {tab === 'errors' && <ErrorsPanel experimentId={experiment.id} />}
             {tab === 'setup' && <SetupPanel experimentId={experiment.id} completed={experiment.status === 'completed'} variations={variations} goals={goals} targeting={experiment.targeting} pages={experiment.pages} controlUrl={experiment.control_url} />}
             {tab === 'edit' && <EditTest key={experiment.updated_at} experimentId={experiment.id} variations={variations} goals={goals} targeting={experiment.targeting} autoShift={!!experiment.auto_shift} status={experiment.status} mvt={experiment.mvt} onSaved={() => void load()} />}
-            {tab === 'settings' && experiment.status !== 'completed' && <div className="mb-6"><ScheduleCard experimentId={experiment.id} status={experiment.status} traffic={experiment.traffic_allocation} onSaved={() => void load()} /></div>}
-            {tab === 'settings' && <SettingsPanel experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
+            {tab === 'history' && <HistoryPanel experimentId={experiment.id} />}
+            {tab === 'settings' && experiment.status !== 'completed' && !archived && <div className="mb-6"><ScheduleCard experimentId={experiment.id} status={experiment.status} traffic={experiment.traffic_allocation} onSaved={() => void load()} /></div>}
+            {tab === 'settings' && <SettingsPanel key={experiment.updated_at} experiment={experiment} busy={busy} onSave={(b) => patch(b, 'Changes saved.')} onDelete={remove} />}
         </>
     );
 }
@@ -350,11 +402,32 @@ function SettingsPanel({ experiment, busy, onSave, onDelete }: { experiment: Exp
     const [name, setName] = useState(experiment.name);
     const [description, setDescription] = useState(experiment.description ?? '');
     const [traffic, setTraffic] = useState(experiment.traffic_allocation);
-    const locked = experiment.status === 'completed';
+    const [hypothesis, setHypothesis] = useState(experiment.hypothesis ?? '');
+    const [expected, setExpected] = useState(experiment.expected_outcome ?? '');
+    const [tagText, setTagText] = useState(parseTags(experiment.tags).join(', '));
+    const locked = experiment.status === 'completed' || !!experiment.archived_at;
+    const tagList = tagText.split(',').map((t) => t.trim()).filter(Boolean);
     return (
         <div className="space-y-6">
+            <Card data-testid="notes-form">
+                <CardHeader title="Hypothesis, expected outcome and tags" description="Notes for your team. You can change them at any time, also after the test ends." />
+                <CardBody>
+                    <form
+                        className="space-y-5"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            onSave({ hypothesis, expected_outcome: expected, tags: tagList });
+                        }}
+                    >
+                        <Field label="Hypothesis" hint="What you change, for whom, and why you expect it to help.">{(id) => <Textarea id={id} rows={3} maxLength={2000} value={hypothesis} onChange={(e) => setHypothesis(e.target.value)} placeholder="If we shorten the signup form, more visitors will finish it, because fewer fields take less effort." />}</Field>
+                        <Field label="Expected outcome" hint="The result you would call a win.">{(id) => <Textarea id={id} rows={2} maxLength={2000} value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="Signups rise by at least 10%." />}</Field>
+                        <Field label="Tags" hint={`Separate tags with commas. Up to ${MAX_TAGS} tags of ${MAX_TAG_LENGTH} characters.`}>{(id) => <Input id={id} value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="homepage, q4, pricing" />}</Field>
+                        <div className="flex justify-end"><Button type="submit" disabled={busy || tagList.length > MAX_TAGS}>Save notes and tags</Button></div>
+                    </form>
+                </CardBody>
+            </Card>
             <Card>
-                <CardHeader title="General" description={locked ? 'Completed experiments are read only.' : undefined} />
+                <CardHeader title="General" description={experiment.archived_at ? 'Archived tests are read only. Unarchive the test to change these.' : locked ? 'Completed experiments are read only.' : undefined} />
                 <CardBody>
                     <form
                         className="space-y-5"
@@ -364,7 +437,7 @@ function SettingsPanel({ experiment, busy, onSave, onDelete }: { experiment: Exp
                         }}
                     >
                         <Field label="Name">{(id) => <Input id={id} required value={name} disabled={locked} onChange={(e) => setName(e.target.value)} />}</Field>
-                        <Field label="Hypothesis or description">{(id) => <Textarea id={id} rows={3} value={description} disabled={locked} onChange={(e) => setDescription(e.target.value)} />}</Field>
+                        <Field label="Description">{(id) => <Textarea id={id} rows={3} value={description} disabled={locked} onChange={(e) => setDescription(e.target.value)} />}</Field>
                         <Field
                             label={`Traffic allocation: ${traffic}%`}
                             hint={experiment.status === 'running' ? 'Raising allocation keeps existing visitors in their variation. Lowering it removes some visitors from the experiment.' : undefined}
@@ -381,5 +454,18 @@ function SettingsPanel({ experiment, busy, onSave, onDelete }: { experiment: Exp
                 </Card>
             )}
         </div>
+    );
+}
+
+function NotesCard({ hypothesis, expected, onEdit }: { hypothesis: string | null; expected: string | null; onEdit: () => void }) {
+    if (!hypothesis && !expected) return null;
+    return (
+        <Card className="mb-6" data-testid="test-notes">
+            <CardHeader title="Hypothesis" actions={<Button variant="ghost" size="sm" onClick={onEdit}>Edit</Button>} />
+            <CardBody className="space-y-2 text-sm text-zinc-700">
+                {hypothesis && <p className="whitespace-pre-line">{hypothesis}</p>}
+                {expected && <p className="whitespace-pre-line"><span className="font-medium text-zinc-900">Expected outcome:</span> {expected}</p>}
+            </CardBody>
+        </Card>
     );
 }

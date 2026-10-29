@@ -61,6 +61,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Free: 1 new test per calendar month (UTC), counted when the test is created, per account and per domain, in `free_test_usage`. Never decrement it. Use `checkNewTest` before and `recordNewTest` after creating a test, in any new create path.
 - Free: 1 goal per test, a click on a CSS selector. Any new goal type or conversion path must check `advanced_goals` (see `goalPlanError`, `ingestTrack`, `/api/sdk/event`, `recordGoalHits`).
 - Public copy: the Free card on /pricing shows three ticks and links to the comparison table (#compare), which lists every free limit in plain numbers with no footnotes. Never call Free "unlimited", "all features free" or a "free trial". Label paid-only features. `tests/publicCopyMatchesApp.test.ts` checks this.
+- Duplicating a test is a create path: POST /api/experiments/[id]/duplicate calls `checkNewTest` and `recordNewTest` and re-checks plan limits on what it copies. Keep that for any future copy or import feature.
 - Tests that are not about the free plan should put their org on a paid plan with `makePaid` (tests/helpers.ts), or clear the monthly counter with `resetFreeTestUsage`.
 
 
@@ -75,3 +76,9 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 ## Blog posts from the content store
 - Before replacing a live post with a store copy, diff the two. Store copies can miss edits made only in the repo (for example the links from posts 02 and 03 to post 04); keep those and apply only the requested change.
 - Check product claims in a new post against the code (lib/plans.ts, sdk-src/sdk.js, lib/docs/content) and add tests/blogPostNN.test.ts. Date pins on older posts use >= so later updates do not break them.
+
+## Experiment management
+- Archived tests (`experiments.archived_at` set) must never be served. Any new SDK, server or schedule path that reads tests must skip them, like `getRunningConfig`, `getRolloutConfig`, `getDueSchedules`, `rolloutVariation`, `checkEvent` and `previewBlocker`. Archive is a flag, not a status: the status stays paused or completed.
+- Per-test history (GET /api/experiments/[id]/history) uses the `audit_log` feature and the plan retention window, the same as the org audit log. Every experiment change must write `db.audit` with `entity: 'experiment'` and the experiment id so it shows there.
+- Tags are cleaned with `tagsSchema` (lower case, deduped, max 10) and stored as JSON; read them with `parseTags`.
+

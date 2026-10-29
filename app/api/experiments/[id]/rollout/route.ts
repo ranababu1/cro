@@ -24,6 +24,7 @@ export async function POST(request: NextRequest, { params }: Params) {
         if (!experiment) return NextResponse.json({ error: 'Experiment not found' }, { status: 404 });
         const parsed = body.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
+        if (experiment.archived_at) return NextResponse.json({ error: 'Unarchive this test before rolling out a version' }, { status: 400 });
         if (!ROLLOUT_FROM.includes(experiment.status)) {
             return NextResponse.json({ error: 'Start the test first. A draft has no results to roll out.' }, { status: 400 });
         }

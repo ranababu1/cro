@@ -161,6 +161,13 @@ export const experiments = sqliteTable('experiments', {
     pages: text('pages'),
     // Multivariate tests (Growth+): JSON factors and levels the variations were built from. Null = a normal test. See lib/mvt.ts.
     mvt: text('mvt'),
+    // Test notes: what you expect and why (shown on the test page), copied from a planner idea when made from one.
+    hypothesis: text('hypothesis'),
+    expected_outcome: text('expected_outcome'),
+    // JSON array of short tags for organizing the list, see lib/experimentManage.ts. Null = none.
+    tags: text('tags'),
+    // Archived (completed or paused tests only): hidden from the default list and never served by the SDK. Null = not archived.
+    archived_at: text('archived_at'),
 }, (t) => [
     index('idx_experiments_project').on(t.project_id),
     index('idx_experiments_status').on(t.status),
@@ -246,7 +253,7 @@ export const auditLog = sqliteTable('audit_log', {
     action: text('action').notNull(),
     diff: text('diff'),
     created_at: text('created_at').notNull().default(now),
-}, (t) => [index('idx_audit_org_created').on(t.org_id, t.created_at), index('idx_audit_created').on(t.created_at)]);
+}, (t) => [index('idx_audit_org_created').on(t.org_id, t.created_at), index('idx_audit_created').on(t.created_at), index('idx_audit_entity_created').on(t.entity_id, t.created_at)]);
 
 /** Daily aggregated platform telemetry counters. scope_type+scope_id identify platform/org/user/project/experiment. */
 export const telemetryDaily = sqliteTable('telemetry_daily', {

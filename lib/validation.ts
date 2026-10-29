@@ -2,6 +2,7 @@ import { MAX_REVENUE_PER_EVENT } from './revenue';
 import { z } from 'zod';
 import { EVENT_NAME_RE, isValidRegex, checkGoalSelector, MAX_GOALS } from './goals';
 import { targetingSchema } from './targeting';
+import { noteSchema, tagsSchema } from './experimentManage';
 
 // Forms send empty strings for blank optional fields.
 const blankToUndefined = (v: unknown) => (v === '' ? undefined : v);
@@ -44,6 +45,9 @@ export const createDomainSchema = z.object({
 export const createExperimentSchema = z.object({
     name: z.string().trim().min(1).max(200),
     description: z.string().max(2000).optional(),
+    hypothesis: noteSchema.optional(),
+    expected_outcome: noteSchema.optional(),
+    tags: tagsSchema.optional(),
     project_id: id.optional(),
     control_url: z.string().url().max(2000),
     traffic_allocation: z.number().int().min(0).max(100).optional(),
@@ -73,6 +77,9 @@ export const updateExperimentSchema = z
     .object({
         name: z.string().trim().min(1).max(200),
         description: z.string().max(2000),
+        hypothesis: noteSchema.nullable(),
+        expected_outcome: noteSchema.nullable(),
+        tags: tagsSchema,
         status: z.enum(['draft', 'running', 'paused', 'completed']),
         traffic_allocation: z.number().int().min(0).max(100),
         targeting: targetingSchema,
