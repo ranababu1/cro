@@ -7,7 +7,7 @@ export const introduction: DocPage = {
     group: 'Getting started',
     blocks: [
         { type: 'p', text: 'freeabtest.com is an A/B testing platform. You create an experiment with two or more variations, add a small JavaScript snippet to your site, and the platform splits visitors between the variations. It records who saw what and who converted, and tells you whether the difference is real or likely noise.' },
-        { type: 'p', text: 'These docs describe what the product does today. Features that are planned but not built yet are marked **Coming later**. See the [roadmap](/roadmap) for the bigger picture.' },
+        { type: 'p', text: 'These docs describe what the product does today. Features that are planned but not built yet are marked **Coming later**.' },
         { type: 'callout', tone: 'info', title: 'New here?', text: 'Follow the [Quick start](/docs/quick-start). It takes you from sign in to reading your first result in about fifteen minutes.' },
         { type: 'h2', text: 'How it works' },
         { type: 'diagram', name: 'flow', caption: 'The SDK asks for an assignment, applies the variation, and reports page views and conversions. The dashboard reads the same data.' },
@@ -40,6 +40,6 @@ export const introduction: DocPage = {
             'An audit log of every change to experiments and keys, which you can read on paid plans.',
         ] },
         { type: 'h2', text: 'What is coming later' },
-        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Session recordings are on the [roadmap](/roadmap). Heatmaps and funnels are live on paid plans, and the visual editor on Growth and above.' },
+        { type: 'callout', tone: 'later', title: 'Coming later', text: 'Session recordings are not available yet. Heatmaps and funnels are live on paid plans, and the visual editor on Growth and above.' },
     ],
 };

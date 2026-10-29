@@ -1,6 +1,6 @@
 # Roadmap (approved 15 Oct 2026)
 
-Internal. The public /roadmap page shows phase names, features and status only (no timelines, approach, competitors or scaling).
+Internal only. The public /roadmap page was retired on 2026-10-29 and /roadmap now redirects (301) to /pricing. Public pages, docs and blog posts do not mention phases or link to a roadmap; planned features appear only as Coming soon on the pricing page.
 Public numbering: Phase 1 A/B testing core (done), Phase 2 more goals and targeting (in progress), Phase 3 heatmaps, Phase 4 recordings, funnels and visual editor, Phase 5 engagement extras.
 Internal numbering below follows the approved plan, where "Phase 1" = public Phase 2. Scaling work: see docs/scaling.md.
 

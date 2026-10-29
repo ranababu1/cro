@@ -120,7 +120,7 @@ Paid plans allow up to 50 variations. Starter is $10 a month for 250,000 tested 
 
 ### What is still planned
 
-Session recordings are planned (Phase 7). They are not live today. Sequential (peeking-safe) testing ships on all plans; Bayesian analysis is not offered. We do not ship feature flags, or React, Next.js or Node SDKs.
+Session recordings are not available yet. Sequential (peeking-safe) testing ships on all plans; Bayesian analysis is not offered. We do not ship feature flags, or React, Next.js or Node SDKs.
 
 Choose freeabtest.com if you can paste a script tag (or install the WordPress plugin on Starter and up), you want results you can explain, and you do not want to start at $99 to $495 a month. Upgrade inside freeabtest.com when you need heatmaps, funnels, revenue storage, the WordPress plugin or the visual editor.
 

@@ -183,7 +183,7 @@ The snippet hides the page for at most 0.8 seconds while it decides, so visitors
 
 **Breadth.** Optimizely's plans page lists A/B, multi-page, feature and server-side testing, real-time personalization and warehouse-native analytics. Convert Pro adds multivariate and multi-page testing, server-side testing with feature flags, and a multi-arm bandit. We do not ship feature flags, and our multi-page and multivariate tests start on Growth.
 
-**Session recordings.** Crazy Egg Plus includes 1,000 recordings a month alongside unlimited A/B testing. Our heatmaps are live on Starter and up, but session recordings are planned (Phase 7 on our [roadmap](https://www.freeabtest.com/roadmap)), not live.
+**Session recordings.** Crazy Egg Plus includes 1,000 recordings a month alongside unlimited A/B testing. Our heatmaps are live on Starter and up, but session recordings are not available yet.
 
 **Bayesian reporting.** Wingify's pricing page describes a Bayesian-powered reporting dashboard, and Convert lists frequentist and Bayesian stats. We use a peeking-safe sequential test and do not offer Bayesian analysis.
 

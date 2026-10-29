@@ -159,7 +159,7 @@ experiments (belong to a project, owned by a user; hypothesis, expected_outcome,
 - GET /api/experiments/:id/heatmaps?variation=&device= (paid only) feeds the Heatmaps tab: click map, scroll map, confetti, overlay (sandboxed iframe) and element list. Migration 0015.
 
 ## In-app links to public pages
-- Links from the signed-in app to /docs, /pricing, /roadmap, /blog or /wordpress use target=_blank and rel=noopener noreferrer (tests/inAppLinks.test.ts).
+- Links from the signed-in app to /docs, /pricing, /blog or /wordpress use target=_blank and rel=noopener noreferrer (tests/inAppLinks.test.ts).
 
 ## App dark mode
 - lib/theme.ts themeInitScript runs in the root layout head and sets html[data-theme] from localStorage fabt-theme (light, dark or system via prefers-color-scheme).
@@ -369,3 +369,8 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Routes: GET/PUT /api/ai, POST /api/ai/keys, DELETE /api/ai/keys/[provider], POST /api/ai/ideas (url and objective, page fetched server-side with lib/ai/pageText.ts, private hosts refused, redirects re-checked, 8 s and 1.5 MB caps), POST /api/ai/hypothesis, POST /api/experiments/[id]/ai (summary or followups; followups only for completed tests), POST /api/sdk/visual/ai (visual editor copy, CORS). maxDuration 60.
 - Results summary is built from the same verdict as the results page (lib/ai/features.ts verdictOf); an answer that claims a winner the stats did not find, or denies one they did, is refused with a retry message.
 - Homepage hero, AI section and meta switch to the AI copy only when AI_KEYS_ENCRYPTION_KEY is set at build time.
+
+## Public roadmap retired (2026-10-29)
+- app/roadmap removed. next.config.js redirects /roadmap to /pricing with a 301. The sitemap, header menus (Product now links Features and plans to /pricing#compare), mobile menu, footer, homepage Explore the platform button, docs introduction and pricing no longer link to it.
+- Pricing coming soon tags read Coming soon (no phase number). Blog posts 01, 04 and 05 say session recordings are not available yet (wording from the content store; repo-only links kept). docs/roadmap.md stays as the internal plan.
+- tests/publicContent.test.ts checks that no public page, doc or blog post links to /roadmap or mentions phases, and that the redirect is a 301.

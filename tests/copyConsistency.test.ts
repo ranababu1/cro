@@ -23,6 +23,5 @@ describe('public copy matches the code', () => {
         const winners = read('lib/docs/content/winners.ts');
         expect(winners).not.toMatch(/Weights cannot be changed/);
         expect(winners).toMatch(/change the traffic split on a running test/);
-        expect(read('app/roadmap/page.tsx')).toMatch(/Change the split, pause a variation or add goals/);
     });
 });

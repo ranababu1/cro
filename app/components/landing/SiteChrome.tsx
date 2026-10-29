@@ -6,7 +6,7 @@ import { MobileNav } from './MobileNav';
 const menus = {
     Product: [
         { href: '/#how-it-works', title: 'How it works', body: 'From idea to result in three steps' },
-        { href: '/roadmap', title: 'Features and roadmap', body: 'What works today and what is next' },
+        { href: '/pricing#compare', title: 'Features and plans', body: 'Every feature and the plans that include it' },
     ],
     'Use cases': [
         { href: '/#test-anything', title: 'Landing pages', body: 'Headlines, copy and calls to action' },
@@ -16,13 +16,12 @@ const menus = {
     Resources: [
         { href: '/docs', title: 'Documentation', body: 'Guides, SDK and API reference' },
         { href: '/docs/quick-start', title: 'Quick start', body: 'Your first experiment, step by step' },
-        { href: '/roadmap', title: 'Roadmap', body: 'Planned features by phase' },
         { href: '/pricing#faq', title: 'FAQ', body: 'Common questions' },
     ],
 };
 
 /** Mobile menu: every desktop header link, flattened into groups. */
-export const mobileLinks = [{ href: '/pricing', title: 'Pricing' }, { href: '/blog', title: 'Blog' }, { href: '/docs', title: 'Docs' }, { href: '/roadmap', title: 'Roadmap' }];
+export const mobileLinks = [{ href: '/pricing', title: 'Pricing' }, { href: '/blog', title: 'Blog' }, { href: '/docs', title: 'Docs' }];
 export const mobileGroups = (Object.keys(menus) as (keyof typeof menus)[]).map((label) => ({ label, items: menus[label].map(({ href, title }) => ({ href, title })) }));
 
 export const Arrow = () => <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 10h12M11 5l5 5-5 5" /></svg>;
@@ -59,7 +58,6 @@ export function SiteFooter() {
                     <Link href="/pricing" className="hover:text-zinc-900">Pricing</Link>
                     <Link href="/docs" className="hover:text-zinc-900">Docs</Link>
                     <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
-                    <Link href="/roadmap" className="hover:text-zinc-900">Roadmap</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
                     <Link href="/signin" className="hover:text-zinc-900">Sign in</Link>
                 </nav>

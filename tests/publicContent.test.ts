@@ -20,7 +20,7 @@ const FORBIDDEN: RegExp[] = [
 
 const root = path.join(__dirname, '..');
 const publicFiles = [
-    'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/roadmap/page.tsx',
+    'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/sitemap.ts',
     ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
@@ -53,9 +53,9 @@ describe('public content hides internals', () => {
 });
 
 /**
- * The public roadmap may list phases, names and features at a high level. It must not show timelines,
- * effort estimates, technical approach, competitor names or scaling details. Other public pages must not
- * list phase-by-phase plans at all (only /roadmap does).
+ * Public pages must not show timelines, effort estimates, technical approach, competitor names or scaling
+ * details. The public roadmap was retired (/roadmap redirects to /pricing), so no public page talks about
+ * phases or links to it.
  */
 const ROADMAP_FORBIDDEN: RegExp[] = [
     /\b\d+\s*(to|-)\s*\d+\s*weeks?\b/i, /\b\d+\s*weeks?\b/i, /\b(sprint|milestone|eta|deadline)\b/i, /\bQ[1-4]\s*20\d\d\b/,
@@ -64,16 +64,8 @@ const ROADMAP_FORBIDDEN: RegExp[] = [
     /technical approach/i, /\bedge (ingest|function)/i,
 ];
 
-describe('roadmap stays high level', () => {
-    const roadmapSrc = fs.readFileSync(path.join(root, 'app/roadmap/page.tsx'), 'utf8');
-
-    it('lists the phases with a status each', () => {
-        for (let i = 1; i <= 5; i++) expect(roadmapSrc).toContain(`phase: 'Phase ${i}'`);
-        expect(roadmapSrc).toMatch(/status: 'Done'/);
-        expect(roadmapSrc).toMatch(/status: '(Planned|In progress)'/);
-    });
-
-    it('roadmap and other public pages show no timelines, competitors or scaling details', () => {
+describe('public pages stay high level', () => {
+    it('public pages show no timelines, competitors or scaling details', () => {
         for (const f of publicFiles) {
             const src = fs.readFileSync(path.join(root, f), 'utf8');
             for (const re of ROADMAP_FORBIDDEN) expect(src, `${f} matches ${re}`).not.toMatch(re);
@@ -83,17 +75,34 @@ describe('roadmap stays high level', () => {
             for (const re of ROADMAP_FORBIDDEN) expect(text, `${p.slug} matches ${re}`).not.toMatch(re);
         }
     });
+});
 
-    // The pricing page may tag coming-soon features with their phase ("Coming soon, Phase N"). No timelines either way.
-    it('only the roadmap and pricing pages talk about phases', () => {
-        for (const f of publicFiles.filter((f) => f !== 'app/roadmap/page.tsx' && f !== 'app/pricing/page.tsx')) {
+describe('public roadmap is retired', () => {
+    const PHASE = /\bPhase \d|planned \(Phase|see (the |our )?roadmap/i;
+
+    it('no public page, doc or blog post links to /roadmap or talks about phases', () => {
+        expect(fs.existsSync(path.join(root, 'app/roadmap'))).toBe(false);
+        for (const f of publicFiles) {
             const src = fs.readFileSync(path.join(root, f), 'utf8');
-            expect(src, f).not.toMatch(/Phase \d/);
+            expect(src, f).not.toMatch(/\/roadmap\b/);
+            expect(src, f).not.toMatch(PHASE);
         }
         for (const p of docPages) {
             const text = [p.title, p.description, ...p.blocks.map(blockText)].join('\n');
-            expect(text, p.slug).not.toMatch(/Phase \d/);
+            expect(text, p.slug).not.toMatch(/roadmap/i);
+            expect(text, p.slug).not.toMatch(PHASE);
         }
+        for (const f of fs.readdirSync(path.join(root, 'content/blog'))) {
+            const src = fs.readFileSync(path.join(root, 'content/blog', f), 'utf8');
+            expect(src, f).not.toMatch(/roadmap/i);
+            expect(src, f).not.toMatch(PHASE);
+        }
+    });
+
+    it('/roadmap redirects permanently (301) to /pricing', async () => {
+        const config = (await import('../next.config.js')).default as { redirects: () => Promise<{ source: string; destination: string; statusCode?: number; permanent?: boolean }[]> };
+        const r = (await config.redirects()).find((x) => x.source === '/roadmap');
+        expect(r).toEqual({ source: '/roadmap', destination: '/pricing', statusCode: 301 });
     });
 });
 

@@ -22,7 +22,7 @@ describe('app theme', () => {
         expect(darkRules.length).toBeGreaterThan(5);
         for (const r of darkRules) expect(r).toContain('.app-scope');
         expect(fs.readFileSync('app/components/shell/AppShell.tsx', 'utf8')).toContain('app-scope');
-        for (const f of ['app/page.tsx', 'app/pricing/page.tsx', 'app/roadmap/page.tsx', 'app/wordpress/page.tsx', 'app/components/landing/SiteChrome.tsx']) {
+        for (const f of ['app/page.tsx', 'app/pricing/page.tsx', 'app/wordpress/page.tsx', 'app/components/landing/SiteChrome.tsx']) {
             expect(fs.readFileSync(f, 'utf8')).not.toContain('app-scope');
         }
     });

@@ -90,3 +90,6 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Any AI text about results must agree with `verdictOf`; keep `agreesWithVerdict` in the path.
 - Public copy may say "your own key" and list providers, but never the encryption details or env var name. Images are not built: do not claim them.
 - Tests stub `fetch` with `vi.stubGlobal`; never call a real provider in tests.
+
+## Public roadmap
+- There is no public roadmap. Do not add /roadmap links, phase numbers or "see roadmap" wording to public pages, docs or blog posts. Planned features appear only as Coming soon rows on the pricing page. Keep docs/roadmap.md as the internal plan (step 3 of Required on every change still applies).

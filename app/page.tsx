@@ -208,7 +208,7 @@ export default function LandingPage() {
                                 <li key={t.text} className="flex items-start gap-3"><span className="mt-[3px]"><CheckDot /></span><span>{t.text}{t.note && <span className="text-zinc-500"> {t.note}</span>}</span></li>
                             ))}
                         </ul>
-                        <Link href="/roadmap" className="mt-8 inline-flex h-[54px] items-center gap-3 rounded-xl bg-[#0b1630] px-8 text-[16px] font-medium text-white hover:bg-[#13224a]">Explore the platform <Arrow /></Link>
+                        <Link href="/pricing#compare" className="mt-8 inline-flex h-[54px] items-center gap-3 rounded-xl bg-[#0b1630] px-8 text-[16px] font-medium text-white hover:bg-[#13224a]">Explore the platform <Arrow /></Link>
                     </div>
                 </div>
             </section>
