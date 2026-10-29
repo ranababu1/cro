@@ -12,8 +12,9 @@ import type { BootstrapResponse, Experiment, Variation } from './types';
 export const ROLLOUT_FROM: ReadonlyArray<Experiment['status']> = ['running', 'paused', 'completed'];
 
 /** The rolled-out variation, or null when the rollout is off or points at a variation that no longer exists. */
-export function rolloutVariation(experiment: Pick<Experiment, 'status' | 'rollout_variation_id'>, variations: Variation[]): Variation | null {
-    if (experiment.status !== 'completed' || !experiment.rollout_variation_id) return null;
+export function rolloutVariation(experiment: Pick<Experiment, 'status' | 'rollout_variation_id'> & { archived_at?: string | null }, variations: Variation[]): Variation | null {
+    // Archived tests are never served, even if a rollout was left set.
+    if (experiment.status !== 'completed' || !experiment.rollout_variation_id || experiment.archived_at) return null;
     return variations.find((v) => v.id === experiment.rollout_variation_id) ?? null;
 }
 

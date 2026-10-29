@@ -10,6 +10,7 @@ import { scheduleSchedules } from '@/lib/schedule';
 import { scheduleWebhooks } from '@/lib/webhooks';
 import { serializeTargeting } from '@/lib/targeting';
 import { clientIpFromHeaders } from '@/lib/telemetry';
+import { noteOrNull, serializeTags } from '@/lib/experimentManage';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -53,8 +54,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
         const parsed = updateExperimentSchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-        const { targeting, ...rest } = parsed.data;
+        const { targeting, tags, hypothesis, expected_outcome, ...rest } = parsed.data;
         const updates: Parameters<typeof db.updateExperiment>[1] = { ...rest };
+        if (tags !== undefined) updates.tags = serializeTags(tags);
+        if (hypothesis !== undefined) updates.hypothesis = noteOrNull(hypothesis);
+        if (expected_outcome !== undefined) updates.expected_outcome = noteOrNull(expected_outcome);
+        // Archived tests keep their status until they are unarchived, so nothing can start them by accident.
+        if (experiment.archived_at && updates.status && updates.status !== experiment.status) {
+            return NextResponse.json({ error: 'Unarchive this test before changing its status' }, { status: 400 });
+        }
         let start: { startedAt: string | null } | null = null;
         // Targeting applies to new visitors only; people already in the test keep their version.
         if (targeting !== undefined) updates.targeting = serializeTargeting(targeting);

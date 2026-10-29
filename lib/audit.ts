@@ -32,7 +32,7 @@ export function isCustomerVisible(entity: string, action: string): boolean {
 
 const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project', webhook: 'Webhook', page_heatmap: 'Page heatmap', idea: 'Test idea' };
 const ACTION_NAMES: Record<string, string> = {
-    create: 'created', update: 'updated', delete: 'deleted', revoke: 'revoked', rename: 'renamed',
+    create: 'created', update: 'updated', archive: 'archived', unarchive: 'unarchived', duplicate: 'duplicated', delete: 'deleted', revoke: 'revoked', rename: 'renamed',
     'invite:create': 'invite link created', 'invite:revoke': 'invite cancelled', join: 'joined', role: 'role changed', remove: 'removed', leave: 'left',
     'goal:remove': 'goal removed', 'goal:reorder': 'goals reordered', 'goal:primary': 'primary goal changed',
     'funnel:add': 'funnel added', 'funnel:remove': 'funnel removed',

@@ -4,6 +4,7 @@ import { formatZodError } from '@/lib/validation';
 import { currentProject } from '@/lib/popupRoutes';
 import { orgIdForProject } from '@/lib/access';
 import { ideaJson, updateIdeaSchema, type IdeaRow } from '@/lib/planner';
+import { ideaExpectedOutcome } from '@/lib/experimentManage';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -41,6 +42,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             const e = await db.getExperiment(u.experiment_id);
             if (!e || e.project_id !== r.idea.project_id) return NextResponse.json({ error: 'That test is not in this project' }, { status: 400 });
             if (!u.status) u.status = 'started';
+            // Carry the idea's notes over when the test has none of its own (API callers that only link the idea).
+            const fill: { hypothesis?: string; expected_outcome?: string } = {};
+            if (!e.hypothesis && r.idea.hypothesis) fill.hypothesis = r.idea.hypothesis.slice(0, 2000);
+            const outcome = ideaExpectedOutcome(r.idea);
+            if (!e.expected_outcome && outcome) fill.expected_outcome = outcome;
+            if (Object.keys(fill).length) await db.updateExperiment(e.id, fill);
         }
         const idea = await db.updateIdea(r.idea.id, u);
         await db.audit({ orgId: r.orgId, actorId: r.userId, entity: 'idea', entityId: r.idea.id, action: u.experiment_id ? 'idea:start' : 'update', diff: u });

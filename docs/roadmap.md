@@ -58,6 +58,8 @@ Google Analytics 4 events
 
 Traffic page paths capped at 500 per day per environment, extra paths roll into Other pages (paid)
 
+- Done (29 Oct 2026): duplicate a test, archive and unarchive, hypothesis and expected outcome fields, tags with search and a tag filter, per-test History tab (paid, on the audit log; plain entries, not detailed diffs). Still open from these items: categories, owner change, approvals and the review status.
+
 Visual editor (Growth+)
 
 JavaScript error tracking per version (paid)
@@ -311,14 +313,14 @@ Every feature from the 14-section list appears in exactly one phase.
 Goal: a team can install one snippet on a real site, run code-based A/B and A/B/n tests safely, and trust the result.
 
 1. Experiment Management
-- Create, edit, pause, resume, archive experiments
+- Create, edit, pause, resume, archive experiments (archive done 29 Oct 2026, as a flag on paused or completed tests)
 - A/B testing (control vs variant)
 - Split testing with configurable traffic allocation
 - A/B/n testing
 - Redirect testing
 - URL-based split testing (same mechanism as redirect, shipped together)
 - Scheduling with start and end dates
-- Naming, tagging, categorization, ownership
+- Naming, tagging, categorization, ownership (tags done 29 Oct 2026; categories not yet)
 - Statuses: draft, running, completed, archived (plus paused). Review status lands with approvals in Phase 2
 
 2. Visual Editor: none (Phase 3), but code variants are the Phase 1 authoring path, see section 9 note below. Items from section 2 that are code features are listed here:
@@ -415,7 +417,7 @@ Goal: credible for a team running many tests in parallel, with server-side use, 
 1. Experiment Management
 - Multivariate testing (MVT), needs factorial variants and multiple-comparison correction
 - Approval workflows and the review status
-- Experiment history UI on top of the audit log (detailed diffs)
+- Experiment history UI on top of the audit log (detailed diffs). Basic per-test History tab done 29 Oct 2026; field-by-field diffs still open
 
 3. Traffic Allocation
 - URL and domain-level traffic splitting

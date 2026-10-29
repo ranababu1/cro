@@ -295,15 +295,19 @@ export const db = {
     },
 
     async createExperiment(
-        experiment: Pick<Experiment, 'id' | 'project_id' | 'user_id' | 'name' | 'status' | 'traffic_allocation'> & { description?: string | null; control_url?: string | null; targeting?: string | null },
-        variations: Array<Pick<Variation, 'name' | 'weight' | 'is_control'> & { description?: string | null; url?: string | null }>,
+        experiment: Pick<Experiment, 'id' | 'project_id' | 'user_id' | 'name' | 'status' | 'traffic_allocation'> & { description?: string | null; control_url?: string | null; targeting?: string | null }
+            & Partial<Pick<Experiment, 'hypothesis' | 'expected_outcome' | 'tags' | 'pages' | 'mvt' | 'auto_shift' | 'heatmap_sample' | 'heatmap_stop_days' | 'heatmap_stop_views' | 'ramp_start' | 'ramp_step' | 'ramp_every_hours'>>,
+        variations: Array<Pick<Variation, 'name' | 'weight' | 'is_control'> & { description?: string | null; url?: string | null; changes?: string | null; combo?: string | null }>,
         goals: Array<Pick<Goal, 'name' | 'selector' | 'is_primary'> & { type?: Goal['type']; match_type?: Goal['match_type'] }> = [],
     ): Promise<void> {
         clearConfigCache();
         const d = await getDb();
         await d.insert(s.experiments).values({ ...experiment, description: experiment.description ?? null, control_url: experiment.control_url ?? null });
+        // Spaced timestamps keep the listed order (variations sort by created_at, then id).
+        const t0 = Date.now();
         await d.insert(s.variations).values(
-            variations.map((v) => ({
+            variations.map((v, i) => ({
+                created_at: new Date(t0 + i).toISOString(),
                 id: generateId('var'),
                 experiment_id: experiment.id,
                 name: v.name,
@@ -311,6 +315,8 @@ export const db = {
                 url: v.url ?? null,
                 weight: v.weight,
                 is_control: v.is_control,
+                changes: v.changes ?? null,
+                combo: v.combo ?? null,
             })),
         );
         if (goals.length) {
@@ -331,7 +337,7 @@ export const db = {
 
     async updateExperiment(
         id: string,
-        updates: Partial<Pick<Experiment, 'name' | 'description' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at' | 'rollout_variation_id' | 'rollout_at' | 'schedule_start_at' | 'schedule_stop_at' | 'schedule_error' | 'ramp_start' | 'ramp_step' | 'ramp_every_hours'>>,
+        updates: Partial<Pick<Experiment, 'name' | 'description' | 'hypothesis' | 'expected_outcome' | 'tags' | 'archived_at' | 'status' | 'traffic_allocation' | 'targeting' | 'started_at' | 'ended_at' | 'rollout_variation_id' | 'rollout_at' | 'schedule_start_at' | 'schedule_stop_at' | 'schedule_error' | 'ramp_start' | 'ramp_step' | 'ramp_every_hours'>>,
     ): Promise<void> {
         clearConfigCache();
         const d = await getDb();
@@ -341,10 +347,10 @@ export const db = {
     /** Experiments with a scheduled start or stop that is due: starts on draft or paused tests, stops on running or paused ones. */
     async getDueSchedules(nowIso: string, limit = 50): Promise<Experiment[]> {
         const d = await getDb();
-        return d.select().from(s.experiments).where(or(
+        return d.select().from(s.experiments).where(and(isNull(s.experiments.archived_at), or(
             and(isNotNull(s.experiments.schedule_start_at), lte(s.experiments.schedule_start_at, nowIso), inArray(s.experiments.status, ['draft', 'paused'])),
             and(isNotNull(s.experiments.schedule_stop_at), lte(s.experiments.schedule_stop_at, nowIso), inArray(s.experiments.status, ['running', 'paused'])),
-        )).limit(limit);
+        ))).limit(limit);
     },
 
     async deleteExperiment(id: string): Promise<void> {
@@ -689,7 +695,7 @@ export const db = {
     async getRunningConfig(projectId: string): Promise<Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }>> {
         return cached(`run:${projectId}`, async () => {
             const d = await getDb();
-            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running')));
+            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running'), isNull(s.experiments.archived_at)));
             const out: Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }> = [];
             for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id), goals: await this.getGoals(experiment.id) });
             return out;
@@ -700,7 +706,7 @@ export const db = {
     async getRolloutConfig(projectId: string): Promise<Array<{ experiment: Experiment; variations: Variation[] }>> {
         return cached(`roll:${projectId}`, async () => {
             const d = await getDb();
-            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'completed'), isNotNull(s.experiments.rollout_variation_id)));
+            const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'completed'), isNotNull(s.experiments.rollout_variation_id), isNull(s.experiments.archived_at)));
             const out: Array<{ experiment: Experiment; variations: Variation[] }> = [];
             for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id) });
             return out;
@@ -1082,6 +1088,23 @@ export const db = {
             WHERE a.org_id = ${orgId} AND a.created_at >= ${o.since}
               AND a.entity != 'abuse' AND a.action NOT LIKE 'abuse:%' AND a.action != 'admin:special_friend'
               ${o.entity ? sql`AND a.entity = ${o.entity}` : sql``}
+              ${o.before ? sql`AND (a.created_at < ${o.before.t} OR (a.created_at = ${o.before.t} AND a.id < ${o.before.id}))` : sql``}
+            ORDER BY a.created_at DESC, a.id DESC
+            LIMIT ${o.limit}`);
+    },
+
+    /** One test's audit entries (per-test History tab), newest first, inside the retention window. */
+    async listAuditForEntity(orgId: string, entity: string, entityId: string, o: { since: string; before?: { t: string; id: string } | null; limit: number }) {
+        const d = await getDb();
+        return d.all<import('../audit').AuditRow>(sql`
+            SELECT a.id, a.entity, a.entity_id, a.action, a.diff, a.created_at, a.actor_id,
+                   u.name AS actor_name, u.email AS actor_email,
+                   CASE WHEN m.user_id IS NULL THEN 0 ELSE 1 END AS actor_member
+            FROM audit_log a
+            LEFT JOIN users u ON u.id = a.actor_id
+            LEFT JOIN memberships m ON m.org_id = a.org_id AND m.user_id = a.actor_id
+            WHERE a.entity_id = ${entityId} AND a.org_id = ${orgId} AND a.entity = ${entity} AND a.created_at >= ${o.since}
+              AND a.action NOT LIKE 'abuse:%' AND a.action != 'admin:special_friend'
               ${o.before ? sql`AND (a.created_at < ${o.before.t} OR (a.created_at = ${o.before.t} AND a.id < ${o.before.id}))` : sql``}
             ORDER BY a.created_at DESC, a.id DESC
             LIMIT ${o.limit}`);

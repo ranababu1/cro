@@ -6,7 +6,8 @@ import { PROFILE_REQUIRED_MESSAGE } from '@/lib/profile';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Field, Alert } from '@/app/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Button, ButtonLink, Input, Textarea, Field, Alert } from '@/app/components/ui';
+import { MAX_TAGS, ideaExpectedOutcome } from '@/lib/experimentManage';
 import { GOAL_TYPES, GOAL_TYPE_LABELS, describeGoal, type GoalType, type PageMatchType } from '@/lib/goals';
 import { evenWeights, redistributeWeights } from '@/lib/weights';
 import { InstallSnippet } from '@/app/components/InstallSnippet';
@@ -60,6 +61,9 @@ export default function NewExperimentWizard() {
     const [advancedGoals, setAdvancedGoals] = useState(false);
     const [monthly, setMonthly] = useState<{ limit: number; used: number; resets_at: string } | null>(null);
     const [name, setName] = useState('');
+    const [hypothesis, setHypothesis] = useState('');
+    const [expected, setExpected] = useState('');
+    const [tagText, setTagText] = useState('');
     const [controlUrl, setControlUrl] = useState('');
     const [vars, setVars] = useState<VarDraft[]>([
         { name: 'Control', url: '', weight: 50, is_control: true },
@@ -85,6 +89,9 @@ export default function NewExperimentWizard() {
             if (!live || !j?.idea) return;
             setIdea({ id: j.idea.id, title: j.idea.title, hypothesis: j.idea.hypothesis });
             setName((n) => n || j.idea.title);
+            if (j.idea.hypothesis) setHypothesis((h) => h || j.idea.hypothesis);
+            const outcome = ideaExpectedOutcome(j.idea);
+            if (outcome) setExpected((x) => x || outcome);
             if (j.idea.page_url) {
                 setControlUrl((u) => u || j.idea.page_url);
                 setVars((vs) => vs.map((v) => (v.is_control && !v.url ? { ...v, url: j.idea.page_url } : v)));
@@ -117,6 +124,7 @@ export default function NewExperimentWizard() {
         })();
     }, []);
 
+    const tagList = tagText.split(',').map((t) => t.trim()).filter(Boolean);
     const nonControlCount = vars.filter((v) => !v.is_control).length;
     const goalCap = maxGoals === null ? MAX_GOALS : Math.min(maxGoals, MAX_GOALS);
     const monthlyUsed = !!monthly && monthly.used >= monthly.limit;
@@ -169,7 +177,9 @@ export default function NewExperimentWizard() {
         setBusy(true); setError('');
         const payload = {
             name: name || 'Untitled test',
-            ...(idea?.hypothesis ? { description: `Hypothesis: ${idea.hypothesis}`.slice(0, 2000) } : {}),
+            ...(hypothesis.trim() ? { hypothesis: hypothesis.trim().slice(0, 2000) } : {}),
+            ...(expected.trim() ? { expected_outcome: expected.trim().slice(0, 2000) } : {}),
+            ...(tagList.length ? { tags: tagList } : {}),
             control_url: controlUrl,
             traffic_allocation: traffic,
             targeting,
@@ -206,12 +216,12 @@ export default function NewExperimentWizard() {
 
     const canNext = useMemo(() => {
         if (step === 'domain') return domains.length > 0;
-        if (step === 'control') return !!controlUrl && !!name;
+        if (step === 'control') return !!controlUrl && !!name && tagList.length <= MAX_TAGS;
         if (step === 'variations') return vars.every((v) => (v.url || (v.visual && !v.is_control)) && v.name) && Math.abs(vars.reduce((a, v) => a + v.weight, 0) - 100) < 0.05;
         if (step === 'goals') return goals.length > 0 && goals.length <= goalCap && goals.every((g) => g.name.trim() && g.selector.trim() && !goalProblem(g) && (advancedGoals || g.type === 'click')) && goals.filter((g) => g.is_primary).length === 1;
         if (step === 'traffic') return traffic >= 0 && traffic <= 100;
         return true;
-    }, [step, domains, controlUrl, name, vars, goals, traffic, goalCap, advancedGoals]);
+    }, [step, domains, controlUrl, name, vars, goals, traffic, goalCap, advancedGoals, tagList.length]);
 
     function goNext() {
         if (!canNext) return;
@@ -230,7 +240,7 @@ export default function NewExperimentWizard() {
                 description="One control page, then variation pages or visual changes made with the visual editor, and goals."
                 breadcrumb={<Link href="/experiments" className="hover:text-zinc-800">Experiments</Link>}
             />
-            {idea && <Alert tone="info" className="mb-4">From the test planner: <strong>{idea.title}</strong>. The hypothesis is saved as the test description, and the idea moves to Started.</Alert>}
+            {idea && <Alert tone="info" className="mb-4">From the test planner: <strong>{idea.title}</strong>. The hypothesis and expected outcome are copied to the test, and the idea moves to Started.</Alert>}
 
             <ol className="mb-8 flex flex-wrap gap-2">
                 {STEPS.map((s, i) => (
@@ -279,6 +289,15 @@ export default function NewExperimentWizard() {
                         <Field label="Test name">{(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} placeholder="Homepage headline" required />}</Field>
                         <Field label="Control URL" hint="Full URL, for example https://www.example.com/pricing">
                             {(id) => <Input id={id} type="url" value={controlUrl} onChange={(e) => syncControlUrl(e.target.value)} placeholder="https://www.example.com/" required />}
+                        </Field>
+                        <Field label="Hypothesis (optional)" hint="What you change, for whom, and why you expect it to help.">
+                            {(id) => <Textarea id={id} rows={3} maxLength={2000} value={hypothesis} onChange={(e) => setHypothesis(e.target.value)} placeholder="If we shorten the signup form, more visitors will finish it, because fewer fields take less effort." />}
+                        </Field>
+                        <Field label="Expected outcome (optional)" hint="The result you would call a win.">
+                            {(id) => <Textarea id={id} rows={2} maxLength={2000} value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="Signups rise by at least 10%." />}
+                        </Field>
+                        <Field label="Tags (optional)" hint={`Separate tags with commas. Up to ${MAX_TAGS} tags.`} error={tagList.length > MAX_TAGS ? `A test can have up to ${MAX_TAGS} tags` : undefined}>
+                            {(id) => <Input id={id} value={tagText} onChange={(e) => setTagText(e.target.value)} placeholder="homepage, q4, pricing" />}
                         </Field>
                     </CardBody>
                 </Card>
@@ -384,6 +403,9 @@ export default function NewExperimentWizard() {
                         <CardHeader title="Review and start" />
                         <CardBody className="space-y-3 text-sm text-zinc-700">
                             <p><span className="font-medium text-zinc-900">Name:</span> {name}</p>
+                            {hypothesis.trim() && <p><span className="font-medium text-zinc-900">Hypothesis:</span> {hypothesis.trim()}</p>}
+                            {expected.trim() && <p><span className="font-medium text-zinc-900">Expected outcome:</span> {expected.trim()}</p>}
+                            {tagList.length > 0 && <p><span className="font-medium text-zinc-900">Tags:</span> {tagList.join(', ')}</p>}
                             <p><span className="font-medium text-zinc-900">Control:</span> {controlUrl}</p>
                             <p><span className="font-medium text-zinc-900">Variations:</span> {vars.filter((v) => !v.is_control).map((v) => `${v.name} (${v.weight}%) → ${v.visual ? 'same page, visual editor' : v.url}`).join('; ')}</p>
                             <p><span className="font-medium text-zinc-900">Goals:</span> {goals.map((g) => `${g.name} (${GOAL_TYPE_LABELS[g.type]}: ${describeGoal(g)})${g.is_primary ? ' (primary)' : ''}`).join('; ')}</p>
