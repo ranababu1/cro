@@ -3,7 +3,7 @@ title: "What statistical significance means in an A/B test"
 meta_description: "A significant A/B test result means a gap this big would be rare if the versions converted the same. What a p-value tells you, what it doesn't, with examples."
 slug: statistical-significance-ab-test
 date: 2026-10-25
-updated: 2026-10-25
+updated: 2026-10-29
 author: "Imraan, freeabtest.com"
 keywords: ["statistical significance a/b test", "p value ab test", "ab test significance explained", "what does 95% significance mean", "false positive risk"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "What statistical significance means in an A/B test",
     "datePublished": "2026-10-25",
-    "dateModified": "2026-10-25",
+    "dateModified": "2026-10-29",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/statistical-significance-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -48,7 +48,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 25 October 2026.
+By Imraan, freeabtest.com. Published 25 October 2026. Updated 29 October 2026.
 
 A statistically significant A/B test result means the gap between your versions is larger than chance would usually produce if they really converted at the same rate. At the standard 5% level, it does not mean there is a 95% chance your variant is better, and it says nothing about whether the lift is big enough to ship.
 
@@ -95,7 +95,7 @@ Significance depends on the size of the gap and on how much data you have. Here 
 
 The observed rates are identical in every row. Only the amount of evidence changes. At 1,000 visitors per version, the interval runs from a loss of almost a point to a gain of over 2 points, so the data cannot tell the versions apart.
 
-This is why "not significant" rarely means "no effect". It usually means "not enough data to tell", which is why you work out the sample size before launch. Our guide to [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test) shows that calculation step by step. If your traffic is small, our guide to [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) covers what you can still learn.
+This is why "not significant" rarely means "no effect". It usually means "not enough data to tell", which is why you work out the sample size before launch. Our guide to [A/B test sample size](https://www.freeabtest.com/blog/ab-test-sample-size) shows how many visitors a given lift needs, with a calculator, and our guide to [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test) turns that into weeks. If your traffic is small, our guide to [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) covers what you can still learn.
 
 ## What does a p-value not tell you?
 

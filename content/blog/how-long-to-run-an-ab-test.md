@@ -3,7 +3,7 @@ title: "How long should you run an A/B test? Worked examples"
 meta_description: "Run an A/B test until it reaches its planned sample size, in whole weeks, and for at least 2 weeks. Worked examples for 1,000 to 50,000 weekly visitors."
 slug: how-long-to-run-an-ab-test
 date: 2026-10-17
-updated: 2026-10-27
+updated: 2026-10-29
 author: "Imraan, freeabtest.com"
 keywords: ["how long to run an a/b test", "a/b test duration", "ab test sample size", "when to stop an ab test", "minimum detectable effect"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How long should you run an A/B test? Worked examples",
     "datePublished": "2026-10-17",
-    "dateModified": "2026-10-27",
+    "dateModified": "2026-10-29",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Updated 27 October 2026.
+By Imraan, freeabtest.com. Published 17 October 2026. Updated 29 October 2026.
 
 Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
@@ -82,7 +82,7 @@ Here are the visitors needed per variant, at 95% confidence and 80% power, for c
 | 5% | 122,124 | 31,234 | 8,158 | 3,780 | 1,471 |
 | 10% | 57,763 | 14,751 | 3,841 | 1,774 | 686 |
 
-Lifts are relative. A 20% lift on a 3% baseline means 3.0% to 3.6%.
+Lifts are relative. A 20% lift on a 3% baseline means 3.0% to 3.6%. For how each input moves these numbers, plus a calculator you can run yourself, see our guide to [A/B test sample size](https://www.freeabtest.com/blog/ab-test-sample-size).
 
 Two things stand out.
 
