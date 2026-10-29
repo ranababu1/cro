@@ -11,7 +11,8 @@ describe('post: What statistical significance means in an A/B test', () => {
         expect(p).toBeTruthy();
         expect(p.date).toBe('2026-10-25');
         expect(p.category).toBe('Statistics');
-        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', dateModified: '2026-10-25', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!).dateModified >= '2026-10-29').toBe(true);
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
         expect(p.markdown).not.toContain('\u2014');

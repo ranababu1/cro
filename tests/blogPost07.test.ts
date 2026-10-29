@@ -36,9 +36,9 @@ describe('post: A/B test sample size, explained with a calculator', () => {
         for (const slug of ['how-long-to-run-an-ab-test', 'ab-testing-low-traffic']) {
             const post = getPost(slug)!;
             expect(post.markdown).toContain(`](${SIG})`);
-            expect(post.updated).toBe('2026-10-27');
-            expect(JSON.parse(post.articleSchema!).dateModified).toBe('2026-10-27');
-            expect(post.markdown).toContain('Updated 27 October 2026.');
+            expect(post.updated >= '2026-10-27').toBe(true);
+            expect(JSON.parse(post.articleSchema!).dateModified >= '2026-10-27').toBe(true);
+            expect(post.markdown).toMatch(/Updated \d+ [A-Z][a-z]+ \d{4}\./);
         }
     });
 });

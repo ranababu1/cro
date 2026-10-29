@@ -123,6 +123,8 @@ Free plan reshape: 1 new test a month, 1 click goal, no custom conversions on Fr
 
 Blog post 04 (plain JavaScript A/B test) published (21 Oct 2026).
 
+Blog posts 05 to 08 published (23 to 29 Oct 2026); post 08 covers split URL testing.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
