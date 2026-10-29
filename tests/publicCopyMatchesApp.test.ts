@@ -7,7 +7,6 @@ import {
 const read = (p: string) => fs.readFileSync(p, 'utf8');
 const pricing = read('app/pricing/page.tsx');
 const cards = read('app/pricing/BillingCards.tsx');
-const roadmap = read('app/roadmap/page.tsx');
 const home = read('app/page.tsx');
 const docs = fs.readdirSync('lib/docs/content').map((f) => read(`lib/docs/content/${f}`)).join('\n');
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -73,7 +72,7 @@ describe('public copy matches what the app enforces', () => {
     });
 
     it('drops old variant counts and unplanned promises', () => {
-        for (const src of [pricing, cards, roadmap, home, docs]) {
+        for (const src of [pricing, cards, home, docs]) {
             expect(src).not.toMatch(/\b26\b(?! 26)|2 to 26|control \+ 25|up to 10 on paid|allow up to 10\b/);
             // Sequential testing is shipped (lib/sequential.ts); a Bayesian engine is not, so never claim one.
             expect(src).not.toMatch(/Bayesian/i);
@@ -82,18 +81,11 @@ describe('public copy matches what the app enforces', () => {
         expect(pricing).not.toMatch(/email you at 80%/);
     });
 
-    it('coming-soon tags point at roadmap phases that are not done', () => {
-        const phases = [...roadmap.matchAll(/phase: 'Phase (\d)', name: '[^']+', status: '([^']+)'/g)].map((m) => ({ n: Number(m[1]), status: m[2] }));
-        expect(phases.find((p) => p.n === 1)?.status).toBe('Done');
-        expect(phases.find((p) => p.n === 2)?.status).toBe('Done');
-        const tags = [...pricing.matchAll(/\{ name: '([^']+)', p: (\d), tier: \d \}/g)].map((m) => ({ name: m[1], p: Number(m[2]) }));
+    it('coming-soon tags only list features that are not live', () => {
+        const comingSoon = pricing.slice(pricing.indexOf('const comingSoon'), pricing.indexOf('const faqs'));
+        const tags = [...comingSoon.matchAll(/\{ name: '([^']+)', tier: \d \}/g)].map((m) => m[1]);
         expect(tags.length).toBeGreaterThan(0);
-        for (const t of tags) expect(phases.find((p) => p.n === t.p)?.status, t.name).not.toBe('Done');
-        // Live features are not listed as coming soon.
-        for (const live of ['targeting', 'Sample ratio', 'custom goals', 'Flicker-free']) expect(tags.some((t) => t.name.toLowerCase().includes(live.toLowerCase()))).toBe(false);
-        expect(tags.find((t) => t.name === 'Session recordings')).toBeTruthy();
-        // Revenue goals shipped: no longer coming soon, still named on the public roadmap phase.
-        expect(tags.find((t) => t.name === 'Revenue goals')).toBeFalsy();
-        expect(roadmap).toContain("'Revenue goals'");
+        for (const live of ['targeting', 'Sample ratio', 'custom goals', 'Flicker-free', 'Revenue goals']) expect(tags.some((t) => t.toLowerCase().includes(live.toLowerCase()))).toBe(false);
+        expect(tags).toContain('Session recordings');
     });
 });

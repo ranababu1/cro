@@ -35,10 +35,11 @@ describe('focus trap', () => {
 });
 
 describe('mobile nav', () => {
-    it('holds every desktop header link plus Docs, Pricing, Blog and Roadmap', () => {
+    it('holds every desktop header link plus Docs, Pricing and Blog', () => {
         const chrome = read('app/components/landing/SiteChrome.tsx');
         const all = [...mobileLinks.map((l) => l.href), ...mobileGroups.flatMap((g) => g.items.map((i) => i.href))];
-        for (const href of ['/pricing', '/blog', '/docs', '/roadmap']) expect(all).toContain(href);
+        for (const href of ['/pricing', '/blog', '/docs']) expect(all).toContain(href);
+        expect(all.some((h) => h.startsWith('/roadmap'))).toBe(false);
         const desktop = [...chrome.slice(chrome.indexOf('aria-label="Main"'), chrome.indexOf('</nav>', chrome.indexOf('aria-label="Main"'))).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
         for (const href of desktop) expect(all).toContain(href);
         expect(mobileGroups.map((g) => g.label)).toEqual(['Product', 'Use cases', 'Resources']);

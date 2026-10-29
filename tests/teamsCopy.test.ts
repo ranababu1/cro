@@ -9,7 +9,6 @@ const read = (f: string) => fs.readFileSync(path.join(process.cwd(), f), 'utf8')
 describe('team seats and projects copy', () => {
     const pricing = read('app/pricing/page.tsx');
     const cards = read('app/pricing/BillingCards.tsx');
-    const roadmap = read('app/roadmap/page.tsx');
 
     it('pricing rows match the enforced limits', () => {
         expect(pricing).toContain("['Projects', '1', '3', '10', 'Custom'],");
@@ -23,10 +22,6 @@ describe('team seats and projects copy', () => {
     it('plan cards list the seats and projects each plan includes', () => {
         expect(cards).toContain("'3 projects and 5 team seats'");
         expect(cards).toContain("'10 projects and 15 team seats'");
-    });
-
-    it('the Teams phase is done on the public roadmap', () => {
-        expect(roadmap).toMatch(/phase: 'Phase 6', name: 'Teams', status: 'Done'/);
     });
 
     it('no custom retention or custom environments promise for Enterprise', () => {

@@ -14,6 +14,8 @@ const nextConfig = {
             { source: '/demo', destination: '/', permanent: false },
             { source: '/demo.html', destination: '/', permanent: false },
             { source: '/demo/:path*', destination: '/', permanent: false },
+            // The public roadmap was retired; what each plan includes lives on the pricing page.
+            { source: '/roadmap', destination: '/pricing', statusCode: 301 },
         ];
     },
     async headers() {

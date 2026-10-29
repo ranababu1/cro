@@ -83,9 +83,8 @@ const availableToday: { name: string; tier: number }[] = [
 ];
 
 // tier: index of the lowest plan that includes the feature (0 Free, 1 Starter, 2 Growth, 3 Enterprise).
-// p must match the phase that lists the item on the public /roadmap.
-const comingSoon: { name: string; p: number; tier: number }[] = [
-    { name: 'Session recordings', p: 7, tier: 1 },
+const comingSoon: { name: string; tier: number }[] = [
+    { name: 'Session recordings', tier: 1 },
 ];
 
 const faqs = [
@@ -113,7 +112,7 @@ const faqJsonLd = {
 const Check = () => <span className="font-bold text-teal-600" aria-label="Included">✓</span>;
 const NotIncluded = () => <span className="text-xs text-zinc-500">Not included</span>;
 const PaidBadge = ({ tier }: { tier: number }) => <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
-const Soon = ({ p }: { p: number }) => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon, Phase {p}</span>;
+const Soon = () => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon</span>;
 
 export default function PricingPage() {
     return (
@@ -145,13 +144,13 @@ export default function PricingPage() {
                                 ))}
                                 <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Coming soon</td></tr>
                                 {comingSoon.map((f) => (
-                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Soon p={f.p} /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
+                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Soon /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
                                 ))}
                                 <tr><td className="p-4 text-zinc-900">Custom contract and DPA</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-600">Enterprise</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <p className="mt-4 text-sm text-zinc-600">Heatmaps (live) and session recordings (coming soon) are on paid plans only (Starter and up). Coming soon means planned, not shipped. See the <Link href="/roadmap" className="font-medium text-blue-600 hover:underline">roadmap</Link> for details. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
+                    <p className="mt-4 text-sm text-zinc-600">Heatmaps (live) and session recordings (coming soon) are on paid plans only (Starter and up). Coming soon means planned, not shipped. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
                 </section>
 
                 <section className="mt-16 rounded-2xl border border-teal-200 bg-teal-50/60 p-7">
