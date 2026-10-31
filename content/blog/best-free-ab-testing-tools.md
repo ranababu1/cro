@@ -3,7 +3,7 @@ title: "Best free A/B testing tools in 2026, compared honestly"
 meta_description: "A free-forever A/B testing plan at freeabtest.com versus VWO, Convert, Optimizely, Crazy Egg and other paid tools. Prices checked 15 Oct 2026."
 slug: best-free-ab-testing-tools
 date: 2026-10-15
-updated: 2026-10-21
+updated: 2026-10-31
 author: "Imraan, freeabtest.com"
 keywords:
   - free a/b testing tool
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 15 October 2026. Updated 21 October 2026. Competitor prices were checked on each vendor's pricing page on 15 October 2026. freeabtest.com features below match the live product as of 19 October 2026.
+By Imraan, freeabtest.com. Published 15 October 2026. Updated 31 October 2026. Competitor prices were checked on each vendor's pricing page on 15 October 2026. freeabtest.com features below match the live product as of 19 October 2026.
 
 The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
 
@@ -85,7 +85,7 @@ This is our product, so here is what it does today. Plan limits match our [prici
 
 ### What every plan includes
 
-- A/B tests and split URL tests, set up with a JavaScript snippet of under 30 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
+- A/B tests and [split URL tests](https://www.freeabtest.com/blog/split-url-testing), set up with a JavaScript snippet of under 30 KB gzipped (install guides for Google Tag Manager and WordPress are in the docs)
 - Sticky assignment: each visitor ID is hashed with the experiment ID, so the same visitor always sees the same variant. You can change the traffic split on a running test; visitors already in the test keep their variant (our guide to [running an A/B test with plain JavaScript](/blog/ab-test-javascript) shows how that hashing works)
 - Click goals by CSS selector. Paid plans add page visit, form submit and custom event goals, more goals per test, and conversions you send from your own code
 - Targeting by device, UTM, referrer and new or returning visitors

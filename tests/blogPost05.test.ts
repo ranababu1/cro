@@ -10,7 +10,8 @@ describe('post: Google Optimize alternatives for developers in 2026', () => {
     it('exists, dated 23 October 2026, with BlogPosting, ItemList, BreadcrumbList and FAQPage JSON-LD', () => {
         expect(p).toBeTruthy();
         expect(p.date).toBe('2026-10-23');
-        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', dateModified: '2026-10-23', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!).dateModified >= '2026-10-23').toBe(true);
         expect(JSON.parse(p.itemListSchema!)).toMatchObject({ '@type': 'ItemList', numberOfItems: 7 });
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);

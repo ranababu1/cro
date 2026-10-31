@@ -127,6 +127,8 @@ Blog post 04 (plain JavaScript A/B test) published (21 Oct 2026).
 
 Blog posts 05 to 08 published (23 to 29 Oct 2026); post 08 covers split URL testing.
 
+Blog post 09 (25 A/B test ideas for SaaS landing pages) published (31 Oct 2026); posts 01, 04 and 05 link to post 08.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
