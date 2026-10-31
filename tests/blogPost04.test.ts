@@ -8,7 +8,8 @@ describe('post: How to run an A/B test with plain JavaScript', () => {
     it('exists, dated 21 October 2026, with BlogPosting, BreadcrumbList, HowTo and FAQPage JSON-LD', () => {
         expect(p).toBeTruthy();
         expect(p.date).toBe('2026-10-21');
-        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', dateModified: '2026-10-21', mainEntityOfPage: 'https://www.freeabtest.com/blog/ab-test-javascript' });
+        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', mainEntityOfPage: 'https://www.freeabtest.com/blog/ab-test-javascript' });
+        expect(JSON.parse(p.articleSchema!).dateModified >= '2026-10-21').toBe(true);
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.howtoSchema!)).toMatchObject({ '@type': 'HowTo' });
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(5);

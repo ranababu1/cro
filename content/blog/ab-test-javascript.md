@@ -3,7 +3,7 @@ title: "How to run an A/B test with plain JavaScript"
 meta_description: "Build a client-side A/B test in plain JavaScript: hash a stored visitor ID, show the variant without flicker, log conversions. Tested code and pitfalls."
 slug: ab-test-javascript
 date: 2026-10-21
-updated: 2026-10-21
+updated: 2026-10-31
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test javascript", "javascript split test", "ab testing without framework", "client side ab test", "deterministic bucketing javascript"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How to run an A/B test with plain JavaScript",
     "datePublished": "2026-10-21",
-    "dateModified": "2026-10-21",
+    "dateModified": "2026-10-31",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-javascript",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -62,7 +62,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 21 October 2026. Updated 21 October 2026.
+By Imraan, freeabtest.com. Published 21 October 2026. Updated 31 October 2026.
 
 To run an A/B test with plain JavaScript, give each visitor a random ID stored in localStorage, hash that ID together with the test name to pick a variant, and apply the variant from a small inline script in the `<head>` so the page never flickers. Then log one exposure per page view and any conversions, check that traffic split the way you set it, and compare conversion rates at a sample size you chose before launch.
 
@@ -230,7 +230,7 @@ This is where homemade tests stop being cheap. The assignment code is short; the
 
 ## How do you run the same test with freeabtest.com?
 
-On freeabtest.com, the same test is a split URL test: your current page is the control, and the variant lives at its own URL, such as `/pricing-b`. Add one line to the `<head>` of both pages, copied from the app with your public key already filled in:
+On freeabtest.com, the same test is a [split URL test](https://www.freeabtest.com/blog/split-url-testing): your current page is the control, and the variant lives at its own URL, such as `/pricing-b`. Add one line to the `<head>` of both pages, copied from the app with your public key already filled in:
 
 ```html
 <script src="https://www.freeabtest.com/sdk.js" data-key="cro_pk_prod_..." async></script>

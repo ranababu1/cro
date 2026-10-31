@@ -3,7 +3,7 @@ title: "Google Optimize alternatives for developers in 2026"
 meta_description: "Google Optimize shut down on 30 Sept 2023. Free and paid replacements for developers, how each connects to GA4, and prices checked 23 October 2026."
 slug: google-optimize-alternatives-developers
 date: 2026-10-23
-updated: 2026-10-23
+updated: 2026-10-31
 author: "Imraan, freeabtest.com"
 keywords: ["google optimize alternative free", "google optimize replacement", "optimize sunset alternative", "google optimize alternative ga4", "experience_impression ga4"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "Google Optimize alternatives for developers in 2026",
     "datePublished": "2026-10-23",
-    "dateModified": "2026-10-23",
+    "dateModified": "2026-10-31",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/google-optimize-alternatives-developers",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -65,7 +65,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 23 October 2026. Prices checked 23 October 2026.
+By Imraan, freeabtest.com. Published 23 October 2026. Prices checked 23 October 2026. Updated 31 October 2026.
 
 Google Optimize and Optimize 360 shut down on 30 September 2023, and Google did not replace them with a testing tool inside GA4: it now points to third-party A/B testing tools that send their data to Google Analytics. For developers who want a $0 plan with no end date, freeabtest.com Free runs one A/B test at a time on up to 10,000 tested visitors a month and sends a GA4 event on every plan, while the paid alternatives that publish prices start at $99 a month (Crazy Egg, billed annually) and go up to $495 a month (Kameleoon).
 
@@ -148,7 +148,7 @@ Our sequential test can need 2 to 3 times as many visitors for the same observed
 
 ## How do you move an Optimize-style test to freeabtest.com?
 
-Rebuild the test as a split URL test: your current page is the control and the variant has its own URL.
+Rebuild the test as a [split URL test](https://www.freeabtest.com/blog/split-url-testing): your current page is the control and the variant has its own URL.
 
 1. **Add the snippet** to the `<head>` of both pages, copied from the app with your public key filled in:
 
@@ -173,7 +173,7 @@ ABTest.bootstrap().then(function (r) {
 });
 ```
 
-The snippet hides the page for at most 0.8 seconds while it decides, so visitors do not see the original first. To write the whole test yourself, see our guide to [running an A/B test with plain JavaScript](https://www.freeabtest.com/blog/ab-test-javascript). A guide to sending A/B test data to GA4 and one on split URL testing are planned.
+The snippet hides the page for at most 0.8 seconds while it decides, so visitors do not see the original first. To write the whole test yourself, see our guide to [running an A/B test with plain JavaScript](https://www.freeabtest.com/blog/ab-test-javascript). A guide to sending A/B test data to GA4 is planned.
 
 ## Where are the paid alternatives stronger?
 

@@ -76,6 +76,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 ## Blog posts from the content store
 - Before replacing a live post with a store copy, diff the two. Store copies can miss edits made only in the repo (for example the links from posts 02 and 03 to post 04); keep those and apply only the requested change.
 - Check product claims in a new post against the code (lib/plans.ts, sdk-src/sdk.js, lib/docs/content) and add tests/blogPostNN.test.ts. Date pins on older posts use >= so later updates do not break them.
+- Store copies can also predate repo-side content changes (for example PR #110 removed roadmap and phase wording from posts 01, 04 and 05). Apply only the requested edits to the live file; never bring back /roadmap links or phase wording from a store copy.
 
 ## Experiment management
 - Archived tests (`experiments.archived_at` set) must never be served. Any new SDK, server or schedule path that reads tests must skip them, like `getRunningConfig`, `getRolloutConfig`, `getDueSchedules`, `rolloutVariation`, `checkEvent` and `previewBlocker`. Archive is a flag, not a status: the status stays paused or completed.
