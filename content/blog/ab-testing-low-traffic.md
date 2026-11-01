@@ -3,7 +3,7 @@ title: "A/B testing with low traffic: what you can and can't learn"
 meta_description: "With under 10,000 monthly visitors, a 4-week A/B test can only detect lifts of about 36% or more on a 3% conversion rate. Here is what to do instead."
 slug: ab-testing-low-traffic
 date: 2026-10-19
-updated: 2026-10-29
+updated: 2026-11-01
 author: "Imraan, freeabtest.com"
 keywords: ["a/b testing low traffic", "ab testing small website", "minimum traffic for ab testing", "ab test small sample size", "low traffic conversion optimization"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B testing with low traffic: what you can and can't learn",
     "datePublished": "2026-10-19",
-    "dateModified": "2026-10-29",
+    "dateModified": "2026-11-01",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-testing-low-traffic",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 19 October 2026. Updated 29 October 2026. Sources checked 19 October 2026.
+By Imraan, freeabtest.com. Published 19 October 2026. Updated 1 November 2026. Sources checked 19 October 2026.
 
 With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference." Our guide to [what statistical significance means in an A/B test](https://www.freeabtest.com/blog/statistical-significance-ab-test) shows why "not significant" usually means "not enough data to tell" rather than "no effect".
 
@@ -107,7 +107,7 @@ Changes more likely to produce large effects:
 - A different offer: a free plan instead of a trial, monthly instead of annual by default
 - A page built around a different structure, tested as a split URL test (one URL per variant)
 
-Bigger changes have a cost. When a big redesign wins, you know the package worked, but not which part of it did. On a small site, that is usually an acceptable trade. Learning that the new page is clearly better is worth more than learning nothing about five small tweaks.
+Bigger changes have a cost. When a big redesign wins, you know the package worked, but not which part of it did. On a small site, that is usually an acceptable trade. Learning that the new page is clearly better is worth more than learning nothing about five small tweaks. For 25 specific tests ranked by the traffic each needs, see our list of [A/B test ideas for SaaS landing pages](https://www.freeabtest.com/blog/ab-test-ideas-saas-landing-pages).
 
 ## Tactic 3: Run fewer variants
 

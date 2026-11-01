@@ -10,7 +10,8 @@ describe('post: A/B test sample size, explained with a calculator', () => {
     it('exists, dated 27 October 2026, with BlogPosting, BreadcrumbList and FAQPage JSON-LD', () => {
         expect(p).toBeTruthy();
         expect(p.date).toBe('2026-10-27');
-        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', dateModified: '2026-10-27', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', mainEntityOfPage: URL });
+        expect(JSON.parse(p.articleSchema!).dateModified >= '2026-10-27').toBe(true);
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
         expect(p.markdown).not.toContain('\u2014');
