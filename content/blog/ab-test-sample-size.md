@@ -3,7 +3,7 @@ title: "A/B test sample size, explained with a calculator"
 meta_description: "How many visitors an A/B test needs: about 13,914 per version for a 20% lift on a 3% rate. See how each input changes it, with tables and a free calculator."
 slug: ab-test-sample-size
 date: 2026-10-27
-updated: 2026-10-27
+updated: 2026-11-01
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test sample size calculator", "sample size for ab test", "minimum detectable effect", "ab test sample size formula", "how many visitors for an ab test"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B test sample size, explained with a calculator",
     "datePublished": "2026-10-27",
-    "dateModified": "2026-10-27",
+    "dateModified": "2026-11-01",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-sample-size",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -48,7 +48,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 27 October 2026.
+By Imraan, freeabtest.com. Published 27 October 2026. Updated 1 November 2026.
 
 An A/B test needs about 13,914 visitors per version to detect a 20% relative lift on a 3% conversion rate, at 95% confidence and 80% power, so about 27,828 visitors for a plain A/B test. The smallest lift you want to detect matters more than any other input: halving it from 20% to 10% multiplies the sample by about 3.8, to 53,211 per version.
 
@@ -183,7 +183,7 @@ Turn the question around when traffic is fixed. Here is the smallest relative li
 | 25,000 | 50,000 | 10.3% | 7.9% | 5.4% |
 | 50,000 | 100,000 | 7.2% | 5.5% | 3.8% |
 
-If your page gets 2,500 visitors a week and converts at 3%, a 4-week test can only reliably catch a lift of about 34%. Button color tweaks will not get there. A new offer, a rewritten headline or a shorter form might.
+If your page gets 2,500 visitors a week and converts at 3%, a 4-week test can only reliably catch a lift of about 34%. Button color tweaks will not get there. A new offer, a rewritten headline or a shorter form might. Our list of [A/B test ideas for SaaS landing pages](https://www.freeabtest.com/blog/ab-test-ideas-saas-landing-pages) ranks 25 tests by the visitors each one needs.
 
 The same math applies to plan limits. Our [free plan](https://www.freeabtest.com/pricing) allows up to 10,000 tested visitors a month and 300 a day. At the daily cap, 4 weeks gives 8,400 tested visitors, or 4,200 per version, enough to detect a lift of about 38% at a 3% baseline or 19% at a 10% baseline. Starter at $10 a month raises the limit to 250,000 tested visitors. For small sites, our guide to [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) covers what else you can learn.
 
