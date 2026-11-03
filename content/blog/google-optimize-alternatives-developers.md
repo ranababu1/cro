@@ -65,8 +65,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 23 October 2026. Prices checked 23 October 2026. Updated 31 October 2026.
-
 Google Optimize and Optimize 360 shut down on 30 September 2023, and Google did not replace them with a testing tool inside GA4: it now points to third-party A/B testing tools that send their data to Google Analytics. For developers who want a $0 plan with no end date, freeabtest.com Free runs one A/B test at a time on up to 10,000 tested visitors a month and sends a GA4 event on every plan, while the paid alternatives that publish prices start at $99 a month (Crazy Egg, billed annually) and go up to $495 a month (Kameleoon).
 
 We make freeabtest.com, so weigh our view with that in mind. Where another tool is stronger, we say so. Every price below comes from the vendor's own pricing page, checked on 23 October 2026.

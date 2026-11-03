@@ -48,8 +48,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 27 October 2026. Updated 3 November 2026.
-
 An A/B test needs about 13,914 visitors per version to detect a 20% relative lift on a 3% conversion rate, at 95% confidence and 80% power, so about 27,828 visitors for a plain A/B test. The smallest lift you want to detect matters more than any other input: halving it from 20% to 10% multiplies the sample by about 3.8, to 53,211 per version.
 
 This article explains each input to a sample size calculator, shows how much each one moves the answer, and gives you a short calculator in JavaScript that you can paste into your browser console. Every number here comes from a Python script we ran with SciPy, using the standard two-proportion formula, the same one behind [Evan Miller's sample size calculator](https://www.evanmiller.org/ab-testing/sample-size.html) and the planning table in our [guide to reading results](https://www.freeabtest.com/docs/results). Our docs table lands within 2 visitors of these figures because of rounding in the z values.

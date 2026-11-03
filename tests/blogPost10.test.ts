@@ -75,7 +75,7 @@ describe('post: the peeking problem, why daily checks create false winners', () 
             expect(post.markdown).toContain(`](${IDEAS})`);
             expect(post.updated >= '2026-11-01').toBe(true);
             expect(JSON.parse(post.articleSchema!).dateModified >= '2026-11-01').toBe(true);
-            expect(post.markdown).toMatch(/Updated \d+ [A-Z][a-z]+ \d{4}\./);
+            expect(post.markdown).not.toMatch(/^By Imraan, freeabtest\.com\./m);
             expect(post.markdown).not.toMatch(/\/roadmap|\bPhase \d/);
         }
         expect(getPost('ab-testing-low-traffic')!.markdown).toContain('](/blog/ab-test-javascript)');

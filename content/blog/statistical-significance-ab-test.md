@@ -48,8 +48,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 25 October 2026. Updated 3 November 2026.
-
 A statistically significant A/B test result means the gap between your versions is larger than chance would usually produce if they really converted at the same rate. At the standard 5% level, it does not mean there is a 95% chance your variant is better, and it says nothing about whether the lift is big enough to ship.
 
 That gap between what significance sounds like and what it says is where most bad test decisions start. This article explains the idea in plain terms, then shows what it looks like with real numbers. We ran every calculation ourselves in Python with NumPy and SciPy (the script is described at the end), using a two-proportion z-test, the same test most A/B calculators use for a single look at the data.
@@ -189,7 +187,7 @@ Treat significance as one gate out of several. A sequence that works:
 4. **Read the interval for the lift.** Ask whether the low end is still worth shipping. A significant result with an interval from 0.01 to 0.11 points may not cover the cost of the change.
 5. **Be stricter with surprises.** A lift far larger than anything you have seen before is more likely to be a bug or a fluke. Rerun it.
 
-Here is how much the interval matters. With 1,000,000 visitors per version, 3.00% against 3.06% gives p = 0.013, which is significant. The interval for the gap runs from 0.01 to 0.11 points. Whether that is worth anything depends on your revenue per conversion, not on the p-value. A separate article on reading confidence intervals instead of a single winner number is planned.
+Here is how much the interval matters. With 1,000,000 visitors per version, 3.00% against 3.06% gives p = 0.013, which is significant. The interval for the gap runs from 0.01 to 0.11 points. Whether that is worth anything depends on your revenue per conversion, not on the p-value. For a full walkthrough, see [how to read a confidence interval in an A/B test](/blog/confidence-interval-ab-test).
 
 When you are ready to try it, the [quick start](https://www.freeabtest.com/docs/quick-start) takes you from sign-in to a running test in about 15 minutes.
 

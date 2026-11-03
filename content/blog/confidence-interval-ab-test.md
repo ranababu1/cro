@@ -48,8 +48,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 3 November 2026. Sources checked 3 November 2026.
-
 A confidence interval shows the range of effects your data can support, and a single winner number hides that range. A test that reads +20% on 10,000 visitors per version is consistent with a true lift anywhere from 3% to 40%, and which end is true changes whether the change is worth shipping.
 
 Here I explain how to read an interval, how to calculate one for the lift between two versions, and where intervals mislead. Every number below comes from our own calculations in Python with NumPy and SciPy, and the method is described at the end. A confidence interval is a range of values calculated from your data so that, if you repeated the test many times, 95% of the ranges built this way would contain the true value.

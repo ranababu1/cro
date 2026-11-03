@@ -39,7 +39,7 @@ describe('post: A/B test sample size, explained with a calculator', () => {
             expect(post.markdown).toContain(`](${SIG})`);
             expect(post.updated >= '2026-10-27').toBe(true);
             expect(JSON.parse(post.articleSchema!).dateModified >= '2026-10-27').toBe(true);
-            expect(post.markdown).toMatch(/Updated \d+ [A-Z][a-z]+ \d{4}\./);
+            expect(post.markdown).not.toMatch(/^By Imraan, freeabtest\.com\./m);
         }
     });
 });

@@ -64,8 +64,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 29 October 2026. Product details checked 29 October 2026.
-
 A split URL test sends some of the visitors who open your original page to a second URL, then compares conversions on the two pages. To run one without a plugin, you need one inline script in the `<head>` of both pages that gives each visitor a stable ID, sends the variant group to the new URL with a temporary redirect that keeps the query string, and logs which page each visitor actually saw.
 
 This guide gives you that script, the SEO rules Google publishes for redirect tests, and the check that catches the most common split URL bug: visitors lost in the redirect. We tested the script in Node against a stubbed browser and ran the statistics in Python with SciPy. Both files are named in the note at the end, and every input is stated so you can check any number.

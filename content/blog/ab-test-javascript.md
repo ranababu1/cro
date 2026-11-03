@@ -62,8 +62,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 21 October 2026. Updated 3 November 2026.
-
 To run an A/B test with plain JavaScript, give each visitor a random ID stored in localStorage, hash that ID together with the test name to pick a variant, and apply the variant from a small inline script in the `<head>` so the page never flickers. Then log one exposure per page view and any conversions, check that traffic split the way you set it, and compare conversion rates at a sample size you chose before launch.
 
 The code is about 50 lines, and we ran it in Node against 100,000 simulated visitors to check the split. The harder part of a client-side A/B test is everything around the code: bots, broken splits, peeking and statistics.
