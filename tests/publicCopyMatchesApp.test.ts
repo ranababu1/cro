@@ -30,7 +30,8 @@ describe('public copy matches what the app enforces', () => {
         expect(cards).toContain("{ name: 'Free', monthly: 0, yearly: 0, body: 'For side projects and trying it out.'");
         expect(cards).toContain("'Free forever, no card'");
         expect(cards).toContain('<a href="#compare"');
-        expect(cards).toContain('See all plan limits');
+        expect(cards).toContain('>See all plan details</a>');
+        expect(cards).not.toMatch(/see all plan limits/i);
         expect(pricing).toContain('<section id="compare"');
     });
 

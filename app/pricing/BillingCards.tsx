@@ -42,7 +42,7 @@ export function BillingCards() {
                             <ul className="mt-4 flex-1 space-y-1.5 text-sm leading-5 text-zinc-700" data-testid={`plan-${t.name.toLowerCase()}-limits`}>
                                 {highlights[t.name].map((i) => <li key={i} className="flex gap-2"><span className="text-teal-600" aria-hidden>✓</span>{i}</li>)}
                             </ul>
-                            <a href="#compare" className="mt-4 text-sm font-medium text-blue-700 hover:underline">See all plan limits</a>
+                            <a href="#compare" className="mt-4 text-sm font-medium text-blue-700 hover:underline">See all plan details</a>
                             <Link href={t.href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold ${t.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-zinc-300 text-zinc-900 hover:bg-zinc-50'}`}>{t.cta}</Link>
                         </div>
                     );
