@@ -78,6 +78,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Check product claims in a new post against the code (lib/plans.ts, sdk-src/sdk.js, lib/docs/content) and add tests/blogPostNN.test.ts. Date pins on older posts use >= so later updates do not break them.
 - Store copies can also predate repo-side content changes (for example PR #110 removed roadmap and phase wording from posts 01, 04 and 05). Apply only the requested edits to the live file; never bring back /roadmap links or phase wording from a store copy.
 - When a post reports simulation results, re-run them with a few seeds before publishing, and check any sentence about how the product's test is tuned against lib/sequential.ts (TAU_RELATIVE, SEQUENTIAL_MIN_VISITORS). Do not publish the internal tuning values.
+- When a post describes what the results screen shows, check app/(app)/experiments/[id]/page.tsx and LiveStats.tsx, not only the docs: the goals table shows an uplift interval that the docs do not mention.
 
 ## Experiment management
 - Archived tests (`experiments.archived_at` set) must never be served. Any new SDK, server or schedule path that reads tests must skip them, like `getRunningConfig`, `getRolloutConfig`, `getDueSchedules`, `rolloutVariation`, `checkEvent` and `previewBlocker`. Archive is a flag, not a status: the status stays paused or completed.

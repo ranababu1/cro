@@ -3,7 +3,7 @@ title: "A/B test sample size, explained with a calculator"
 meta_description: "How many visitors an A/B test needs: about 13,914 per version for a 20% lift on a 3% rate. See how each input changes it, with tables and a free calculator."
 slug: ab-test-sample-size
 date: 2026-10-27
-updated: 2026-11-01
+updated: 2026-11-03
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test sample size calculator", "sample size for ab test", "minimum detectable effect", "ab test sample size formula", "how many visitors for an ab test"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B test sample size, explained with a calculator",
     "datePublished": "2026-10-27",
-    "dateModified": "2026-11-01",
+    "dateModified": "2026-11-03",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-sample-size",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -48,7 +48,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 27 October 2026. Updated 1 November 2026.
+By Imraan, freeabtest.com. Published 27 October 2026. Updated 3 November 2026.
 
 An A/B test needs about 13,914 visitors per version to detect a 20% relative lift on a 3% conversion rate, at 95% confidence and 80% power, so about 27,828 visitors for a plain A/B test. The smallest lift you want to detect matters more than any other input: halving it from 20% to 10% multiplies the sample by about 3.8, to 53,211 per version.
 
@@ -244,7 +244,7 @@ If you use freeabtest.com, the Test planner in the dashboard does the same job o
 
 ## How does sample size work with a peeking-safe test?
 
-The formula above assumes you look at the result once, at the planned end. If you check a standard z-test every day and stop at the first significant reading, false winners become far more common. Our article on [what statistical significance means](https://www.freeabtest.com/blog/statistical-significance-ab-test) shows how this happens.
+The formula above assumes you look at the result once, at the planned end. If you check a standard z-test every day and stop at the first significant reading, [false winners become far more common](https://www.freeabtest.com/blog/ab-test-peeking-problem). Our article on [what statistical significance means](https://www.freeabtest.com/blog/statistical-significance-ab-test) shows how this happens.
 
 freeabtest.com runs a peeking-safe sequential test (a mixture sequential probability ratio test) on every plan. Its p-value stays valid however often you look, so you can stop the moment the verdict is significant. The cost, as our [guide to reading results](https://www.freeabtest.com/docs/results) states, is that the sequential test needs about 2 to 3 times as many visitors for the same observed lift. The other side is that it can stop earlier when the real lift is bigger than your MDE.
 

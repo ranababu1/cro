@@ -270,7 +270,7 @@ Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with
 
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
 
-Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Ten posts live (2026-11-01).
+Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Eleven posts live (2026-11-03).
 
 Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.
 
@@ -357,6 +357,9 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 
 ## Blog post 10 (2026-11-01)
 - content/blog/ab-test-peeking-problem.md, from the content store with three small wording fixes (see changelog). Explains peeking with re-run simulations (A/A false winners 5% with one look to about 48% hourly, inflated lifts from early stops, Pocock and O'Brien-Fleming bars, an mSPRT checked hourly) and describes the shipped statistics (mSPRT at 5% with a Bonferroni split, 100-visitor floor, Wilson intervals, fixed-sample z-test only in the results API). tests/blogPost10.test.ts. Posts 03 and 07 link to post 09 (ab-test-ideas-saas-landing-pages) and show Updated 1 November 2026.
+
+## Blog post 11 (2026-11-03)
+- content/blog/confidence-interval-ab-test.md, from the content store with one fix (see changelog). Explains confidence intervals for conversion rates and lift (Wilson, Newcombe hybrid score, Katz log ratio) with a Node-runnable function, coverage, overlap and early-stop simulations, and a ship decision table. Describes the shipped results: Wilson interval per rate, the goals table's uplift interval, single-figure lift and chance to beat control in the detailed table. tests/blogPost11.test.ts. Posts 02, 04, 06 and 07 link to post 10 (ab-test-peeking-problem) and show Updated 3 November 2026.
 
 ## Experiment management (2026-10-29)
 - Migration 0042_experiment_manage: experiments.hypothesis, expected_outcome (text, up to 2,000 characters), tags (JSON list, up to 10, each up to 30 characters, lower case, letters, digits, spaces and - _ . /), archived_at; index idx_audit_entity_created on audit_log(entity_id, created_at). Helpers in lib/experimentManage.ts.

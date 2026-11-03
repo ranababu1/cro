@@ -3,7 +3,7 @@ title: "How to run an A/B test with plain JavaScript"
 meta_description: "Build a client-side A/B test in plain JavaScript: hash a stored visitor ID, show the variant without flicker, log conversions. Tested code and pitfalls."
 slug: ab-test-javascript
 date: 2026-10-21
-updated: 2026-10-31
+updated: 2026-11-03
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test javascript", "javascript split test", "ab testing without framework", "client side ab test", "deterministic bucketing javascript"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How to run an A/B test with plain JavaScript",
     "datePublished": "2026-10-21",
-    "dateModified": "2026-10-31",
+    "dateModified": "2026-11-03",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-javascript",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -62,7 +62,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 21 October 2026. Updated 31 October 2026.
+By Imraan, freeabtest.com. Published 21 October 2026. Updated 3 November 2026.
 
 To run an A/B test with plain JavaScript, give each visitor a random ID stored in localStorage, hash that ID together with the test name to pick a variant, and apply the variant from a small inline script in the `<head>` so the page never flickers. Then log one exposure per page view and any conversions, check that traffic split the way you set it, and compare conversion rates at a sample size you chose before launch.
 
@@ -214,7 +214,7 @@ The code above is the easy part. These are the common problems, with a fix for e
 
 **Sample ratio mismatch (SRM)** is a gap between the split you set and the split you got that is too large to be chance. Our script ran a chi-square check on 50/50 splits: 10,000 vs 9,900 gives p = 0.48 (fine), 10,000 vs 9,700 gives p = 0.03 (suspicious), and 5,500 vs 4,500 gives p below 0.0001 (broken). Usual causes are a variant that errors before logging its exposure, or a redirect that loses visitors. Chapter 21 of Kohavi, Tang and Xu covers SRM, and so will our planned article on sample ratio mismatch.
 
-**Peeking** is checking a fixed-sample test repeatedly and stopping the first time it looks significant. In our simulation for [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test), checking a classic z-test daily for 20 days gave a false winner 24.5% of the time instead of about 5%. That article also shows how to set the sample size. On a small site, read [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) before you write any code.
+**Peeking** is checking a fixed-sample test repeatedly and stopping the first time it looks significant. In our simulation for [how long to run an A/B test](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test), checking a classic z-test daily for 20 days gave a false winner 24.5% of the time instead of about 5%. Our article on [the peeking problem](https://www.freeabtest.com/blog/ab-test-peeking-problem) goes further: checking every hour gave 48.4%. The test duration article also shows how to set the sample size. On a small site, read [A/B testing with low traffic](https://www.freeabtest.com/blog/ab-testing-low-traffic) before you write any code.
 
 
 ## How do you read the result of a JavaScript A/B test?
