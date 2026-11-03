@@ -91,6 +91,6 @@ describe('post: How to run a split URL test without a plugin', () => {
             expect(post.updated >= '2026-10-29').toBe(true);
             expect(JSON.parse(post.articleSchema!).dateModified >= '2026-10-29').toBe(true);
         }
-        expect(getPost('statistical-significance-ab-test')!.markdown).toContain('Published 25 October 2026. Updated 29 October 2026.');
+        expect(getPost('statistical-significance-ab-test')!.markdown).toMatch(/Published 25 October 2026\. Updated \d+ [A-Z][a-z]+ 2026\./);
     });
 });

@@ -3,7 +3,7 @@ title: "How long should you run an A/B test? Worked examples"
 meta_description: "Run an A/B test until it reaches its planned sample size, in whole weeks, and for at least 2 weeks. Worked examples for 1,000 to 50,000 weekly visitors."
 slug: how-long-to-run-an-ab-test
 date: 2026-10-17
-updated: 2026-10-29
+updated: 2026-11-03
 author: "Imraan, freeabtest.com"
 keywords: ["how long to run an a/b test", "a/b test duration", "ab test sample size", "when to stop an ab test", "minimum detectable effect"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How long should you run an A/B test? Worked examples",
     "datePublished": "2026-10-17",
-    "dateModified": "2026-10-29",
+    "dateModified": "2026-11-03",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/how-long-to-run-an-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Updated 29 October 2026.
+By Imraan, freeabtest.com. Published 17 October 2026. Updated 3 November 2026.
 
 Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
@@ -138,7 +138,7 @@ With a **standard fixed-sample z-test**, checking again and again and stopping t
 | Once, on day 20 | 4.7% |
 | Every day, stopping at the first p < 0.05 | 24.5% |
 
-Checking daily made a false winner about 5 times more likely. On a fixed-sample test, the 5% error rate you think you chose only holds if you look once, at the planned end.
+Checking daily made a false winner about 5 times more likely. On a fixed-sample test, the 5% error rate you think you chose only holds if you look once, at the planned end. Our article on [the peeking problem](https://www.freeabtest.com/blog/ab-test-peeking-problem) repeats the simulation with other check schedules and shows how peeking also inflates the reported lift.
 
 **freeabtest.com uses a peeking-safe sequential test** (a mixture sequential probability ratio test) on every plan, including Free. Its p-value stays valid however often you look, so you can check the dashboard and stop when the sequential verdict is significant. Chance to beat control also appears once each version has 100 visitors. Two habits still help: run for at least one full week so weekday and weekend visitors are both included, and pick the primary goal before you start.
 

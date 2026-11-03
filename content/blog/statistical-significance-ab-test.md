@@ -3,7 +3,7 @@ title: "What statistical significance means in an A/B test"
 meta_description: "A significant A/B test result means a gap this big would be rare if the versions converted the same. What a p-value tells you, what it doesn't, with examples."
 slug: statistical-significance-ab-test
 date: 2026-10-25
-updated: 2026-10-29
+updated: 2026-11-03
 author: "Imraan, freeabtest.com"
 keywords: ["statistical significance a/b test", "p value ab test", "ab test significance explained", "what does 95% significance mean", "false positive risk"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "What statistical significance means in an A/B test",
     "datePublished": "2026-10-25",
-    "dateModified": "2026-10-29",
+    "dateModified": "2026-11-03",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/statistical-significance-ab-test",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -48,7 +48,7 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 25 October 2026. Updated 29 October 2026.
+By Imraan, freeabtest.com. Published 25 October 2026. Updated 3 November 2026.
 
 A statistically significant A/B test result means the gap between your versions is larger than chance would usually produce if they really converted at the same rate. At the standard 5% level, it does not mean there is a 95% chance your variant is better, and it says nothing about whether the lift is big enough to ship.
 
@@ -152,7 +152,7 @@ About 5% of the time at a 5% threshold, if you look once. We simulated 10,000 A/
 
 The p-values were spread evenly from 0 to 1, which is what a correct test produces when there is no effect. That 5% only holds under two conditions.
 
-**You look once.** With a fixed-sample z-test, checking every day and stopping at the first p below 0.05 inflates false winners. In our [test duration simulation](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test), daily checks over 20 days pushed the false winner rate from 4.7% to 24.5%. A separate article on the peeking problem is planned.
+**You look once.** With a fixed-sample z-test, checking every day and stopping at the first p below 0.05 inflates false winners. In our [test duration simulation](https://www.freeabtest.com/blog/how-long-to-run-an-ab-test), daily checks over 20 days pushed the false winner rate from 4.7% to 24.5%. Our article on [the peeking problem](https://www.freeabtest.com/blog/ab-test-peeking-problem) measures how far false winners rise with weekly, daily and hourly checks.
 
 **You test one comparison.** Each extra variant is another chance to find a false winner. Without a correction, the chance that at least one of several variants "beats" an identical control by luck grows quickly:
 
