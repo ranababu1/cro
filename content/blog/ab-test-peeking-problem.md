@@ -3,7 +3,7 @@ title: "The peeking problem: why daily checks create false winners"
 meta_description: "Checking an A/B test daily and stopping at the first p < 0.05 turned 5% false winners into 27% in our simulation. Why peeking breaks tests, and 3 safe fixes."
 slug: ab-test-peeking-problem
 date: 2026-11-01
-updated: 2026-11-01
+updated: 2026-11-03
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test peeking", "peeking problem", "stopping ab test early", "optional stopping", "sequential testing ab test", "checking ab test results daily"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "The peeking problem: why daily checks create false winners",
     "datePublished": "2026-11-01",
-    "dateModified": "2026-11-01",
+    "dateModified": "2026-11-03",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-peeking-problem",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -47,8 +47,6 @@ faq_schema: |
     ]
   }
 ---
-
-By Imraan, freeabtest.com. Published 1 November 2026. Sources checked 1 November 2026.
 
 Peeking is checking a fixed-sample A/B test before it ends and stopping as soon as it looks significant, and it turns a 5% false winner rate into something far higher. In our simulation of 10,000 tests where both versions were identical, checking a standard z-test once a day for 4 weeks and stopping at the first p below 0.05 declared a winner 27.4% of the time, against 5.1% for a single look at the end.
 
@@ -166,7 +164,7 @@ The other rules on the results page:
 
 - **100-visitor minimum.** Significance is only tested once every variation has at least 100 visitors. Until then the dashboard shows "Collecting data".
 - **Bonferroni correction.** With several variants, a result is significant when p is below 0.05 divided by the number of variants compared with the control.
-- **Wilson intervals.** Each conversion rate shows a 95% Wilson score interval, so you can see how wide the plausible range still is.
+- **Wilson intervals.** Each conversion rate shows a 95% Wilson score interval, so you can see how wide the plausible range still is. Our guide to [reading confidence intervals in an A/B test](/blog/confidence-interval-ab-test) covers how to use that range.
 - **Fixed-sample z-test on request.** The results API still returns a classic z-test under `statistical_significance` if you plan a single look in advance.
 
 The cost is the one shown above. Our docs say the sequential test needs about 2 to 3 times as many visitors for the same observed lift, and it can stop sooner when the real lift is larger than you planned for. The Test planner, on every plan, shows the fixed-sample estimate and that range. Our simulation does not replace those numbers.

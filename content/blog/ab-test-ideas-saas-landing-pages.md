@@ -83,8 +83,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 31 October 2026.
-
 The SaaS landing page tests that need the least traffic are big changes measured on a click close to the change: rewriting the headline around one outcome, measured on clicks of the main button, needs about 4,552 visitors in total to detect a 30% lift on an 8% click rate. A button color change measured the same way needs about 147,706 visitors to detect a 5% lift, so most small sites should skip it.
 
 Most lists of A/B test ideas treat every idea as equal. They are not. The visitors a test needs depend on two things: how often the goal happens, and how big a change the idea can plausibly make. Below are 25 ideas for a SaaS landing page, ranked from the fewest visitors needed to the most, with the numbers we calculated for each and the plan limits that apply if you run them on freeabtest.com.

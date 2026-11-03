@@ -46,8 +46,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 19 October 2026. Updated 1 November 2026. Sources checked 19 October 2026.
-
 With low traffic, an A/B test can only detect large effects. A site sending 10,000 visitors a month to a page that converts at 3% can, in a 4-week test, reliably detect only a lift of about 36% or more (3.0% to about 4.1%). Smaller real improvements will usually look like "no significant difference." Our guide to [what statistical significance means in an A/B test](https://www.freeabtest.com/blog/statistical-significance-ab-test) shows why "not significant" usually means "not enough data to tell" rather than "no effect".
 
 That does not mean small sites should never test. It means they should test differently: bigger changes, more frequent goals, longer tests, and a clear idea in advance of what the test can and cannot tell them. This article gives the numbers, then the tactics.

@@ -46,8 +46,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 17 October 2026. Updated 3 November 2026.
-
 Plan an A/B test with a sample size calculated before launch, rounded up to whole weeks, and run it for at least 2 weeks. With a fixed-sample test, wait until that sample is reached before deciding. With freeabtest.com's peeking-safe sequential test, you can stop earlier once the verdict is significant, but still plan with a sample-size estimate and keep a one-week floor. To get a planning estimate in weeks, divide the total visitors the test needs by the weekly visitors to the page you are testing.
 
 That answer hides one hard part: working out the sample size. This article does it step by step, with numbers you can check. All calculations use the standard two-proportion sample size formula at 95% confidence (two-sided) and 80% power, the same defaults as [Evan Miller's sample size calculator](https://www.evanmiller.org/ab-testing/sample-size.html). We ran them ourselves in Python with SciPy, using this formula for visitors per variant:

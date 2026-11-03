@@ -46,8 +46,6 @@ faq_schema: |
   }
 ---
 
-By Imraan, freeabtest.com. Published 15 October 2026. Updated 31 October 2026. Competitor prices were checked on each vendor's pricing page on 15 October 2026. freeabtest.com features below match the live product as of 19 October 2026.
-
 The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
 
 We make freeabtest.com, so read this with that in mind. We have tried to make the comparison useful even if you never sign up with us, and we say where other tools still do things we don't. This article compares freeabtest.com with platforms that cost more, or that are a weaker fit for developers and small teams who want plain A/B tests.
