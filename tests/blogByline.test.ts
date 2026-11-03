@@ -30,12 +30,15 @@ describe('blog posts carry no in-body byline', () => {
 
 describe('blog post layout width', () => {
     const page = fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8');
-    it('body column is 800px wide with the table of contents beside it on desktop, and the header lines up with it', () => {
-        expect(page).toContain('xl:grid-cols-[minmax(180px,1fr)_minmax(0,800px)_minmax(180px,1fr)]');
-        expect(page).toContain('id="article-body" className="mx-auto w-full min-w-0 max-w-[800px]"');
-        // 800px of text plus the sm:px-8 padding on each side.
-        expect(page).toContain('mx-auto max-w-[864px] px-5');
-        expect(page).not.toContain('max-w-[720px]');
+    it('two columns on desktop: the article starts at the container edge and fills it, the table of contents sits on the right', () => {
+        expect(page).toContain('mx-auto grid max-w-[1360px] gap-12 px-5 pt-12 sm:px-8 xl:grid-cols-[minmax(0,1fr)_240px]');
+        expect(page).toContain('id="article-body" className="w-full min-w-0 xl:max-w-[1040px]"');
+        // The header uses the same container and leaves the 240px table of contents plus the 48px gap free on the right,
+        // so its text starts and ends where the article does.
+        expect(page).toContain('mx-auto max-w-[1360px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14');
+        expect(page).toContain('<div className="xl:pr-[288px]">');
+        expect(page).not.toContain('<div className="hidden xl:block" />');
+        expect(page).not.toMatch(/max-w-\[(720|800|864)px\]/);
         const css = fs.readFileSync('app/globals.css', 'utf8');
         expect(css).toMatch(/\.blog-prose pre \{[^}]*overflow-x: auto/);
         expect(css).toMatch(/\.blog-prose \.table-wrap \{[^}]*overflow-x: auto/);

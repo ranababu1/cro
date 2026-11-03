@@ -270,7 +270,7 @@ Teams (19 Oct 2026): migration 0030 invites table. lib/team.ts (teamContext with
 
 Preview links: lib/previewToken.ts (HMAC with NEXTAUTH_SECRET, 'preview:' domain, 7 day TTL, not revocable before expiry), lib/preview.ts previewReply, bootstrap preview field, SDK fabt_preview param kept in sessionStorage, public/preview.js bar. Works on drafts, running and paused tests on all plans; stops on completed or deleted tests.
 
-Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Eleven posts live (2026-11-03). Post bodies carry no byline line; the post header shows the author name, publish date and reading time (2026-11-03). Post pages use an 800px body column (header aligned at 864px with padding) and a right-hand table of contents from xl up.
+Blog posts support article_schema, faq_schema, breadcrumb_schema, howto_schema and itemlist_schema frontmatter, each rendered as JSON-LD. Eleven posts live (2026-11-03). Post bodies carry no byline line; the post header shows the author name, publish date and reading time (2026-11-03). Post pages use a two-column grid from xl up in a 1360px container: the article starts at the container's left padding and fills the column up to 1040px, with a 240px table of contents on the right; the header shares the container and keeps 288px free on the right, so its text lines up with the article on both edges. Below xl the article fills the container.
 
 Roadmap phases: 1 to 6 Done, Phase 7 Session recordings Planned (on hold). tests/claimsAudit.test.ts keeps planned items out of Done phases and ties pricing coming soon rows to a non-Done phase.
 
