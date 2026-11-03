@@ -38,7 +38,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <SiteHeader />
             <main>
                 <header className="border-b border-zinc-100 bg-gradient-to-b from-[#f8faff] to-white">
-                    <div className="mx-auto max-w-[864px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14">
+                    <div className="mx-auto max-w-[1360px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14">
+                        <div className="xl:pr-[288px]">
                         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-zinc-500">
                             <Link href="/blog" className="font-medium text-blue-700 hover:text-blue-900">Blog</Link><span aria-hidden>/</span><span>{p.category}</span>
                         </nav>
@@ -52,12 +53,12 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                                 <p className="mt-1 text-zinc-500"><time dateTime={p.date}>{formatDate(p.date)}</time><span aria-hidden className="mx-2">·</span>{p.readingMinutes} min read</p>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </header>
 
-                <div className="mx-auto grid max-w-[1360px] gap-12 px-5 pt-12 sm:px-8 xl:grid-cols-[minmax(180px,1fr)_minmax(0,800px)_minmax(180px,1fr)] xl:gap-10">
-                    <div className="hidden xl:block" />
-                    <div id="article-body" className="mx-auto w-full min-w-0 max-w-[800px]">
+                <div className="mx-auto grid max-w-[1360px] gap-12 px-5 pt-12 sm:px-8 xl:grid-cols-[minmax(0,1fr)_240px]">
+                    <div id="article-body" className="w-full min-w-0 xl:max-w-[1040px]">
                         {toc.length > 2 && (
                             <details className="toc-mobile mb-10 rounded-xl border border-zinc-200 bg-[#f8faff] xl:hidden">
                                 <summary className="cursor-pointer select-none px-5 py-3.5 text-[15px] font-semibold text-[#0b1630]">On this page</summary>
