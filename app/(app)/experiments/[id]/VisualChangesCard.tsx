@@ -62,6 +62,8 @@ function VisualVariation({ experimentId, variation }: { experimentId: string; va
         const data = await res.json().catch(() => ({}));
         setBusy(false);
         if (!res.ok || !data.url) { tab?.close(); setMsg({ tone: 'danger', text: data.error || 'Could not open the visual editor' }); return; }
+        // Only ever follow a web address: a javascript: address would run inside this app.
+        if (!/^https?:\/\//i.test(String(data.url))) { tab?.close(); setMsg({ tone: 'danger', text: 'This test has an invalid page address' }); return; }
         if (tab) tab.location.href = data.url; else window.location.href = data.url;
     }
 

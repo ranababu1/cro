@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { db, type SdkKeyContext } from './db';
 import { apiKeyType, hashApiKey, isWellFormedApiKey } from './apiKeys';
-import { apiRateLimiter, sdkRateLimiter, type RateLimiter } from './rateLimit';
+import { apiRateLimiter, sdkRateLimiter, unknownKeyLimiter, type RateLimiter } from './rateLimit';
 import { bumpMetric, METRICS, touchUserActivity } from './telemetry';
 
 /** CORS headers for endpoints called from customer websites by the browser SDK. */
@@ -46,8 +46,15 @@ export async function authenticateSdkRequest(
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: sdkJson({ error: 'Rate limit exceeded' }, 429, { 'Retry-After': String(limit.retryAfterSeconds) }) };
     }
+    const ip = clientIp(request);
+    // An address that keeps sending keys we do not know is stopped before the lookup, which costs a database read.
+    if (unknownKeyLimiter.exceeded(ip)) {
+        void bumpMetric(METRICS.rate_limit_hits, {});
+        return { error: sdkJson({ error: 'Rate limit exceeded' }, 429, { 'Retry-After': '60' }) };
+    }
     const ctx = await db.authenticateApiKey(key);
     if (!ctx) {
+        unknownKeyLimiter.check(ip);
         void bumpMetric(METRICS.errors, {});
         return { error: sdkJson({ error: 'Unknown or revoked API key' }, 401) };
     }
@@ -76,8 +83,16 @@ export async function authenticateServerRequest(
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }) };
     }
+    const ip = clientIp(request);
+    if (unknownKeyLimiter.exceeded(ip)) {
+        void bumpMetric(METRICS.rate_limit_hits, {});
+        return { error: NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': '60' } }) };
+    }
     const ctx = await db.authenticateApiKey(key);
-    if (!ctx) return { error: NextResponse.json({ error: 'Unknown or revoked API key' }, { status: 401 }) };
+    if (!ctx) {
+        unknownKeyLimiter.check(ip);
+        return { error: NextResponse.json({ error: 'Unknown or revoked API key' }, { status: 401 }) };
+    }
     if (ctx.orgStatus !== 'active') return { error: NextResponse.json({ error: 'This account is suspended' }, { status: 403 }) };
     void bumpMetric(METRICS.api_key_requests, { orgId: ctx.orgId, projectId: ctx.projectId });
     return { ctx };

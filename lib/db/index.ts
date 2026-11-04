@@ -696,9 +696,11 @@ export const db = {
         return cached(`run:${projectId}`, async () => {
             const d = await getDb();
             const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'running'), isNull(s.experiments.archived_at)));
-            const out: Array<{ experiment: Experiment; variations: Variation[]; goals: Goal[] }> = [];
-            for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id), goals: await this.getGoals(experiment.id) });
-            return out;
+            // One round of parallel reads instead of two queries per test in a row.
+            return Promise.all(experiments.map(async (experiment) => {
+                const [variations, goals] = await Promise.all([this.getVariations(experiment.id), this.getGoals(experiment.id)]);
+                return { experiment, variations, goals };
+            }));
         });
     },
 
@@ -707,9 +709,7 @@ export const db = {
         return cached(`roll:${projectId}`, async () => {
             const d = await getDb();
             const experiments = await d.select().from(s.experiments).where(and(eq(s.experiments.project_id, projectId), eq(s.experiments.status, 'completed'), isNotNull(s.experiments.rollout_variation_id), isNull(s.experiments.archived_at)));
-            const out: Array<{ experiment: Experiment; variations: Variation[] }> = [];
-            for (const experiment of experiments) out.push({ experiment, variations: await this.getVariations(experiment.id) });
-            return out;
+            return Promise.all(experiments.map(async (experiment) => ({ experiment, variations: await this.getVariations(experiment.id) })));
         });
     },
 

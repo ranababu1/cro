@@ -58,19 +58,54 @@ export function parseEvents(raw: string | null | undefined): (typeof WEBHOOK_EVE
     }
 }
 
-/** True for loopback, private, link-local, carrier-grade NAT, multicast and other non-public addresses. */
+function isPrivateV4(a: number, b: number): boolean {
+    return a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254)
+        || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) || (a === 198 && (b === 18 || b === 19));
+}
+
+/** The 16 bytes of an IPv6 address (any notation, including a dotted IPv4 tail), or null if it is not valid. */
+function ipv6Bytes(ip: string): number[] | null {
+    let x = ip.toLowerCase().split('%')[0];
+    const dotted = x.match(/^(.*:)(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+    if (dotted) {
+        const o = dotted.slice(2).map(Number);
+        if (o.some((n) => n > 255)) return null;
+        x = `${dotted[1]}${((o[0] << 8) | o[1]).toString(16)}:${((o[2] << 8) | o[3]).toString(16)}`;
+    }
+    const halves = x.split('::');
+    if (halves.length > 2) return null;
+    const head = halves[0] ? halves[0].split(':') : [];
+    const tail = halves.length === 2 && halves[1] ? halves[1].split(':') : [];
+    const fill = halves.length === 2 ? 8 - head.length - tail.length : 0;
+    if (fill < 0 || (halves.length === 1 && head.length !== 8)) return null;
+    const groups = [...head, ...Array<string>(fill).fill('0'), ...tail];
+    if (groups.length !== 8 || groups.some((g) => !/^[0-9a-f]{1,4}$/.test(g))) return null;
+    return groups.flatMap((g) => [parseInt(g, 16) >> 8, parseInt(g, 16) & 255]);
+}
+
+/**
+ * True for loopback, private, link-local, carrier-grade NAT, multicast and other non-public addresses.
+ * IPv6 is parsed to bytes, so every spelling is judged the same. Addresses that carry an IPv4 address (mapped
+ * ::ffff:a.b.c.d, the deprecated ::a.b.c.d, NAT64 64:ff9b::/96 and 6to4 2002::/16) are judged by that IPv4 address.
+ * Of the rest, only global unicast (2000::/3) is public, minus the documentation and Teredo ranges.
+ */
 export function isPrivateAddress(ip: string): boolean {
     const v = isIP(ip);
     if (v === 4) {
         const [a, b] = ip.split('.').map(Number);
-        return a === 0 || a === 10 || a === 127 || a >= 224 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254)
-            || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) || (a === 198 && (b === 18 || b === 19));
+        return isPrivateV4(a, b);
     }
     if (v === 6) {
-        const x = ip.toLowerCase();
-        const mapped = x.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-        if (mapped) return isPrivateAddress(mapped[1]);
-        return x === '::' || x === '::1' || x.startsWith('fc') || x.startsWith('fd') || x.startsWith('fe8') || x.startsWith('fe9') || x.startsWith('fea') || x.startsWith('feb') || x.startsWith('ff');
+        const b = ipv6Bytes(ip);
+        if (!b) return true;
+        const zeros = (from: number, to: number) => b.slice(from, to).every((n) => n === 0);
+        if (zeros(0, 10) && b[10] === 0xff && b[11] === 0xff) return isPrivateV4(b[12], b[13]);
+        if (zeros(0, 12)) return b[12] === 0 && b[13] === 0 && b[14] === 0 && b[15] <= 1 ? true : isPrivateV4(b[12], b[13]);
+        if (b[0] === 0x00 && b[1] === 0x64 && b[2] === 0xff && b[3] === 0x9b && zeros(4, 12)) return isPrivateV4(b[12], b[13]);
+        if (b[0] === 0x20 && b[1] === 0x02) return isPrivateV4(b[2], b[3]);
+        if ((b[0] & 0xe0) !== 0x20) return true;
+        if (b[0] === 0x20 && b[1] === 0x01 && ((b[2] === 0x0d && b[3] === 0xb8) || (b[2] === 0 && b[3] === 0))) return true;
+        return false;
     }
     return true;
 }

@@ -60,18 +60,30 @@
         styleEl = null;
     }
 
+    // The id is kept for the whole page even when storage is blocked, so a visit never counts as many visitors.
+    // Local storage first; a first-party cookie only when local storage is not available.
+    var memoryId = '';
+    function newVisitorId() { return 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11); }
     function getUserId() {
         if (config.userId) return config.userId;
+        if (memoryId) return memoryId;
+        var id = '';
+        var stored = false;
         try {
-            var id = localStorage.getItem('ab_user_id');
+            id = localStorage.getItem('ab_user_id') || '';
             if (!id) {
-                id = 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+                id = newVisitorId();
                 localStorage.setItem('ab_user_id', id);
             }
-            return id;
-        } catch {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2, 11);
+            stored = true;
+        } catch (e) { /* storage blocked */ }
+        if (!stored) {
+            var m = /(?:^|; )ab_user_id=([^;]+)/.exec(document.cookie || '');
+            id = m && /^[\x21-\x7e]+$/.test(m[1]) ? m[1] : newVisitorId();
+            try { document.cookie = 'ab_user_id=' + id + '; max-age=31536000; path=/; SameSite=Lax'; } catch (e) { /* cookies blocked */ }
         }
+        memoryId = id;
+        return id;
     }
 
     // New vs returning: a visitor is returning when their first visit was in an earlier browser session.
@@ -173,6 +185,8 @@
     function redirectTo(variationUrl) {
         try {
             var target = new URL(variationUrl, window.location.href);
+            // Only web pages: a javascript: or data: address must never be followed.
+            if (target.protocol !== 'http:' && target.protocol !== 'https:') { reveal(); return; }
             // Keep query and hash from the current page.
             var cur = new URL(window.location.href);
             cur.searchParams.forEach(function (v, k) {

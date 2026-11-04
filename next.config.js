@@ -26,6 +26,8 @@ const nextConfig = {
             { key: 'X-Frame-Options', value: 'DENY' },
             { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
             { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+            // HTTPS only for a year. No includeSubDomains: other hosts under the domain are not ours to pin.
+            { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
         ];
         return [
             { source: '/:path*', headers: base },

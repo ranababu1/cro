@@ -42,8 +42,18 @@ export async function getDb(): Promise<DB> {
     if (!globalForDb.__croDb) {
         globalForDb.__croDb = open();
     }
-    await globalForDb.__croDb.ready;
-    return globalForDb.__croDb.db;
+    const state = globalForDb.__croDb;
+    try {
+        await state.ready;
+    } catch (err) {
+        // A failed start (for example a network error while migrating) must not stick: forget it so the next request retries.
+        if (globalForDb.__croDb === state) {
+            globalForDb.__croDb = undefined;
+            try { state.client.close(); } catch { /* already closed */ }
+        }
+        throw err;
+    }
+    return state.db;
 }
 
 /** Test helper: close and forget the current connection. */

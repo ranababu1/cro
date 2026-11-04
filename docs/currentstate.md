@@ -72,7 +72,7 @@ experiments (belong to a project, owned by a user; hypothesis, expected_outcome,
 - Variation URLs from the create form were dropped. They are now stored.
 
 ## Known gaps
-- Rate limiter is in memory per instance. On Vercel with many instances it needs a shared store (Upstash Redis) to be strict.
+- Rate limiter is in memory per instance. On Vercel with many instances it needs a shared store (Upstash Redis) to be strict. It is memory-bounded (50,000 keys) and addresses that keep sending unknown API keys are stopped before the key lookup (UNKNOWN_KEY_LIMIT_PER_MINUTE, default 30 a minute per address).
 - CORS allows any origin. Per-project domain allowlists come in M2 with the new ingest endpoint.
 - SDK still makes a server call per visitor, has no anti-flicker, no batching or retries. Rebuilt in M1.
 - No targeting, goal definitions, revenue metrics, SRM check, sample size page or CSV export (M1 to M3).
@@ -383,3 +383,14 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - app/roadmap removed. next.config.js redirects /roadmap to /pricing with a 301. The sitemap, header menus (Product now links Features and plans to /pricing#compare), mobile menu, footer, homepage Explore the platform button, docs introduction and pricing no longer link to it.
 - Pricing coming soon tags read Coming soon (no phase number). Blog posts 01, 04 and 05 say session recordings are not available yet (wording from the content store; repo-only links kept). docs/roadmap.md stays as the internal plan.
 - tests/publicContent.test.ts checks that no public page, doc or blog post links to /roadmap or mentions phases, and that the redirect is a 301.
+
+## GA hardening review (2026-11-04)
+- Outbound requests (webhooks, AI page reader): isPrivateAddress parses IPv6 to bytes. Mapped (::ffff:a.b.c.d, as the URL parser writes it in hex), deprecated ::a.b.c.d, NAT64 64:ff9b::/96 and 6to4 2002::/16 are judged by the IPv4 address inside; everything outside 2000::/3, plus documentation and Teredo ranges, is private. Connection pinning and per-redirect checks are unchanged.
+- Page addresses are http or https only: control and variation URLs, assign and bootstrap URLs (lib/validation.ts), normalizePageUrl (lib/domains.ts). The visual editor and preview routes answer 400 for an old test whose address is not a web address. sdk.js and the dashboard editor launch never follow another scheme.
+- Browser SDK visitor id: local storage, else a first-party cookie (ab_user_id, one year) only when local storage throws, always kept in memory for the page. A visit with blocked storage no longer counts as several visitors.
+- Track: an event whose variation differs from the visitor's stored assignment gets 409 and is not counted. Visitors with no stored assignment are accepted as before.
+- Database start: a failed migration or connection is retried on the next request instead of failing until the process restarts.
+- Caches: lib/configCache.ts keeps at most 10,000 entries and sweeps expired ones every minute; lib/rateLimit.ts keeps at most 50,000 keys.
+- Reads: assign (browser, server) reads the cached config; getRunningConfig and getRolloutConfig load a test's variations and goals in parallel.
+- Sign-in refuses an unverified Google email. Responses carry Strict-Transport-Security (one year, no subdomains).
+- Still open for GA: the rate limiter and the unknown-key throttle are per instance (shared store needed to be strict); telemetry counters are dropped if a batch write fails; events are still accepted for paused or completed tests from visitors already enrolled.

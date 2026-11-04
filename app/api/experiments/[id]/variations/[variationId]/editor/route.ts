@@ -3,6 +3,7 @@ import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment } from '@/lib/access';
 import { createEditorToken, editorUrl, EDITOR_TOKEN_TTL_MS } from '@/lib/visualEditorToken';
 import { editableVariation } from '@/lib/visualEditor';
+import { normalizePageUrl } from '@/lib/domains';
 
 type Params = { params: Promise<{ id: string; variationId: string }> };
 
@@ -16,6 +17,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (!experiment) return NextResponse.json({ error: 'Experiment not found' }, { status: 404 });
     const r = await editableVariation(experiment, variationId);
     if ('error' in r) return NextResponse.json({ error: r.error }, { status: r.status });
+    if (!experiment.control_url || !normalizePageUrl(experiment.control_url)) return NextResponse.json({ error: 'This test has an invalid page address' }, { status: 400 });
     const token = createEditorToken({ experimentId: id, variationId, userId: ctx.userId });
     return NextResponse.json({ url: editorUrl(experiment.control_url!, token), expires_in: EDITOR_TOKEN_TTL_MS / 1000 });
 }

@@ -17,6 +17,8 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async signIn({ user, profile }) {
             if (!user.email) return false;
+            // Accounts are matched by email, so the provider must have verified it.
+            if ((profile as { email_verified?: boolean } | undefined)?.email_verified === false) return false;
 
             // Store user in database and make sure they have an org, project and environments
             const existingUser = await db.getUserByEmail(user.email);

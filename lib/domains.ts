@@ -36,6 +36,8 @@ export function isHostAllowed(host: string | null, allowed: string[]): boolean {
 export function normalizePageUrl(input: string): string | null {
     try {
         const u = new URL(input);
+        // Pages are web pages. javascript:, data: and the like have no origin to match and must never be followed.
+        if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
         let path = u.pathname || '/';
         if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
         return `${u.origin}${path}`;

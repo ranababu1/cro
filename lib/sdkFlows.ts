@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { db, type SdkKeyContext } from './db';
-import type { AssignmentResponse, Event, Experiment, Goal, Variation } from './types';
+import type { Assignment, AssignmentResponse, Event, Experiment, Goal, Variation } from './types';
 import { assignUserToVariation, isExperimentEligible } from './assignment';
 import { rolloutVariation } from './rollout';
 import { formatZodError, trackBatchSchema, trackSchema } from './validation';
@@ -41,10 +41,10 @@ export async function assignVisitor(ctx: SdkKeyContext, raw: unknown): Promise<F
 
     scheduleSchedules();
     scheduleWebhooks();
-    const experiment = await db.getExperiment(experimentId);
-    if (!experiment || experiment.project_id !== ctx.projectId) return { status: 404, body: { error: 'Experiment not found' } };
-
-    const variations = await db.getVariations(experimentId);
+    // Test and versions come from the short-lived config cache (as in track and bootstrap): no database round trip for a visitor who is already assigned.
+    const config = await db.getExperimentConfig(experimentId);
+    if (!config || config.experiment.project_id !== ctx.projectId || config.experiment.archived_at) return { status: 404, body: { error: 'Experiment not found' } };
+    const { experiment, variations } = config;
     // Rolled-out winner: every visitor gets that variation, and nothing is stored or counted.
     const rolled = rolloutVariation(experiment, variations);
     if (rolled) {
@@ -88,7 +88,17 @@ export interface TrackOptions {
     storeExposureAssignments?: boolean;
 }
 
-async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>, opts: TrackOptions, advancedGoals: boolean): Promise<Outcome> {
+/** Stored assignments looked up during one request, so a batch for one visitor reads the database once. */
+type Assigned = Map<string, Promise<Assignment | null>>;
+
+function storedAssignment(assigned: Assigned, experimentId: string, userId: string): Promise<Assignment | null> {
+    const key = `${experimentId}:${userId}`;
+    let p = assigned.get(key);
+    if (!p) { p = db.getAssignment(experimentId, userId); assigned.set(key, p); }
+    return p;
+}
+
+async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>, assigned: Assigned, opts: TrackOptions, advancedGoals: boolean): Promise<Outcome> {
     const metadata = body.metadata ? JSON.stringify(body.metadata) : null;
     if (metadata && metadata.length > MAX_METADATA_BYTES) return { status: 400, body: { error: `metadata must be under ${MAX_METADATA_BYTES} bytes` } };
     const config = await db.getExperimentConfig(body.experiment_id);
@@ -96,6 +106,11 @@ async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>
     // Archived tests are never served, so nothing more is counted for them.
     if (config.experiment.archived_at) return { status: 404, body: { error: 'Experiment not found' } };
     if (!config.variations.some((v) => v.id === body.variation_id)) return { status: 404, body: { error: 'Variation not found' } };
+    // A visitor belongs to the version they were given. Events for another version are not counted, so nobody is
+    // counted in two versions (a stale page, a copied id or a bad install would otherwise skew both).
+    // Visitors with no stored assignment are accepted as before.
+    const stored = await storedAssignment(assigned, body.experiment_id, body.user_id);
+    if (stored && stored.variation_id !== body.variation_id) return { status: 409, body: { error: 'Visitor is assigned to another variation', variation_id: stored.variation_id } };
     if (body.event_type === 'conversion' && !advancedGoals) {
         const goal = body.goal_id ? config.goals.find((g) => g.id === body.goal_id) : undefined;
         if (!goal || goal.type !== 'click') return { status: 403, body: { error: CUSTOM_CONVERSION_REFUSED, reason: 'custom_conversion' } };
@@ -108,7 +123,7 @@ async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>
         seen.add(key);
     }
     if (opts.storeExposureAssignments && body.event_type === 'page_view') {
-        const stored = await storeExposure(body, config.experiment, ctx, seen);
+        const stored = await storeExposure(body, config.experiment, ctx, seen, assigned);
         if (stored) return stored;
     }
     return {
@@ -128,15 +143,12 @@ async function checkEvent(body: TrackBody, ctx: SdkKeyContext, seen: Set<string>
 }
 
 /** Returns an outcome that drops the event, or null to record it. */
-async function storeExposure(body: TrackBody, experiment: Experiment, ctx: SdkKeyContext, seen: Set<string>): Promise<Outcome | null> {
+async function storeExposure(body: TrackBody, experiment: Experiment, ctx: SdkKeyContext, seen: Set<string>, assigned: Assigned): Promise<Outcome | null> {
     const key = `a:${body.experiment_id}:${body.user_id}`;
     if (seen.has(key)) return null;
     seen.add(key);
-    const existing = await db.getAssignment(body.experiment_id, body.user_id);
-    if (existing) {
-        // The stored assignment wins: an exposure for another variation is not counted.
-        return existing.variation_id === body.variation_id ? null : { status: 409, body: { error: 'Visitor is assigned to another variation', variation_id: existing.variation_id } };
-    }
+    // A different stored version was already refused in checkEvent, so a stored one here is this version.
+    if (await storedAssignment(assigned, body.experiment_id, body.user_id)) return null;
     if (experiment.status !== 'running' || pastStop(experiment)) return { status: 409, body: { error: 'Experiment is not running' } };
     const quota = await checkVisitorQuota(ctx.orgId, body.user_id);
     if (!quota.allowed) return { status: 200, body: { success: true, reason: 'quota_exceeded' } };
@@ -163,9 +175,10 @@ export async function ingestTrack(ctx: SdkKeyContext, raw: unknown, opts: TrackO
     }
 
     const seen = new Set<string>();
+    const assigned: Assigned = new Map();
     const outcomes: Outcome[] = [];
     const advancedGoals = items.some((i) => i.event_type === 'conversion') ? await canUseFeature(ctx.orgId, 'advanced_goals') : true;
-    for (const item of items) outcomes.push(await checkEvent(item, ctx, seen, opts, advancedGoals));
+    for (const item of items) outcomes.push(await checkEvent(item, ctx, seen, assigned, opts, advancedGoals));
     const events = outcomes.flatMap((o) => (o.event ? [o.event] : []));
     await db.createEvents(events);
 

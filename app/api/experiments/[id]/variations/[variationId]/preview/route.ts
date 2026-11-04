@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { requireUserContext } from '@/lib/requestAuth';
 import { getAccessibleExperiment } from '@/lib/access';
 import { controlUrlOf, previewBlocker } from '@/lib/preview';
+import { normalizePageUrl } from '@/lib/domains';
 import { createPreviewToken, previewUrl, PREVIEW_TOKEN_TTL_MS } from '@/lib/previewToken';
 
 type Params = { params: Promise<{ id: string; variationId: string }> };
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     const variations = await db.getVariations(experiment.id);
     const blocker = previewBlocker(experiment, variations, variationId);
     if (blocker) return NextResponse.json({ error: blocker }, { status: blocker === 'Variation not found' ? 404 : 400 });
+    if (!normalizePageUrl(controlUrlOf(experiment, variations))) return NextResponse.json({ error: 'This test has an invalid page address' }, { status: 400 });
     const now = Date.now();
     const token = createPreviewToken({ experimentId: id, variationId }, now);
     return NextResponse.json({ url: previewUrl(controlUrlOf(experiment, variations), token), expires_at: new Date(now + PREVIEW_TOKEN_TTL_MS).toISOString() });

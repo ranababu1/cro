@@ -8,6 +8,8 @@ import { noteSchema, tagsSchema } from './experimentManage';
 const blankToUndefined = (v: unknown) => (v === '' ? undefined : v);
 
 const id = z.string().min(1).max(100);
+/** A page address. Only http and https: other schemes (javascript:, data:) would run code when a browser follows them. */
+const pageUrl = z.string().url().max(2000).refine((u) => /^https?:\/\//i.test(u), 'URL must start with http:// or https://');
 // Visitor ids come from browsers. Keep them bounded and printable.
 const visitorId = z.string().min(1).max(200).regex(/^[\x21-\x7e]+$/, 'user_id must be printable ASCII without spaces');
 
@@ -49,7 +51,7 @@ export const createExperimentSchema = z.object({
     expected_outcome: noteSchema.optional(),
     tags: tagsSchema.optional(),
     project_id: id.optional(),
-    control_url: z.string().url().max(2000),
+    control_url: pageUrl,
     traffic_allocation: z.number().int().min(0).max(100).optional(),
     targeting: targetingSchema.optional(),
     variations: z
@@ -58,7 +60,7 @@ export const createExperimentSchema = z.object({
                 name: z.string().trim().min(1).max(200),
                 description: z.preprocess(blankToUndefined, z.string().max(2000).optional()),
                 // Leave out on a variation to change the control page with the visual editor instead of redirecting.
-                url: z.preprocess(blankToUndefined, z.string().url().max(2000).optional()),
+                url: z.preprocess(blankToUndefined, pageUrl.optional()),
                 weight: z.number().min(0).max(100),
                 is_control: z.boolean(),
             }),
@@ -93,12 +95,12 @@ export const allocationSchema = z.object({
 
 export const assignSchema = z.object({
     experiment_id: id.optional(),
-    url: z.string().url().max(2000).optional(),
+    url: pageUrl.optional(),
     user_id: visitorId,
 }).refine((v) => !!v.experiment_id || !!v.url, 'experiment_id or url is required');
 
 export const bootstrapSchema = z.object({
-    url: z.string().url().max(2000),
+    url: pageUrl,
     user_id: visitorId,
     referrer: z.string().max(2000).optional(),
     visitor: z.enum(['new', 'returning']).optional(),
