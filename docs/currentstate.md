@@ -9,6 +9,21 @@
 > 4. Paid-plan billing terms (refunds, renewals, taxes) are not in the Terms yet; add them with the payment integration.
 > 5. When the text changes in substance, bump `LEGAL_VERSION` in `lib/legal.ts`.
 
+> **GA LAUNCH CHECKLIST (open items as of 2026-11-05).** Code is done; these need you. Details in `docs/operations.md`.
+> - [ ] Legal: fill `lib/legal.ts`, lawyer review, sub-processor list, billing terms with the payment work (see the banner above).
+> - [ ] Production env vars: `OPS_ALERT_WEBHOOK_URL` (Slack or Discord webhook for errors and new tickets),
+>       `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (shared rate limits), `DB_AUTO_MIGRATE=false` with `npm run db:migrate`
+>       as a deploy step, optional `GITHUB_CLIENT_ID` + `GITHUB_CLIENT_SECRET`, and `AI_KEYS_ENCRYPTION_KEY` if AI is on.
+> - [ ] Uptime monitor on `/api/health` and `/sdk.js` (every minute, 2+ regions) and a hosted status page; then link it from Support.
+> - [ ] Turso point-in-time restore on; daily `npm run db:backup` to encrypted storage with a 30-day lifecycle (the legal pages promise 30 days).
+> - [ ] Run the restore drill once (docs/operations.md section 4).
+> - [ ] Check `x-forwarded-for` is set by the host (true on Vercel); per-IP limits trust it.
+> - [ ] Payment integration (planned next).
+> - Known gaps accepted for launch: no transactional email (invites, ticket replies, quota warnings are in-app only); WordPress plugin has
+>   no consent setting; account deletion signs the user out but does not revoke other sessions server-side; telemetry counters are lost if a
+>   batch write fails; events from already-enrolled visitors are still accepted for paused or completed tests; Microsoft sign-in not
+>   offered (unverified email claim, see docs/operations.md).
+
 
 As of 2026-10-14 21:45 IST, branch fix/autofill-sdk-key (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
@@ -188,7 +203,7 @@ WordPress plugin (paid only, 1.1.0): entitlement feature wordpress_plugin (paid 
 
 Funnels (paid, feature 'funnels', special friend allowance): table funnels (migration 0018, steps = JSON goal ids). GET/POST/DELETE /api/experiments/[id]/funnels (403 with upgrade note for free). Numbers come from one grouped query over raw conversion events (first time per visitor, variation and goal, db.getFirstGoalHits) plus rollup visitors; lib/funnels.ts computeFunnel counts a step when its first completion is at or after the previous step's. Steps whose goal was removed are dropped and reported. Scale note: the hits query is bounded by converters times steps; add a rollup if it gets slow.
 
-SDK size claim: public copy says under 30 KB gzipped, about 100 KB raw; tests/sdkSizeClaim.test.ts keeps public/sdk.js under 28 KB at gzip level 6 and under 115 KB raw. The obfuscation build (dead code injection 0.4) is most of the size. Later: SDK slimming (lower dead code injection or split modules) to get back toward 15 KB.
+SDK size claim: public copy says under 30 KB gzipped, about 100 KB raw; tests/sdkSizeClaim.test.ts keeps public/sdk.js under 28 KB at gzip level 6 and under 115 KB raw. The obfuscation build is most of the size. Since 2026-11-05 dead code injection starts at 0.1 (was 0.3 to 0.4) to keep the claim after the consent API was added, which makes the build slightly less obfuscated; about 27 KB at gzip level 6. Later: SDK slimming (split modules) to get back toward 15 KB.
 
 Revenue goals (paid, feature 'revenue_goals', special friend allowance): events.revenue real column (migration 0019). POST /api/sdk/event accepts revenue (0 to 1,000,000, rounded to 2 decimals); lib/goalHits.ts keeps it only when the org has the feature, records every order for event goals (cap 50 revenue events per visitor and goal), and bumps the conversions metric only on the first conversion, so rollup conversion counts stay once per visitor. GET /api/experiments/[id]/revenue (403 with upgrade note for free) runs one grouped query over raw conversion events (db.getRevenueStats: buyers, orders, sum, sum of squared per-visitor totals) plus rollup visitors; lib/revenue.ts computes revenue per visitor (non-buyers count as 0), average order, lift and Welch's t-test (normal approximation, verdict after 30 visitors in both arms). Amounts carry no currency; the UI says they are in the site's currency.
 
@@ -403,7 +418,7 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Caches: lib/configCache.ts keeps at most 10,000 entries and sweeps expired ones every minute; lib/rateLimit.ts keeps at most 50,000 keys.
 - Reads: assign (browser, server) reads the cached config; getRunningConfig and getRolloutConfig load a test's variations and goals in parallel.
 - Sign-in refuses an unverified Google email. Responses carry Strict-Transport-Security (one year, no subdomains).
-- Still open for GA: the rate limiter and the unknown-key throttle are per instance (shared store needed to be strict); telemetry counters are dropped if a batch write fails; events are still accepted for paused or completed tests from visitors already enrolled.
+- Still open for GA: see the GA launch checklist at the top. (Rate limits became shareable through Upstash on 2026-11-05.)
 
 ## SaaS readiness (2026-11-05)
 - Legal: draft pages (see the banner at the top). New users record `terms_version` and `terms_accepted_at`; the sign-in page says continuing accepts the Terms and Privacy Policy. Existing users have no recorded version.
