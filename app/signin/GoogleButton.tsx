@@ -31,10 +31,11 @@ function loadTurnstile(): Promise<TurnstileApi> {
 }
 
 /**
- * Google sign-in button. When a Turnstile site key is set, a bot check runs first; its token is checked
- * on the server (POST /api/auth/turnstile), which sets a short-lived pass the OAuth start requires.
+ * Sign-in buttons (Google, and GitHub when it is configured). When a Turnstile site key is set, a bot check runs
+ * first; its token is checked on the server (POST /api/auth/turnstile), which sets a short-lived pass the OAuth start
+ * requires for every provider.
  */
-export default function GoogleButton({ callbackUrl, siteKey }: { callbackUrl: string; siteKey?: string | null }) {
+export default function GoogleButton({ callbackUrl, siteKey, github = false }: { callbackUrl: string; siteKey?: string | null; github?: boolean }) {
     const [busy, setBusy] = useState(false);
     const [verified, setVerified] = useState(!siteKey);
     const [checkError, setCheckError] = useState<string | null>(null);
@@ -84,6 +85,7 @@ export default function GoogleButton({ callbackUrl, siteKey }: { callbackUrl: st
                     setBusy(true);
                     void signIn('google', { callbackUrl });
                 }}
+                data-provider="google"
             >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
                     <path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.8 3.3-8.1z" />
@@ -93,6 +95,24 @@ export default function GoogleButton({ callbackUrl, siteKey }: { callbackUrl: st
                 </svg>
                 {busy ? 'Redirecting...' : 'Continue with Google'}
             </Button>
+            {github && (
+                <Button
+                    variant="secondary"
+                    size="lg"
+                    className="mt-3 w-full"
+                    disabled={busy || !verified}
+                    data-provider="github"
+                    onClick={() => {
+                        setBusy(true);
+                        void signIn('github', { callbackUrl });
+                    }}
+                >
+                    <svg viewBox="0 0 16 16" className="h-4 w-4" fill="currentColor" aria-hidden>
+                        <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.35c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0z" />
+                    </svg>
+                    {busy ? 'Redirecting...' : 'Continue with GitHub'}
+                </Button>
+            )}
             {siteKey && !verified && !checkError && <p className="mt-2 text-center text-xs text-zinc-500">Complete the check above to continue.</p>}
         </div>
     );

@@ -45,3 +45,7 @@ plan.md
 *.db
 *.db-journal
 !.env.example
+
+# database backups (customer data)
+/backups
+*.sql.gz

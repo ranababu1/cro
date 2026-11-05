@@ -89,12 +89,13 @@ export const db = {
         return (await d.query.users.findFirst({ where: eq(s.users.email, email) })) ?? null;
     },
 
-    async createUser(data: { email: string; name: string; image?: string | null; first_name?: string | null; last_name?: string | null; onboarding_pending?: boolean }): Promise<User> {
+    async createUser(data: { email: string; name: string; image?: string | null; first_name?: string | null; last_name?: string | null; onboarding_pending?: boolean; terms_version?: string | null }): Promise<User> {
         const d = await getDb();
         const id = generateId('usr');
         await d.insert(s.users).values({
             id, email: data.email, name: data.name, image: data.image ?? null,
             first_name: data.first_name ?? null, last_name: data.last_name ?? null, onboarding_pending: data.onboarding_pending ?? false,
+            terms_version: data.terms_version ?? null, terms_accepted_at: data.terms_version ? nowIso() : null,
         });
         return (await d.query.users.findFirst({ where: eq(s.users.id, id) }))!;
     },

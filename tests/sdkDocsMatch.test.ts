@@ -11,7 +11,7 @@ describe('SDK docs match the shipped SDK', () => {
     const exposed = new Set([...api.matchAll(/^\s+(\w+):/gm)].map((m) => m[1]));
 
     it('exposes the documented methods', () => {
-        expect([...exposed].sort()).toEqual(['bootstrap', 'getUserId', 'init', 'track', 'trackConversion']);
+        expect([...exposed].sort()).toEqual(['bootstrap', 'consent', 'getUserId', 'init', 'isOptedOut', 'optIn', 'optOut', 'track', 'trackConversion']);
     });
 
     it('every ABTest call in the docs exists', () => {

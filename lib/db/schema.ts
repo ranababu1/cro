@@ -31,6 +31,9 @@ export const users = sqliteTable('users', {
     profile_prompt_dismissed_at: text('profile_prompt_dismissed_at'),
     // Salted hash of the IP the account was created from (lib/telemetry hashIp). Never the raw IP.
     signup_ip_hash: text('signup_ip_hash'),
+    // When the user accepted the Terms and Privacy Policy, and which version (lib/legal.ts LEGAL_VERSION).
+    terms_accepted_at: text('terms_accepted_at'),
+    terms_version: text('terms_version'),
 });
 
 export const organizations = sqliteTable('organizations', {
@@ -729,3 +732,25 @@ export const aiUsage = sqliteTable('ai_usage', {
     hour: text('hour').notNull(),
     count: integer('count').notNull().default(0),
 }, (t) => [primaryKey({ columns: [t.org_id, t.hour] }), index('idx_ai_usage_hour').on(t.hour)]);
+
+/** Support tickets (lib/support.ts). One per question; messages hold the conversation. */
+export const supportTickets = sqliteTable('support_tickets', {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    user_id: text('user_id').references(() => users.id, { onDelete: 'set null' }),
+    subject: text('subject').notNull(),
+    category: text('category', { enum: ['question', 'bug', 'billing', 'privacy', 'security', 'other'] }).notNull().default('question'),
+    // open: waiting for us; waiting: we answered, waiting for the customer; closed.
+    status: text('status', { enum: ['open', 'waiting', 'closed'] }).notNull().default('open'),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [index('idx_support_tickets_org').on(t.org_id, t.updated_at), index('idx_support_tickets_status').on(t.status, t.updated_at)]);
+
+export const supportMessages = sqliteTable('support_messages', {
+    id: text('id').primaryKey(),
+    ticket_id: text('ticket_id').notNull().references(() => supportTickets.id, { onDelete: 'cascade' }),
+    author_id: text('author_id').references(() => users.id, { onDelete: 'set null' }),
+    from_staff: integer('from_staff', { mode: 'boolean' }).notNull().default(false),
+    body: text('body').notNull(),
+    created_at: text('created_at').notNull().default(now),
+}, (t) => [index('idx_support_messages_ticket').on(t.ticket_id, t.created_at)]);

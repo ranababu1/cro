@@ -7,6 +7,7 @@ import { Logo } from '../components/ui/Logo';
 import { Alert } from '../components/ui';
 import GoogleButton from './GoogleButton';
 import { turnstileEnabled, turnstileSiteKey } from '@/lib/turnstile';
+import { githubEnabled } from '@/lib/auth';
 
 export const metadata: Metadata = { title: 'Sign in' };
 export const dynamic = 'force-dynamic';
@@ -33,9 +34,13 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
                 <div className="w-full max-w-sm">
                     <div className="rounded-lg border border-zinc-200 bg-white p-8 shadow-card">
                         <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Sign in to freeabtest.com</h1>
-                        <p className="mt-1 text-sm text-zinc-500">Use your work Google account. A workspace is created on first sign-in.</p>
+                        <p className="mt-1 text-sm text-zinc-500">{githubEnabled() ? 'Use your work Google or GitHub account.' : 'Use your work Google account.'} A workspace is created on first sign-in.</p>
                         {error && <Alert tone="danger" className="mt-5">{errors[error] ?? errors.Default}</Alert>}
-                        <div className="mt-6"><GoogleButton callbackUrl={target} siteKey={turnstileEnabled() ? turnstileSiteKey() : null} /></div>
+                        <div className="mt-6"><GoogleButton callbackUrl={target} siteKey={turnstileEnabled() ? turnstileSiteKey() : null} github={githubEnabled()} /></div>
+                        <p className="mt-5 text-xs leading-5 text-zinc-500">
+                            By continuing you agree to the <Link href="/legal/terms" className="underline hover:text-zinc-800">Terms of Service</Link> and
+                            the <Link href="/legal/privacy" className="underline hover:text-zinc-800">Privacy Policy</Link>.
+                        </p>
                     </div>
                     <p className="mt-6 text-center text-xs text-zinc-500">
                         <Link href="/" className="underline hover:text-zinc-800">Back to home</Link>

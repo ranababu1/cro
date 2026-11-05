@@ -1,5 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import GithubProvider from "next-auth/providers/github";
+import { LEGAL_VERSION } from "./legal";
 import { db } from "./db";
 import { cleanText, splitName } from "./profile";
 import { currentAuthRequest } from "./authRequest";
@@ -7,12 +9,45 @@ import { reserveSignup, SIGNUP_LIMIT_ERROR } from "./signupLimits";
 import { BOT_CHECK_ERROR, botCheckPassed, PASS_COOKIE } from "./turnstile";
 import { bumpMetric, METRICS, touchUserActivity, recordProductEvent } from "./telemetry";
 
+/** GitHub sign-in is offered when both GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET are set. */
+export const githubEnabled = () => !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET);
+
+type GithubEmail = { email: string; primary: boolean; verified: boolean };
+
+/**
+ * Accounts are matched by email, so only a verified GitHub address may be used: the primary one when it is
+ * verified, else any verified one. Without one, sign-in is refused (no email).
+ */
+export function pickVerifiedGithubEmail(emails: unknown): string | null {
+    if (!Array.isArray(emails)) return null;
+    const list = emails as GithubEmail[];
+    return (list.find((e) => e?.primary && e?.verified) ?? list.find((e) => e?.verified))?.email ?? null;
+}
+
+function githubProvider() {
+    return GithubProvider({
+        clientId: process.env.GITHUB_CLIENT_ID || "",
+        clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+        userinfo: {
+            url: "https://api.github.com/user",
+            async request({ tokens }) {
+                const headers = { Authorization: `Bearer ${tokens.access_token}`, "User-Agent": "freeabtest", Accept: "application/vnd.github+json" };
+                const profile = await (await fetch("https://api.github.com/user", { headers })).json();
+                const emails = await fetch("https://api.github.com/user/emails", { headers }).then((r) => (r.ok ? r.json() : [])).catch(() => []);
+                const email = pickVerifiedGithubEmail(emails);
+                return { ...profile, email, email_verified: !!email };
+            },
+        },
+    });
+}
+
 export const authOptions: NextAuthOptions = {
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID || "",
             clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
         }),
+        ...(githubEnabled() ? [githubProvider()] : []),
     ],
     callbacks: {
         async signIn({ user, profile }) {
@@ -42,6 +77,8 @@ export const authOptions: NextAuthOptions = {
                 first_name: cleanText(g.given_name ?? '') || split.first || null,
                 last_name: cleanText(g.family_name ?? '') || split.last || null,
                 onboarding_pending: true,
+                // The sign-in page states that continuing accepts the Terms and Privacy Policy.
+                terms_version: LEGAL_VERSION,
             });
             if (isSignup && signupIpHash) await db.setUserSignupIpHash(dbUser.id, signupIpHash);
             const ws = await db.ensureWorkspace(dbUser);

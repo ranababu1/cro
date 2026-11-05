@@ -36,6 +36,8 @@ const nav = [
     { href: '/settings/webhooks', label: 'Webhooks', icon: BoltIcon },
     { href: '/settings/ai', label: 'AI', icon: SparkleIcon },
     { href: '/settings/profile', label: 'Profile', icon: UserIcon },
+    { href: '/settings/privacy', label: 'Privacy and data', icon: ShieldIcon },
+    { href: '/support', label: 'Support', icon: ChatIcon },
 ];
 
 function useClickOutside(onOutside: () => void) {
@@ -163,6 +165,7 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
                     <p className="mt-6 mb-1 px-2.5 text-xs font-medium text-zinc-400">Platform</p>
                     {item('/admin', 'Admin console', ShieldIcon)}
                     {item('/admin/telemetry', 'Telemetry', ShieldIcon)}
+                    {item('/admin/support', 'Support queue', ChatIcon)}
                 </>
             )}
             <div className="mt-auto pb-4">

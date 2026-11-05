@@ -31,6 +31,15 @@
     // Integrations tag their calls (the WordPress plugin sets data-via="wp") so the server can apply their rules.
     var via = (script && script.getAttribute('data-via')) === 'wp' ? 'wp' : '';
     var config = { apiUrl: apiUrl, apiKey: apiKey, userId: null };
+    // Consent: with data-consent="required" nothing is stored, sent or hidden until ABTest.consent(true).
+    // A visitor who opted out (ABTest.optOut()) is never tested or tracked again in this browser.
+    var consentGiven = (script && script.getAttribute('data-consent')) !== 'required';
+    var blocked = false;
+    var started = false;
+    function optedOut() {
+        try { return localStorage.getItem('ab_opt_out') === '1'; } catch (e) { return false; }
+    }
+    function allowed() { return consentGiven && !blocked && !optedOut(); }
     function withVia(path) { return via ? path + (path.indexOf('?') === -1 ? '?' : '&') + 'via=' + via : path; }
     // QA preview link (?fabt_preview=<token>): shows one variation, kept for this tab's session. Nothing is recorded.
     var previewToken = '';
@@ -140,7 +149,7 @@
     }
 
     function track(experimentId, variationId, eventType, goalId, eventName) {
-        if (previewToken) return Promise.resolve();
+        if (previewToken || !allowed()) return Promise.resolve();
         var ev = { experiment_id: experimentId, variation_id: variationId, user_id: getUserId(), event_type: eventType };
         if (goalId) ev.goal_id = goalId;
         if (eventName) ev.event_name = eventName;
@@ -266,6 +275,10 @@
     }
 
     function bootstrap() {
+        if (!allowed()) {
+            reveal();
+            return Promise.resolve({ matched: false, action: 'none', reason: 'no_consent' });
+        }
         if (!config.apiUrl || !config.apiKey) {
             console.error('[ABTest] Missing apiUrl or data-key');
             reveal();
@@ -328,7 +341,7 @@
      * Revenue goal: ABTest.track('purchase', { revenue: 49.99 }) also records the order value (paid plans).
      */
     function trackEvent(name, options) {
-        if (!name || !config.apiUrl || !config.apiKey || previewToken) return Promise.resolve();
+        if (!name || !config.apiUrl || !config.apiKey || previewToken || !allowed()) return Promise.resolve();
         var body = { user_id: getUserId(), event_name: String(name) };
         var revenue = options && typeof options === 'object' ? Number(options.revenue) : NaN;
         if (isFinite(revenue) && revenue >= 0) body.revenue = revenue;
@@ -336,11 +349,50 @@
             .catch(function () { return {}; });
     }
 
+    function start() {
+        if (started || !allowed() || !config.apiKey || !config.apiUrl) return;
+        started = true;
+        hide();
+        bootstrap();
+    }
+
+    /** Consent from the site's cookie banner: ABTest.consent(true) starts testing; false stops sending anything. */
+    function consent(granted) {
+        consentGiven = !!granted;
+        blocked = !granted;
+        if (granted) start();
+        else reveal();
+    }
+
+    /** Opt this browser out for good: forgets the visitor id and never tests or tracks it again. */
+    function optOut() {
+        blocked = true;
+        queue.length = 0;
+        reveal();
+        try {
+            localStorage.setItem('ab_opt_out', '1');
+            localStorage.removeItem('ab_user_id');
+            localStorage.removeItem('ab_first_seen');
+        } catch (e) { /* storage blocked */ }
+        try { document.cookie = 'ab_user_id=; max-age=0; path=/; SameSite=Lax'; } catch (e) { /* cookies blocked */ }
+        memoryId = '';
+    }
+
+    function optIn() {
+        try { localStorage.removeItem('ab_opt_out'); } catch (e) { /* storage blocked */ }
+        blocked = false;
+    }
+
     window.ABTest = {
         track: trackEvent,
+        consent: consent,
+        optOut: optOut,
+        optIn: optIn,
+        isOptedOut: optedOut,
         init: init,
         bootstrap: bootstrap,
-        getUserId: getUserId,
+        // Before consent no id is created or stored.
+        getUserId: function () { return allowed() ? getUserId() : ''; },
         trackConversion: function (experimentId, eventName) {
             var a = assignmentCache[experimentId];
             if (!a || !a.variation_id) return Promise.resolve();
@@ -357,7 +409,7 @@
         loadModule('visual.js', '__ABTestVisual', { editor: editorToken, apiUrl: config.apiUrl });
     } else if (config.apiKey && config.apiUrl) {
         // Auto-start when a data-key is present on the script tag: hide ASAP, bootstrap ASAP.
-        hide();
-        bootstrap();
+        // With data-consent="required" this waits for ABTest.consent(true).
+        start();
     }
 })(window, document);

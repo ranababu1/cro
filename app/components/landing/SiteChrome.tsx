@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LEGAL } from '@/lib/legal';
 import { Logo } from '../ui/Logo';
 import { NavMenu } from './NavMenu';
 import { MobileNav } from './MobileNav';
@@ -60,6 +61,10 @@ export function SiteFooter() {
                     <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
                     <Link href="/signin" className="hover:text-zinc-900">Sign in</Link>
+                    <Link href="/legal/terms" className="hover:text-zinc-900">Terms</Link>
+                    <Link href="/legal/privacy" className="hover:text-zinc-900">Privacy</Link>
+                    <Link href="/security" className="hover:text-zinc-900">Security</Link>
+                    <a href={`mailto:${LEGAL.contactEmail}`} className="hover:text-zinc-900">Contact</a>
                 </nav>
                 <p className="text-zinc-500 md:ml-auto">© {new Date().getFullYear()} freeabtest.com</p>
             </div>

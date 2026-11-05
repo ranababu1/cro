@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { db, type SdkKeyContext } from './db';
 import { apiKeyType, hashApiKey, isWellFormedApiKey } from './apiKeys';
-import { apiRateLimiter, sdkRateLimiter, unknownKeyLimiter, type RateLimiter } from './rateLimit';
+import { apiRateLimiter, sdkRateLimiter, unknownKeyLimiter, type Limiter } from './rateLimit';
 import { bumpMetric, METRICS, touchUserActivity } from './telemetry';
 
 /** CORS headers for endpoints called from customer websites by the browser SDK. */
@@ -32,7 +32,7 @@ function extractKey(request: NextRequest): string | null {
  */
 export async function authenticateSdkRequest(
     request: NextRequest,
-    limiter: RateLimiter = sdkRateLimiter,
+    limiter: Limiter = sdkRateLimiter,
 ): Promise<{ ctx: SdkKeyContext } | { error: NextResponse }> {
     const key = extractKey(request);
     if (!key || !isWellFormedApiKey(key)) {
@@ -41,20 +41,20 @@ export async function authenticateSdkRequest(
     if (apiKeyType(key) !== 'sdk') {
         return { error: sdkJson({ error: 'Use an SDK key (cro_pk_...) here. Secret keys must never be used in browsers.' }, 401) };
     }
-    const limit = limiter.check(`${hashApiKey(key).slice(0, 16)}:${clientIp(request)}`);
+    const limit = await limiter.check(`${hashApiKey(key).slice(0, 16)}:${clientIp(request)}`);
     if (!limit.allowed) {
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: sdkJson({ error: 'Rate limit exceeded' }, 429, { 'Retry-After': String(limit.retryAfterSeconds) }) };
     }
     const ip = clientIp(request);
     // An address that keeps sending keys we do not know is stopped before the lookup, which costs a database read.
-    if (unknownKeyLimiter.exceeded(ip)) {
+    if (await unknownKeyLimiter.exceeded(ip)) {
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: sdkJson({ error: 'Rate limit exceeded' }, 429, { 'Retry-After': '60' }) };
     }
     const ctx = await db.authenticateApiKey(key);
     if (!ctx) {
-        unknownKeyLimiter.check(ip);
+        await unknownKeyLimiter.check(ip);
         void bumpMetric(METRICS.errors, {});
         return { error: sdkJson({ error: 'Unknown or revoked API key' }, 401) };
     }
@@ -71,26 +71,26 @@ export async function authenticateSdkRequest(
  */
 export async function authenticateServerRequest(
     request: NextRequest,
-    limiter: RateLimiter = sdkRateLimiter,
+    limiter: Limiter = sdkRateLimiter,
 ): Promise<{ ctx: SdkKeyContext } | { error: NextResponse }> {
     const header = request.headers.get('authorization');
     const key = header?.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : '';
     if (!key || !isWellFormedApiKey(key) || apiKeyType(key) !== 'secret') {
         return { error: NextResponse.json({ error: 'Send a secret key (cro_sk_...) as "Authorization: Bearer <key>".' }, { status: 401 }) };
     }
-    const limit = limiter.check(`srv:${hashApiKey(key).slice(0, 16)}`);
+    const limit = await limiter.check(`srv:${hashApiKey(key).slice(0, 16)}`);
     if (!limit.allowed) {
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } }) };
     }
     const ip = clientIp(request);
-    if (unknownKeyLimiter.exceeded(ip)) {
+    if (await unknownKeyLimiter.exceeded(ip)) {
         void bumpMetric(METRICS.rate_limit_hits, {});
         return { error: NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': '60' } }) };
     }
     const ctx = await db.authenticateApiKey(key);
     if (!ctx) {
-        unknownKeyLimiter.check(ip);
+        await unknownKeyLimiter.check(ip);
         return { error: NextResponse.json({ error: 'Unknown or revoked API key' }, { status: 401 }) };
     }
     if (ctx.orgStatus !== 'active') return { error: NextResponse.json({ error: 'This account is suspended' }, { status: 403 }) };
@@ -140,12 +140,12 @@ export async function getUserContext(request?: NextRequest): Promise<UserContext
 /**
  * Like getUserContext but returns a ready error: 401 when not signed in, 403 when the caller's tenant is suspended.
  */
-export async function requireUserContext(request?: NextRequest, limiter: RateLimiter = apiRateLimiter): Promise<UserContext | NextResponse> {
+export async function requireUserContext(request?: NextRequest, limiter: Limiter = apiRateLimiter): Promise<UserContext | NextResponse> {
     const authHeader = request?.headers.get('authorization');
     if (authHeader?.startsWith('Bearer ')) {
         const key = authHeader.slice('Bearer '.length).trim();
         if (apiKeyType(key) === 'secret') {
-            const limit = limiter.check(`sk:${hashApiKey(key).slice(0, 16)}`);
+            const limit = await limiter.check(`sk:${hashApiKey(key).slice(0, 16)}`);
             if (!limit.allowed) {
                 void bumpMetric(METRICS.rate_limit_hits, {});
                 return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } });

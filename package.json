@@ -12,6 +12,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:backup": "node scripts/backup-db.mjs",
+    "db:restore": "node scripts/restore-db.mjs",
     "sdk:build": "node scripts/obfuscate-sdk.mjs && node scripts/build-modules.mjs",
     "pretest": "npm run sdk:build"
   },

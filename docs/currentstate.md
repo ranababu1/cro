@@ -1,5 +1,15 @@
 # Current State
 
+> **LEGAL PAGES ARE A STANDARD DRAFT (added 2026-11-05).** /legal/terms, /legal/privacy, /legal/dpa, /legal/cookies and /security
+> are a generic starting version written from how the product works today. Before relying on them:
+> 1. Fill in `lib/legal.ts`: `entity` (registered company name), `address`, `governingLaw`, and the contact, privacy and security emails.
+>    While these are null the pages name only freeabtest.com and use a generic governing-law clause.
+> 2. Have the Terms, Privacy Policy and DPA reviewed by a lawyer for your jurisdiction and customer markets (EU, UK, US, India).
+> 3. Prepare the sub-processor list (hosting, database, bot check, sign-in, analytics, Upstash if used); the pages say it is available on request.
+> 4. Paid-plan billing terms (refunds, renewals, taxes) are not in the Terms yet; add them with the payment integration.
+> 5. When the text changes in substance, bump `LEGAL_VERSION` in `lib/legal.ts`.
+
+
 As of 2026-10-14 21:45 IST, branch fix/autofill-sdk-key (Phase 1 milestone M0, platform admin, the UI redesign and the freeabtest.com landing page). Usable for local development and
 a single-instance deployment. Not yet a full MVP: the SDK, targeting, goals and results UI are still the old prototype.
 
@@ -394,3 +404,14 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Reads: assign (browser, server) reads the cached config; getRunningConfig and getRolloutConfig load a test's variations and goals in parallel.
 - Sign-in refuses an unverified Google email. Responses carry Strict-Transport-Security (one year, no subdomains).
 - Still open for GA: the rate limiter and the unknown-key throttle are per instance (shared store needed to be strict); telemetry counters are dropped if a batch write fails; events are still accepted for paused or completed tests from visitors already enrolled.
+
+## SaaS readiness (2026-11-05)
+- Legal: draft pages (see the banner at the top). New users record `terms_version` and `terms_accepted_at`; the sign-in page says continuing accepts the Terms and Privacy Policy. Existing users have no recorded version.
+- Consent: `data-consent="required"` on the script tag makes the SDK store, send and hide nothing until `ABTest.consent(true)`; `optOut()` stores `ab_opt_out` and forgets the id; `getUserId()` returns '' before consent. The WordPress plugin does not expose the consent option yet.
+- Privacy and data (Settings): JSON account export; account deletion (organizations where the user is the only member are deleted, last owner of a shared org must hand over first, their tests move to another owner, user-scoped telemetry and product events deleted); project deletion (owners, typed name, not the last project, cascades); visitor erasure (assignments, events and the monthly visitor row in one project; daily rollups hold no ids and stay). JWT sessions of a deleted user are not revoked server-side; the page signs the user out and the user has no memberships left.
+- Support: tickets with categories and open/waiting/closed status at /support (members of the org) and /admin/support (platform admins). No email notifications yet; alerts go to OPS_ALERT_WEBHOOK_URL.
+- Operations: /api/health, error alerts (instrumentation.ts, lib/alerts.ts), backup and restore scripts, docs/operations.md (uptime monitors, status page, backup schedule, restore drill, deploy and migration steps).
+- Error pages (404, error boundary, global error) and robots.txt (app, API, share and invite links not indexed).
+- Sign-in: Google, plus GitHub when configured. Microsoft deliberately not added (email claim is not verified for multi-tenant apps; see docs/operations.md).
+- Rate limits: shared through Upstash Redis when configured (local limiter first, 250 ms timeout, fail open); otherwise per instance as before.
+- Still open: transactional email (invites, ticket replies, quota warnings, billing), billing terms, a hosted status page (set up outside the app), WordPress plugin consent setting, server-side session revocation on account deletion.
