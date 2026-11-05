@@ -133,6 +133,8 @@ Blog post 10 (the peeking problem) published (1 Nov 2026); posts 03 and 07 link 
 
 Blog post 11 (confidence intervals) published (3 Nov 2026); posts 02, 04, 06 and 07 link to post 10.
 
+Blog post 13 (visitor bucketing and hashing) published (5 Nov 2026); post 02 links to post 11.
+
 ## Status of the approved Phase 1 (public Phase 2): all items shipped 15 Oct 2026 (PRs #18, #20 to #25)
 - [x] Page reach, form submit and custom event goals
 - [x] Targeting: device, UTM, referrer, new vs returning
