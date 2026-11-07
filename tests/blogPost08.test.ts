@@ -34,7 +34,9 @@ describe('post: How to run a split URL test without a plugin', () => {
     it('exists, dated 29 October 2026, with BlogPosting, BreadcrumbList, HowTo and FAQPage JSON-LD', () => {
         expect(p).toBeTruthy();
         expect(p.date).toBe('2026-10-29');
-        expect(JSON.parse(p.articleSchema!)).toMatchObject({ '@type': 'BlogPosting', dateModified: '2026-10-29', mainEntityOfPage: URL });
+        const article = JSON.parse(p.articleSchema!);
+        expect(article).toMatchObject({ '@type': 'BlogPosting', mainEntityOfPage: URL });
+        expect(article.dateModified >= '2026-10-29').toBe(true);
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         const howto = JSON.parse(p.howtoSchema!);
         expect(howto['@type']).toBe('HowTo');

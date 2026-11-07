@@ -3,7 +3,7 @@ title: "A/B test sample size, explained with a calculator"
 meta_description: "How many visitors an A/B test needs: about 13,914 per version for a 20% lift on a 3% rate. See how each input changes it, with tables and a free calculator."
 slug: ab-test-sample-size
 date: 2026-10-27
-updated: 2026-11-03
+updated: 2026-11-07
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test sample size calculator", "sample size for ab test", "minimum detectable effect", "ab test sample size formula", "how many visitors for an ab test"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "A/B test sample size, explained with a calculator",
     "datePublished": "2026-10-27",
-    "dateModified": "2026-11-03",
+    "dateModified": "2026-11-07",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-sample-size",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -153,7 +153,7 @@ Uneven splits cost visitors too. Sending only 10% of traffic to the variant limi
 | 80% | 34,030 | 8,508 | 42,538 |
 | 90% | 67,537 | 7,505 | 75,042 |
 
-A 70/30 split costs only 17% more than 50/50. A 90/10 split costs 170% more. If you want to limit risk early, a better option is a gradual ramp: keep the 50/50 split, let only a small share of new visitors into the test at first, and raise that share step by step. freeabtest.com offers this on every plan under scheduling in [managing experiments](https://www.freeabtest.com/docs/experiments).
+A 70/30 split costs only 17% more than 50/50. A 90/10 split costs 170% more. If you want to limit risk early, a better option is a gradual ramp: keep the 50/50 split, let only a small share of new visitors into the test at first, and raise that share step by step. Visitors already assigned keep their variant when you change the ramp, because [sticky assignment](https://www.freeabtest.com/blog/ab-test-bucketing-hashing) hashes the visitor with the experiment. freeabtest.com offers this on every plan under scheduling in [managing experiments](https://www.freeabtest.com/docs/experiments).
 
 ## Is there a quick rule of thumb?
 
