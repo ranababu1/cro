@@ -3,7 +3,7 @@ title: "How to run an A/B test with plain JavaScript"
 meta_description: "Build a client-side A/B test in plain JavaScript: hash a stored visitor ID, show the variant without flicker, log conversions. Tested code and pitfalls."
 slug: ab-test-javascript
 date: 2026-10-21
-updated: 2026-11-03
+updated: 2026-11-07
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test javascript", "javascript split test", "ab testing without framework", "client side ab test", "deterministic bucketing javascript"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How to run an A/B test with plain JavaScript",
     "datePublished": "2026-10-21",
-    "dateModified": "2026-11-03",
+    "dateModified": "2026-11-07",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-javascript",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -71,7 +71,7 @@ The code is about 50 lines, and we ran it in Node against 100,000 simulated visi
 Four pieces, all built into modern browsers:
 
 - **A visitor ID.** A random string created on the first visit and kept in the browser. [`crypto.randomUUID()`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID) creates one, and [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) keeps it with no expiry date.
-- **Deterministic bucketing.** Bucketing is the step that maps a visitor to a variant. Deterministic means the same visitor ID and test name always give the same variant, so you never have to store the variant itself.
+- **[Deterministic bucketing](https://www.freeabtest.com/blog/ab-test-bucketing-hashing).** Bucketing is the step that maps a visitor to a variant. Deterministic means the same visitor ID and test name always give the same variant, so you never have to store the variant itself.
 - **An early switch.** Code that runs before the page is painted and shows the right version.
 - **Logging.** One event when a visitor sees the test (an exposure) and one when they convert, sent to any endpoint that can append rows to a log.
 

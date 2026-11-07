@@ -3,7 +3,7 @@ title: "How to run a split URL test without a plugin"
 meta_description: "Run a split URL test with one script in the head of two pages: a stable visitor ID, a 302-style redirect, a canonical tag and logging that catches lost visitors."
 slug: split-url-testing
 date: 2026-10-29
-updated: 2026-10-29
+updated: 2026-11-07
 author: "Imraan, freeabtest.com"
 keywords: ["split url testing", "split url test", "redirect test", "split url vs ab test", "split url test seo"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How to run a split URL test without a plugin",
     "datePublished": "2026-10-29",
-    "dateModified": "2026-10-29",
+    "dateModified": "2026-11-07",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/split-url-testing",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -99,7 +99,7 @@ Five parts, all of which fit in one short script plus your own logging endpoint:
 
 1. **A variant page** on the same domain, with a `rel="canonical"` link pointing to the original.
 2. **A stable visitor ID**, stored in the browser, so the same person gets the same version on every visit.
-3. **Deterministic assignment**: hash the ID with the test name and compare it with your split. No random draw on each page view.
+3. **[Deterministic assignment](https://www.freeabtest.com/blog/ab-test-bucketing-hashing)**: hash the ID with the test name and compare it with your split. No random draw on each page view.
 4. **A redirect** that runs in the `<head>`, keeps UTM tags and other query parameters, and does not leave the original page in the back-button history.
 5. **Two log events**: `assigned` on the original page for everyone, and `landed` on the page each visitor actually sees. You analyse `landed`, and the gap between the two is your redirect loss.
 
@@ -173,7 +173,7 @@ Put the same script inline at the top of the `<head>` on both pages, above your 
 
 How each part works:
 
-- **Assignment** uses the same FNV-1a hash and stored ID as our plain JavaScript guide. The test name is part of the hashed string, so a visitor's group in this test says nothing about their group in the next one.
+- **Assignment** uses the same FNV-1a hash and stored ID as our plain JavaScript guide (see [how A/B testing tools assign visitors](https://www.freeabtest.com/blog/ab-test-bucketing-hashing)). The test name is part of the hashed string, so a visitor's group in this test says nothing about their group in the next one.
 - **The redirect** uses [`location.replace()`](https://developer.mozilla.org/en-US/docs/Web/API/Location/replace), which MDN notes does not save the current page in session history. A visitor who presses Back goes to where they came from, not to the original page, which would redirect them again.
 - **The query string and hash are kept**, so `?utm_source=newsletter` still reaches your analytics on the variant page.
 - **The page is hidden** while the redirect starts, so the original does not flash. The 1.5 second timer shows the original if the redirect never happens, for example when a browser blocks it.

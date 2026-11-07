@@ -386,6 +386,9 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 ## Blog post 11 (2026-11-03)
 - content/blog/confidence-interval-ab-test.md, from the content store with one fix (see changelog). Explains confidence intervals for conversion rates and lift (Wilson, Newcombe hybrid score, Katz log ratio) with a Node-runnable function, coverage, overlap and early-stop simulations, and a ship decision table. Describes the shipped results: Wilson interval per rate, the goals table's uplift interval, single-figure lift and chance to beat control in the detailed table. tests/blogPost11.test.ts. Posts 02, 04, 06 and 07 link to post 10 (ab-test-peeking-problem) and show Updated 3 November 2026.
 
+## Blog post 12 (2026-11-07)
+- content/blog/optimizely-alternatives-small-teams.md, from the content store with two small fixes (see changelog). Compares published-price Optimizely alternatives (freeabtest.com, Crazy Egg, Convert, Unbounce, Kameleoon) with quote-only Optimizely and Wingify (VWO, AB Tasty), with 12-month costs, prices checked 7 Nov 2026. Posts 04, 07 and 08 link to post 13.
+
 ## Blog post 13 (2026-11-05)
 - content/blog/ab-test-bucketing-hashing.md, from the content store with one wording fix (see changelog). Explains hash-based bucketing, experiment ID in the hash, separate allocation hash, split changes and SRM, with a runnable assign function. Post 02 links to post 11.
 
