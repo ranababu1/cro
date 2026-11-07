@@ -3,7 +3,7 @@ title: "Best free A/B testing tools in 2026, compared honestly"
 meta_description: "A free-forever A/B testing plan at freeabtest.com versus VWO, Convert, Optimizely, Crazy Egg and other paid tools. Prices checked 15 Oct 2026."
 slug: best-free-ab-testing-tools
 date: 2026-10-15
-updated: 2026-10-31
+updated: 2026-11-07
 author: "Imraan, freeabtest.com"
 keywords:
   - free a/b testing tool
@@ -138,7 +138,7 @@ Crazy Egg is strongest if you want session recordings in the same product as A/B
 
 Kameleoon's plans page lists a 30-day PBX Starter free trial (up to 3 experiments, no card) and PBX Starter from $495 a month for up to 10 experiments and 50,000 tested visitors. Enterprise is custom, with unlimited experiments and traffic. PBX is prompt-based experimentation: you describe changes in natural language rather than using a classic visual editor only.
 
-At $495 a month for 50,000 tested visitors, Kameleoon Starter costs more per month than freeabtest Growth while covering half the tested-visitor allowance of freeabtest Starter. That can be fair if you want their prompt workflow and enterprise modules. It is a weak fit if your budget is under $100 a month.
+At $495 a month for 50,000 tested visitors, Kameleoon Starter costs more per month than freeabtest Growth while covering a fifth of the tested-visitor allowance of freeabtest Starter. That can be fair if you want their prompt workflow and enterprise modules. It is a weak fit if your budget is under $100 a month.
 
 ## Unbounce: A/B on landing pages from $149 a month
 
@@ -150,7 +150,7 @@ Use Unbounce when the pages you test live inside Unbounce. It is not a general s
 
 **VWO** lists Growth, Pro and Enterprise for web experimentation, each with a "Schedule a Demo" button and no public price. Growth includes a visual editor, unlimited experiments and variations, and multi-arm bandits. The pricing page does not list a free plan.
 
-**Optimizely** states that every plan is individually packaged and asks you to describe your needs so they can create a plan. No self-serve price appears on the pricing page.
+**Optimizely** states that every plan is individually packaged and asks you to describe your needs so they can create a plan. No self-serve price appears on the pricing page. If Optimizely is the tool you are replacing, our guide to [Optimizely alternatives for small teams](https://www.freeabtest.com/blog/optimizely-alternatives-small-teams) compares published-price options.
 
 **AB Tasty** states that pricing is custom, based on traffic volume, domains, modules and implementation scope, with no fixed plans on the pricing page. Their documentation also says platform access is created by their commercial team, not through a public signup.
 

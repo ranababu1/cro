@@ -3,7 +3,7 @@ title: "Google Optimize alternatives for developers in 2026"
 meta_description: "Google Optimize shut down on 30 Sept 2023. Free and paid replacements for developers, how each connects to GA4, and prices checked 23 October 2026."
 slug: google-optimize-alternatives-developers
 date: 2026-10-23
-updated: 2026-10-31
+updated: 2026-11-07
 author: "Imraan, freeabtest.com"
 keywords: ["google optimize alternative free", "google optimize replacement", "optimize sunset alternative", "google optimize alternative ga4", "experience_impression ga4"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "Google Optimize alternatives for developers in 2026",
     "datePublished": "2026-10-23",
-    "dateModified": "2026-10-31",
+    "dateModified": "2026-11-07",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/google-optimize-alternatives-developers",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -179,7 +179,7 @@ The snippet hides the page for at most 0.8 seconds while it decides, so visitors
 
 **Visual editing at the entry tier.** Wingify's Growth plan for web experimentation lists a visual and code editor, unlimited experiments and variations, and multi-arm bandit campaigns. On freeabtest.com, the visual editor starts at Growth, $50 a month.
 
-**Breadth.** Optimizely's plans page lists A/B, multi-page, feature and server-side testing, real-time personalization and warehouse-native analytics. Convert Pro adds multivariate and multi-page testing, server-side testing with feature flags, and a multi-arm bandit. We do not ship feature flags, and our multi-page and multivariate tests start on Growth.
+**Breadth.** Optimizely's plans page lists A/B, multi-page, feature and server-side testing, real-time personalization and warehouse-native analytics; our [Optimizely alternatives for small teams](https://www.freeabtest.com/blog/optimizely-alternatives-small-teams) guide covers when that breadth is worth a sales quote. Convert Pro adds multivariate and multi-page testing, server-side testing with feature flags, and a multi-arm bandit. We do not ship feature flags, and our multi-page and multivariate tests start on Growth.
 
 **Session recordings.** Crazy Egg Plus includes 1,000 recordings a month alongside unlimited A/B testing. Our heatmaps are live on Starter and up, but session recordings are not available yet.
 
