@@ -2,6 +2,8 @@
 
 Read this before changing anything in this repo. It applies to people and AI agents alike.
 
+For the marketing site redesign, also read `docs/plan.md` (roadmap, sitemap, capability inventory, design system) and `docs/instructions.md` (rules for that work: architecture, tests, Git, public copy). Rules here win where both cover the same topic.
+
 ## Required on every change
 1. Update `docs/changelog.md`: add a row at the top with commit ID, date and time in IST, and a one-line summary.
 2. Update `docs/currentstate.md` so it describes the app as it is after your change (features, known gaps, stack).
@@ -50,7 +52,7 @@ A change without these updates is incomplete.
 Plain language, short sentences, no em dashes, no filler.
 
 ## Product docs
-- User-facing docs live at /docs, with content in `lib/docs/content/*.ts`. When a change affects behaviour, limits, the SDK or the API, update the matching docs page in the same PR. Never link to the GitHub README from the product. Public pages (docs, landing, pricing, roadmap) must not reveal internals: framework, database, hosting, env var names, rate limiter details, repo links or the admin console. Keep that in README and docs/*.md. Mark unbuilt features as Coming later with their phase.
+- User-facing docs live at /docs, with content in `lib/docs/content/*.ts`. When a change affects behaviour, limits, the SDK or the API, update the matching docs page in the same PR. Never link to the GitHub README from the product. Public pages (docs, landing, pricing, roadmap) must not reveal internals: framework, database, hosting, env var names, rate limiter details, repo links or the admin console. Keep that in README and docs/*.md. Unbuilt features appear only as Coming soon rows on the pricing page, with no phase numbers (see Public roadmap below).
 
 
 ## Telemetry
