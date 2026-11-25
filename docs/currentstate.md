@@ -1,16 +1,16 @@
 # Current State
 
-> **LEGAL PAGES ARE A STANDARD DRAFT (added 2026-11-05).** /legal/terms, /legal/privacy, /legal/dpa, /legal/cookies and /security
-> are a generic starting version written from how the product works today. Before relying on them:
-> 1. Fill in `lib/legal.ts`: `entity` (registered company name), `address`, `governingLaw`, and the contact, privacy and security emails.
->    While these are null the pages name only freeabtest.com and use a generic governing-law clause.
-> 2. Have the Terms, Privacy Policy and DPA reviewed by a lawyer for your jurisdiction and customer markets (EU, UK, US, India).
-> 3. Prepare the sub-processor list (hosting, database, bot check, sign-in, analytics, Upstash if used); the pages say it is available on request.
-> 4. Paid-plan billing terms (refunds, renewals, taxes) are not in the Terms yet; add them with the payment integration.
-> 5. When the text changes in substance, bump `LEGAL_VERSION` in `lib/legal.ts`.
+> **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
+> the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone
+> +91 9964 180587; email hello@freeabtest.com. Public pages: /about, /contact, /legal/terms (billing, renewal, tax and refund terms
+> in section 2), /legal/privacy, /legal/dpa, /legal/cookies, /legal/refunds, /legal/delivery and /security. Paid checkout is not live
+> yet; the billing terms describe what will apply when it is (no mid-cycle refunds; cancellations and downgrades take effect at period end).
+> Still have the text reviewed by a lawyer for your jurisdiction and customer markets (EU, UK, US, India). The sub-processor list
+> (hosting, database, bot check, sign-in, analytics, Upstash if used) is still to be prepared; the pages say it is available on request.
+> When the Terms or Privacy Policy change in substance, bump `LEGAL_VERSION` in `lib/legal.ts`.
 
 > **GA LAUNCH CHECKLIST (open items as of 2026-11-05).** Code is done; these need you. Details in `docs/operations.md`.
-> - [ ] Legal: fill `lib/legal.ts`, lawyer review, sub-processor list, billing terms with the payment work (see the banner above).
+> - [ ] Legal: lawyer review and the sub-processor list (operator details and billing terms are filled; see the banner above).
 > - [ ] Production env vars: `OPS_ALERT_WEBHOOK_URL` (Slack or Discord webhook for errors and new tickets),
 >       `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` (shared rate limits), `DB_AUTO_MIGRATE=false` with `npm run db:migrate`
 >       as a deploy step, optional `GITHUB_CLIENT_ID` + `GITHUB_CLIENT_SECRET`, and `AI_KEYS_ENCRYPTION_KEY` if AI is on.
@@ -18,7 +18,7 @@
 > - [ ] Turso point-in-time restore on; daily `npm run db:backup` to encrypted storage with a 30-day lifecycle (the legal pages promise 30 days).
 > - [ ] Run the restore drill once (docs/operations.md section 4).
 > - [ ] Check `x-forwarded-for` is set by the host (true on Vercel); per-IP limits trust it.
-> - [ ] Payment integration (planned next).
+> - [ ] Payment integration (PayPal USD subscriptions next, then Razorpay INR). Policy pages for review are live.
 > - Known gaps accepted for launch: no transactional email (invites, ticket replies, quota warnings are in-app only); WordPress plugin has
 >   no consent setting; account deletion signs the user out but does not revoke other sessions server-side; telemetry counters are lost if a
 >   batch write fails; events from already-enrolled visitors are still accepted for paused or completed tests; Microsoft sign-in not

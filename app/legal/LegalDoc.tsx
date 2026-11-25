@@ -1,18 +1,19 @@
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
-import { LEGAL_PAGES, LEGAL_UPDATED } from '@/lib/legal';
+import { COMPANY_PAGES, LEGAL_PAGES, LEGAL_UPDATED } from '@/lib/legal';
 
-/** Shared frame for the legal pages: title, last updated date, links between the documents and readable prose. */
+const NAV = [...COMPANY_PAGES, ...LEGAL_PAGES, { slug: 'security', href: '/security', title: 'Security' }] as const;
+
+/** Shared frame for the legal and company policy pages: title, last updated date, links between the documents and readable prose. */
 export function LegalDoc({ slug, title, intro, children }: { slug: string; title: string; intro?: React.ReactNode; children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-white">
             <SiteHeader />
             <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8">
                 <nav aria-label="Legal documents" className="mb-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                    {LEGAL_PAGES.map((p) => (
-                        <Link key={p.slug} href={`/legal/${p.slug}`} aria-current={p.slug === slug ? 'page' : undefined} className={p.slug === slug ? 'font-semibold text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}>{p.title}</Link>
+                    {NAV.map((p) => (
+                        <Link key={p.slug} href={p.href} aria-current={p.slug === slug ? 'page' : undefined} className={p.slug === slug ? 'font-semibold text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}>{p.title}</Link>
                     ))}
-                    <Link href="/security" className={slug === 'security' ? 'font-semibold text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}>Security</Link>
                 </nav>
                 <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">{title}</h1>
                 <p className="mt-2 text-sm text-zinc-500">Last updated {LEGAL_UPDATED}</p>

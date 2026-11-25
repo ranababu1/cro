@@ -56,13 +56,14 @@ beforeEach(() => as(null));
 
 describe('legal pages', () => {
     it('exist, are linked from the footer and sign-in, and are in the sitemap', () => {
-        for (const f of ['app/legal/terms/page.tsx', 'app/legal/privacy/page.tsx', 'app/legal/dpa/page.tsx', 'app/legal/cookies/page.tsx', 'app/security/page.tsx']) expect(fs.existsSync(f), f).toBe(true);
+        for (const f of ['app/legal/terms/page.tsx', 'app/legal/privacy/page.tsx', 'app/legal/dpa/page.tsx', 'app/legal/cookies/page.tsx', 'app/legal/refunds/page.tsx', 'app/legal/delivery/page.tsx', 'app/about/page.tsx', 'app/contact/page.tsx', 'app/security/page.tsx']) expect(fs.existsSync(f), f).toBe(true);
         const footer = fs.readFileSync('app/components/landing/SiteChrome.tsx', 'utf8');
-        for (const href of ['/legal/terms', '/legal/privacy', '/security']) expect(footer).toContain(href);
+        for (const href of ['/about', '/contact', '/legal/terms', '/legal/privacy', '/legal/refunds', '/legal/delivery', '/security']) expect(footer).toContain(href);
         const signin = fs.readFileSync('app/signin/page.tsx', 'utf8');
         expect(signin).toContain('/legal/terms');
         expect(signin).toContain('/legal/privacy');
-        expect(fs.readFileSync('app/sitemap.ts', 'utf8')).toContain('/legal/privacy');
+        const sitemap = fs.readFileSync('app/sitemap.ts', 'utf8');
+        for (const href of ['/about', '/contact', '/legal/privacy', '/legal/refunds', '/legal/delivery']) expect(sitemap).toContain(href);
     });
     it('the cookie page lists every key the SDK stores', () => {
         const page = fs.readFileSync('app/legal/cookies/page.tsx', 'utf8');

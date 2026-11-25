@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
-import { LEGAL, operatorName } from '@/lib/legal';
+import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
 
 export const metadata: Metadata = { title: 'Privacy Policy', description: 'What freeabtest.com collects, why, how long it is kept and your rights.' };
 
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
             <h2>9. Changes</h2>
             <p>We will post changes here with a new date, and tell account owners about material changes before they apply.</p>
             <h2>10. Contact</h2>
-            <p>{op}{LEGAL.address ? `, ${LEGAL.address}` : ''}. Email: {mail}.</p>
+            <p>{op}{LEGAL.address ? `, ${LEGAL.address}` : ''}. Email: {mail}.{LEGAL.contactPhone ? <> Phone: <a href={contactPhoneHref()}>{LEGAL.contactPhone}</a>.</> : null}</p>
         </LegalDoc>
     );
 }
