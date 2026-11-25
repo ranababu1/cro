@@ -3,7 +3,9 @@ import { getAppContext } from '@/lib/appContext';
 import { db } from '@/lib/db';
 import { isProfileComplete } from '@/lib/profile';
 import { isProfileExempt } from '@/lib/profileGate';
-import { billingEnabled } from '@/lib/billing/config';
+import { canUseBillingCheckout } from '@/lib/billing/config';
+import { getOwnerBillingAlert } from '@/lib/billing/service';
+import { BillingAlertBanner } from '../components/BillingAlertBanner';
 import { ProfilePrompt } from '../components/profile/ProfilePrompt';
 import AppShell from '../components/shell/AppShell';
 import { Logo } from '../components/ui/Logo';
@@ -33,8 +35,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     if (user?.onboarding_pending && !complete && !exempt) redirect('/onboarding');
     const showPrompt = !complete && !exempt && !user?.profile_prompt_dismissed_at;
 
+    const billingOn = canUseBillingCheckout(ctx.user.email);
+    const billingAlert = billingOn && ctx.current ? await getOwnerBillingAlert(ctx.current.org_id, ctx.user.id) : null;
+
     return (
-        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin} billing={billingEnabled()}>
+        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin} billing={billingOn}>
+            {billingAlert && <BillingAlertBanner alert={billingAlert} />}
             {showPrompt && <ProfilePrompt />}
             {children}
         </AppShell>

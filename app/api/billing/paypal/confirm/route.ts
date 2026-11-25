@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { teamContext } from '@/lib/team';
 import { formatZodError } from '@/lib/validation';
-import { paypalConfig } from '@/lib/billing/config';
+import { canUseBillingCheckout, paypalConfig } from '@/lib/billing/config';
 import { PAYPAL_SUBSCRIPTION_ID, PayPalError } from '@/lib/billing/paypal';
 import { billingStatus, syncPayPalSubscription } from '@/lib/billing/service';
 import { db } from '@/lib/db';
@@ -22,6 +22,12 @@ export async function POST(request: NextRequest) {
         if (!cfg) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         const t = await teamContext(request, { owner: true });
         if (t instanceof NextResponse) return t;
+        if (cfg.mode === 'sandbox') {
+            const user = await db.getUser(t.userId);
+            if (!canUseBillingCheckout(user?.email)) {
+                return NextResponse.json({ error: 'Checkout is restricted while billing is in test mode.' }, { status: 403 });
+            }
+        }
         const parsed = bodySchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const known = await db.getBillingSubscription('paypal', parsed.data.subscription_id);

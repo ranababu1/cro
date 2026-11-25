@@ -61,6 +61,10 @@ export const organizations = sqliteTable('organizations', {
     custom_allowances: text('custom_allowances'),
     // Paid billing plan ends at this time (ISO, UTC) after a cancellation or suspension; null while it renews. See lib/billing.
     plan_ends_at: text('plan_ends_at'),
+    // Scheduled plan change (e.g. downgrade at period end). See lib/billing.
+    scheduled_plan: text('scheduled_plan', { enum: ['free', 'starter', 'growth'] }),
+    scheduled_period: text('scheduled_period', { enum: ['monthly', 'yearly'] }),
+    scheduled_plan_at: text('scheduled_plan_at'),
     created_at: text('created_at').notNull().default(now),
 });
 
@@ -772,6 +776,8 @@ export const billingSubscriptions = sqliteTable('billing_subscriptions', {
     paid_through: text('paid_through'),
     next_billing_at: text('next_billing_at'),
     last_payment_at: text('last_payment_at'),
+    replaces_subscription_id: text('replaces_subscription_id'),
+    payment_failed_at: text('payment_failed_at'),
     created_by: text('created_by').references(() => users.id, { onDelete: 'set null' }),
     created_at: text('created_at').notNull().default(now),
     updated_at: text('updated_at').notNull().default(now),

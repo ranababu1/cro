@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
 import { teamContext } from '@/lib/team';
-import { billingEnabled } from '@/lib/billing/config';
+import { canUseBillingCheckout, paypalConfig } from '@/lib/billing/config';
 import { billingStatus } from '@/lib/billing/service';
 
 export const runtime = 'nodejs';
@@ -11,7 +12,14 @@ export async function GET(request: NextRequest) {
     try {
         const t = await teamContext(request);
         if (t instanceof NextResponse) return t;
-        if (!billingEnabled()) return NextResponse.json({ enabled: false }, { headers: { 'Cache-Control': 'no-store' } });
+        const cfg = paypalConfig();
+        if (!cfg) return NextResponse.json({ enabled: false }, { headers: { 'Cache-Control': 'no-store' } });
+        if (cfg.mode === 'sandbox') {
+            const user = await db.getUser(t.userId);
+            if (!canUseBillingCheckout(user?.email)) {
+                return NextResponse.json({ enabled: false }, { headers: { 'Cache-Control': 'no-store' } });
+            }
+        }
         if (t.role !== 'owner') return NextResponse.json({ enabled: true, owner: false }, { headers: { 'Cache-Control': 'no-store' } });
         return NextResponse.json({ ...(await billingStatus(t.orgId)), owner: true }, { headers: { 'Cache-Control': 'no-store' } });
     } catch (error) {

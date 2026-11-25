@@ -73,6 +73,9 @@ export interface OrgForEntitlements {
     custom_allowances?: string | null;
     /** Paid billing plan ends at this time after a cancellation (lib/billing). Past it, the billing plan is Free. */
     plan_ends_at?: string | null;
+    /** Scheduled plan change (e.g. downgrade at period end on an active subscription). */
+    scheduled_plan?: string | null;
+    scheduled_plan_at?: string | null;
 }
 
 export function isSuperAdminEmail(email: string | null | undefined): boolean {
@@ -118,7 +121,8 @@ function applyAllowances(limits: Limits, a: Allowances): Limits {
 /** Pure rule used everywhere. */
 export function computeEntitlements(org: OrgForEntitlements | null, memberEmails: string[], now = Date.now()): Entitlements {
     const ended = !!org?.plan_ends_at && Date.parse(org.plan_ends_at) <= now;
-    const billingPlan = ended ? 'free' : org?.plan || 'free';
+    const downgraded = !ended && !!org?.scheduled_plan && !!org?.scheduled_plan_at && Date.parse(org.scheduled_plan_at) <= now;
+    const billingPlan = ended ? 'free' : downgraded && org?.scheduled_plan ? org.scheduled_plan : org?.plan || 'free';
     const unlimited = memberEmails.some(isSuperAdminEmail);
     const assigned = org?.plan_override && (ASSIGNABLE_PLANS as readonly string[]).includes(org.plan_override) ? org.plan_override : null;
     const planSource: PlanSource = unlimited ? 'platform_admin' : assigned ? 'assigned' : 'billing';

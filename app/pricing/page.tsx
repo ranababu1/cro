@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
 import { BillingCards } from './BillingCards';
-import { billingEnabled } from '@/lib/billing/config';
+import { canSessionCheckout } from '@/lib/billing/access';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
     title: 'Pricing',
@@ -115,7 +117,8 @@ const NotIncluded = () => <span className="text-xs text-zinc-500">Not included</
 const PaidBadge = ({ tier }: { tier: number }) => <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
 const Soon = () => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon</span>;
 
-export default function PricingPage() {
+export default async function PricingPage() {
+    const checkout = await canSessionCheckout();
     return (
         <div className="min-h-screen bg-[#f8faff] text-zinc-950">
             <SiteHeader />
@@ -125,7 +128,7 @@ export default function PricingPage() {
                 <h1 className="mt-3 text-[34px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[44px]">Simple plans. A free tier you can actually use.</h1>
                 <p className="mt-3 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
 
-                <BillingCards checkout={billingEnabled()} />
+                <BillingCards checkout={checkout} />
 
                 <section id="compare" className="mt-20 scroll-mt-6">
                     <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Compare plans</h2>

@@ -46,7 +46,9 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                             </tr>
                         </THead>
                         <TBody>
-                            {tenants.map(({ org, members, projects, usage, plan }) => (
+                            {tenants.map(({ org, members, projects, usage, plan, subscriptions }) => {
+                                const sub = subscriptions[0];
+                                return (
                                 <TR key={org.id}>
                                     <TD>
                                         <Link className="font-medium text-zinc-900 hover:underline" href={`/admin/orgs/${org.id}`}>{org.name}</Link>
@@ -54,7 +56,12 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                                         {org.special_friend && <Badge tone="brand" className="mt-1">Special friend</Badge>}
                                     </TD>
                                     <TD><StatusBadge status={org.status} /></TD>
-                                    <TD><PlanCell plan={plan} /></TD>
+                                    <TD>
+                                        <PlanCell plan={plan} />
+                                        {sub?.status === 'SUSPENDED' && <Badge tone="danger" className="ml-1">Suspended</Badge>}
+                                        {sub?.status === 'ACTIVE' && sub.payment_failed_at && <Badge tone="warning" className="ml-1">Payment failed</Badge>}
+                                        {org.plan_ends_at && <Badge tone="neutral" className="ml-1">Ends {new Date(org.plan_ends_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</Badge>}
+                                    </TD>
                                     <TD className="max-w-[14rem] truncate" title={members.map((m) => m.email).join(', ')}>{members.map((m) => m.email).join(', ')}</TD>
                                     <TD numeric>{projects.length}</TD>
                                     <TD numeric>{usage.total.experiments}<span className="text-zinc-400"> ({usage.total.running} running)</span></TD>
@@ -62,7 +69,8 @@ export default async function AdminHome({ searchParams }: { searchParams: Promis
                                     <TD numeric>{usage.month.events.toLocaleString()}</TD>
                                     <TD numeric>{new Date(org.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</TD>
                                 </TR>
-                            ))}
+                                );
+                            })}
                         </TBody>
                     </Table>
                 )}

@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         }
         let result: string;
         try {
-            result = (await syncPayPalSubscription(cfg, subscriptionId)).result;
+            result = (await syncPayPalSubscription(cfg, subscriptionId, null, { eventType: type })).result;
         } catch (e) {
             // A subscription PayPal does not know (or not ours to read) will not get better on retry.
             if (e instanceof PayPalError && (e.status === 400 || e.status === 404)) result = 'not_found';

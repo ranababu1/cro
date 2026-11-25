@@ -1,6 +1,11 @@
+import { isSuperAdminEmail } from '../entitlements';
+
 /**
  * Billing configuration from environment variables. Billing stays off (no checkout, no Billing page, pricing
  * buttons go to sign-in as before) until every PayPal variable below is set.
+ *
+ * When PAYPAL_API_BASE is sandbox, checkout is restricted to platform admins and BILLING_TEST_EMAILS so
+ * public visitors cannot get free paid plans while testing.
  *
  * Keep these names out of public pages and docs.
  */
@@ -65,6 +70,32 @@ export function billingEnabled(env: Env = process.env): boolean {
     return paypalConfig(env) !== null;
 }
 
+/** Optional comma-separated list of emails allowed to test checkout while PAYPAL_API_BASE is sandbox. */
+export function billingTestEmails(env: Env = process.env): string[] {
+    return (env.BILLING_TEST_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+}
+
+/**
+ * In live mode, any owner may use billing checkout.
+ * In sandbox mode, only platform admins and emails in BILLING_TEST_EMAILS may use checkout.
+ */
+export function canUseBillingCheckout(email: string | null | undefined, env: Env = process.env): boolean {
+    const cfg = paypalConfig(env);
+    if (!cfg) return false;
+    if (cfg.mode === 'live') return true;
+    if (!email) return false;
+    const lower = email.trim().toLowerCase();
+    // In tests or custom envs, check both env.PLATFORM_ADMIN_EMAILS and the app helper.
+    const envAdmins = (env.PLATFORM_ADMIN_EMAILS || '')
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+    return isSuperAdminEmail(lower) || envAdmins.includes(lower) || billingTestEmails(env).includes(lower);
+}
+
 /** Which of our plans a PayPal plan id sells, or null for an id we do not know. */
 export function planForPayPalPlanId(cfg: PayPalConfig, planId: string | null | undefined): { plan: PaidPlan; period: BillingPeriod } | null {
     if (!planId) return null;
@@ -72,7 +103,7 @@ export function planForPayPalPlanId(cfg: PayPalConfig, planId: string | null | u
     return null;
 }
 
-/** Where a subscriber stops automatic payments while in-app cancellation is not built. */
+/** Where a subscriber updates payment details or cancels at PayPal. */
 export function paypalManageUrl(mode: 'sandbox' | 'live'): string {
     return mode === 'live' ? 'https://www.paypal.com/myaccount/autopay/' : 'https://www.sandbox.paypal.com/myaccount/autopay/';
 }

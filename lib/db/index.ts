@@ -46,7 +46,7 @@ function effectivePlanSql(orgAlias: string, adminEmails: string[]) {
     const owned = adminEmails.length
         ? sql`WHEN EXISTS (SELECT 1 FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.org_id = ${o}.id AND m.role = 'owner' AND lower(u.email) IN (${sql.join(adminEmails.map((e) => sql`${e.toLowerCase()}`), sql`, `)})) THEN 'enterprise' `
         : sql``;
-    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) WHEN ${o}.plan_ends_at IS NOT NULL AND ${o}.plan_ends_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 'free' ELSE coalesce(lower(${o}.plan), 'free') END)`;
+    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) WHEN ${o}.plan_ends_at IS NOT NULL AND ${o}.plan_ends_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 'free' WHEN ${o}.scheduled_plan IS NOT NULL AND ${o}.scheduled_plan_at IS NOT NULL AND ${o}.scheduled_plan_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN lower(${o}.scheduled_plan) ELSE coalesce(lower(${o}.plan), 'free') END)`;
 }
 
 export interface OrgUpdate {
@@ -57,6 +57,9 @@ export interface OrgUpdate {
     plan_override_by?: string | null;
     plan_override_at?: string | null;
     plan_ends_at?: string | null;
+    scheduled_plan?: 'free' | 'starter' | 'growth' | null;
+    scheduled_period?: 'monthly' | 'yearly' | null;
+    scheduled_plan_at?: string | null;
     monthly_visitor_limit?: number | null;
     monthly_experiment_limit?: number | null;
     monthly_pageview_limit?: number | null;
@@ -1078,7 +1081,8 @@ export const db = {
     async upsertBillingSubscription(row: {
         orgId: string; provider: 'paypal' | 'razorpay'; providerSubscriptionId: string; providerPlanId: string | null;
         plan: 'starter' | 'growth' | null; period: 'monthly' | 'yearly' | null; status: string;
-        paidThrough?: string | null; nextBillingAt?: string | null; lastPaymentAt?: string | null; createdBy?: string | null;
+        paidThrough?: string | null; nextBillingAt?: string | null; lastPaymentAt?: string | null;
+        replacesSubscriptionId?: string | null; paymentFailedAt?: string | null; createdBy?: string | null;
     }) {
         const d = await getDb();
         const at = nowIso();
@@ -1086,11 +1090,22 @@ export const db = {
             org_id: row.orgId, provider: row.provider, provider_subscription_id: row.providerSubscriptionId, provider_plan_id: row.providerPlanId,
             plan: row.plan, period: row.period, status: row.status, next_billing_at: row.nextBillingAt ?? null, last_payment_at: row.lastPaymentAt ?? null, updated_at: at,
             ...(row.paidThrough !== undefined ? { paid_through: row.paidThrough } : {}),
+            ...(row.replacesSubscriptionId !== undefined ? { replaces_subscription_id: row.replacesSubscriptionId } : {}),
+            ...(row.paymentFailedAt !== undefined ? { payment_failed_at: row.paymentFailedAt } : {}),
         };
         await d.insert(s.billingSubscriptions)
-            .values({ id: generateId('bsub'), ...values, paid_through: row.paidThrough ?? null, created_by: row.createdBy ?? null })
+            .values({
+                id: generateId('bsub'), ...values, paid_through: row.paidThrough ?? null,
+                replaces_subscription_id: row.replacesSubscriptionId ?? null, payment_failed_at: row.paymentFailedAt ?? null, created_by: row.createdBy ?? null,
+            })
             .onConflictDoUpdate({ target: [s.billingSubscriptions.provider, s.billingSubscriptions.provider_subscription_id], set: values });
         return (await this.getBillingSubscription(row.provider, row.providerSubscriptionId))!;
+    },
+
+    async listBillingWebhookEventsForResources(resourceIds: string[], limit = 25) {
+        if (resourceIds.length === 0) return [];
+        const d = await getDb();
+        return d.select().from(s.billingWebhookEvents).where(inArray(s.billingWebhookEvents.resource_id, resourceIds)).orderBy(desc(s.billingWebhookEvents.received_at)).limit(limit);
     },
 
     /** Records a webhook event id. Returns false when it was already processed (a retried delivery). */
