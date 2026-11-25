@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { canDownloadPlugin } from '@/lib/pluginDownload';
-import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
+import { SiteFooter, SiteHeader } from '../components/site';
 
 export const metadata: Metadata = { title: 'WordPress plugin', description: 'The FreeABTest WordPress plugin for paid plans. Install once and run every future test without touching your theme.' };
 export const dynamic = 'force-dynamic';

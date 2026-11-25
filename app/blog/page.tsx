@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
+import { SiteFooter, SiteHeader } from '../components/site';
 import { SITE_URL, formatDate, getAllPosts } from '@/lib/blog';
 import { BlogGrid } from './_components/BlogGrid';
 import { CategoryTag, Meta, type CardPost } from './_components/PostCard';

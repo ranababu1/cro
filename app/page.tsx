@@ -4,7 +4,7 @@ import { aiConfigured } from '@/lib/ai/crypto';
 import { Blobs } from './components/landing/Blobs';
 import { DashboardMock } from './components/landing/DashboardMock';
 import { TestIllustration } from './components/landing/TestIllustration';
-import { Arrow, SiteFooter, SiteHeader } from './components/landing/SiteChrome';
+import { ArrowIcon as Arrow, SiteFooter, SiteHeader } from './components/site';
 
 // "Works with your stack": JavaScript, HTML and WordPress (paid plans) exist today, the rest are marked as coming soon.
 const stack: { name: string; soon?: boolean; icon: React.ReactNode }[] = [
@@ -74,10 +74,10 @@ export function generateMetadata(): Metadata {
 export default function LandingPage() {
     const aiLive = aiConfigured();
     return (
-        <div className="min-h-screen overflow-x-hidden bg-[#f8faff] text-zinc-950">
+        <div className="min-h-screen overflow-x-clip bg-[#f8faff] text-zinc-950">
+            <SiteHeader />
             <div className="relative isolate">
                 <Blobs variant="hero" />
-                <SiteHeader />
 
                 {/* Hero */}
                 <section className="mx-auto grid max-w-[1360px] gap-14 px-5 pb-10 pt-6 sm:px-8 lg:grid-cols-[minmax(0,560px)_minmax(0,1fr)] lg:gap-6 lg:px-10 lg:pt-[52px]">

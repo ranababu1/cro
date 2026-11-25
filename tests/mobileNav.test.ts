@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { focusableIn, trapTab } from '@/app/components/overlay';
-import { mobileGroups, mobileLinks } from '@/app/components/landing/SiteChrome';
+import { NAV_LINKS, NAV_MENUS } from '@/app/components/site/nav';
 
 const root = path.join(__dirname, '..');
 const read = (f: string) => fs.readFileSync(path.join(root, f), 'utf8');
@@ -35,19 +35,20 @@ describe('focus trap', () => {
 });
 
 describe('mobile nav', () => {
-    it('holds every desktop header link plus Docs, Pricing and Blog', () => {
-        const chrome = read('app/components/landing/SiteChrome.tsx');
-        const all = [...mobileLinks.map((l) => l.href), ...mobileGroups.flatMap((g) => g.items.map((i) => i.href))];
-        for (const href of ['/pricing', '/blog', '/docs']) expect(all).toContain(href);
+    it('mobile menu renders the same menus and links as the desktop mega menu', () => {
+        const mobile = read('app/components/site/MobileMenu.tsx');
+        const desktop = read('app/components/site/MegaNav.tsx');
+        for (const src of [mobile, desktop]) { expect(src).toContain('NAV_MENUS.map'); expect(src).toContain('NAV_LINKS.map'); }
+        expect(NAV_MENUS.map((m) => m.label)).toEqual(['Product', 'Solutions', 'Developers', 'Resources']);
+        expect(NAV_LINKS.map((l) => l.title)).toEqual(['Pricing']);
+        const all = NAV_MENUS.flatMap((m) => m.groups.flatMap((g) => g.items.map((i) => i.href)));
+        for (const href of ['/blog', '/docs']) expect(all).toContain(href);
         expect(all.some((h) => h.startsWith('/roadmap'))).toBe(false);
-        const desktop = [...chrome.slice(chrome.indexOf('aria-label="Main"'), chrome.indexOf('</nav>', chrome.indexOf('aria-label="Main"'))).matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
-        for (const href of desktop) expect(all).toContain(href);
-        expect(mobileGroups.map((g) => g.label)).toEqual(['Product', 'Use cases', 'Resources']);
     });
 
-    it('menu has Sign in, Start free, aria-expanded and is hidden from lg up', () => {
-        const src = read('app/components/landing/MobileNav.tsx');
-        expect(src).toMatch(/>Sign in</); expect(src).toMatch(/Start free/);
+    it('menu has Sign in, Start for free, aria-expanded and is hidden from lg up', () => {
+        const src = read('app/components/site/MobileMenu.tsx');
+        expect(src).toMatch(/>Sign in</); expect(src).toMatch(/Start for free/);
         expect(src).toContain('aria-expanded={open}'); expect(src).toContain('aria-controls');
         expect(src).toContain('lg:hidden'); expect(src).toContain('useOverlay(');
     });
