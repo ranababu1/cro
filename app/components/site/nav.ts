@@ -58,6 +58,7 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'Integrate',
                 items: [
+                    { href: '/developers', title: 'Developer hub', body: 'Setup, code examples, keys and webhooks' },
                     { href: '/docs/sdk', title: 'JavaScript SDK', body: 'One script tag and the ABTest API' },
                     { href: '/docs/rest-api', title: 'REST API', body: 'Assign, track and read results over HTTP' },
                     { href: '/docs/server-side', title: 'Server-side testing', body: 'Assign visitors from your backend' },
@@ -116,6 +117,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
         { href: '/wordpress', title: 'WordPress plugin' },
     ] },
     { heading: 'Developers', links: [
+        { href: '/developers', title: 'Developer hub' },
         { href: '/docs', title: 'Documentation' },
         { href: '/docs/sdk', title: 'JavaScript SDK' },
         { href: '/docs/rest-api', title: 'REST API' },

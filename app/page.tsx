@@ -110,7 +110,7 @@ export default function LandingPage() {
                             <h3 className="mt-3 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em]">Build experimentation into your product.</h3>
                             <p className="mt-3 text-[16px] leading-[1.6] text-slate-300">Deterministic assignment, a small JavaScript API and REST endpoints for your backend, with public and secret keys per environment.</p>
                             <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 text-[15px] font-medium">
-                                <Link href="/docs/sdk" className="text-white underline-offset-4 hover:underline">JavaScript SDK</Link>
+                                <Link href="/developers" className="text-white underline-offset-4 hover:underline">Developer hub</Link>
                                 <Link href="/docs/rest-api" className="text-white underline-offset-4 hover:underline">REST API</Link>
                             </div>
                         </div>
@@ -220,8 +220,8 @@ export default function LandingPage() {
                                 <li><strong className="font-semibold text-white">Integrations.</strong> GA4 events, Google Tag Manager, a WordPress plugin on paid plans, and signed webhooks.</li>
                             </ul>
                             <div className="mt-8 flex flex-wrap gap-3">
-                                <SiteButton href="/docs/sdk" variant="onDark">SDK reference <ArrowIcon /></SiteButton>
-                                <SiteButton href="/docs/rest-api" variant="outlineDark">API reference</SiteButton>
+                                <SiteButton href="/developers" variant="onDark">Developer hub <ArrowIcon /></SiteButton>
+                                <SiteButton href="/docs/sdk" variant="outlineDark">SDK reference</SiteButton>
                             </div>
                         </div>
                         <div className="min-w-0 space-y-4">
