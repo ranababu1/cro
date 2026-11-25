@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vites
 import { NextRequest } from 'next/server';
 import { useTempDatabase, seedProjectDomain, flowExperimentBody } from './helpers';
 import { effectivePageviewLimit, clearPageviewCache, getPageviewStatus, currentMonth } from '@/lib/pageviewQuota';
-import { FREE_MONTHLY_PAGEVIEWS, PAID_MONTHLY_PAGEVIEWS } from '@/lib/plans';
+import { FREE_MONTHLY_PAGEVIEWS, planMonthlyPageviews } from '@/lib/plans';
 import { adminUpdateOrgSchema } from '@/lib/validation';
 
 const session = vi.hoisted(() => ({ current: null as null | { user: { id: string } } }));
@@ -19,16 +19,22 @@ describe('effective limit', () => {
     it('uses plan default, override, unlimited and admin exemption', () => {
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: null }, false)).toBe(FREE_MONTHLY_PAGEVIEWS);
         expect(FREE_MONTHLY_PAGEVIEWS).toBeNull();
-        expect(effectivePageviewLimit({ plan: 'team', monthly_pageview_limit: null }, false)).toBe(PAID_MONTHLY_PAGEVIEWS);
+        expect(planMonthlyPageviews('starter')).toBeNull();
+        expect(effectivePageviewLimit({ plan: 'starter', monthly_pageview_limit: null }, false)).toBeNull();
+        expect(effectivePageviewLimit({ plan: 'growth', monthly_pageview_limit: null }, false)).toBeNull();
+        expect(effectivePageviewLimit({ plan: 'team', monthly_pageview_limit: null }, false)).toBeNull();
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: 5 }, false)).toBe(5);
+        expect(effectivePageviewLimit({ plan: 'starter', monthly_pageview_limit: 5 }, false)).toBe(5);
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: -1 }, false)).toBeNull();
         expect(effectivePageviewLimit({ plan: 'free', monthly_pageview_limit: 5 }, true)).toBeNull();
     });
-    it('admin schema accepts -1 and null for pageviews only', () => {
+    it('admin schema accepts -1 and null for pageviews and visitors', () => {
         expect(adminUpdateOrgSchema.safeParse({ monthly_pageview_limit: -1 }).success).toBe(true);
         expect(adminUpdateOrgSchema.safeParse({ monthly_pageview_limit: null }).success).toBe(true);
         expect(adminUpdateOrgSchema.safeParse({ monthly_pageview_limit: -2 }).success).toBe(false);
-        expect(adminUpdateOrgSchema.safeParse({ monthly_visitor_limit: -1 }).success).toBe(false);
+        expect(adminUpdateOrgSchema.safeParse({ monthly_visitor_limit: -1 }).success).toBe(true);
+        expect(adminUpdateOrgSchema.safeParse({ monthly_visitor_limit: null }).success).toBe(true);
+        expect(adminUpdateOrgSchema.safeParse({ monthly_visitor_limit: -2 }).success).toBe(false);
     });
 });
 

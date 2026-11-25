@@ -41,14 +41,14 @@ export default function TenantControls({ org, plan: effective }: { org: Org; pla
     return (
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
             <Card>
-                <CardHeader title="Plan and limits" description="Limits reset each calendar month (UTC). Visitor and experiment limits: blank is unlimited. Orgs with a platform admin member have no pageview cap." />
+                <CardHeader title="Plan and limits" description="Limits reset each calendar month (UTC). Visitor and pageview fields: blank uses the plan default, -1 is unlimited. Experiment starts: blank is unlimited. Orgs a platform admin owns have no caps." />
                 <CardBody>
                     <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void patch({ plan, monthly_visitor_limit: toLimit(visitors), monthly_experiment_limit: toLimit(experiments), monthly_pageview_limit: toLimit(pageviews) }, 'Plan saved.'); }}>
                         {error && <Alert tone="danger">{error}</Alert>}
                         {saved && <Alert tone="success">{saved}</Alert>}
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                             <Field label="Billing plan">{(id) => <Input id={id} required value={plan} onChange={(e) => setPlan(e.target.value)} />}</Field>
-                            <Field label="Visitors per month">{(id) => <Input id={id} type="number" min={0} value={visitors} placeholder="Unlimited" onChange={(e) => setVisitors(e.target.value)} />}</Field>
+                            <Field label="Visitors per month" hint="Blank uses the plan default. -1 is unlimited.">{(id) => <Input id={id} type="number" min={-1} value={visitors} placeholder="Plan default" onChange={(e) => setVisitors(e.target.value)} />}</Field>
                             <Field label="Pageviews per month" hint="Blank uses the plan default. -1 is unlimited.">{(id) => <Input id={id} type="number" min={-1} value={pageviews} placeholder="Plan default" onChange={(e) => setPageviews(e.target.value)} />}</Field>
                             <Field label="Experiment starts per month">{(id) => <Input id={id} type="number" min={0} value={experiments} placeholder="Unlimited" onChange={(e) => setExperiments(e.target.value)} />}</Field>
                         </div>

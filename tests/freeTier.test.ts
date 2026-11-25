@@ -71,7 +71,7 @@ describe('free plan defaults', () => {
         });
         expect(computeEntitlements({ plan: 'free' }, []).features.advanced_goals).toBe(false);
         expect(computeEntitlements({ plan: 'starter' }, []).limits).toMatchObject({
-            monthlyVisitors: null, dailyVisitors: null, activeExperiments: null, monthlyTests: null, maxGoals: null, projects: 3, seats: 5, maxVariations: 50,
+            monthlyVisitors: 250_000, dailyVisitors: null, activeExperiments: 20, monthlyTests: null, maxGoals: 50, projects: 3, seats: 5, domains: null, maxVariations: 50, monthlyPageviews: null,
         });
         expect(computeEntitlements({ plan: 'starter' }, []).features.advanced_goals).toBe(true);
         expect(computeEntitlements({ plan: 'free' }, []).limits).not.toHaveProperty('lifetimeExperiments');

@@ -1,7 +1,7 @@
 import { db } from './db';
 import {
-    isPaidPlan, planTier, maxVariationUrlsForPlan, planMonthlyPageviews, UNLIMITED,
-    FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_MONTHLY_TESTS, FREE_MAX_GOALS, FREE_DOMAINS, PLAN_PROJECTS, PLAN_SEATS,
+    isPaidPlan, planTier, maxVariationUrlsForPlan, planMonthlyPageviews, planMonthlyVisitors, planActiveExperiments, planMaxGoals, UNLIMITED,
+    FREE_DAILY_VISITORS, FREE_MONTHLY_TESTS, FREE_DOMAINS, PLAN_PROJECTS, PLAN_SEATS,
 } from './plans';
 import { isPlatformAdminEmail } from './platformAdmin';
 import { cached } from './configCache';
@@ -82,14 +82,15 @@ function planLimits(org: OrgForEntitlements | null): Limits {
     const plan = org?.plan || 'free';
     const free = !isPaidPlan(plan);
     const pv = org?.monthly_pageview_limit;
+    const visitors = org?.monthly_visitor_limit;
     return {
-        monthlyVisitors: org?.monthly_visitor_limit ?? (free ? FREE_MONTHLY_VISITORS : null),
+        monthlyVisitors: visitors === UNLIMITED ? null : visitors ?? planMonthlyVisitors(plan),
         dailyVisitors: free ? FREE_DAILY_VISITORS : null,
         monthlyTests: free ? FREE_MONTHLY_TESTS : null,
-        maxGoals: free ? FREE_MAX_GOALS : null,
+        maxGoals: planMaxGoals(plan),
         monthlyPageviews: pv === UNLIMITED ? null : pv ?? planMonthlyPageviews(plan),
         maxVariations: maxVariationUrlsForPlan(plan),
-        activeExperiments: free ? FREE_RUNNING_EXPERIMENTS : null,
+        activeExperiments: planActiveExperiments(plan),
         projects: PLAN_PROJECTS[planTier(plan)],
         seats: PLAN_SEATS[planTier(plan)],
         domains: free ? FREE_DOMAINS : null,

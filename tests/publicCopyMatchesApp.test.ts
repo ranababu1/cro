@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import {
     FREE_MONTHLY_VISITORS, FREE_DAILY_VISITORS, FREE_RUNNING_EXPERIMENTS, FREE_MONTHLY_TESTS, FREE_MAX_GOALS, FREE_DOMAINS, FREE_PROJECTS, FREE_MAX_VARIATIONS, PAID_MAX_VARIATIONS,
+    STARTER_MONTHLY_VISITORS, GROWTH_MONTHLY_VISITORS, STARTER_RUNNING_EXPERIMENTS, PAID_MAX_GOALS, PLAN_PROJECTS, PLAN_SEATS,
 } from '@/lib/plans';
 
 const read = (p: string) => fs.readFileSync(p, 'utf8');
@@ -20,6 +21,27 @@ describe('public copy matches what the app enforces', () => {
         expect(pricing).toContain(`'A/B only (control plus ${FREE_MAX_VARIATIONS} variation)'`);
         expect(pricing).toContain(`Control plus up to ${PAID_MAX_VARIATIONS}`);
         expect(pricing).toMatch(/1 running test at a time, 1 new test a month, 1 page URL per test, 1 goal per test \(a click on a CSS selector\), 1 project, 1 domain/);
+    });
+
+    it('paid numbers on the pricing cards and comparison table come from lib/plans.ts', () => {
+        expect([STARTER_MONTHLY_VISITORS, GROWTH_MONTHLY_VISITORS, STARTER_RUNNING_EXPERIMENTS, PAID_MAX_GOALS, PLAN_PROJECTS[1], PLAN_PROJECTS[2], PLAN_SEATS[1], PLAN_SEATS[2]])
+            .toEqual([250_000, 1_000_000, 20, 50, 3, 10, 5, 15]);
+        expect(cards).toContain(`${fmt(STARTER_MONTHLY_VISITORS)} tested visitors a month`);
+        expect(cards).toContain(`${STARTER_RUNNING_EXPERIMENTS} active experiments`);
+        expect(cards).toContain(`${PLAN_PROJECTS[1]} projects and ${PLAN_SEATS[1]} team seats`);
+        expect(cards).toContain(`${fmt(GROWTH_MONTHLY_VISITORS)} tested visitors a month`);
+        expect(cards).toContain(`${PLAN_PROJECTS[2]} projects and ${PLAN_SEATS[2]} team seats`);
+        const cols = [...pricing.matchAll(/^    \['((?:[^'\\]|\\')*)', '((?:[^'\\]|\\')*)', '((?:[^'\\]|\\')*)', '((?:[^'\\]|\\')*)', '((?:[^'\\]|\\')*)'/gm)]
+            .map((m) => [m[1], m[2], m[3], m[4], m[5]]);
+        const row = (name: string) => cols.find((c) => c[0] === name);
+        expect(row('Tested visitors a month')).toEqual(['Tested visitors a month', fmt(FREE_MONTHLY_VISITORS), fmt(STARTER_MONTHLY_VISITORS), fmt(GROWTH_MONTHLY_VISITORS), 'Custom']);
+        expect(row('Tested visitors a day')).toEqual(['Tested visitors a day', String(FREE_DAILY_VISITORS), 'No daily limit', 'No daily limit', 'No daily limit']);
+        expect(row('Running experiments at a time')).toEqual(['Running experiments at a time', String(FREE_RUNNING_EXPERIMENTS), String(STARTER_RUNNING_EXPERIMENTS), 'Unlimited', 'Unlimited']);
+        expect(row('Projects')).toEqual(['Projects', String(FREE_PROJECTS), String(PLAN_PROJECTS[1]), String(PLAN_PROJECTS[2]), 'Custom']);
+        expect(row('Team seats')).toEqual(['Team seats', '1', String(PLAN_SEATS[1]), String(PLAN_SEATS[2]), 'Unlimited']);
+        expect(row('Goals per experiment')?.[2]).toContain(`Up to ${PAID_MAX_GOALS}`);
+        expect(row('Variations per experiment')?.[2]).toContain(`up to ${PAID_MAX_VARIATIONS}`);
+        expect(docs).not.toMatch(/Paid plans include a number of tracked pageviews a month/);
     });
 
     it('the Free card has exactly three ticks, the price note and a link to the comparison table', () => {

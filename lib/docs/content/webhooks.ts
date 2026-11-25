@@ -12,7 +12,7 @@ export const webhooks: DocPage = {
             '`test.winner`: a running test found a winner on its primary goal. Checked about every 10 minutes. Sent once per winner.',
             '`test.completed`: a test was stopped, by hand, on schedule or by rolling out a version.',
             '`test.srm_warning`: the visitor split of a running test does not match its weights (sample ratio mismatch). Checked about every 10 minutes. Sent once per test.',
-            '`quota.reached`: your organization used all of its monthly tested visitors or tracked pageviews. Sent once per limit per month.',
+            '`quota.reached`: your organization used all of its monthly tested visitors, or a custom tracked-pageview cap if one is set. Sent once per limit per month.',
             '`ping`: sent only by the **Send test** button.',
         ] },
         { type: 'h2', text: 'Delivery', id: 'delivery' },

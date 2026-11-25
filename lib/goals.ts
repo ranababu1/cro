@@ -86,6 +86,7 @@ export function goalPlanError(rule: { maxGoals: number | null; advancedGoals: bo
     }
     if (rule.maxGoals !== null && existing + adding.length > rule.maxGoals) {
         const allows = `Your plan allows ${rule.maxGoals} goal${rule.maxGoals === 1 ? '' : 's'} per test.`;
+        if (rule.maxGoals >= MAX_GOALS) return existing > 0 ? `${allows} Remove a goal first.` : allows;
         return existing > 0
             ? `${allows} Remove a goal first, or upgrade to Starter or above for up to ${MAX_GOALS}.`
             : `${allows} Upgrade to Starter or above for up to ${MAX_GOALS}.`;
