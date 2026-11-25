@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
     title: 'Pricing',
-    description: 'Start free with 10,000 tested visitors a month. Starter $10/mo, Growth $50/mo, Enterprise custom. No per-seat fees, no surprise bills.',
+    description: 'Start free with 10,000 tested visitors a month. Starter $20/mo, Growth $50/mo, Enterprise custom. No per-seat fees, no surprise bills.',
 };
 
 const plans = ['Free', 'Starter', 'Growth', 'Enterprise'];
@@ -160,7 +160,7 @@ export default async function PricingPage() {
                 <section className="mt-16 rounded-2xl border border-teal-200 bg-teal-50/60 p-7">
                     <h2 className="text-xl font-semibold text-[#0b1630]">Annual billing and overages</h2>
                     <ul className="mt-4 space-y-2 text-sm text-zinc-700">
-                        <li>Pay yearly and get 2 months free: Starter $100/yr (about $8.33/mo), Growth $500/yr.</li>
+                        <li>Pay yearly and get 2 months free: Starter $200/yr (about $16.67/mo), Growth $500/yr.</li>
                         <li>You&apos;re never billed or upgraded automatically. Once you&apos;re over your limit, new visitors see the control and aren&apos;t counted.</li>
                         <li>Your usage and limits are always shown on the Overview page.</li>
                     </ul>

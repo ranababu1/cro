@@ -103,6 +103,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - When the Terms or Privacy Policy change in substance, bump `LEGAL_VERSION` and `LEGAL_UPDATED`. Keep `tests/policyPages.test.ts` in sync if the entity, address, phone or refund rules change.
 
 ## Billing
+- List prices are in lib/billing/config.ts (PLAN_PRICES_USD): Starter $20/month and $200/year, Growth $50/month and $500/year. Yearly is two months free. Keep the pricing page (cards, FAQ, metadata), Settings Billing, scripts/paypal-setup.mjs and public blog copy in sync when these change.
 - All payment code lives in lib/billing. Routes and pages never call a provider directly. A new provider (Razorpay INR next) adds an adapter that returns a ProviderSubscription (lib/billing/provider.ts) and reuses applySubscription.
 - Never grant a plan from the browser or a webhook body. Always re-read the subscription from the provider (syncPayPalSubscription). Webhooks are verified with the raw body and recorded by event id in billing_webhook_events before they are applied.
 - Billing writes organizations.plan, plan_ends_at, scheduled_plan, scheduled_period and scheduled_plan_at only. Do not touch plan_override, special-friend allowances or platform admin rules from billing code; they keep winning in lib/entitlements.ts.

@@ -16,7 +16,7 @@ type State = {
     subscription?: Sub | null; manage_url?: string | null;
 };
 
-const PRICES: Record<Plan, Record<Period, number>> = { starter: { monthly: 10, yearly: 100 }, growth: { monthly: 50, yearly: 500 } };
+const PRICES: Record<Plan, Record<Period, number>> = { starter: { monthly: 20, yearly: 200 }, growth: { monthly: 50, yearly: 500 } };
 const NAMES: Record<string, string> = { free: 'Free', starter: 'Starter', growth: 'Growth', enterprise: 'Enterprise' };
 const STATUS: Record<string, string> = { ACTIVE: 'Active', SUSPENDED: 'Payment problem', CANCELLED: 'Cancelled', EXPIRED: 'Ended', APPROVAL_PENDING: 'Waiting for approval', APPROVED: 'Approved' };
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : null);

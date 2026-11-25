@@ -3,7 +3,7 @@ title: "How to run a split URL test without a plugin"
 meta_description: "Run a split URL test with one script in the head of two pages: a stable visitor ID, a 302-style redirect, a canonical tag and logging that catches lost visitors."
 slug: split-url-testing
 date: 2026-10-29
-updated: 2026-11-07
+updated: 2026-11-25
 author: "Imraan, freeabtest.com"
 keywords: ["split url testing", "split url test", "redirect test", "split url vs ab test", "split url test seo"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "How to run a split URL test without a plugin",
     "datePublished": "2026-10-29",
-    "dateModified": "2026-11-07",
+    "dateModified": "2026-11-25",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/split-url-testing",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -262,7 +262,7 @@ Split URL tests are the core test type on every plan, including Free. You add on
 6. **Read the results.** You get conversion rate, lift, 95% intervals and a peeking-safe significance verdict, plus a sample ratio mismatch warning if the split drifts from your weights.
 7. **Roll out the winner.** For a split URL winner, visitors who open the original page are sent to the winning page until you put the change in your code, then you stop the rollout.
 
-The Free plan covers 10,000 tested visitors a month (up to 300 a day), 1 running test, 1 new test a month, and a control plus 1 variation. At a 10% click rate and a 30% lift, a test needs 3,548 visitors in total, about 12 days at 300 a day, so plan for 2 full weeks. Our significance test stays valid however often you check, and in exchange it needs about 2 to 3 times as many visitors to call the same observed lift, so treat that table as the minimum. Paid plans start at $10 a month and allow up to 50 variations. Full details are on the [pricing page](https://www.freeabtest.com/pricing).
+The Free plan covers 10,000 tested visitors a month (up to 300 a day), 1 running test, 1 new test a month, and a control plus 1 variation. At a 10% click rate and a 30% lift, a test needs 3,548 visitors in total, about 12 days at 300 a day, so plan for 2 full weeks. Our significance test stays valid however often you check, and in exchange it needs about 2 to 3 times as many visitors to call the same observed lift, so treat that table as the minimum. Paid plans start at $20 a month and allow up to 50 variations. Full details are on the [pricing page](https://www.freeabtest.com/pricing).
 
 Two limits worth knowing before you start: variation URLs cannot be changed after the test is created, and you cannot add or remove variations on a running test. If you need a different page, create a new test.
 
