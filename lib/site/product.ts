@@ -236,7 +236,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
             { name: 'Visitor data controls', plan: 'Every plan', href: '/security',
                 what: 'Erase one visitor, export your account data, or delete projects and your account.',
                 how: 'Visitors get random IDs. Heatmaps never record keystrokes, form values or page text.',
-                benefit: 'Answer a data request in minutes.',
+                benefit: 'Handle a visitor\'s data request yourself, without writing to support.',
                 limits: 'Retention for clicks, survey answers and audit entries follows your plan.' },
             { name: 'Team roles and audit log', plan: 'Paid plans', href: '/docs/organizations-and-projects#audit-log',
                 what: 'Invite teammates as owners or members, and see who changed what.',

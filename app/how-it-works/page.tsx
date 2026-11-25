@@ -34,7 +34,7 @@ export default function HowItWorksPage() {
 
             <Section>
                 <SectionHeading eyebrow="The lifecycle" title="Seven steps, one loop" lede="Select a step to read how it works and see a worked example." />
-                <ol className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                <ol className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
                     {LIFECYCLE.map((s, i) => (
                         <li key={s.id} className="relative">
                             <a href={`#${s.id}`} className="flex h-full flex-col rounded-xl border border-line bg-white p-4 transition-colors hover:border-slate-300 hover:bg-surface">
@@ -70,26 +70,26 @@ export default function HowItWorksPage() {
                 ))}
             </div>
 
-            <Section tone="navy" labelledBy="flow-title">
+            <Section tone="surface" className="border-t border-line" labelledBy="flow-title">
                 <div className="max-w-[720px]">
-                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-100">Under the hood</p>
-                    <h2 id="flow-title" className="mt-3 text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] md:text-[32px]">What happens on one page view</h2>
-                    <p className="mt-4 text-[17px] leading-[1.6] text-slate-300">Steps 3 to 5 happen in the visitor&apos;s browser in a fraction of a second. With server-side testing, your backend asks for the version instead and sends the events itself.</p>
+                    <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Under the hood</p>
+                    <h2 id="flow-title" className="mt-3 text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-navy-950 md:text-[32px]">What happens on one page view</h2>
+                    <p className="mt-4 text-[17px] leading-[1.6] text-muted-strong">Steps 2 to 4 happen while the page loads, before the visitor sees it. With server-side testing, your backend asks for the version instead and sends the events itself.</p>
                 </div>
                 <ol className="mt-10 grid gap-3 md:grid-cols-5">
                     {FLOW.map((f, i) => (
-                        <li key={f.title} className="relative rounded-xl bg-white/[0.06] p-5 ring-1 ring-white/10">
-                            <span className="text-[13px] font-semibold text-accent-100">{i + 1}</span>
-                            <h3 className="mt-2 text-[16px] font-semibold">{f.title}</h3>
-                            <p className="mt-2 text-[14px] leading-[1.55] text-slate-300">{f.body}</p>
-                            {i < FLOW.length - 1 && <span aria-hidden className="absolute -right-2.5 top-1/2 hidden -translate-y-1/2 text-slate-400 md:block">&rsaquo;</span>}
+                        <li key={f.title} className="relative rounded-xl border border-line bg-white p-5">
+                            <span className="text-[13px] font-semibold text-accent-700">{i + 1}</span>
+                            <h3 className="mt-2 text-[16px] font-semibold text-navy-950">{f.title}</h3>
+                            <p className="mt-2 text-[14px] leading-[1.55] text-muted-strong">{f.body}</p>
+                            {i < FLOW.length - 1 && <span aria-hidden className="absolute -right-2.5 top-1/2 hidden -translate-y-1/2 text-slate-300 md:block">&rsaquo;</span>}
                         </li>
                     ))}
                 </ol>
                 <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px]">
-                    <Link href="/docs/sdk" className="font-medium text-white underline-offset-4 hover:underline">JavaScript SDK</Link>
-                    <Link href="/docs/server-side" className="font-medium text-white underline-offset-4 hover:underline">Server-side testing</Link>
-                    <Link href="/experiment-analytics" className="font-medium text-white underline-offset-4 hover:underline">How results are read</Link>
+                    <Link href="/docs/sdk" className="font-medium text-accent-700 hover:underline">JavaScript SDK</Link>
+                    <Link href="/docs/server-side" className="font-medium text-accent-700 hover:underline">Server-side testing</Link>
+                    <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">How results are read</Link>
                 </div>
             </Section>
 

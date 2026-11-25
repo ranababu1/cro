@@ -92,7 +92,7 @@ export default function FeaturesPage() {
             <Section tone="surface" className="border-t border-line !py-12">
                 <h2 className="text-[20px] font-semibold text-navy-950">Not available yet</h2>
                 <p className="mt-2 max-w-[680px] text-[16px] leading-[1.6] text-muted-strong">
-                    {NOT_YET.join(', ')} {NOT_YET.length === 1 ? 'is' : 'are'} not built yet and {NOT_YET.length === 1 ? 'is' : 'are'} marked coming soon on the <Link href="/pricing#compare" className="font-medium text-accent-700 hover:underline">pricing page</Link>. Please do not choose a plan for a feature that is not built.
+                    These are not built yet and are marked coming soon on the <Link href="/pricing#compare" className="font-medium text-accent-700 hover:underline">pricing page</Link>: {NOT_YET.join(', ').toLowerCase()}. Please do not choose a plan for a feature that is not built.
                 </p>
             </Section>
 
