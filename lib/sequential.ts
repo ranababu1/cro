@@ -16,7 +16,7 @@ export const SEQUENTIAL_ALPHA = 0.05;
 export const SEQUENTIAL_MIN_VISITORS = 100;
 /** Mixing prior scale: the effect size the test is tuned for, as a share of the pooled conversion rate. */
 export const TAU_RELATIVE = 0.2;
-const TAU_FLOOR = 0.002;
+export const TAU_FLOOR = 0.002;
 
 export interface SequentialResult {
     /** Always-valid p-value of this variation against the control. */

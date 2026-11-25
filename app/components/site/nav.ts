@@ -69,7 +69,7 @@ export const NAV_MENUS: NavMenu[] = [
                 items: [
                     { href: '/docs/integrations', title: 'Integrations', body: 'Google Tag Manager, WordPress and GA4' },
                     { href: '/docs/webhooks', title: 'Webhooks', body: 'Signed events when a test changes' },
-                    { href: '/docs/results#significance', title: 'Statistical methods', body: 'Sequential testing and Wilson intervals' },
+                    { href: '/statistical-methodology', title: 'Statistical methods', body: 'Formulas and worked examples for every result' },
                 ],
             },
         ],
@@ -126,6 +126,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     { heading: 'Resources', links: [
         { href: '/blog', title: 'Blog' },
         { href: '/docs/quick-start', title: 'Quick start' },
+        { href: '/statistical-methodology', title: 'Statistical methodology' },
         { href: '/pricing#faq', title: 'FAQ' },
         { href: '/docs/troubleshooting', title: 'Troubleshooting' },
     ] },

@@ -26,6 +26,7 @@ export const results: DocPage = {
         { type: 'p', text: 'The price of checking freely is sample size: for the same observed difference, the sequential test needs about 2 to 3 times as many visitors as a test you look at only once. The fixed-sample z-test is still returned by the results API under `statistical_significance` for anyone who plans a single look in advance.' },
         { type: 'callout', tone: 'info', title: 'Minimum sample', text: 'Significance is only tested once every variation has at least 100 visitors. Until then the dashboard shows **Collecting data**.' },
         { type: 'p', text: 'Live stats, above the detailed results, run the same sequential test for each variant against the control and mark every variant that is significantly different. The winner is the best-converting variant whose sequential test is significant.' },
+        { type: 'p', text: 'The formulas behind every number, with worked examples, are on [Statistical methodology](/statistical-methodology).' },
         { type: 'h3', text: 'Chance to beat control', id: 'chance-to-beat' },
         { type: 'p', text: 'Chance to beat control reads the same data a different way: given what has happened so far, how likely is it that the variant is truly better? It starts every rate from a flat prior, so it reflects only your data. A chance of 95% or more is a strong lead, but use the significance verdict to decide: chance to beat control moves quickly with small samples.' },
         { type: 'h3', text: 'What the summary means' },
