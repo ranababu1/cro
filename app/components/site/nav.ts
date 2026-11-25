@@ -37,15 +37,16 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'By team',
                 items: [
-                    { href: '/#marketers', title: 'Marketing teams', body: 'Headlines, calls to action and landing pages' },
-                    { href: '/blog/ab-test-ideas-saas-landing-pages', title: 'SaaS products', body: 'Test ideas for pricing and signup pages' },
+                    { href: '/solutions/marketing', title: 'Marketing teams', body: 'Landing pages, headlines and campaign tests' },
+                    { href: '/solutions/saas', title: 'SaaS products', body: 'Pricing pages, signup flows and in-app tests' },
                 ],
             },
             {
-                heading: 'By goal',
+                heading: 'By business',
                 items: [
-                    { href: '/docs/goals#revenue', title: 'Ecommerce revenue', body: 'Revenue per visitor and average order value' },
-                    { href: '/blog/ab-testing-low-traffic', title: 'Low traffic sites', body: 'How to test when visitors are scarce' },
+                    { href: '/solutions/ecommerce', title: 'Ecommerce', body: 'Product pages, checkout and revenue per visitor' },
+                    { href: '/solutions/startups', title: 'Startups', body: 'Free plan, low traffic and the first tests' },
+                    { href: '/solutions', title: 'All solutions', body: 'Workflows and test ideas for each team' },
                 ],
             },
         ],
@@ -110,6 +111,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
         { href: '/features', title: 'Features' },
         { href: '/how-it-works', title: 'How it works' },
         { href: '/experiment-analytics', title: 'Experiment analytics' },
+        { href: '/solutions', title: 'Solutions' },
         { href: '/pricing', title: 'Pricing' },
         { href: '/wordpress', title: 'WordPress plugin' },
     ] },

@@ -8,4 +8,4 @@ export { NAV_MENUS, NAV_LINKS, FOOTER_COLUMNS, allChromeHrefs } from './nav';
 export { Breadcrumbs } from './Breadcrumbs';
 export { SitePage } from './SitePage';
 export { PlanBadge } from './PlanBadge';
-export { ProductSubnav } from './ProductSubnav';
+export { ProductSubnav, SolutionsSubnav } from './ProductSubnav';

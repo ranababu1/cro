@@ -193,9 +193,9 @@ Sections in brief order: hero (exact headline and lede, CTAs Start experimenting
 
 Done in PR B. Notes: AI-powered positioning (badge, hero line, title, description, #ai section) is kept and gated on `aiConfigured()`, as Imran wants it to lead when AI is on. Explore features points at /pricing#compare until /features ships (PR C swaps it). Marketer and developer cards link to docs until the solution and developer pages ship. The homepage preview is illustrative (no seeded demo account yet); replace with real screenshots when one exists.
 
-### Phase 4: product and solutions (PR C product pages, PR D solutions)
+### Phase 4: product and solutions (PR C product pages, PR D solutions, done)
 - PR C: /product, /features, /how-it-works, /experiment-analytics. Done: content in lib/site/product.ts (FEATURE_GROUPS, LIFECYCLE, ANALYTICS_EXTRAS, NOT_YET), shared SitePage, Breadcrumbs, PlanBadge, ProductSubnav and pageMetadata for the next pages. tests/helpers/links.ts checks internal links; reuse it for every new page. Product menu, footer and homepage links now point at these pages.
-- PR D: /solutions and four children. Each with a real workflow example, relevant goals and plan notes.
+- PR D: /solutions and four children. Each with a real workflow example, relevant goals and plan notes. Done: one template (app/solutions/SolutionPage.tsx) fed by lib/site/solutions.ts; workflows are labelled example plans, never customer stories; ecommerce names no store platform integration (snippet, Tag Manager and API only).
 
 ### Phase 5: developer ecosystem (PR E developers hub, PR F docs changes, PR G statistical methodology)
 - PR E: /developers.

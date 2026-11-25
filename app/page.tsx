@@ -101,7 +101,7 @@ export default function LandingPage() {
                             <h3 className="mt-3 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em]">Improve what your customers experience.</h3>
                             <p className="mt-3 text-[16px] leading-[1.6] text-muted-strong">Test headlines, calls to action and whole landing pages, then see which version brings more signups. Most tests need no engineering time.</p>
                             <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 text-[15px] font-medium">
-                                <Link href="#marketers" className="text-accent-700 hover:underline">Use cases</Link>
+                                <Link href="/solutions/marketing" className="text-accent-700 hover:underline">Marketing solutions</Link>
                                 <Link href="/docs/quick-start" className="text-accent-700 hover:underline">Quick start</Link>
                             </div>
                         </div>
@@ -200,8 +200,9 @@ export default function LandingPage() {
                             </li>
                         ))}
                         <li className="flex flex-col justify-center rounded-xl border border-dashed border-slate-300 p-6">
-                            <p className="text-[15px] leading-[1.6] text-muted-strong">Need ideas? Browse tests ranked by the traffic they need.</p>
-                            <Link href="/blog/ab-test-ideas-saas-landing-pages" className="mt-3 text-[15px] font-medium text-accent-700 hover:underline">Read the test ideas guide</Link>
+                            <p className="text-[15px] leading-[1.6] text-muted-strong">See a full campaign test, from hypothesis to rollout, and ideas for SaaS, ecommerce and startups.</p>
+                            <Link href="/solutions/marketing" className="mt-3 text-[15px] font-medium text-accent-700 hover:underline">Marketing solutions</Link>
+                            <Link href="/solutions" className="mt-1 text-[15px] font-medium text-accent-700 hover:underline">All solutions</Link>
                         </li>
                     </ul>
                 </Section>

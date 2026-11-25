@@ -1,6 +1,6 @@
 # Current State
 
-> **SITE REDESIGN (started 2026-11-25).** Phase 1 (plan, PR #125), Phase 2 (shared chrome, PR #126), Phase 3 (homepage, PR #127) and the product pages of Phase 4 (PR C) are done. See `docs/plan.md`
+> **SITE REDESIGN (started 2026-11-25).** Phase 1 (plan, PR #125), Phase 2 (shared chrome, PR #126), Phase 3 (homepage, PR #127) and Phase 4 (product pages PR #128, solutions PR D) are done. See `docs/plan.md`
 > and `docs/instructions.md`. Public pages that had the old header (landing, pricing, blog, wordpress, legal, about, contact,
 > security) now use `app/components/site`: sticky header with Product, Solutions, Developers and Resources mega menus, Pricing,
 > Sign in and Start for free, an accordion mobile menu below 1024px, and a grouped footer. Links live in
@@ -10,8 +10,9 @@
 > docs shell are unchanged. Phase 3 (homepage, PR B) is done: the 11 brief sections with content in `lib/site/home.ts`, AI
 > positioning kept behind `aiConfigured()`, mockups labelled Example data, and a worked example computed by the stats code.
 > Product pages (PR C): /product, /features, /how-it-works and /experiment-analytics, content in `lib/site/product.ts`, shared
-> `SitePage`, `Breadcrumbs`, `PlanBadge`, `ProductSubnav` and `pageMetadata` (lib/site/meta.ts). Solutions (PR D) are next.
-> Brief URLs not built yet: /solutions/*, /developers, /docs/javascript-sdk (today /docs/sdk),
+> `SitePage`, `Breadcrumbs`, `PlanBadge`, `ProductSubnav` and `pageMetadata` (lib/site/meta.ts). Solutions (PR D): /solutions and
+> /solutions/marketing, /saas, /ecommerce, /startups from `app/solutions/SolutionPage.tsx`, content in `lib/site/solutions.ts`.
+> Phase 5 (developers hub) is next. Brief URLs not built yet: /developers, /docs/javascript-sdk (today /docs/sdk),
 > /docs/integrations, /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
 > /cookie-policy.
 
