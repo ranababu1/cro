@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
-import { GUIDE_SECTIONS, RESOURCE_LINKS } from '@/lib/site/resources';
+import { GUIDE_SECTIONS, RESOURCE_LINKS, listablePost } from '@/lib/site/resources';
 import { BILLING_QUESTIONS, FAQ_GROUPS, allFaqItems } from '@/lib/site/faq';
 import { HOME_FAQ } from '@/lib/site/home';
 import { RELEASES, featurePlan, itemPlan } from '@/lib/changelog';
 import { FEATURE_GROUPS, NOT_YET } from '@/lib/site/product';
 import { FOOTER_COLUMNS, NAV_MENUS } from '@/app/components/site/nav';
-import { getPost } from '@/lib/blog';
+import { getAllPosts, getPost } from '@/lib/blog';
 import { blockText, getDocPage } from '@/lib/docs';
 import { PLAN_PRICES_USD } from '@/lib/billing/config';
 import { GROWTH_MONTHLY_VISITORS, PLAN_RUNNING_EXPERIMENTS, STARTER_MONTHLY_VISITORS, STARTER_RUNNING_EXPERIMENTS, FREE_MONTHLY_TESTS, FREE_MAX_GOALS } from '@/lib/plans';
@@ -136,6 +136,13 @@ describe('changelog: curated, shipped and free of internals', () => {
 });
 
 describe('resources hub, nav, footer and sitemap', () => {
+    it('the hub lists the latest posts that name no other product', () => {
+        const shown = getAllPosts().filter(listablePost).slice(0, 3);
+        expect(shown).toHaveLength(3);
+        for (const p of shown) expect(`${p.title} ${p.description}`).not.toMatch(/optimizely|google optimize|vwo|crazy ?egg|convert\b/i);
+        expect(read('app/resources/page.tsx')).toContain('getAllPosts().filter(listablePost)');
+    });
+
     it('hub links and page links resolve', () => {
         for (const r of RESOURCE_LINKS) expect(checkHref(r.href), r.href).toBeNull();
         for (const f of PAGES) for (const h of hrefsIn(read(f))) expect(checkHref(h), `${f}: ${h}`).toBeNull();

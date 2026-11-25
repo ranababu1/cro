@@ -47,3 +47,6 @@ export const RESOURCE_LINKS: { href: string; title: string; body: string }[] = [
     { href: '/statistical-methodology', title: 'Statistical methodology', body: 'The tests behind every verdict, with worked examples.' },
     { href: '/developers', title: 'Developer hub', body: 'Snippet, SDK, REST API, webhooks and server-side tests.' },
 ];
+
+
+export { listablePost } from './postFilter';

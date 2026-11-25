@@ -3,7 +3,7 @@ import Link from 'next/link';
 export type CardPost = { slug: string; title: string; description: string; date: string; dateLabel: string; readingMinutes: number; category: string };
 
 export function CategoryTag({ children }: { children: React.ReactNode }) {
-    return <span className="inline-flex items-center rounded-full bg-accent-50 px-2.5 py-0.5 text-[12px] font-medium text-accent-700 ring-1 ring-inset ring-accent-100">{children}</span>;
+    return <span className="inline-flex w-fit items-center self-start rounded-full bg-accent-50 px-2.5 py-0.5 text-[12px] font-medium text-accent-700 ring-1 ring-inset ring-accent-100">{children}</span>;
 }
 
 export function Meta({ p }: { p: Pick<CardPost, 'date' | 'dateLabel' | 'readingMinutes'> }) {

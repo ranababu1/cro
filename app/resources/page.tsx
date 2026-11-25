@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { pageMetadata } from '@/lib/site/meta';
 import { formatDate, getAllPosts } from '@/lib/blog';
 import { latestReleases } from '@/lib/changelog';
-import { RESOURCE_LINKS } from '@/lib/site/resources';
+import { RESOURCE_LINKS, listablePost } from '@/lib/site/resources';
 import { Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, SitePage } from '../components/site';
 
 export const metadata = pageMetadata({
@@ -12,7 +12,7 @@ export const metadata = pageMetadata({
 });
 
 export default function ResourcesPage() {
-    const posts = getAllPosts().slice(0, 3);
+    const posts = getAllPosts().filter(listablePost).slice(0, 3);
     const releases = latestReleases(3);
     return (
         <SitePage>
