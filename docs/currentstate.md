@@ -15,9 +15,10 @@
 > Developers hub (PR E): /developers, content in `lib/site/developers.ts`, `CodeBlock` component. Docs (PR F): the docs use the
 > site header and footer with a docs bar and search; the SDK page is /docs/javascript-sdk (/docs/sdk 301s to it); new
 > /docs/integrations; the sitemap lists every docs page. Statistical methodology (PR G):
-> /statistical-methodology, content and computed examples in `lib/site/methodology.ts`. Next is PR H (resources). Brief URLs not built yet:
-> /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
-> /cookie-policy.
+> /statistical-methodology, content and computed examples in `lib/site/methodology.ts`. Resources (PR H): /resources,
+> /guides (`lib/site/resources.ts`), /faq (`lib/site/faq.ts`, product questions only; billing stays on /pricing#faq) and
+> /changelog (curated notes in `content/changelog/releases.json`, never the engineering log); blog index on the site tokens.
+> Next is PR I (pricing and legal). Brief URLs not built yet: redirects /privacy, /terms, /cookie-policy.
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone

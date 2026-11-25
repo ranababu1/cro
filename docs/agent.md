@@ -100,6 +100,8 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 
 ## Legal and billing copy
 - Operator details live in `lib/legal.ts`. Keep `LEGAL.address` worded exactly as the Razorpay KYC record. The public Contact page shows `LEGAL.contactPhone` (+91 9964 180587) and hello@freeabtest.com. Governing law is India, courts of Bengaluru.
+- Public changelog (/changelog): customer-facing notes in `content/changelog/releases.json`, shipped features only, newest first, no hashes, internals or checkout claims. It is curated by hand and never copies docs/changelog.md. An item that names a feature takes its plan badge from `FEATURE_GROUPS`/`ANALYTICS_EXTRAS` in lib/site/product.ts, so add the feature there first. When you ship a user-facing feature, add a line to the newest release (or a new release).
+- FAQ: product questions live in `lib/site/faq.ts` (/faq); billing and plan questions live only in the pricing page `faqs`. Never put the same question in both; tests/resourcesPages.test.ts checks it and that /faq's billing link list matches the pricing questions.
 - Public policy pages: /about, /contact, /legal/terms, /legal/privacy, /legal/dpa, /legal/cookies, /legal/refunds, /legal/delivery and /security. Link them from the footer and `app/sitemap.ts`.
 - Do not claim paid checkout is live until it ships. Billing terms in the Terms (section 2) and /legal/refunds already state: no mid-cycle refunds; access continues until the period ends; cancellations and downgrades take effect at period end (same as the pricing FAQ).
 - When the Terms or Privacy Policy change in substance, bump `LEGAL_VERSION` and `LEGAL_UPDATED`. Keep `tests/policyPages.test.ts` in sync if the entity, address, phone or refund rules change.

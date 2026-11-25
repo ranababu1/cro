@@ -284,7 +284,7 @@ export default function LandingPage() {
                 {/* 10. FAQ */}
                 <Section id="faq" labelledBy="faq-title">
                     <div className="grid gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,8fr)]">
-                        <SectionHeading id="faq-title" eyebrow="FAQ" title="Questions people ask first" lede={<>More answers on the <Link href="/pricing#faq" className="font-medium text-accent-700 hover:underline">pricing page</Link> and in the <Link href="/docs" className="font-medium text-accent-700 hover:underline">docs</Link>.</>} />
+                        <SectionHeading id="faq-title" eyebrow="FAQ" title="Questions people ask first" lede={<>More answers in the <Link href="/faq" className="font-medium text-accent-700 hover:underline">FAQ</Link> and the <Link href="/docs" className="font-medium text-accent-700 hover:underline">docs</Link>.</>} />
                         <div className="divide-y divide-line border-y border-line">
                             {HOME_FAQ.map((f) => (
                                 <details key={f.q} className="group py-1">
