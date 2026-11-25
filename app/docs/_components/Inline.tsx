@@ -10,15 +10,15 @@ export function Inline({ text }: { text: string }) {
         <>
             {parts.map((part, i) => {
                 if (part.startsWith('`') && part.endsWith('`') && part.length > 1) {
-                    return <code key={i} className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-[0.85em] text-zinc-800">{part.slice(1, -1)}</code>;
+                    return <code key={i} className="rounded bg-surface px-1 py-0.5 font-mono text-[0.85em] text-navy-900">{part.slice(1, -1)}</code>;
                 }
                 if (part.startsWith('**') && part.endsWith('**')) {
-                    return <strong key={i} className="font-semibold text-zinc-900">{part.slice(2, -2)}</strong>;
+                    return <strong key={i} className="font-semibold text-navy-950">{part.slice(2, -2)}</strong>;
                 }
                 const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(part);
                 if (link) {
                     const [, label, href] = link;
-                    const cls = 'font-medium text-brand-700 underline decoration-brand-200 underline-offset-2 hover:decoration-brand-600';
+                    const cls = 'font-medium text-accent-700 underline decoration-accent-600/40 underline-offset-2 hover:decoration-accent-700';
                     return href.startsWith('/') ? <Link key={i} href={href} className={cls}>{label}</Link> : <a key={i} href={href} className={cls}>{label}</a>;
                 }
                 return <Fragment key={i}>{part}</Fragment>;

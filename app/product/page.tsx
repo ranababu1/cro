@@ -19,7 +19,7 @@ const JOURNEYS = [
     {
         audience: 'Developers and engineering teams', title: 'Put experiments in your own code',
         steps: ['Read the assigned version in the browser with ABTest.bootstrap', 'Assign from your backend with a secret key and the same hashing', 'Send custom events and revenue from your code on paid plans', 'Read results over the REST API and get signed webhooks'],
-        links: [{ href: '/docs/sdk', label: 'JavaScript SDK' }, { href: '/docs/rest-api', label: 'REST API' }],
+        links: [{ href: '/docs/javascript-sdk', label: 'JavaScript SDK' }, { href: '/docs/rest-api', label: 'REST API' }],
     },
 ];
 

@@ -63,7 +63,7 @@ export default function SolutionsPage() {
                 <div className="grid gap-8 md:grid-cols-3">
                     {[
                         { t: 'No code for most tests', b: 'One script tag, split URL tests and click goals. The visual editor on Growth changes copy without code.', h: '/docs/quick-start', l: 'Quick start' },
-                        { t: 'Code when you need it', b: 'Read the version in your own code, assign from your server, and send custom events on paid plans.', h: '/docs/sdk', l: 'JavaScript SDK' },
+                        { t: 'Code when you need it', b: 'Read the version in your own code, assign from your server, and send custom events on paid plans.', h: '/docs/javascript-sdk', l: 'JavaScript SDK' },
                         { t: 'One way to read results', b: 'Every test gets the same sequential verdict, Wilson intervals and visitor split check.', h: '/experiment-analytics', l: 'Experiment analytics' },
                     ].map((x) => (
                         <div key={x.t}>

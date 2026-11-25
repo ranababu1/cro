@@ -5,16 +5,17 @@
 > security) now use `app/components/site`: sticky header with Product, Solutions, Developers and Resources mega menus, Pricing,
 > Sign in and Start for free, an accordion mobile menu below 1024px, and a grouped footer. Links live in
 > `app/components/site/nav.ts`; until a brief page ships, its menu item points at the closest existing page (for example
-> JavaScript SDK at /docs/sdk), and tests/siteNav.test.ts fails on any link without a page.
+> Statistical methods at /docs/results#significance), and tests/siteNav.test.ts fails on any link without a page.
 > Marketing tokens (`navy-*`, `accent-*`, `surface`, `line`, `soft-blue`, `muted`) are in globals.css; the signed-in app and
-> docs shell are unchanged. Phase 3 (homepage, PR B) is done: the 11 brief sections with content in `lib/site/home.ts`, AI
+> the signed-in app is unchanged. Phase 3 (homepage, PR B) is done: the 11 brief sections with content in `lib/site/home.ts`, AI
 > positioning kept behind `aiConfigured()`, mockups labelled Example data, and a worked example computed by the stats code.
 > Product pages (PR C): /product, /features, /how-it-works and /experiment-analytics, content in `lib/site/product.ts`, shared
 > `SitePage`, `Breadcrumbs`, `PlanBadge`, `ProductSubnav` and `pageMetadata` (lib/site/meta.ts). Solutions (PR D): /solutions and
 > /solutions/marketing, /saas, /ecommerce, /startups from `app/solutions/SolutionPage.tsx`, content in `lib/site/solutions.ts`.
-> Developers hub (PR E): /developers, content in `lib/site/developers.ts`, `CodeBlock` component. Next is PR F (docs rename
-> and /docs/integrations). Brief URLs not built yet: /docs/javascript-sdk (today /docs/sdk),
-> /docs/integrations, /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
+> Developers hub (PR E): /developers, content in `lib/site/developers.ts`, `CodeBlock` component. Docs (PR F): the docs use the
+> site header and footer with a docs bar and search; the SDK page is /docs/javascript-sdk (/docs/sdk 301s to it); new
+> /docs/integrations; the sitemap lists every docs page. Next is PR G (/statistical-methodology). Brief URLs not built yet:
+> /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
 > /cookie-policy.
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;

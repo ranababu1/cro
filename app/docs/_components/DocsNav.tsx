@@ -11,14 +11,14 @@ function Links({ groups, onNavigate }: { groups: NavGroup[]; onNavigate?: () => 
         <div className="space-y-6">
             {groups.map((g) => (
                 <div key={g.group}>
-                    <p className="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">{g.group}</p>
+                    <p className="px-2 text-xs font-semibold uppercase tracking-wide text-muted">{g.group}</p>
                     <ul className="mt-2 space-y-0.5">
                         {g.pages.map((p) => {
                             const href = `/docs/${p.slug}`;
                             const on = path === href || (path === '/docs' && p.slug === 'introduction');
                             return (
                                 <li key={p.slug}>
-                                    <Link href={href} onClick={onNavigate} aria-current={on ? 'page' : undefined} className={`block rounded-md px-2 py-1.5 text-sm ${on ? 'bg-brand-50 font-medium text-brand-700' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900'}`}>
+                                    <Link href={href} onClick={onNavigate} aria-current={on ? 'page' : undefined} className={`block rounded-md px-2 py-1.5 text-sm ${on ? 'bg-accent-50 font-medium text-accent-700' : 'text-muted-strong hover:bg-surface hover:text-navy-950'}`}>
                                         {p.title}
                                     </Link>
                                 </li>
@@ -40,12 +40,12 @@ export function DocsMobileNav({ groups }: { groups: NavGroup[] }) {
     const path = usePathname();
     const current = groups.flatMap((g) => g.pages).find((p) => path === `/docs/${p.slug}`)?.title ?? 'Introduction';
     return (
-        <details className="group rounded-lg border border-zinc-200 bg-white lg:hidden">
-            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-2.5 text-sm font-medium text-zinc-900">
-                <span><span className="text-zinc-400">Docs / </span>{current}</span>
-                <span className="text-zinc-400 transition-transform group-open:rotate-180" aria-hidden>▾</span>
+        <details className="group rounded-lg border border-line bg-white lg:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-2.5 text-sm font-medium text-navy-950">
+                <span><span className="text-muted">Docs / </span>{current}</span>
+                <span className="text-muted transition-transform group-open:rotate-180" aria-hidden>▾</span>
             </summary>
-            <div className="border-t border-zinc-100 p-3"><Links groups={groups} /></div>
+            <div className="border-t border-line p-3"><Links groups={groups} /></div>
         </details>
     );
 }

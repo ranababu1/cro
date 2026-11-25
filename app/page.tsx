@@ -221,7 +221,7 @@ export default function LandingPage() {
                             </ul>
                             <div className="mt-8 flex flex-wrap gap-3">
                                 <SiteButton href="/developers" variant="onDark">Developer hub <ArrowIcon /></SiteButton>
-                                <SiteButton href="/docs/sdk" variant="outlineDark">SDK reference</SiteButton>
+                                <SiteButton href="/docs/javascript-sdk" variant="outlineDark">SDK reference</SiteButton>
                             </div>
                         </div>
                         <div className="min-w-0 space-y-4">
