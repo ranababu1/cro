@@ -7,9 +7,11 @@ const variants = {
     accent: 'bg-accent-700 text-white hover:bg-[#0c6644]',
     secondary: 'bg-white text-navy-950 ring-1 ring-inset ring-line hover:bg-surface',
     ghost: 'text-navy-950 hover:bg-surface',
+    onDark: 'bg-white text-navy-950 hover:bg-surface',
+    outlineDark: 'text-white ring-1 ring-inset ring-white/30 hover:bg-white/10',
 };
 
-/** Marketing call to action. Navy is the primary action; accent is for one emphasised action per view. */
+/** Marketing call to action. Navy is the primary action; accent is for one emphasised action per view. On navy sections use onDark and outlineDark (cn does not merge conflicting classes, so do not override colours with className). */
 export function SiteButton({ href, variant = 'primary', className, children, onClick }: {
     href: string; variant?: keyof typeof variants; className?: string; children: React.ReactNode; onClick?: () => void;
 }) {

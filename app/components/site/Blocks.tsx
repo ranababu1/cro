@@ -32,7 +32,7 @@ export function CtaBand({ title, body, href, label }: { title: string; body?: st
                     <h2 className="text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] md:text-[32px]">{title}</h2>
                     {body && <p className="mt-3 text-[17px] leading-[1.6] text-slate-300">{body}</p>}
                 </div>
-                <SiteButton href={href} className="bg-white text-navy-950 hover:bg-surface">{label}<ArrowIcon /></SiteButton>
+                <SiteButton href={href} variant="onDark">{label}<ArrowIcon /></SiteButton>
             </Container>
         </section>
     );

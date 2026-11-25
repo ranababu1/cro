@@ -178,8 +178,8 @@ export default function LandingPage() {
                                     ))}
                                 </ul>
                                 <div className="mt-8 flex flex-wrap gap-3">
-                                    <SiteButton href="/docs/ai" className="bg-white text-navy-950 hover:bg-surface">How AI suggestions work <ArrowIcon /></SiteButton>
-                                    <SiteButton href="/pricing" className="bg-transparent ring-1 ring-inset ring-white/30 hover:bg-white/10">See plans</SiteButton>
+                                    <SiteButton href="/docs/ai" variant="onDark">How AI suggestions work <ArrowIcon /></SiteButton>
+                                    <SiteButton href="/pricing" variant="outlineDark">See plans</SiteButton>
                                 </div>
                             </div>
                         </Container>
@@ -217,8 +217,8 @@ export default function LandingPage() {
                                 <li><strong className="font-semibold text-white">Integrations.</strong> GA4 events, Google Tag Manager, a WordPress plugin on paid plans, and signed webhooks.</li>
                             </ul>
                             <div className="mt-8 flex flex-wrap gap-3">
-                                <SiteButton href="/docs/sdk" className="bg-white text-navy-950 hover:bg-surface">SDK reference <ArrowIcon /></SiteButton>
-                                <SiteButton href="/docs/rest-api" className="bg-transparent ring-1 ring-inset ring-white/30 hover:bg-white/10">API reference</SiteButton>
+                                <SiteButton href="/docs/sdk" variant="onDark">SDK reference <ArrowIcon /></SiteButton>
+                                <SiteButton href="/docs/rest-api" variant="outlineDark">API reference</SiteButton>
                             </div>
                         </div>
                         <div className="min-w-0 space-y-4">
