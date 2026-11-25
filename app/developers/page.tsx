@@ -177,7 +177,7 @@ export default function DevelopersPage() {
                         </li>
                     ))}
                 </ul>
-                <p className="mt-6 text-[14px] text-muted">How results are calculated: <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">experiment analytics</Link> and <Link href="/docs/results#significance" className="font-medium text-accent-700 hover:underline">significance in the docs</Link>.</p>
+                <p className="mt-6 text-[14px] text-muted">How results are calculated: <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">experiment analytics</Link> and <Link href="/statistical-methodology" className="font-medium text-accent-700 hover:underline">statistical methodology</Link>.</p>
             </Section>
 
             <CtaBand title="Ship your first experiment." body={FREE_LINE} href="/signin" label="Get your keys" />

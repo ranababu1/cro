@@ -257,7 +257,7 @@ export default function LandingPage() {
                         <p className="text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Inconclusive tests.</strong> No verdict before every version has 100 visitors. Many tests end with no significant difference; ship the simpler version and test a bolder idea.</p>
                         <p className="text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Sample ratio check.</strong> If visitors are not split the way you set the weights, the results page warns you before you trust the numbers.</p>
                     </div>
-                    <p className="mt-8 text-[14px] text-muted">Worked example with example numbers. <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">Read how results are calculated</Link></p>
+                    <p className="mt-8 text-[14px] text-muted">Worked example with example numbers. <Link href="/statistical-methodology" className="font-medium text-accent-700 hover:underline">Read how results are calculated</Link></p>
                 </Section>
 
                 {/* 9. Pricing */}

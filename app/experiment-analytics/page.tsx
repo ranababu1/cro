@@ -115,7 +115,7 @@ export default function ExperimentAnalyticsPage() {
                     <p><strong className="text-navy-950">Sample ratio check.</strong> From 100 visitors, the results page warns you when the split is far from what you set and the chance of luck is under 0.1%. Fix the cause before you trust the numbers.</p>
                     <p><strong className="text-navy-950">Inconclusive is a result.</strong> Many tests end without a clear winner. The change did not matter much, so ship the simpler version and test a bolder idea.</p>
                 </div>
-                <p className="mt-6 text-[14px]"><Link href="/docs/results#significance" className="font-medium text-accent-700 hover:underline">How significance is calculated</Link></p>
+                <p className="mt-6 text-[14px]"><Link href="/statistical-methodology" className="font-medium text-accent-700 hover:underline">How every number is calculated</Link></p>
             </Section>
 
             <Section tone="surface" className="border-t border-line">

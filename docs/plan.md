@@ -200,7 +200,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 ### Phase 5: developer ecosystem (PR E developers hub, PR F docs changes, PR G statistical methodology)
 - PR E: /developers. Done: content in `lib/site/developers.ts` (code samples copied from `lib/docs/content`, checked by tests/developersPage.test.ts), `CodeBlock` component, Developer hub first in the Developers menu and footer column, homepage developer links point at /developers.
 - PR F: rename `/docs/sdk` to `/docs/javascript-sdk` with redirect and link updates; new `/docs/integrations`; restyle docs shell; add docs pages to sitemap. Done: 301 in next.config.js, docs shell uses SiteHeader and SiteFooter plus a docs bar, integrations page in `lib/docs/content/integrations.ts`, tests/docsShell.test.ts.
-- PR G: /statistical-methodology with formulas, worked examples (reuse docs diagrams), interpretation guide.
+- PR G: /statistical-methodology with formulas, worked examples (reuse docs diagrams), interpretation guide. Done: page in app/statistical-methodology, examples computed by `lib/site/methodology.ts` with the app's statistics functions, interval diagram reused from the docs, tests/methodologyPage.test.ts checks formulas against lib source.
 
 ### Phase 6: resources and commercial (PR H resources, PR I pricing and legal)
 - PR H: /resources, /guides, /faq, /changelog (content/changelog), blog index restyle.
