@@ -60,7 +60,7 @@ export default function StatisticalMethodologyPage() {
                     ))}
                 </ul>
                 <div className="mt-10 hidden overflow-x-auto rounded-xl border border-line md:block">
-                    <table className="w-full text-left text-[14px]">
+                    <table className="[&_td]:pr-3 [&_th]:pr-3 w-full text-left text-[14px]">
                         <thead className="border-b border-line bg-surface text-[12px] uppercase tracking-[0.06em] text-muted">
                             <tr><th className="px-4 py-3 font-semibold">Number</th><th className="px-4 py-3 font-semibold">Method</th><th className="px-4 py-3 font-semibold">Shown when</th></tr>
                         </thead>
@@ -91,7 +91,7 @@ export default function StatisticalMethodologyPage() {
                                 <div><dt className="text-muted">Variant, {fmt(ex.variant.conversions)} / {fmt(ex.variant.visitors)}</dt><dd className="mt-1 text-[18px] font-semibold text-accent-700">{pct(m.variant.conversion_rate)}</dd><dd className="text-muted-strong">{pct(m.variant.ci.lower, 2)} to {pct(m.variant.ci.upper, 2)}</dd></div>
                             </dl>
                         </SampleDataFrame>
-                        <figure className="rounded-xl border border-line bg-white p-4"><Diagram name="interval" /><figcaption className="mt-3 text-center text-[12px] text-muted">Separated intervals point to a real difference. Overlap does not prove there is none; the significance test decides.</figcaption></figure>
+                        <figure className="rounded-xl border border-line bg-white p-4"><Diagram name="interval" /><figcaption className="mt-3 text-center text-[12px] text-muted">Illustration. Separated intervals point to a real difference. Overlap does not prove there is none; the significance test decides.</figcaption></figure>
                     </div>
                 </div>
             </Section>
@@ -117,9 +117,9 @@ export default function StatisticalMethodologyPage() {
                     </div>
                     <div className="grid content-start gap-4">
                         <SampleDataFrame>
-                            <div className="p-5">
-                                <table className="w-full text-left text-[14px] tabular-nums">
-                                    <thead><tr className="text-[12px] text-muted"><th className="pb-2 font-medium">Visitors each</th><th className="pb-2 font-medium">Variants</th><th className="pb-2 font-medium">p</th><th className="pb-2 font-medium">Bar</th><th className="pb-2 font-medium">Verdict</th></tr></thead>
+                            <div className="p-5 pt-10">
+                                <table className="[&_td]:pr-3 [&_th]:pr-3 w-full text-left text-[14px] tabular-nums">
+                                    <thead><tr className="text-[12px] text-muted"><th className="pb-2 font-medium">Visitors</th><th className="pb-2 font-medium">Variants</th><th className="pb-2 font-medium">p</th><th className="pb-2 font-medium">Bar</th><th className="pb-2 font-medium">Verdict</th></tr></thead>
                                     <tbody className="divide-y divide-line">
                                         <tr><td className="py-2">{fmt(ex.early.visitors)}</td><td>1</td><td>{m.early.seq.p_value.toFixed(3)}</td><td>{m.early.seq.threshold}</td><td>Keep running</td></tr>
                                         <tr><td className="py-2">{fmt(ex.control.visitors)}</td><td>1</td><td>{m.seq.p_value.toFixed(3)}</td><td>{m.seq.threshold}</td><td className="font-semibold text-accent-700">Significant</td></tr>
@@ -132,7 +132,7 @@ export default function StatisticalMethodologyPage() {
                         <div className="rounded-xl border border-line p-5">
                             <h3 className="text-[16px] font-semibold text-navy-950">The price of looking freely</h3>
                             <p className="mt-2 text-[14px] leading-[1.6] text-muted-strong">For the same observed lift, the sequential test needs about 2 to 3 times the visitors of a test you look at once. Visitors per version before the lift first clears 0.05:</p>
-                            <table className="mt-3 w-full text-left text-[14px] tabular-nums">
+                            <table className="[&_td]:pr-3 [&_th]:pr-3 mt-3 w-full text-left text-[14px] tabular-nums">
                                 <thead><tr className="text-[12px] text-muted"><th className="pb-2 font-medium">Baseline</th><th className="pb-2 font-medium">Lift</th><th className="pb-2 font-medium">Single look</th><th className="pb-2 font-medium">Sequential</th></tr></thead>
                                 <tbody className="divide-y divide-line">
                                     {m.cost.map((c) => <tr key={`${c.baseline}-${c.lift}`}><td className="py-2">{pct(c.baseline, 0)}</td><td>{pct(c.lift, 0)}</td><td>{fmt(c.fixed)}</td><td>{fmt(c.sequential)}</td></tr>)}
@@ -195,7 +195,7 @@ export default function StatisticalMethodologyPage() {
                     <div className="grid content-start gap-4">
                         <Formula label="Chi-square goodness of fit" lines={['Eᵢ = total visitors × weightᵢ / Σ weights', 'χ² = Σ (Oᵢ − Eᵢ)² / Eᵢ', 'degrees of freedom = versions − 1', `warn when p < ${K.srmP} and total ≥ ${K.srmMin}`]} />
                         <SampleDataFrame>
-                            <table className="m-5 w-[calc(100%-2.5rem)] text-left text-[14px] tabular-nums">
+                            <table className="[&_td]:pr-3 [&_th]:pr-3 mx-5 mb-5 mt-10 w-[calc(100%-2.5rem)] text-left text-[14px] tabular-nums">
                                 <thead><tr className="text-[12px] text-muted"><th className="pb-2 font-medium">50/50 test</th><th className="pb-2 font-medium">χ²</th><th className="pb-2 font-medium">p</th><th className="pb-2 font-medium">Result</th></tr></thead>
                                 <tbody className="divide-y divide-line">
                                     <tr><td className="py-2">{fmt(SRM_EXAMPLES.fine[0])} / {fmt(SRM_EXAMPLES.fine[1])}</td><td>{m.srmFine.chi_square.toFixed(2)}</td><td>{pv(m.srmFine.p_value)}</td><td>No warning</td></tr>
@@ -221,8 +221,8 @@ export default function StatisticalMethodologyPage() {
                         <Formula label="Welch's test, normal approximation" lines={['mean = revenue / visitors      (non-buyers count as 0)', 's² = sample variance of revenue per visitor', 'z = |mean_B − mean_A| / √( s²_A/n_A + s²_B/n_B )', 'p = 2 × (1 − Φ(z)),  significant when p < 0.05']} />
                         <SampleDataFrame>
                             <div className="p-5 text-[14px] tabular-nums">
-                                <p className="text-muted-strong">Control ${REVENUE_EXAMPLE.control.mean.toFixed(2)} per visitor (standard deviation ${REVENUE_EXAMPLE.control.sd}), variant ${REVENUE_EXAMPLE.variant.mean.toFixed(2)} (${REVENUE_EXAMPLE.variant.sd}).</p>
-                                <table className="mt-3 w-full text-left">
+                                <p className="pr-28 text-muted-strong">Control ${REVENUE_EXAMPLE.control.mean.toFixed(2)} per visitor (standard deviation ${REVENUE_EXAMPLE.control.sd}), variant ${REVENUE_EXAMPLE.variant.mean.toFixed(2)} (${REVENUE_EXAMPLE.variant.sd}).</p>
+                                <table className="[&_td]:pr-3 [&_th]:pr-3 mt-3 w-full text-left">
                                     <thead><tr className="text-[12px] text-muted"><th className="pb-2 font-medium">Visitors each</th><th className="pb-2 font-medium">p</th><th className="pb-2 font-medium">Verdict</th></tr></thead>
                                     <tbody className="divide-y divide-line">
                                         <tr><td className="py-2">{fmt(REVENUE_EXAMPLE.small)}</td><td>{m.revenueSmall.toFixed(3)}</td><td>Not significant</td></tr>
@@ -259,7 +259,7 @@ export default function StatisticalMethodologyPage() {
                     </div>
                     <SampleDataFrame>
                         <div className="p-5 text-[14px] tabular-nums">
-                            <p className="text-muted-strong">The early example: {fmt(ex.early.visitors)} visitors each, 5.0% against 6.5%.</p>
+                            <p className="pr-28 text-muted-strong">The early example: {fmt(ex.early.visitors)} visitors each, 5.0% against 6.5%.</p>
                             <dl className="mt-4 grid grid-cols-2 gap-3">
                                 <div className="rounded-lg bg-surface p-3"><dt className="text-[12px] text-muted">z-test p</dt><dd className="mt-1 text-[20px] font-semibold text-navy-950">{m.early.fixed.p_value.toFixed(3)}</dd><dd className="text-[12px] text-muted">Looks significant</dd></div>
                                 <div className="rounded-lg bg-surface p-3"><dt className="text-[12px] text-muted">Sequential p</dt><dd className="mt-1 text-[20px] font-semibold text-navy-950">{m.early.seq.p_value.toFixed(3)}</dd><dd className="text-[12px] text-muted">Keep running</dd></div>
@@ -300,7 +300,7 @@ export default function StatisticalMethodologyPage() {
                     <li className="rounded-xl border border-line bg-white p-5 text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Normal distribution.</strong> Φ uses the Abramowitz and Stegun polynomial approximation (formula 26.2.17). Its inverse, used for z values such as 1.96, uses Acklam&apos;s rational approximation, with relative error below 1.2 × 10⁻⁹.</li>
                     <li className="rounded-xl border border-line bg-white p-5 text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Chi-square p-values.</strong> From the regularized upper incomplete gamma function, with a series or continued fraction depending on the value, and the Lanczos approximation of the log-gamma function.</li>
                     <li className="rounded-xl border border-line bg-white p-5 text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Beta draws for auto-shift.</strong> 4,000 draws per update from Gamma samples (Marsaglia and Tsang), with a seeded generator so an update can be reproduced.</li>
-                    <li className="rounded-xl border border-line bg-white p-5 text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Where to read more.</strong> The <Link href="/docs/results" className="font-medium text-accent-700 hover:underline">results guide</Link> explains each screen, <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">experiment analytics</Link> shows the reports, and the <Link href="/docs/rest-api" className="font-medium text-accent-700 hover:underline">REST API</Link> returns every number on this page.</li>
+                    <li className="rounded-xl border border-line bg-white p-5 text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Where to read more.</strong> The <Link href="/docs/results" className="font-medium text-accent-700 hover:underline">results guide</Link> explains each screen, <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">experiment analytics</Link> shows the reports, and the <Link href="/docs/rest-api" className="font-medium text-accent-700 hover:underline">REST API</Link> returns the results of each test.</li>
                 </ul>
             </Section>
 
