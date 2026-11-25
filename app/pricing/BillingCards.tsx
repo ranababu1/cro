@@ -24,11 +24,11 @@ export function BillingCards({ checkout = false }: { checkout?: boolean }) {
     const [yearly, setYearly] = useState(false);
     return (
         <div>
-            <div className="mt-4 inline-flex rounded-full border border-zinc-200 bg-white p-1 text-sm font-medium" role="group" aria-label="Billing period">
-                <button type="button" onClick={() => setYearly(false)} aria-pressed={!yearly} className={`rounded-full px-4 py-2 ${!yearly ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Monthly</button>
-                <button type="button" onClick={() => setYearly(true)} aria-pressed={yearly} className={`rounded-full px-4 py-2 ${yearly ? 'bg-blue-600 text-white' : 'text-zinc-600'}`}>Yearly <span className={yearly ? 'text-teal-100' : 'text-teal-700'}>(2 months free)</span></button>
+            <div className="mt-8 inline-flex rounded-full border border-line bg-white p-1 text-[14px] font-medium" role="group" aria-label="Billing period">
+                <button type="button" onClick={() => setYearly(false)} aria-pressed={!yearly} className={`rounded-full px-4 py-2 ${!yearly ? 'bg-navy-950 text-white' : 'text-muted-strong hover:text-navy-950'}`}>Monthly</button>
+                <button type="button" onClick={() => setYearly(true)} aria-pressed={yearly} className={`rounded-full px-4 py-2 ${yearly ? 'bg-navy-950 text-white' : 'text-muted-strong hover:text-navy-950'}`}>Yearly <span className={yearly ? 'text-accent-100' : 'text-accent-700'}>(2 months free)</span></button>
             </div>
-            <div className="mt-4 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
                 {tiers.map((t) => {
                     const price = t.monthly === null ? 'Custom' : `$${yearly ? t.yearly : t.monthly}`;
                     const unit = t.monthly === null ? '' : yearly ? '/yr' : '/mo';
@@ -36,17 +36,17 @@ export function BillingCards({ checkout = false }: { checkout?: boolean }) {
                     const href = paid ? `/signin?callbackUrl=${encodeURIComponent(`/settings/billing?plan=${t.name.toLowerCase()}&period=${yearly ? 'yearly' : 'monthly'}`)}` : t.href;
                     const note = t.monthly === null ? 'Contact us' : t.monthly === 0 ? 'Free forever, no card' : yearly ? `About $${((t.yearly as number) / 12).toFixed(2)}/mo, billed yearly` : 'Billed monthly';
                     return (
-                        <div key={t.name} className={`relative flex flex-col rounded-2xl border bg-white p-6 ${t.popular ? 'border-blue-600 ring-1 ring-blue-600' : 'border-zinc-200'}`}>
-                            {t.popular && <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-[#2563eb] to-[#14b8a6] px-3 py-1 text-xs font-semibold text-white">Most popular</span>}
-                            <h2 className="text-lg font-semibold">{t.name}</h2>
-                            <p className="mt-1 min-h-[40px] text-sm text-zinc-600">{t.body}</p>
-                            <p className="mt-4 text-4xl font-bold tracking-tight text-[#0b1630]">{price}<span className="text-base font-medium text-zinc-500">{unit}</span></p>
-                            <p className="mt-1 text-xs text-zinc-500">{note}</p>
-                            <ul className="mt-4 flex-1 space-y-1.5 text-sm leading-5 text-zinc-700" data-testid={`plan-${t.name.toLowerCase()}-limits`}>
-                                {highlights[t.name].map((i) => <li key={i} className="flex gap-2"><span className="text-teal-600" aria-hidden>✓</span>{i}</li>)}
+                        <div key={t.name} className={`relative flex min-w-0 flex-col rounded-xl border bg-white p-6 shadow-xs ${t.popular ? 'border-navy-950 ring-1 ring-navy-950' : 'border-line'}`}>
+                            {t.popular && <span className="absolute -top-3 left-6 rounded-full bg-navy-950 px-3 py-1 text-[12px] font-semibold text-white">Most popular</span>}
+                            <h2 className="text-[18px] font-semibold text-navy-950">{t.name}</h2>
+                            <p className="mt-1 min-h-[44px] text-[14px] leading-[1.55] text-muted-strong">{t.body}</p>
+                            <p className="mt-4 text-[38px] font-semibold tracking-[-0.02em] text-navy-950">{price}<span className="text-[16px] font-medium text-muted">{unit}</span></p>
+                            <p className="mt-1 text-[12px] text-muted">{note}</p>
+                            <ul className="mt-5 flex-1 space-y-2 border-t border-line pt-5 text-[14px] leading-5 text-muted-strong" data-testid={`plan-${t.name.toLowerCase()}-limits`}>
+                                {highlights[t.name].map((i) => <li key={i} className="flex gap-2"><span className="font-semibold text-accent-700" aria-hidden>✓</span>{i}</li>)}
                             </ul>
-                            <a href="#compare" className="mt-4 text-sm font-medium text-blue-700 hover:underline">See all plan details</a>
-                            <Link href={href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold ${t.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-zinc-300 text-zinc-900 hover:bg-zinc-50'}`}>{t.cta}</Link>
+                            <a href="#compare" className="mt-5 text-[14px] font-medium text-accent-700 hover:underline">See all plan details</a>
+                            <Link href={href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-[15px] font-semibold ${t.popular ? 'bg-navy-950 text-white hover:bg-navy-800' : 'border border-line text-navy-950 hover:bg-surface'}`}>{t.cta}</Link>
                         </div>
                     );
                 })}

@@ -18,6 +18,10 @@ const nextConfig = {
             { source: '/roadmap', destination: '/pricing', statusCode: 301 },
             // The SDK docs moved; the old address keeps working, anchors included.
             { source: '/docs/sdk', destination: '/docs/javascript-sdk', statusCode: 301 },
+            // Short legal URLs people type or link to.
+            { source: '/privacy', destination: '/legal/privacy', statusCode: 301 },
+            { source: '/terms', destination: '/legal/terms', statusCode: 301 },
+            { source: '/cookie-policy', destination: '/legal/cookies', statusCode: 301 },
         ];
     },
     async headers() {

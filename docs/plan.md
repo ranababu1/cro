@@ -204,7 +204,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 
 ### Phase 6: resources and commercial (PR H resources, PR I pricing and legal)
 - PR H: /resources, /guides, /faq, /changelog (content/changelog), blog index restyle. Done: hub in app/resources, curated guides in `lib/site/resources.ts`, product FAQ in `lib/site/faq.ts` (no question shared with the pricing FAQ), public release notes in `content/changelog/releases.json` via `lib/changelog.ts`, blog index restyled; checked by tests/resourcesPages.test.ts.
-- PR I: /pricing redesign (same numbers), /about restyle, legal restyle, redirects /privacy, /terms, /cookie-policy.
+- PR I: /pricing redesign (same numbers), /about restyle, legal restyle, redirects /privacy, /terms, /cookie-policy. Done: pricing page and plan cards on the site tokens, LegalDoc restyled (covers /about, /contact, /security and every /legal page), 301s in next.config.js; checked by tests/pricingLegalDesign.test.ts.
 
 ### Phase 7: SEO, accessibility, QA (PR J)
 `metadataBase`, canonical, OG and Twitter on every public page, default OG image, breadcrumbs, sitemap with every public page and docs, robots check, internal link checker test, axe-style checks, 390/768/1280 screenshots, Lighthouse pass, full `npm test` and build.
