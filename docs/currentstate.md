@@ -12,7 +12,8 @@
 > Product pages (PR C): /product, /features, /how-it-works and /experiment-analytics, content in `lib/site/product.ts`, shared
 > `SitePage`, `Breadcrumbs`, `PlanBadge`, `ProductSubnav` and `pageMetadata` (lib/site/meta.ts). Solutions (PR D): /solutions and
 > /solutions/marketing, /saas, /ecommerce, /startups from `app/solutions/SolutionPage.tsx`, content in `lib/site/solutions.ts`.
-> Phase 5 (developers hub) is next. Brief URLs not built yet: /developers, /docs/javascript-sdk (today /docs/sdk),
+> Developers hub (PR E): /developers, content in `lib/site/developers.ts`, `CodeBlock` component. Next is PR F (docs rename
+> and /docs/integrations). Brief URLs not built yet: /docs/javascript-sdk (today /docs/sdk),
 > /docs/integrations, /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
 > /cookie-policy.
 

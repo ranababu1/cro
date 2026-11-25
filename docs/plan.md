@@ -198,7 +198,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 - PR D: /solutions and four children. Each with a real workflow example, relevant goals and plan notes. Done: one template (app/solutions/SolutionPage.tsx) fed by lib/site/solutions.ts; workflows are labelled example plans, never customer stories; ecommerce names no store platform integration (snippet, Tag Manager and API only).
 
 ### Phase 5: developer ecosystem (PR E developers hub, PR F docs changes, PR G statistical methodology)
-- PR E: /developers.
+- PR E: /developers. Done: content in `lib/site/developers.ts` (code samples copied from `lib/docs/content`, checked by tests/developersPage.test.ts), `CodeBlock` component, Developer hub first in the Developers menu and footer column, homepage developer links point at /developers.
 - PR F: rename `/docs/sdk` to `/docs/javascript-sdk` with redirect and link updates; new `/docs/integrations`; restyle docs shell; add docs pages to sitemap.
 - PR G: /statistical-methodology with formulas, worked examples (reuse docs diagrams), interpretation guide.
 
