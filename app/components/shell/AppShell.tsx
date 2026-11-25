@@ -18,6 +18,8 @@ export interface AppShellProps {
     projects: ShellProject[];
     currentProjectId: string | null;
     isPlatformAdmin: boolean;
+    /** Show Settings, Billing (only once paid checkout is configured). */
+    billing?: boolean;
     children: React.ReactNode;
 }
 
@@ -137,7 +139,7 @@ function UserMenu({ user }: { user: AppShellProps['user'] }) {
     );
 }
 
-function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; onNavigate?: () => void }) {
+function NavLinks({ isPlatformAdmin, billing = false, onNavigate }: { isPlatformAdmin: boolean; billing?: boolean; onNavigate?: () => void }) {
     const pathname = usePathname();
     const item = (href: string, label: string, Icon: typeof HomeIcon) => {
         const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href) && !(href === '/admin' && pathname.startsWith('/admin/telemetry')));
@@ -160,6 +162,7 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
     return (
         <nav className="flex flex-1 flex-col gap-0.5 px-3">
             {nav.map((n) => item(n.href, n.label, n.icon))}
+            {billing && item('/settings/billing', 'Billing', ListIcon)}
             {isPlatformAdmin && (
                 <>
                     <p className="mt-6 mb-1 px-2.5 text-xs font-medium text-zinc-400">Platform</p>
@@ -179,7 +182,7 @@ function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; o
     );
 }
 
-export default function AppShell({ user, projects, currentProjectId, isPlatformAdmin, children }: AppShellProps) {
+export default function AppShell({ user, projects, currentProjectId, isPlatformAdmin, billing = false, children }: AppShellProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const closeDrawer = useCallback(() => setMobileOpen(false), []);
     const drawer = useRef<HTMLElement>(null);
@@ -192,7 +195,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                 <div className="flex h-14 items-center px-5">
                     <Logo href="/dashboard" />
                 </div>
-                <NavLinks isPlatformAdmin={isPlatformAdmin} />
+                <NavLinks isPlatformAdmin={isPlatformAdmin} billing={billing} />
             </aside>
 
             {/* Mobile drawer */}
@@ -206,7 +209,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                                 <XIcon />
                             </button>
                         </div>
-                        <NavLinks isPlatformAdmin={isPlatformAdmin} onNavigate={() => setMobileOpen(false)} />
+                        <NavLinks isPlatformAdmin={isPlatformAdmin} billing={billing} onNavigate={() => setMobileOpen(false)} />
                         <div className="mt-auto border-t border-zinc-200 px-5 py-4 sm:hidden"><ThemeToggle /></div>
                     </aside>
                 </div>

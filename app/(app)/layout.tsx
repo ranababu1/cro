@@ -3,6 +3,7 @@ import { getAppContext } from '@/lib/appContext';
 import { db } from '@/lib/db';
 import { isProfileComplete } from '@/lib/profile';
 import { isProfileExempt } from '@/lib/profileGate';
+import { billingEnabled } from '@/lib/billing/config';
 import { ProfilePrompt } from '../components/profile/ProfilePrompt';
 import AppShell from '../components/shell/AppShell';
 import { Logo } from '../components/ui/Logo';
@@ -33,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const showPrompt = !complete && !exempt && !user?.profile_prompt_dismissed_at;
 
     return (
-        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin}>
+        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin} billing={billingEnabled()}>
             {showPrompt && <ProfilePrompt />}
             {children}
         </AppShell>

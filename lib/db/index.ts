@@ -46,7 +46,7 @@ function effectivePlanSql(orgAlias: string, adminEmails: string[]) {
     const owned = adminEmails.length
         ? sql`WHEN EXISTS (SELECT 1 FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.org_id = ${o}.id AND m.role = 'owner' AND lower(u.email) IN (${sql.join(adminEmails.map((e) => sql`${e.toLowerCase()}`), sql`, `)})) THEN 'enterprise' `
         : sql``;
-    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) ELSE coalesce(lower(${o}.plan), 'free') END)`;
+    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) WHEN ${o}.plan_ends_at IS NOT NULL AND ${o}.plan_ends_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 'free' ELSE coalesce(lower(${o}.plan), 'free') END)`;
 }
 
 export interface OrgUpdate {
@@ -56,6 +56,7 @@ export interface OrgUpdate {
     plan_override?: 'free' | 'starter' | 'growth' | 'enterprise' | null;
     plan_override_by?: string | null;
     plan_override_at?: string | null;
+    plan_ends_at?: string | null;
     monthly_visitor_limit?: number | null;
     monthly_experiment_limit?: number | null;
     monthly_pageview_limit?: number | null;
@@ -1060,6 +1061,49 @@ export const db = {
     async getOrgProjects(orgId: string) {
         const d = await getDb();
         return d.select().from(s.projects).where(eq(s.projects.org_id, orgId)).orderBy(asc(s.projects.created_at));
+    },
+
+    // Billing (see lib/billing)
+    async getBillingSubscription(provider: 'paypal' | 'razorpay', providerSubscriptionId: string) {
+        const d = await getDb();
+        return (await d.query.billingSubscriptions.findFirst({ where: and(eq(s.billingSubscriptions.provider, provider), eq(s.billingSubscriptions.provider_subscription_id, providerSubscriptionId)) })) ?? null;
+    },
+
+    async listBillingSubscriptions(orgId: string) {
+        const d = await getDb();
+        return d.select().from(s.billingSubscriptions).where(eq(s.billingSubscriptions.org_id, orgId)).orderBy(desc(s.billingSubscriptions.updated_at), desc(s.billingSubscriptions.created_at));
+    },
+
+    /** Insert or update the mirror of a provider subscription, keyed by provider and provider id. */
+    async upsertBillingSubscription(row: {
+        orgId: string; provider: 'paypal' | 'razorpay'; providerSubscriptionId: string; providerPlanId: string | null;
+        plan: 'starter' | 'growth' | null; period: 'monthly' | 'yearly' | null; status: string;
+        paidThrough?: string | null; nextBillingAt?: string | null; lastPaymentAt?: string | null; createdBy?: string | null;
+    }) {
+        const d = await getDb();
+        const at = nowIso();
+        const values = {
+            org_id: row.orgId, provider: row.provider, provider_subscription_id: row.providerSubscriptionId, provider_plan_id: row.providerPlanId,
+            plan: row.plan, period: row.period, status: row.status, next_billing_at: row.nextBillingAt ?? null, last_payment_at: row.lastPaymentAt ?? null, updated_at: at,
+            ...(row.paidThrough !== undefined ? { paid_through: row.paidThrough } : {}),
+        };
+        await d.insert(s.billingSubscriptions)
+            .values({ id: generateId('bsub'), ...values, paid_through: row.paidThrough ?? null, created_by: row.createdBy ?? null })
+            .onConflictDoUpdate({ target: [s.billingSubscriptions.provider, s.billingSubscriptions.provider_subscription_id], set: values });
+        return (await this.getBillingSubscription(row.provider, row.providerSubscriptionId))!;
+    },
+
+    /** Records a webhook event id. Returns false when it was already processed (a retried delivery). */
+    async claimBillingWebhookEvent(e: { id: string; provider: string; eventType: string; resourceId: string | null }): Promise<boolean> {
+        const d = await getDb();
+        await d.insert(s.billingWebhookEvents).values({ id: e.id, provider: e.provider, event_type: e.eventType, resource_id: e.resourceId }).onConflictDoNothing();
+        const row = await d.query.billingWebhookEvents.findFirst({ where: eq(s.billingWebhookEvents.id, e.id) });
+        return !row?.processed_at;
+    },
+
+    async finishBillingWebhookEvent(id: string, result: string) {
+        const d = await getDb();
+        await d.update(s.billingWebhookEvents).set({ processed_at: nowIso(), result }).where(eq(s.billingWebhookEvents.id, id));
     },
 
     // Audit

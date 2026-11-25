@@ -59,6 +59,8 @@ export const organizations = sqliteTable('organizations', {
     experiments_started_total: integer('experiments_started_total').notNull().default(0),
     special_friend: integer('special_friend', { mode: 'boolean' }).notNull().default(false),
     custom_allowances: text('custom_allowances'),
+    // Paid billing plan ends at this time (ISO, UTC) after a cancellation or suspension; null while it renews. See lib/billing.
+    plan_ends_at: text('plan_ends_at'),
     created_at: text('created_at').notNull().default(now),
 });
 
@@ -754,3 +756,34 @@ export const supportMessages = sqliteTable('support_messages', {
     body: text('body').notNull(),
     created_at: text('created_at').notNull().default(now),
 }, (t) => [index('idx_support_messages_ticket').on(t.ticket_id, t.created_at)]);
+
+/** Paid subscriptions at a payment provider (PayPal now). The provider is the source of truth; rows mirror what it last reported. */
+export const billingSubscriptions = sqliteTable('billing_subscriptions', {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+    provider: text('provider', { enum: ['paypal', 'razorpay'] }).notNull(),
+    provider_subscription_id: text('provider_subscription_id').notNull(),
+    provider_plan_id: text('provider_plan_id'),
+    plan: text('plan', { enum: ['starter', 'growth'] }),
+    period: text('period', { enum: ['monthly', 'yearly'] }),
+    // Provider status in upper case, for example APPROVAL_PENDING, ACTIVE, SUSPENDED, CANCELLED, EXPIRED.
+    status: text('status').notNull(),
+    // End of the period already paid for. Access continues until then after a cancellation.
+    paid_through: text('paid_through'),
+    next_billing_at: text('next_billing_at'),
+    last_payment_at: text('last_payment_at'),
+    created_by: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    created_at: text('created_at').notNull().default(now),
+    updated_at: text('updated_at').notNull().default(now),
+}, (t) => [uniqueIndex('uq_billing_subscriptions_provider_id').on(t.provider, t.provider_subscription_id), index('idx_billing_subscriptions_org').on(t.org_id, t.updated_at)]);
+
+/** Provider webhook events already handled, by event id, so a retried delivery is applied once. */
+export const billingWebhookEvents = sqliteTable('billing_webhook_events', {
+    id: text('id').primaryKey(),
+    provider: text('provider').notNull(),
+    event_type: text('event_type').notNull(),
+    resource_id: text('resource_id'),
+    received_at: text('received_at').notNull().default(now),
+    processed_at: text('processed_at'),
+    result: text('result'),
+});

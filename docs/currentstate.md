@@ -18,7 +18,7 @@
 > - [ ] Turso point-in-time restore on; daily `npm run db:backup` to encrypted storage with a 30-day lifecycle (the legal pages promise 30 days).
 > - [ ] Run the restore drill once (docs/operations.md section 4).
 > - [ ] Check `x-forwarded-for` is set by the host (true on Vercel); per-IP limits trust it.
-> - [ ] Payment integration (PayPal USD subscriptions next, then Razorpay INR). Policy pages for review are live.
+> - [ ] Payment integration: PayPal USD subscriptions are built and stay off until the PayPal variables are set in production (sandbox first, see "Billing" below). Razorpay INR comes later. In-app plan changes and cancellation are not built yet.
 > - Known gaps accepted for launch: no transactional email (invites, ticket replies, quota warnings are in-app only); WordPress plugin has
 >   no consent setting; account deletion signs the user out but does not revoke other sessions server-side; telemetry counters are lost if a
 >   batch write fails; events from already-enrolled visitors are still accepted for paused or completed tests; Microsoft sign-in not
@@ -436,3 +436,11 @@ Multi-page and multivariate tests: lib/multipage.ts (page rules, onTestPage used
 - Sign-in: Google, plus GitHub when configured. Microsoft deliberately not added (email claim is not verified for multi-tenant apps; see docs/operations.md).
 - Rate limits: shared through Upstash Redis when configured (local limiter first, 250 ms timeout, fail open); otherwise per instance as before.
 - Still open: transactional email (invites, ticket replies, quota warnings, billing), billing terms, a hosted status page (set up outside the app), WordPress plugin consent setting, server-side session revocation on account deletion.
+
+## Billing (PayPal, added 2026-11-25)
+- Off until every variable is set: PAYPAL_API_BASE (https://api-m.sandbox.paypal.com or https://api-m.paypal.com only), PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, NEXT_PUBLIC_PAYPAL_CLIENT_ID, PAYPAL_WEBHOOK_ID, PAYPAL_PLAN_STARTER_MONTHLY, PAYPAL_PLAN_STARTER_YEARLY, PAYPAL_PLAN_GROWTH_MONTHLY, PAYPAL_PLAN_GROWTH_YEARLY. While off: billing routes answer 404, /settings/billing is a 404, there is no Billing nav item, and pricing buttons go to /signin as before. The pricing page is static, so redeploy after changing the variables.
+- Code: lib/billing/config.ts (env, plan id mapping), lib/billing/paypal.ts (REST client, signature check), lib/billing/provider.ts (provider-neutral subscription), lib/billing/service.ts (applySubscription, billingStatus). Tables: billing_subscriptions, billing_webhook_events; organizations.plan_ends_at.
+- Flow: owner picks plan and period on Settings, Billing; the PayPal button calls POST /api/billing/subscribe, which creates the subscription server-side with custom_id = org id; after approval POST /api/billing/paypal/confirm re-reads it from PayPal. POST /api/billing/paypal/webhook verifies each delivery with PayPal (raw body), records the event id once and re-reads the subscription. Events: BILLING.SUBSCRIPTION.ACTIVATED, RE-ACTIVATED, UPDATED, CANCELLED, SUSPENDED, EXPIRED, PAYMENT.FAILED and PAYMENT.SALE.COMPLETED.
+- Rules: only ACTIVE with one of our four plan ids sets organizations.plan. CANCELLED and SUSPENDED set plan_ends_at to the end of the paid period (no mid-cycle refunds); past it the billing plan counts as Free. EXPIRED sets Free now. Nothing changes if another subscription is active or the org plan did not come from that subscription. Admin-assigned plan, special-friend allowances and platform admin ownership still win.
+- One subscription per org; a second is refused (409). Cancel and payment method changes happen in PayPal (automatic payments) for now; upgrades, downgrades and in-app cancel are the next PR.
+- Setup: scripts/paypal-setup.mjs creates the product, the four USD plans (Starter $10/mo, $100/yr; Growth $50/mo, $500/yr) and the webhook, and prints the ids.

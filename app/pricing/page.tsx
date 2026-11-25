@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
 import { BillingCards } from './BillingCards';
+import { billingEnabled } from '@/lib/billing/config';
 
 export const metadata: Metadata = {
     title: 'Pricing',
@@ -124,7 +125,7 @@ export default function PricingPage() {
                 <h1 className="mt-3 text-[34px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[44px]">Simple plans. A free tier you can actually use.</h1>
                 <p className="mt-3 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
 
-                <BillingCards />
+                <BillingCards checkout={billingEnabled()} />
 
                 <section id="compare" className="mt-20 scroll-mt-6">
                     <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Compare plans</h2>
