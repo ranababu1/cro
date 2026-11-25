@@ -21,7 +21,8 @@ const FORBIDDEN: RegExp[] = [
 const root = path.join(__dirname, '..');
 const publicFiles = [
     'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/sitemap.ts',
-    'lib/site/home.ts', 'lib/site/product.ts', 'lib/site/meta.ts',
+    'lib/site/home.ts', 'lib/site/product.ts', 'lib/site/meta.ts', 'lib/site/solutions.ts',
+    'app/solutions/page.tsx', 'app/solutions/SolutionPage.tsx', 'app/solutions/marketing/page.tsx', 'app/solutions/saas/page.tsx', 'app/solutions/ecommerce/page.tsx', 'app/solutions/startups/page.tsx',
     'app/product/page.tsx', 'app/features/page.tsx', 'app/how-it-works/page.tsx', 'app/experiment-analytics/page.tsx',
     ...fs.readdirSync(path.join(root, 'app/components/site')).map((f) => `app/components/site/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
