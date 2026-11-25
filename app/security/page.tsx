@@ -1,8 +1,12 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import { LegalDoc } from '../legal/LegalDoc';
 import { LEGAL } from '@/lib/legal';
 
-export const metadata: Metadata = { title: 'Security', description: 'How freeabtest.com protects your data and how to report a vulnerability.' };
+export const metadata = pageMetadata({
+    path: '/security',
+    title: 'Security',
+    description: 'How freeabtest.com protects your account, keys and test data, how data is kept separate, and how to report a vulnerability.',
+});
 
 export default function SecurityPage() {
     const mail = <a href={`mailto:${LEGAL.securityEmail}`}>{LEGAL.securityEmail}</a>;

@@ -8,6 +8,8 @@ const nextConfig = {
         // The WordPress plugin is zipped on request by the signed-in download route.
         '/api/downloads/wordpress': ['./integrations/wordpress/freeabtest/**/*'],
     },
+    // Metadata is static, so render it in <head> for every client instead of streaming it into the body on dynamic pages.
+    htmlLimitedBots: /.*/,
     // The demo page was taken down; old links go to the homepage.
     async redirects() {
         return [

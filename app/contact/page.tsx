@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../legal/LegalDoc';
 import { LEGAL, contactPhoneHref, operatorName, organizationJsonLd } from '@/lib/legal';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+    path: '/contact',
     title: 'Contact',
-    description: 'Email, phone and address for freeabtest.com support, billing and legal questions.',
-};
+    description: 'Email, phone and postal address for freeabtest.com support, billing and legal questions, and what to include so we can help quickly.',
+});
 
 const jsonLd = {
     '@context': 'https://schema.org',

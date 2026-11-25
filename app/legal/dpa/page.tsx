@@ -1,9 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 import { LEGAL, operatorName } from '@/lib/legal';
 
-export const metadata: Metadata = { title: 'Data Processing Agreement', description: 'How freeabtest.com processes personal data about your website visitors on your behalf.' };
+export const metadata = pageMetadata({
+    path: '/legal/dpa',
+    title: 'Data Processing Agreement',
+    description: 'How freeabtest.com processes personal data about your website visitors on your behalf, as your processor, and the safeguards that apply.',
+});
 
 export default function DpaPage() {
     const op = operatorName();

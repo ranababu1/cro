@@ -47,7 +47,7 @@ describe('post: How to run a split URL test without a plugin', () => {
     });
     it('renders the redirect script, and the script assigns, redirects and logs as the post says', () => {
         const { html } = renderPost(p.markdown);
-        expect(html).toMatch(/<pre><code[^>]*>[\s\S]*location\.replace/);
+        expect(html).toMatch(/<pre[^>]*><code[^>]*>[\s\S]*location\.replace/);
         const src = /```html\n<script>\n([\s\S]*?)<\/script>\n```/.exec(p.markdown)![1];
         // Find one visitor ID in each group.
         let variantId = '', controlId = '';

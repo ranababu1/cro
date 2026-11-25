@@ -6,8 +6,8 @@ import { ArrowIcon, Breadcrumbs, CodeBlock, CtaBand, PageHero, PlanBadge, Sectio
 
 export const metadata = pageMetadata({
     path: '/developers',
-    title: 'Developers: JavaScript A/B testing SDK and REST API',
-    description: 'Add A/B testing to your product with one script tag, a small JavaScript API and a REST API: deterministic assignment, server-side tests with secret keys, environments, signed webhooks and results over HTTP.',
+    title: 'Developers: A/B testing SDK and REST API',
+    description: 'Add A/B testing with one script tag, a small JavaScript API and a REST API: sticky assignment, server-side tests, environments, signed webhooks and results.',
 });
 
 

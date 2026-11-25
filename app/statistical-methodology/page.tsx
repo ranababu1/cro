@@ -8,8 +8,8 @@ import { Breadcrumbs, CtaBand, PageHero, PlanBadge, SampleDataFrame, Section, Se
 
 export const metadata = pageMetadata({
     path: '/statistical-methodology',
-    title: 'Statistical methodology: how A/B test results are calculated',
-    description: 'The exact methods behind FreeABTest results: Wilson intervals, the mSPRT sequential test with a Bonferroni split, chance to beat control, Newcombe lift intervals, the sample ratio check and Welch\'s test for revenue, with formulas and worked examples.',
+    title: 'Statistical methodology for A/B test results',
+    description: 'The methods behind FreeABTest results: Wilson intervals, the mSPRT sequential test, chance to beat control, lift intervals, SRM and revenue, with examples.',
 });
 
 const pct = (x: number, d = 1) => `${(x * 100).toFixed(d)}%`;
@@ -19,7 +19,7 @@ function Formula({ label, lines }: { label: string; lines: string[] }) {
     return (
         <figure className="min-w-0 rounded-xl border border-line bg-surface">
             <figcaption className="border-b border-line px-4 py-2 text-[12px] font-medium text-muted">{label}</figcaption>
-            <pre className="overflow-x-auto px-4 py-4 font-mono text-[13.5px] leading-[1.8] text-navy-950">{lines.join('\n')}</pre>
+            <pre tabIndex={0} className="overflow-x-auto px-4 py-4 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-600 font-mono text-[13.5px] leading-[1.8] text-navy-950">{lines.join('\n')}</pre>
         </figure>
     );
 }

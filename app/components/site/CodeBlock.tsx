@@ -3,7 +3,7 @@ export function CodeBlock({ label, code, className }: { label: string; code: str
     return (
         <figure className={`min-w-0 overflow-hidden rounded-xl border border-navy-800 bg-navy-950 ${className ?? ''}`}>
             <figcaption className="border-b border-white/10 px-4 py-2 text-[12px] font-medium text-slate-300">{label}</figcaption>
-            <pre className="overflow-x-auto px-4 py-4 text-[13px] leading-[1.7] text-slate-100"><code className="font-mono">{code}</code></pre>
+            <pre tabIndex={0} className="overflow-x-auto px-4 py-4 text-[13px] leading-[1.7] text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-600"><code className="font-mono">{code}</code></pre>
         </figure>
     );
 }

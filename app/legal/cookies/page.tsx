@@ -1,14 +1,18 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 
-export const metadata: Metadata = { title: 'Cookies and storage', description: 'The cookies and browser storage freeabtest.com and its script use.' };
+export const metadata = pageMetadata({
+    path: '/legal/cookies',
+    title: 'Cookies and storage',
+    description: 'The cookies and browser storage that freeabtest.com and its testing script use, what each one is for and how long it is kept.',
+});
 
 export default function CookiesPage() {
     return (
         <LegalDoc slug="cookies" title="Cookies and storage" intro={<p>We use no advertising or cross-site tracking cookies. This page lists what is stored in the browser by our dashboard and by the script our customers install.</p>}>
             <h2>On freeabtest.com</h2>
-            <table>
+            <table tabIndex={0}>
                 <thead><tr><th>Name</th><th>Purpose</th><th>Kept</th></tr></thead>
                 <tbody>
                     <tr><td>Session and sign-in cookies</td><td>Keep you signed in, protect forms against cross-site requests, return you to the right page after sign-in</td><td>Session, up to 30 days for the sign-in</td></tr>
@@ -20,7 +24,7 @@ export default function CookiesPage() {
             <p>These are strictly necessary for the Service or remember a choice you made, so they do not need consent. Our page view statistics set no cookies.</p>
             <h2>On websites that use our script</h2>
             <p>The website you visited decides whether to use these. It is responsible for asking for consent where its law requires; the script can wait for that consent.</p>
-            <table>
+            <table tabIndex={0}>
                 <thead><tr><th>Name</th><th>Where</th><th>Purpose</th><th>Kept</th></tr></thead>
                 <tbody>
                     <tr><td>ab_user_id</td><td>Local storage, or a first-party cookie if local storage is blocked</td><td>Random visitor id, so you see the same version each visit</td><td>Until cleared; cookie 1 year</td></tr>

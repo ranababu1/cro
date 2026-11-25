@@ -18,7 +18,7 @@ describe('post: A/B test sample size, explained with a calculator', () => {
     });
     it('renders the calculator as a code block, and the calculator gives the numbers in the post', () => {
         const { html } = renderPost(p.markdown);
-        expect(html).toMatch(/<pre><code[^>]*>[\s\S]*function sampleSize/);
+        expect(html).toMatch(/<pre[^>]*><code[^>]*>[\s\S]*function sampleSize/);
         const src = /```javascript\n([\s\S]*?)```/.exec(p.markdown)![1].replace(/console\.log\([^)]*\)\);?/g, '');
         const sampleSize = new Function(`${src}; return sampleSize;`)() as (o: Record<string, number>) => { perVersion: number; total: number };
         expect(sampleSize({ baseline: 0.03, lift: 0.2 })).toEqual({ perVersion: 13914, total: 27828 });

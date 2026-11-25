@@ -4,11 +4,16 @@ import './globals.css';
 import { themeInitScript } from '@/lib/theme';
 import AuthProvider from './components/AuthProvider';
 import { Analytics } from '@vercel/analytics/next';
+import { SITE_URL } from '@/lib/blog';
+import { OG_IMAGE } from '@/lib/site/meta';
 
 const inter = Inter({ variable: '--font-inter', subsets: ['latin'], display: 'swap' });
 const mono = JetBrains_Mono({ variable: '--font-mono-face', subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(SITE_URL),
+    openGraph: { siteName: 'freeabtest.com', type: 'website', images: [OG_IMAGE] },
+    twitter: { card: 'summary_large_image', images: [OG_IMAGE.url] },
     title: { default: 'freeabtest.com: A/B testing and experimentation', template: '%s · freeabtest.com' },
     description:
         'Run A/B and A/B/n tests with a small JavaScript SDK, deterministic visitor assignment and statistically sound results.',

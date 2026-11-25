@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { pageMetadata } from '@/lib/site/meta';
 import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
 import { SITE_URL, formatDate, getAllPosts } from '@/lib/blog';
 import { BlogGrid } from './_components/BlogGrid';
 import { CategoryTag, Meta, type CardPost } from './_components/PostCard';
 
-export const metadata: Metadata = {
+const blogMeta = pageMetadata({
+    path: '/blog',
     title: 'Blog',
-    description: 'Practical guides to A/B testing, sample sizes and experiment results.',
-    alternates: { canonical: `${SITE_URL}/blog`, types: { 'application/rss+xml': `${SITE_URL}/blog/rss.xml` } },
-    openGraph: { type: 'website', url: `${SITE_URL}/blog`, title: 'Blog · freeabtest.com', description: 'Practical guides to A/B testing.' },
-};
+    description: 'Practical articles on A/B testing: sample sizes, how long to run a test, reading significance and intervals, and test ideas, with the numbers checked.',
+});
+export const metadata: Metadata = { ...blogMeta, alternates: { canonical: `${SITE_URL}/blog`, types: { 'application/rss+xml': `${SITE_URL}/blog/rss.xml` } } };
 
 export default function BlogIndex() {
     const posts: CardPost[] = getAllPosts().map((p) => ({ slug: p.slug, title: p.title, description: p.description, date: p.date, dateLabel: formatDate(p.date), readingMinutes: p.readingMinutes, category: p.category }));
@@ -19,7 +20,7 @@ export default function BlogIndex() {
     return (
         <div className="min-h-screen bg-white text-navy-950">
             <SiteHeader />
-            <main>
+            <main id="main">
                 <header className="border-b border-line bg-surface">
                     <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 sm:pb-16 sm:pt-12">
                         <Breadcrumbs items={[{ href: '/resources', label: 'Resources' }, { href: '/blog', label: 'Blog' }]} />

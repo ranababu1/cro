@@ -1,9 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
 
-export const metadata: Metadata = { title: 'Terms of Service', description: 'The terms for using freeabtest.com.' };
+export const metadata = pageMetadata({
+    path: '/legal/terms',
+    title: 'Terms of Service',
+    description: 'The terms for using freeabtest.com: accounts, plans and billing, acceptable use, your data, availability, liability and governing law.',
+});
 
 export default function TermsPage() {
     const op = operatorName();

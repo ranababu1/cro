@@ -14,7 +14,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     return (
         <div className="min-h-screen bg-white text-navy-950">
             <SiteHeader />
-            <div className="z-40 border-b border-line bg-surface lg:sticky lg:top-[72px]">
+            <div role="region" aria-label="Documentation tools" className="z-40 border-b border-line bg-surface lg:sticky lg:top-[72px]">
                 <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3 sm:px-8 lg:h-14 lg:flex-nowrap lg:py-0">
                     <Link href="/docs" className="text-[15px] font-semibold text-navy-950 hover:text-accent-700">Documentation</Link>
                     <nav aria-label="Docs sections" className="hidden items-center gap-5 text-[14px] text-muted-strong lg:flex">
@@ -27,13 +27,13 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
                 </div>
             </div>
             <div className="mx-auto max-w-[1200px] px-5 sm:px-8 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10">
-                <aside className="hidden lg:block">
+                <aside aria-label="Documentation pages" className="hidden lg:block">
                     <div className="sticky top-[128px] max-h-[calc(100vh-128px)] overflow-y-auto py-8 pr-2"><DocsSidebar groups={groups} /></div>
                 </aside>
-                <div className="min-w-0 py-6 lg:py-10">
+                <main id="main" className="min-w-0 py-6 lg:py-10">
                     <div className="mb-6 lg:hidden"><DocsMobileNav groups={groups} /></div>
                     {children}
-                </div>
+                </main>
             </div>
             <SiteFooter />
         </div>

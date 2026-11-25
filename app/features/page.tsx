@@ -7,7 +7,7 @@ import { Breadcrumbs, Container, CtaBand, PageHero, PlanBadge, ProductSubnav, Se
 export const metadata = pageMetadata({
     path: '/features',
     title: 'Features: A/B testing software, plan by plan',
-    description: 'Every FreeABTest feature with how it works, what it is good for, its limits and the plan that includes it: tests, traffic, assignment, goals, statistics, reports and APIs.',
+    description: 'Every FreeABTest feature with how it works, what it is good for, its limits and the plan that includes it, from tests and goals to statistics and APIs.',
 });
 
 // AI suggestions need the customer's own provider key and only show once AI is switched on for the site.

@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 import { LEGAL, contactPhoneHref } from '@/lib/legal';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+    path: '/legal/refunds',
     title: 'Refunds and cancellation',
-    description: 'How cancellations, downgrades and refunds work on freeabtest.com paid plans.',
-};
+    description: 'How cancellations, downgrades and refunds work on freeabtest.com paid plans, and how long you keep access after you cancel.',
+});
 
 export default function RefundsPage() {
     const mail = <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>;

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteFooter, SiteHeader } from '../../components/site';
 import { SITE_URL, formatDate, getAllPosts, getPost, ldJson, relatedPosts, renderPost } from '@/lib/blog';
+import { OG_IMAGE } from '@/lib/site/meta';
 import { CategoryTag, PostCard } from '../_components/PostCard';
 import { ReadingProgress } from '../_components/ReadingProgress';
 import { Toc } from '../_components/Toc';
@@ -17,8 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
         title: { absolute: p.title }, description: p.description, keywords: p.keywords, authors: [{ name: p.author }],
         alternates: { canonical: url },
-        openGraph: { type: 'article', url, title: p.title, description: p.description, publishedTime: p.date, modifiedTime: p.updated, siteName: 'freeabtest.com' },
-        twitter: { card: 'summary_large_image', title: p.title, description: p.description },
+        openGraph: { type: 'article', url, title: p.title, description: p.description, publishedTime: p.date, modifiedTime: p.updated, siteName: 'freeabtest.com', images: [OG_IMAGE] },
+        twitter: { card: 'summary_large_image', title: p.title, description: p.description, images: [OG_IMAGE.url] },
     };
 }
 
@@ -36,7 +37,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             {p.itemListSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.itemListSchema) }} />}
             <ReadingProgress target="article-body" />
             <SiteHeader />
-            <main>
+            <main id="main">
                 <header className="border-b border-zinc-100 bg-gradient-to-b from-[#f8faff] to-white">
                     <div className="mx-auto max-w-[1360px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14">
                         <div className="xl:pr-[288px]">

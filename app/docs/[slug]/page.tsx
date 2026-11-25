@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/lib/site/meta';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { docPages, getDocPage } from '@/lib/docs';
@@ -13,7 +14,7 @@ export const dynamicParams = false;
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
     const page = getDocPage((await params).slug);
-    return page ? { title: page.title, description: page.description } : {};
+    return page ? pageMetadata({ path: `/docs/${page.slug}`, title: page.title, description: page.description }) : {};
 }
 
 export default async function DocPageRoute({ params }: Params) {

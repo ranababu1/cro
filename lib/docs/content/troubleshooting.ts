@@ -3,7 +3,7 @@ import type { DocPage } from '../types';
 export const troubleshooting: DocPage = {
     slug: 'troubleshooting',
     title: 'Troubleshooting and FAQ',
-    description: 'Fixes for common problems and answers to common questions.',
+    description: 'Fixes for common problems with the snippet, goals, results and limits, plus answers to common questions about speed, data and changes.',
     group: 'Operations',
     blocks: [
         { type: 'h2', text: 'Troubleshooting' },

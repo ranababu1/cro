@@ -333,7 +333,8 @@ describe('AI public copy', () => {
         expect(home).toContain('const aiLive = aiConfigured();');
         expect(home).toMatch(/\{aiLive && \(\s*<section id="ai"/);
         expect(home).toMatch(/if \(!aiConfigured\(\)\) return \{ \.\.\.base, title: \{ absolute: HOME_TITLE \}/);
-        expect(home).not.toMatch(/image/i);
+        // Share-image metadata (OG_IMAGE, images: [...]) is not an AI claim.
+        expect(home.replace(/OG_IMAGE|images:|summary_large_image/g, '')).not.toMatch(/image/i);
     });
 
     it('pricing lists AI on Growth and above and docs list every provider', () => {
