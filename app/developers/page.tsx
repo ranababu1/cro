@@ -22,7 +22,7 @@ export default function DevelopersPage() {
             </PageHero>
 
             <Section labelledBy="start-title">
-                <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:items-start">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:items-start">
                     <div>
                         <SectionHeading id="start-title" eyebrow="Get started" title="Four steps to a running test" />
                         <ol className="mt-8 grid gap-4">
@@ -47,7 +47,7 @@ export default function DevelopersPage() {
 
             <Section id="examples" tone="surface" className="border-t border-line" labelledBy="examples-title">
                 <SectionHeading id="examples-title" eyebrow="Integration examples" title="From the page to your backend" lede="Copied from the docs. Replace the keys with your own from API keys in the dashboard." />
-                <div className="mt-10 grid gap-6 lg:grid-cols-2">
+                <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     {rest.map((s) => (
                         <article key={s.id} className="flex flex-col">
                             <h3 className="text-[17px] font-semibold text-navy-950">{s.title}</h3>
@@ -75,7 +75,16 @@ export default function DevelopersPage() {
 
             <Section id="api" tone="surface" className="border-t border-line" labelledBy="api-title">
                 <SectionHeading id="api-title" eyebrow="REST API" title="Endpoints by key type" lede="SDK keys call the browser endpoints. Secret keys call the server and management endpoints, and only see their own project. Experiments are created in the dashboard." />
-                <div className="mt-10 overflow-x-auto rounded-xl border border-line bg-white">
+                <ul className="mt-10 divide-y divide-line rounded-xl border border-line bg-white md:hidden">
+                    {ENDPOINTS.map((e) => (
+                        <li key={`${e.method} ${e.path}`} className="p-4">
+                            <Link href={e.href} className="block break-all font-mono text-[13px] text-navy-950 hover:underline"><span className="mr-2 font-semibold text-accent-700">{e.method}</span>{e.path}</Link>
+                            <p className="mt-1 text-[14px] text-muted-strong">{e.body}</p>
+                            <p className="mt-1 text-[12px] font-medium text-muted">{e.auth}</p>
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-10 hidden overflow-x-auto rounded-xl border border-line bg-white md:block">
                     <table className="w-full min-w-[640px] text-left text-[14px]">
                         <thead className="border-b border-line bg-surface text-[12px] uppercase tracking-[0.06em] text-muted">
                             <tr><th className="px-4 py-3 font-semibold">Endpoint</th><th className="px-4 py-3 font-semibold">Key</th><th className="px-4 py-3 font-semibold">What it does</th></tr>
@@ -91,7 +100,7 @@ export default function DevelopersPage() {
                         </tbody>
                     </table>
                 </div>
-                <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <div>
                         <h3 className="text-[17px] font-semibold text-navy-950">Errors</h3>
                         <dl className="mt-3 grid gap-2 text-[14px]">
@@ -105,7 +114,7 @@ export default function DevelopersPage() {
             </Section>
 
             <Section id="keys" labelledBy="keys-title">
-                <div className="grid gap-12 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
                     <div>
                         <SectionHeading id="keys-title" eyebrow="Keys and environments" title="Dev, staging and production in every project" lede="Use a dev key locally, a staging key on staging and a production key on the live site. Events carry the environment of the key, so test traffic stays out of real results." />
                         <Link href="/docs/environments-and-keys" className="mt-5 inline-block text-[14px] font-medium text-accent-700 hover:underline">Creating, rotating and revoking keys</Link>
@@ -127,7 +136,7 @@ export default function DevelopersPage() {
             </Section>
 
             <Section id="webhooks" tone="surface" className="border-t border-line" labelledBy="webhooks-title">
-                <div className="grid gap-12 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
                     <div>
                         <div className="flex flex-wrap items-center gap-3"><p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Webhooks</p><PlanBadge plan="Paid plans" /></div>
                         <h2 id="webhooks-title" className="mt-3 text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] text-navy-950 md:text-[32px]">Signed events when a test changes</h2>
