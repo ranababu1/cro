@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { SiteFooter, SiteHeader } from '../../components/landing/SiteChrome';
+import { SiteFooter, SiteHeader } from '../../components/site';
 import { SITE_URL, formatDate, getAllPosts, getPost, ldJson, relatedPosts, renderPost } from '@/lib/blog';
 import { CategoryTag, PostCard } from '../_components/PostCard';
 import { ReadingProgress } from '../_components/ReadingProgress';
@@ -91,7 +91,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                         </aside>
                     </div>
                     {toc.length > 2 && (
-                        <aside className="hidden xl:block"><div className="sticky top-10 max-h-[calc(100vh-5rem)] overflow-y-auto pb-6"><Toc items={toc} /></div></aside>
+                        <aside className="hidden xl:block"><div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pb-6"><Toc items={toc} /></div></aside>
                     )}
                 </div>
 

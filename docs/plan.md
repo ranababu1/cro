@@ -179,12 +179,14 @@ Desktop opens on click and hover-intent, closes on Escape and outside click, key
 - [x] Write docs/plan.md and docs/instructions.md, update changelog and currentstate
 - [x] Fix .gitignore so docs/plan.md can be committed (`plan.md` became `/plan.md`)
 
-### Phase 2: design system and shared chrome (PR A)
+### Phase 2: design system and shared chrome (PR A, done)
 1. Add tokens from 5.2 and type utilities to globals.css (marketing scope only).
 2. Build `app/components/site/*` primitives from 5.5.
 3. New SiteHeader with mega menus and MobileNav; new SiteFooter. Swap them into every public page that uses SiteChrome (landing, pricing, docs, blog, legal, about, contact, security, wordpress, not-found).
 4. Keep existing link targets working; menu items for pages not built yet point to the nearest existing page until their PR lands (no 404s, no placeholder links).
 5. Tests: update mobileNav, mobileA11y, publicContent file lists; add a nav link test that every menu href resolves to a route or redirect.
+
+Done in PR A. Decisions: tokens are `navy-*`, `accent-*` (emerald), `surface`, `line`, `soft-blue`, `muted`, `muted-strong`; primitives built now are Container, Section, SectionHeading, PageHero, CtaBand, SampleDataFrame, SiteCard, SiteButton. StepFlow, AudienceSplit, CodeTabs, StatExample, FaqList, Breadcrumbs and PlanBadge are built in the phase that first needs them. The docs shell keeps its own header until PR F. Each later PR that ships a page swaps its placeholder href in `app/components/site/nav.ts`.
 
 ### Phase 3: homepage (PR B)
 Sections in brief order: hero (exact headline and lede, CTAs Start experimenting -> /signin, Explore features -> /features), audience split, core capabilities (verified only), seven-step workflow, product preview (real screenshot or labelled sample), for marketers, for developers (real script tag and REST snippet), statistical engine summary (sequential, Wilson, worked example), pricing summary (four tiers, free limits), FAQ (8 brief questions, short, links to /faq), final CTA. Remove blobs, Caveat, gradient text. Update metadata.

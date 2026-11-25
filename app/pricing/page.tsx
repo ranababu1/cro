@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
+import { SiteFooter, SiteHeader } from '../components/site';
 import { BillingCards } from './BillingCards';
 import { canSessionCheckout } from '@/lib/billing/access';
 

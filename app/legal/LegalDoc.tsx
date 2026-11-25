@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SiteFooter, SiteHeader } from '../components/landing/SiteChrome';
+import { SiteFooter, SiteHeader } from '../components/site';
 import { COMPANY_PAGES, LEGAL_PAGES, LEGAL_UPDATED } from '@/lib/legal';
 
 const NAV = [...COMPANY_PAGES, ...LEGAL_PAGES, { slug: 'security', href: '/security', title: 'Security' }] as const;

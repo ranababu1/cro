@@ -1,0 +1,148 @@
+/**
+ * Marketing site navigation. Every href must point at a page that exists today (tests/siteNav.test.ts).
+ * Items for pages that are not built yet point at the closest existing page; swap the href when the page ships.
+ */
+export type NavItem = { href: string; title: string; body: string };
+export type NavGroup = { heading: string; items: NavItem[] };
+export type NavFeature = { eyebrow: string; title: string; body: string; href: string; cta: string };
+export type NavMenu = { label: string; groups: NavGroup[]; feature?: NavFeature };
+
+export const NAV_MENUS: NavMenu[] = [
+    {
+        label: 'Product',
+        groups: [
+            {
+                heading: 'Platform',
+                items: [
+                    { href: '/#how-it-works', title: 'How it works', body: 'Create a test, add the snippet, read the result' },
+                    { href: '/pricing#compare', title: 'Features', body: 'Every feature and the plan that includes it' },
+                    { href: '/docs/results', title: 'Experiment analytics', body: 'Conversion rates, intervals and the verdict' },
+                ],
+            },
+            {
+                heading: 'Build and measure',
+                items: [
+                    { href: '/docs/variations#visual-editor', title: 'Visual editor', body: 'Change text, images and layout without code' },
+                    { href: '/docs/goals', title: 'Goals', body: 'Clicks, form submits, page visits and events' },
+                    { href: '/docs/results#heatmaps', title: 'Heatmaps', body: 'Click and scroll maps for each version' },
+                ],
+            },
+        ],
+        feature: { eyebrow: 'Free plan', title: 'Start with one test a month', body: '10,000 tested visitors a month, no card needed.', href: '/pricing', cta: 'See plans' },
+    },
+    {
+        label: 'Solutions',
+        groups: [
+            {
+                heading: 'By team',
+                items: [
+                    { href: '/#test-anything', title: 'Marketing teams', body: 'Headlines, calls to action and landing pages' },
+                    { href: '/blog/ab-test-ideas-saas-landing-pages', title: 'SaaS products', body: 'Test ideas for pricing and signup pages' },
+                ],
+            },
+            {
+                heading: 'By goal',
+                items: [
+                    { href: '/docs/goals#revenue', title: 'Ecommerce revenue', body: 'Revenue per visitor and average order value' },
+                    { href: '/blog/ab-testing-low-traffic', title: 'Low traffic sites', body: 'How to test when visitors are scarce' },
+                ],
+            },
+        ],
+        feature: { eyebrow: 'Guide', title: 'Split URL testing', body: 'Compare two whole pages and send each visitor to one.', href: '/blog/split-url-testing', cta: 'Read the guide' },
+    },
+    {
+        label: 'Developers',
+        groups: [
+            {
+                heading: 'Integrate',
+                items: [
+                    { href: '/docs/sdk', title: 'JavaScript SDK', body: 'One script tag and the ABTest API' },
+                    { href: '/docs/rest-api', title: 'REST API', body: 'Assign, track and read results over HTTP' },
+                    { href: '/docs/server-side', title: 'Server-side testing', body: 'Assign visitors from your backend' },
+                ],
+            },
+            {
+                heading: 'Connect',
+                items: [
+                    { href: '/docs/install-guides', title: 'Integrations', body: 'Google Tag Manager, WordPress and GA4' },
+                    { href: '/docs/webhooks', title: 'Webhooks', body: 'Signed events when a test changes' },
+                    { href: '/docs/results#significance', title: 'Statistical methods', body: 'Sequential testing and Wilson intervals' },
+                ],
+            },
+        ],
+        feature: { eyebrow: 'Quick start', title: 'Your first test in minutes', body: 'Add the snippet, create a test, check it works.', href: '/docs/quick-start', cta: 'Open the quick start' },
+    },
+    {
+        label: 'Resources',
+        groups: [
+            {
+                heading: 'Learn',
+                items: [
+                    { href: '/blog', title: 'Blog', body: 'Guides on testing, statistics and ideas' },
+                    { href: '/docs', title: 'Documentation', body: 'Setup, features and reference' },
+                    { href: '/pricing#faq', title: 'FAQ', body: 'Plans, limits and how things work' },
+                ],
+            },
+            {
+                heading: 'Company',
+                items: [
+                    { href: '/about', title: 'About', body: 'Who runs FreeABTest' },
+                    { href: '/contact', title: 'Contact', body: 'Email, phone and address' },
+                    { href: '/security', title: 'Security', body: 'How we protect your data' },
+                ],
+            },
+        ],
+        feature: { eyebrow: 'From the blog', title: 'Statistical significance, explained', body: 'What a p-value tells you and when to stop a test.', href: '/blog/statistical-significance-ab-test', cta: 'Read the post' },
+    },
+];
+
+export const NAV_LINKS: { href: string; title: string }[] = [{ href: '/pricing', title: 'Pricing' }];
+
+export const SIGN_IN_HREF = '/signin';
+export const START_HREF = '/signin';
+
+export type FooterColumn = { heading: string; links: { href: string; title: string }[] };
+
+export const FOOTER_COLUMNS: FooterColumn[] = [
+    { heading: 'Product', links: [
+        { href: '/#how-it-works', title: 'How it works' },
+        { href: '/pricing#compare', title: 'Features' },
+        { href: '/pricing', title: 'Pricing' },
+        { href: '/wordpress', title: 'WordPress plugin' },
+    ] },
+    { heading: 'Developers', links: [
+        { href: '/docs', title: 'Documentation' },
+        { href: '/docs/sdk', title: 'JavaScript SDK' },
+        { href: '/docs/rest-api', title: 'REST API' },
+        { href: '/docs/install-guides', title: 'Integrations' },
+    ] },
+    { heading: 'Resources', links: [
+        { href: '/blog', title: 'Blog' },
+        { href: '/docs/quick-start', title: 'Quick start' },
+        { href: '/pricing#faq', title: 'FAQ' },
+        { href: '/docs/troubleshooting', title: 'Troubleshooting' },
+    ] },
+    { heading: 'Company', links: [
+        { href: '/about', title: 'About' },
+        { href: '/contact', title: 'Contact' },
+        { href: '/security', title: 'Security' },
+        { href: '/signin', title: 'Sign in' },
+    ] },
+    { heading: 'Legal', links: [
+        { href: '/legal/terms', title: 'Terms' },
+        { href: '/legal/privacy', title: 'Privacy' },
+        { href: '/legal/cookies', title: 'Cookies' },
+        { href: '/legal/refunds', title: 'Refunds' },
+        { href: '/legal/delivery', title: 'Service delivery' },
+        { href: '/legal/dpa', title: 'DPA' },
+    ] },
+];
+
+/** Every href the marketing chrome links to, for tests. */
+export function allChromeHrefs(): string[] {
+    return [
+        ...NAV_MENUS.flatMap((m) => [...m.groups.flatMap((g) => g.items.map((i) => i.href)), ...(m.feature ? [m.feature.href] : [])]),
+        ...NAV_LINKS.map((l) => l.href), SIGN_IN_HREF, START_HREF,
+        ...FOOTER_COLUMNS.flatMap((c) => c.links.map((l) => l.href)),
+    ];
+}

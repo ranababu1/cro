@@ -22,6 +22,7 @@ const root = path.join(__dirname, '..');
 const publicFiles = [
     'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/sitemap.ts',
     ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
+    ...fs.readdirSync(path.join(root, 'app/components/site')).map((f) => `app/components/site/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
     'app/blog/page.tsx', 'app/blog/[slug]/page.tsx', 'lib/blog.ts',
@@ -258,7 +259,7 @@ describe('demo page removed', () => {
         expect(fs.existsSync(path.join(root, 'public/demo.html'))).toBe(false);
         expect(fs.existsSync(path.join(root, 'public/demo'))).toBe(false);
         expect(fs.existsSync(path.join(root, 'app/demo'))).toBe(false);
-        for (const f of ['app/page.tsx', 'app/components/landing/SiteChrome.tsx', 'app/sitemap.ts']) {
+        for (const f of ['app/page.tsx', 'app/components/site/nav.ts', 'app/sitemap.ts']) {
             expect(fs.readFileSync(path.join(root, f), 'utf8'), f).not.toMatch(/\/demo(\.html|\/|['"])/);
         }
         const home = fs.readFileSync(path.join(root, 'app/page.tsx'), 'utf8');

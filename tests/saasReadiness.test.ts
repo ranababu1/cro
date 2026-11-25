@@ -57,7 +57,7 @@ beforeEach(() => as(null));
 describe('legal pages', () => {
     it('exist, are linked from the footer and sign-in, and are in the sitemap', () => {
         for (const f of ['app/legal/terms/page.tsx', 'app/legal/privacy/page.tsx', 'app/legal/dpa/page.tsx', 'app/legal/cookies/page.tsx', 'app/legal/refunds/page.tsx', 'app/legal/delivery/page.tsx', 'app/about/page.tsx', 'app/contact/page.tsx', 'app/security/page.tsx']) expect(fs.existsSync(f), f).toBe(true);
-        const footer = fs.readFileSync('app/components/landing/SiteChrome.tsx', 'utf8');
+        const footer = fs.readFileSync('app/components/site/nav.ts', 'utf8');
         for (const href of ['/about', '/contact', '/legal/terms', '/legal/privacy', '/legal/refunds', '/legal/delivery', '/security']) expect(footer).toContain(href);
         const signin = fs.readFileSync('app/signin/page.tsx', 'utf8');
         expect(signin).toContain('/legal/terms');
