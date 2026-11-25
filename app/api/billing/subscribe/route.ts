@@ -5,7 +5,7 @@ import { teamContext } from '@/lib/team';
 import { formatZodError } from '@/lib/validation';
 import { generateId } from '@/lib/ids';
 import { publicAppOrigin } from '@/lib/publicOrigin';
-import { BILLING_PERIODS, PAID_PLANS, paypalConfig } from '@/lib/billing/config';
+import { BILLING_PERIODS, canUseBillingCheckout, PAID_PLANS, paypalConfig } from '@/lib/billing/config';
 import { createSubscription } from '@/lib/billing/paypal';
 import { fromPayPal } from '@/lib/billing/service';
 
@@ -24,13 +24,19 @@ export async function POST(request: NextRequest) {
         if (!cfg) return NextResponse.json({ error: 'Not found' }, { status: 404 });
         const t = await teamContext(request, { owner: true });
         if (t instanceof NextResponse) return t;
+        if (cfg.mode === 'sandbox') {
+            const user = await db.getUser(t.userId);
+            if (!canUseBillingCheckout(user?.email)) {
+                return NextResponse.json({ error: 'Checkout is restricted while billing is in test mode.' }, { status: 403 });
+            }
+        }
         const parsed = bodySchema.safeParse(await request.json().catch(() => null));
         if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
         const plan = parsed.data.plan as (typeof PAID_PLANS)[number];
         const period = parsed.data.period as (typeof BILLING_PERIODS)[number];
         const rows = await db.listBillingSubscriptions(t.orgId);
         if (rows.some((r) => r.status === 'ACTIVE' || r.status === 'SUSPENDED')) {
-            return NextResponse.json({ error: 'This organization already has a subscription. To change plan, email hello@freeabtest.com.' }, { status: 409 });
+            return NextResponse.json({ error: 'This organization already has a subscription. Change or cancel it on the Billing page.' }, { status: 409 });
         }
         const origin = publicAppOrigin();
         const created = await createSubscription(cfg, {

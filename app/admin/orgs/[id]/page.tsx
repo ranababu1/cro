@@ -16,9 +16,12 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
     const { id } = await params;
     const tenant = await getTenantSummary(id);
     if (!tenant) notFound();
-    const audit = await db.getAuditLog(id, 50);
-    const { org, members, projects, usage, plan } = tenant;
-    const pv = await getPageviewStatus(id, { fresh: true });
+    const { org, members, projects, usage, plan, subscriptions } = tenant;
+    const [audit, webhookEvents, pv] = await Promise.all([
+        db.getAuditLog(id, 50),
+        db.listBillingWebhookEventsForResources(subscriptions.map((sub) => sub.provider_subscription_id), 25),
+        getPageviewStatus(id, { fresh: true }),
+    ]);
     const visitorLimit = memberEntitlements(org, members).limits.monthlyVisitors;
 
     return (
@@ -44,6 +47,56 @@ export default async function TenantDetail({ params }: { params: Promise<{ id: s
 
             <TenantControls org={org} plan={plan} />
             <SpecialFriendPanel orgId={org.id} specialFriend={org.special_friend} allowances={parseAllowances(org.custom_allowances)} />
+
+            <Card className="mt-6" data-testid="admin-billing-card">
+                <CardHeader
+                    title="Billing (read-only)"
+                    description={`Billing plan: ${plan.billing}${org.plan_ends_at ? ` · ends ${when(org.plan_ends_at)}` : ''}${org.scheduled_plan && org.scheduled_plan_at ? ` · scheduled ${org.scheduled_plan} (${org.scheduled_period ?? '-'}) on ${when(org.scheduled_plan_at)}` : ''}`}
+                />
+                {subscriptions.length === 0 ? <EmptyState title="No billing subscriptions" /> : (
+                    <Table>
+                        <THead>
+                            <tr>
+                                <TH>Provider</TH><TH>Subscription ID</TH><TH>Plan</TH><TH>Status</TH>
+                                <TH>Paid through</TH><TH>Next billing</TH><TH>Last payment</TH><TH>Payment failed</TH><TH>Updated</TH>
+                            </tr>
+                        </THead>
+                        <TBody>
+                            {subscriptions.map((sub) => (
+                                <TR key={sub.id}>
+                                    <TD>{sub.provider}</TD>
+                                    <TD><code className="font-mono text-xs">{sub.provider_subscription_id}</code></TD>
+                                    <TD>{sub.plan ? `${sub.plan} (${sub.period ?? '-'})` : '-'}</TD>
+                                    <TD><Badge tone={sub.status === 'ACTIVE' && !sub.payment_failed_at ? 'success' : sub.status === 'SUSPENDED' || sub.payment_failed_at ? 'danger' : 'neutral'}>{sub.status}</Badge></TD>
+                                    <TD className="whitespace-nowrap">{sub.paid_through ? when(sub.paid_through) : '-'}</TD>
+                                    <TD className="whitespace-nowrap">{sub.next_billing_at ? when(sub.next_billing_at) : '-'}</TD>
+                                    <TD className="whitespace-nowrap">{sub.last_payment_at ? when(sub.last_payment_at) : '-'}</TD>
+                                    <TD className="whitespace-nowrap">{sub.payment_failed_at ? when(sub.payment_failed_at) : '-'}</TD>
+                                    <TD className="whitespace-nowrap">{when(sub.updated_at)}</TD>
+                                </TR>
+                            ))}
+                        </TBody>
+                    </Table>
+                )}
+                {webhookEvents.length > 0 && (
+                    <div className="border-t border-zinc-200 px-5 py-4">
+                        <p className="mb-2 text-xs font-medium text-zinc-500">Recent billing webhook events</p>
+                        <Table>
+                            <THead><tr><TH>When</TH><TH>Event</TH><TH>Subscription</TH><TH>Result</TH></tr></THead>
+                            <TBody>
+                                {webhookEvents.map((ev) => (
+                                    <TR key={ev.id}>
+                                        <TD className="whitespace-nowrap">{when(ev.received_at)}</TD>
+                                        <TD><code className="font-mono text-xs">{ev.event_type}</code></TD>
+                                        <TD><code className="font-mono text-xs">{ev.resource_id ?? '-'}</code></TD>
+                                        <TD>{ev.result ?? 'pending'}</TD>
+                                    </TR>
+                                ))}
+                            </TBody>
+                        </Table>
+                    </div>
+                )}
+            </Card>
 
             <Card className="mt-6">
                 <CardHeader title="Member profiles" actions={<ButtonLink href="/api/admin/profiles" variant="secondary" size="sm" prefetch={false}>Export all profiles (CSV)</ButtonLink>} />

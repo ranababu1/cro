@@ -2,20 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { PageHeader, Card, CardHeader, CardBody, Alert, Spinner, Badge } from '@/app/components/ui';
+import { PageHeader, Card, CardHeader, CardBody, Alert, Spinner, Badge, Button } from '@/app/components/ui';
 
 type Plan = 'starter' | 'growth';
 type Period = 'monthly' | 'yearly';
-type Sub = { status: string; plan: Plan | null; period: Period | null; next_billing_at: string | null; paid_through: string | null; last_payment_at: string | null };
+type Sub = {
+    status: string; plan: Plan | null; period: Period | null; next_billing_at: string | null;
+    paid_through: string | null; last_payment_at: string | null; payment_failed_at?: string | null;
+};
 type State = {
     enabled: boolean; owner?: boolean; mode?: 'sandbox' | 'live' | null; plan?: string; plan_source?: string; billing_plan?: string;
-    plan_ends_at?: string | null; subscription?: Sub | null; manage_url?: string | null;
+    plan_ends_at?: string | null; scheduled_plan?: string | null; scheduled_period?: Period | null; scheduled_plan_at?: string | null;
+    subscription?: Sub | null; manage_url?: string | null;
 };
 
 const PRICES: Record<Plan, Record<Period, number>> = { starter: { monthly: 10, yearly: 100 }, growth: { monthly: 50, yearly: 500 } };
 const NAMES: Record<string, string> = { free: 'Free', starter: 'Starter', growth: 'Growth', enterprise: 'Enterprise' };
 const STATUS: Record<string, string> = { ACTIVE: 'Active', SUSPENDED: 'Payment problem', CANCELLED: 'Cancelled', EXPIRED: 'Ended', APPROVAL_PENDING: 'Waiting for approval', APPROVED: 'Approved' };
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : null);
+
+function isUpgrade(fromPlan: Plan | null, fromPeriod: Period | null, toPlan: Plan, toPeriod: Period): boolean {
+    if (!fromPlan || !fromPeriod) return true;
+    const rank = (p: Plan) => (p === 'growth' ? 2 : 1);
+    if (rank(toPlan) !== rank(fromPlan)) return rank(toPlan) > rank(fromPlan);
+    return fromPeriod === 'monthly' && toPeriod === 'yearly';
+}
 
 type PayPalButtons = { render: (el: HTMLElement) => Promise<void>; close?: () => Promise<void> };
 type PayPalNamespace = { Buttons: (o: Record<string, unknown>) => PayPalButtons };
@@ -34,7 +45,7 @@ function loadPayPal(clientId: string): Promise<PayPalNamespace> {
     });
 }
 
-/** Billing for owners: current plan, subscription status and PayPal checkout for Starter or Growth in USD. */
+/** Billing for owners: current plan, subscription status, upgrades, downgrades, cancellation and PayPal checkout. */
 export function BillingClient({ clientId, initialPlan, initialPeriod }: { clientId: string; initialPlan: Plan; initialPeriod: Period }) {
     const [s, setS] = useState<State | null>(null);
     const [failed, setFailed] = useState(false);
@@ -42,6 +53,8 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
     const [period, setPeriod] = useState<Period>(initialPeriod);
     const [error, setError] = useState('');
     const [note, setNote] = useState('');
+    const [busy, setBusy] = useState<'change' | 'cancel' | 'confirm' | null>(null);
+    const [confirmCancel, setConfirmCancel] = useState(false);
     const [buttonsReady, setButtonsReady] = useState(false);
     const box = useRef<HTMLDivElement>(null);
     const choice = useRef({ plan, period });
@@ -54,14 +67,66 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
         setS(next);
         return next;
     }, []);
+
     useEffect(() => {
         let live = true;
-        fetch('/api/billing', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((next) => { if (!live) return; if (next) setS(next); else setFailed(true); }).catch(() => live && setFailed(true));
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get('status');
+        const subId = params.get('subscription_id');
+
+        const finishLoad = () =>
+            fetch('/api/billing', { cache: 'no-store' })
+                .then((r) => (r.ok ? r.json() : null))
+                .then((next: State | null) => {
+                    if (!live) return;
+                    if (next) setS(next);
+                    else setFailed(true);
+                })
+                .catch(() => live && setFailed(true));
+
+        if ((status === 'approved' || status === 'revised') && subId) {
+            window.history.replaceState({}, '', '/settings/billing');
+            fetch('/api/billing/paypal/confirm', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscription_id: subId }),
+            })
+                .then(async (r) => {
+                    const d = await r.json().catch(() => ({}));
+                    if (!live) return;
+                    if (r.ok && d.result === 'granted') setNote('Thank you. Your plan has been updated.');
+                    else if (r.ok && d.result === 'scheduled_downgrade') setNote('Your downgrade is scheduled for the end of the current billing period. You keep your current plan until then.');
+                    else if (r.ok || r.status === 502) setNote('PayPal is still processing the change; your plan updates as soon as it confirms.');
+                    else setError(String(d.error || 'Could not confirm the subscription.'));
+                    if (d.billing) setS({ ...d.billing, owner: true });
+                    else await finishLoad();
+                })
+                .catch(() => finishLoad());
+            return () => { live = false; };
+        }
+
+        if (status === 'cancelled') {
+            window.history.replaceState({}, '', '/settings/billing');
+            fetch('/api/billing', { cache: 'no-store' })
+                .then((r) => (r.ok ? r.json() : null))
+                .then((next: State | null) => {
+                    if (!live) return;
+                    if (next) {
+                        setS(next);
+                        setNote('Checkout closed. No changes were made.');
+                    } else setFailed(true);
+                })
+                .catch(() => live && setFailed(true));
+            return () => { live = false; };
+        }
+
+        finishLoad();
         return () => { live = false; };
     }, []);
 
     const sub = s?.subscription ?? null;
-    const canBuy = !!s?.enabled && !!s.owner && !(sub && (sub.status === 'ACTIVE' || sub.status === 'SUSPENDED'));
+    const isActiveOrSuspended = !!sub && (sub.status === 'ACTIVE' || sub.status === 'SUSPENDED');
+    const canBuy = !!s?.enabled && !!s.owner && !isActiveOrSuspended;
 
     useEffect(() => {
         if (!canBuy || !box.current) return;
@@ -98,9 +163,61 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
         return () => { live = false; void buttons?.close?.().catch(() => {}); el.innerHTML = ''; };
     }, [canBuy, clientId, load]);
 
+    async function handlePlanChange() {
+        setBusy('change'); setError(''); setNote('');
+        try {
+            const r = await fetch('/api/billing/change', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ plan, period }),
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                setError(String(d.error || 'Could not change plan.'));
+                return;
+            }
+            if ((d.action === 'approve' || d.action === 'checkout_new') && d.approve_url) {
+                window.location.assign(String(d.approve_url));
+                return;
+            }
+            if (d.action === 'scheduled_cancel') {
+                setNote('Your current subscription will not renew, and you keep your current plan until the end of the billing period. Start the new plan here once your current period ends.');
+            } else if (d.action === 'applied') {
+                setNote('Your plan change has been applied.');
+            } else {
+                setNote('No changes were needed.');
+            }
+            if (d.billing) setS({ ...d.billing, owner: true });
+            else await load().catch(() => {});
+        } finally {
+            setBusy(null);
+        }
+    }
+
+    async function handleCancel() {
+        setBusy('cancel'); setError(''); setNote('');
+        try {
+            const r = await fetch('/api/billing/cancel', { method: 'POST' });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                setError(String(d.error || 'Could not cancel the subscription.'));
+                return;
+            }
+            setConfirmCancel(false);
+            setNote('Your subscription is cancelled. You keep your current plan until the end of the period you paid for.');
+            if (d.billing) setS({ ...d.billing, owner: true });
+            else await load().catch(() => {});
+        } finally {
+            setBusy(null);
+        }
+    }
+
     if (failed) return <Alert tone="danger">Could not load billing.</Alert>;
     if (!s) return <div className="flex justify-center py-16"><Spinner /></div>;
     if (!s.enabled) return <Alert tone="neutral">Billing is not available yet.</Alert>;
+
+    const sameAsActive = sub?.status === 'ACTIVE' && sub.plan === plan && sub.period === period;
+    const upgradeSelected = isUpgrade(sub?.plan ?? null, sub?.period ?? null, plan, period);
 
     return (
         <>
@@ -112,6 +229,21 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
 
             {s.owner && (
                 <>
+                    {sub?.status === 'SUSPENDED' && (
+                        <Alert tone="danger" className="mb-4" title="Payment failed — subscription suspended">
+                            PayPal could not collect payment. Update your payment method in{' '}
+                            {s.manage_url ? <a className="font-medium underline" href={s.manage_url} target="_blank" rel="noopener noreferrer">automatic payments in PayPal</a> : 'PayPal'}{' '}
+                            to keep your paid plan{s.plan_ends_at ? ` after ${day(s.plan_ends_at)}` : ''}, or cancel below so PayPal stops retrying.
+                        </Alert>
+                    )}
+                    {sub?.status === 'ACTIVE' && sub.payment_failed_at && (
+                        <Alert tone="warning" className="mb-4" title="Recent payment failed">
+                            A payment attempt failed on {day(sub.payment_failed_at)}. Update your payment method in{' '}
+                            {s.manage_url ? <a className="font-medium underline" href={s.manage_url} target="_blank" rel="noopener noreferrer">PayPal</a> : 'PayPal'}{' '}
+                            so your plan is not interrupted.
+                        </Alert>
+                    )}
+
                     <Card className="mb-6">
                         <CardHeader title="Current plan" />
                         <CardBody>
@@ -119,19 +251,100 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
                                 <div><dt className="text-zinc-500">Plan</dt><dd className="mt-1 font-medium text-zinc-900" data-testid="billing-plan">{NAMES[s.plan ?? 'free'] ?? s.plan}</dd></div>
                                 <div><dt className="text-zinc-500">Status</dt><dd className="mt-1">{sub ? <Badge>{STATUS[sub.status] ?? sub.status}</Badge> : <span className="text-zinc-700">No subscription</span>}</dd></div>
                                 <div>
-                                    <dt className="text-zinc-500">{s.plan_ends_at ? 'Access until' : 'Next payment'}</dt>
-                                    <dd className="mt-1 text-zinc-900">{day(s.plan_ends_at) ?? day(sub?.next_billing_at) ?? 'None'}</dd>
+                                    <dt className="text-zinc-500">{s.plan_ends_at ? 'Access until' : s.scheduled_plan && s.scheduled_plan_at ? 'Changes on' : 'Next payment'}</dt>
+                                    <dd className="mt-1 text-zinc-900">
+                                        {s.plan_ends_at
+                                            ? day(s.plan_ends_at)
+                                            : s.scheduled_plan && s.scheduled_plan_at
+                                                ? `${day(s.scheduled_plan_at)} (to ${NAMES[s.scheduled_plan] ?? s.scheduled_plan})`
+                                                : day(sub?.next_billing_at) ?? 'None'}
+                                    </dd>
                                 </div>
                             </dl>
                             {s.plan_source && s.plan_source !== 'billing' && <p className="mt-4 text-sm text-zinc-600">Your plan was set up by our team, so it does not depend on a subscription.</p>}
-                            {sub?.status === 'SUSPENDED' && <p className="mt-4 text-sm text-zinc-600">PayPal could not take the last payment. Update your payment method in PayPal to keep your plan after the paid period ends.</p>}
-                            {s.manage_url && (sub?.status === 'ACTIVE' || sub?.status === 'SUSPENDED') && (
+                            {sub?.status === 'CANCELLED' && s.plan_ends_at && s.scheduled_plan && (
                                 <p className="mt-4 text-sm text-zinc-600">
-                                    To cancel or change the payment method, open <a className="font-medium text-blue-700 underline" href={s.manage_url} target="_blank" rel="noopener noreferrer">automatic payments in PayPal</a>. After you cancel, your plan stays until the end of the period you paid for. To change plan, email <a className="underline" href="mailto:hello@freeabtest.com">hello@freeabtest.com</a>.
+                                    Your current subscription is cancelled and will not renew. You keep {NAMES[s.plan ?? 'free']} until {day(s.plan_ends_at)}. You chose to switch to {NAMES[s.scheduled_plan]} ({s.scheduled_period}); start that subscription here once {day(s.plan_ends_at)} passes.
                                 </p>
+                            )}
+                            {sub?.status === 'CANCELLED' && s.plan_ends_at && !s.scheduled_plan && (
+                                <p className="mt-4 text-sm text-zinc-600">
+                                    Your subscription is cancelled. You keep {NAMES[s.plan ?? 'free']} until {day(s.plan_ends_at)}, with no further charges.
+                                </p>
+                            )}
+                            {isActiveOrSuspended && (
+                                <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-4 text-sm">
+                                    {s.manage_url && (
+                                        <a className="font-medium text-blue-700 underline" href={s.manage_url} target="_blank" rel="noopener noreferrer">
+                                            Manage payment method in PayPal
+                                        </a>
+                                    )}
+                                    {!confirmCancel ? (
+                                        <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => setConfirmCancel(true)}>
+                                            Cancel at period end
+                                        </Button>
+                                    ) : (
+                                        <div className="flex flex-wrap items-center gap-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                            <span className="text-zinc-700">No mid-cycle refunds; access continues until the period ends.</span>
+                                            <Button size="sm" variant="danger" disabled={busy !== null} onClick={() => void handleCancel()}>
+                                                {busy === 'cancel' ? 'Cancelling...' : 'Confirm cancel'}
+                                            </Button>
+                                            <Button size="sm" variant="secondary" disabled={busy !== null} onClick={() => setConfirmCancel(false)}>
+                                                Keep plan
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             )}
                         </CardBody>
                     </Card>
+
+                    {sub?.status === 'ACTIVE' && (
+                        <Card className="mb-6">
+                            <CardHeader
+                                title="Change plan"
+                                description="Upgrades apply right away once confirmed with PayPal. Downgrades take effect at the end of the current billing period with no mid-cycle refunds."
+                            />
+                            <CardBody>
+                                <div className="flex flex-wrap gap-6">
+                                    <fieldset>
+                                        <legend className="text-sm font-medium text-zinc-900">Plan</legend>
+                                        <div className="mt-2 flex gap-2">
+                                            {(['starter', 'growth'] as Plan[]).map((p) => (
+                                                <label key={p} className={`cursor-pointer rounded-md border px-3 py-2 text-sm ${plan === p ? 'border-blue-600 bg-blue-50 text-zinc-900' : 'border-zinc-200 text-zinc-700'}`}>
+                                                    <input type="radio" name="change-plan" value={p} checked={plan === p} onChange={() => setPlan(p)} className="sr-only" />
+                                                    {NAMES[p]}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                    <fieldset>
+                                        <legend className="text-sm font-medium text-zinc-900">Billing period</legend>
+                                        <div className="mt-2 flex gap-2">
+                                            {(['monthly', 'yearly'] as Period[]).map((p) => (
+                                                <label key={p} className={`cursor-pointer rounded-md border px-3 py-2 text-sm ${period === p ? 'border-blue-600 bg-blue-50 text-zinc-900' : 'border-zinc-200 text-zinc-700'}`}>
+                                                    <input type="radio" name="change-period" value={p} checked={period === p} onChange={() => setPeriod(p)} className="sr-only" />
+                                                    {p === 'monthly' ? 'Monthly' : 'Yearly (2 months free)'}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <p className="mt-4 text-sm text-zinc-700" data-testid="billing-change-summary">
+                                    {sameAsActive
+                                        ? `You are already on ${NAMES[plan]} (${period}).`
+                                        : upgradeSelected
+                                            ? `Upgrade to ${NAMES[plan]} ($${PRICES[plan][period]} ${period === 'monthly' ? 'a month' : 'a year'}): takes effect as soon as PayPal confirms.`
+                                            : `Downgrade to ${NAMES[plan]} ($${PRICES[plan][period]} ${period === 'monthly' ? 'a month' : 'a year'}): takes effect at the end of your current billing period.`}
+                                </p>
+                                <div className="mt-4">
+                                    <Button disabled={busy !== null || sameAsActive} onClick={() => void handlePlanChange()}>
+                                        {busy === 'change' ? 'Updating...' : upgradeSelected ? 'Upgrade now' : 'Downgrade at period end'}
+                                    </Button>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    )}
 
                     {canBuy && (
                         <Card className="mb-6">

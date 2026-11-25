@@ -105,9 +105,10 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 ## Billing
 - All payment code lives in lib/billing. Routes and pages never call a provider directly. A new provider (Razorpay INR next) adds an adapter that returns a ProviderSubscription (lib/billing/provider.ts) and reuses applySubscription.
 - Never grant a plan from the browser or a webhook body. Always re-read the subscription from the provider (syncPayPalSubscription). Webhooks are verified with the raw body and recorded by event id in billing_webhook_events before they are applied.
-- Billing writes organizations.plan and plan_ends_at only. Do not touch plan_override, special-friend allowances or platform admin rules from billing code; they keep winning in lib/entitlements.ts.
-- Billing stays hidden until paypalConfig() returns a config. Any new billing UI or route must check it and fall back to today's behaviour. Billing routes use the Node runtime.
-- Public copy must not say checkout is live until the variables are set in production. Keep PayPal variable names out of public pages and docs. Keep tests/billing.test.ts in sync.
+- Billing writes organizations.plan, plan_ends_at, scheduled_plan, scheduled_period and scheduled_plan_at only. Do not touch plan_override, special-friend allowances or platform admin rules from billing code; they keep winning in lib/entitlements.ts.
+- Upgrades apply immediately (PayPal revise where supported, else new subscription then cancel old once the new one is active). Downgrades and in-app cancellations take effect at the end of the paid period (no mid-cycle refunds).
+- Billing stays hidden until paypalConfig() returns a config, and while PAYPAL_API_BASE is sandbox it stays restricted to platform admins and BILLING_TEST_EMAILS via canUseBillingCheckout / canSessionCheckout. Billing routes use the Node runtime.
+- Public copy must not say checkout is live until the variables are set in production. Never import next-auth in public pages scanned by tests/publicContent.test.ts (use lib/billing/access.ts). Keep PayPal variable names out of public pages and docs. Keep tests/billing.test.ts in sync.
 
 ## Public roadmap
 - There is no public roadmap. Do not add /roadmap links, phase numbers or "see roadmap" wording to public pages, docs or blog posts. Planned features appear only as Coming soon rows on the pricing page. Keep docs/roadmap.md as the internal plan (step 3 of Required on every change still applies).

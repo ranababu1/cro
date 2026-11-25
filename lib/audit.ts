@@ -30,7 +30,7 @@ export function isCustomerVisible(entity: string, action: string): boolean {
     return true;
 }
 
-const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project', webhook: 'Webhook', page_heatmap: 'Page heatmap', idea: 'Test idea', ai_key: 'AI key', ai_settings: 'AI settings' };
+const ENTITY_NAMES: Record<string, string> = { experiment: 'Test', survey: 'Survey', popup: 'Popup', domain: 'Domain', api_key: 'API key', organization: 'Organization', member: 'Member', project: 'Project', webhook: 'Webhook', page_heatmap: 'Page heatmap', idea: 'Test idea', ai_key: 'AI key', ai_settings: 'AI settings', billing: 'Billing' };
 const ACTION_NAMES: Record<string, string> = {
     create: 'created', update: 'updated', archive: 'archived', unarchive: 'unarchived', duplicate: 'duplicated', delete: 'deleted', revoke: 'revoked', rename: 'renamed',
     'invite:create': 'invite link created', 'invite:revoke': 'invite cancelled', join: 'joined', role: 'role changed', remove: 'removed', leave: 'left',
@@ -45,6 +45,15 @@ const ACTION_NAMES: Record<string, string> = {
     pages: 'test pages changed', 'mvt:build': 'multivariate combinations built', 'mvt:undo': 'multivariate combinations undone',
     'status:running': 'started', 'status:paused': 'paused', 'status:completed': 'stopped', 'status:draft': 'moved back to draft',
     'admin:suspend': 'suspended', 'admin:reactivate': 'reactivated', 'admin:update': 'plan or limits changed', 'admin:plan_override': 'plan assigned by an admin', 'admin:plan_override_removed': 'assigned plan removed',
+    'billing:activate': 'subscription started',
+    'billing:upgrade': 'plan upgraded',
+    'billing:downgrade': 'downgrade scheduled',
+    'billing:downgrade_applied': 'scheduled downgrade applied',
+    'billing:cancel': 'subscription cancelled',
+    'billing:cancel_replaced': 'previous subscription cancelled after upgrade',
+    'billing:end': 'subscription ended',
+    'billing:payment_failed': 'payment failed',
+    'billing:suspend': 'subscription suspended',
 };
 
 export function auditLabel(entity: string, action: string): string {

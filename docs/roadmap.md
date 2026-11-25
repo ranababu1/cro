@@ -580,7 +580,7 @@ Phase 2 exit criteria
 
 13. Admin and Billing
 - Event ingestion limits
-- Plan management and billing: policy pages (About, Contact, Refunds, Service delivery, billing terms in the Terms) done 2026-11-25. PayPal USD subscriptions built 2026-11-25 (off until configured; sandbox first). Next: upgrades, downgrades, in-app cancel and failed payments, then Razorpay INR.
+- Plan management and billing: policy pages and PayPal USD subscriptions (checkout, upgrades, period-end downgrades, in-app cancel, failed-payment banners, sandbox allowlist, read-only admin view) done 2026-11-25 (off until configured; sandbox first). Next: Razorpay INR for India.
 - System health dashboard
 - Operational alerts
 
@@ -637,7 +637,7 @@ M0. Foundation (week 1 to 2)
 4. Orgs, memberships, projects, environments; keep Google login; scope every query by org. Done (scoped by project membership).
 5. API keys per environment (SDK key public, secret key hashed), key management UI. Done. All keys are stored as hashes and shown once.
 6. Audit log table and write helper used by all mutations. Done for experiments, keys and org creation. Tenant audit log visible in the admin console.
-7. Platform admin and tenant controls (added to Phase 1 on 2026-10-14). Done: super-admin role from PLATFORM_ADMIN_EMAILS, /admin console, suspend and reactivate, plan and monthly limits per org, quota hooks on new visitors and experiment starts, admin actions audited. Policy pages for billing review and PayPal USD subscriptions (off until configured) done 2026-11-25. Plan changes and Razorpay INR stay in Phase 3.
+7. Platform admin and tenant controls (added to Phase 1 on 2026-10-14). Done: super-admin role from PLATFORM_ADMIN_EMAILS, /admin console, suspend and reactivate, plan and monthly limits per org, quota hooks on new visitors and experiment starts, admin actions audited. Policy pages for billing review and PayPal USD subscriptions (checkout, plan changes, in-app cancel, failed payments, sandbox gate, admin billing view; off until configured) done 2026-11-25. Razorpay INR stays in Phase 3.
 
 M1. Core + SDK (week 3 to 5)
 7. `packages/core`: MurmurHash3 bucketing, traffic allocation, weighted variants, shared test vectors; port logic from `lib/assignment.ts`.

@@ -35,3 +35,25 @@ export function paypalState(status: string): SubscriptionState {
         default: return 'pending';
     }
 }
+
+export function planRank(plan: string | null | undefined): number {
+    if (plan === 'starter') return 1;
+    if (plan === 'growth') return 2;
+    return 0;
+}
+
+/**
+ * Upgrades take effect right away (higher tier, or monthly to yearly on the same tier).
+ * Downgrades take effect at the end of the current paid period (lower tier, or yearly to monthly).
+ */
+export function classifyPlanChange(
+    from: { plan: PaidPlan; period: BillingPeriod },
+    to: { plan: PaidPlan; period: BillingPeriod },
+): 'same' | 'upgrade' | 'downgrade' {
+    if (from.plan === to.plan && from.period === to.period) return 'same';
+    const rFrom = planRank(from.plan);
+    const rTo = planRank(to.plan);
+    if (rTo > rFrom) return 'upgrade';
+    if (rTo < rFrom) return 'downgrade';
+    return from.period === 'monthly' && to.period === 'yearly' ? 'upgrade' : 'downgrade';
+}
