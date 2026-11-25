@@ -580,7 +580,7 @@ Phase 2 exit criteria
 
 13. Admin and Billing
 - Event ingestion limits
-- Plan management and billing (Razorpay)
+- Plan management and billing: policy pages (About, Contact, Refunds, Service delivery, billing terms in the Terms) done 2026-11-25. Next: PayPal USD subscriptions, then Razorpay INR.
 - System health dashboard
 - Operational alerts
 
@@ -637,7 +637,7 @@ M0. Foundation (week 1 to 2)
 4. Orgs, memberships, projects, environments; keep Google login; scope every query by org. Done (scoped by project membership).
 5. API keys per environment (SDK key public, secret key hashed), key management UI. Done. All keys are stored as hashes and shown once.
 6. Audit log table and write helper used by all mutations. Done for experiments, keys and org creation. Tenant audit log visible in the admin console.
-7. Platform admin and tenant controls (added to Phase 1 on 2026-10-14). Done: super-admin role from PLATFORM_ADMIN_EMAILS, /admin console, suspend and reactivate, plan and monthly limits per org, quota hooks on new visitors and experiment starts, admin actions audited. Billing (Razorpay) stays in Phase 3.
+7. Platform admin and tenant controls (added to Phase 1 on 2026-10-14). Done: super-admin role from PLATFORM_ADMIN_EMAILS, /admin console, suspend and reactivate, plan and monthly limits per org, quota hooks on new visitors and experiment starts, admin actions audited. Policy pages for billing review done 2026-11-25. Billing itself (PayPal USD first, then Razorpay INR) stays in Phase 3.
 
 M1. Core + SDK (week 3 to 5)
 7. `packages/core`: MurmurHash3 bucketing, traffic allocation, weighted variants, shared test vectors; port logic from `lib/assignment.ts`.

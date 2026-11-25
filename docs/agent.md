@@ -96,5 +96,11 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Public copy may say "your own key" and list providers, but never the encryption details or env var name. Images are not built: do not claim them.
 - Tests stub `fetch` with `vi.stubGlobal`; never call a real provider in tests.
 
+## Legal and billing copy
+- Operator details live in `lib/legal.ts`. Keep `LEGAL.address` worded exactly as the Razorpay KYC record. The public Contact page shows `LEGAL.contactPhone` (+91 9964 180587) and hello@freeabtest.com. Governing law is India, courts of Bengaluru.
+- Public policy pages: /about, /contact, /legal/terms, /legal/privacy, /legal/dpa, /legal/cookies, /legal/refunds, /legal/delivery and /security. Link them from the footer and `app/sitemap.ts`.
+- Do not claim paid checkout is live until it ships. Billing terms in the Terms (section 2) and /legal/refunds already state: no mid-cycle refunds; access continues until the period ends; cancellations and downgrades take effect at period end (same as the pricing FAQ).
+- When the Terms or Privacy Policy change in substance, bump `LEGAL_VERSION` and `LEGAL_UPDATED`. Keep `tests/policyPages.test.ts` in sync if the entity, address, phone or refund rules change.
+
 ## Public roadmap
 - There is no public roadmap. Do not add /roadmap links, phase numbers or "see roadmap" wording to public pages, docs or blog posts. Planned features appear only as Coming soon rows on the pricing page. Keep docs/roadmap.md as the internal plan (step 3 of Required on every change still applies).

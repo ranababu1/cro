@@ -61,12 +61,15 @@ export function SiteFooter() {
                     <Link href="/blog" className="hover:text-zinc-900">Blog</Link>
                     <Link href="/pricing#faq" className="hover:text-zinc-900">FAQ</Link>
                     <Link href="/signin" className="hover:text-zinc-900">Sign in</Link>
+                    <Link href="/about" className="hover:text-zinc-900">About</Link>
+                    <Link href="/contact" className="hover:text-zinc-900">Contact</Link>
                     <Link href="/legal/terms" className="hover:text-zinc-900">Terms</Link>
                     <Link href="/legal/privacy" className="hover:text-zinc-900">Privacy</Link>
+                    <Link href="/legal/refunds" className="hover:text-zinc-900">Refunds</Link>
+                    <Link href="/legal/delivery" className="hover:text-zinc-900">Service delivery</Link>
                     <Link href="/security" className="hover:text-zinc-900">Security</Link>
-                    <a href={`mailto:${LEGAL.contactEmail}`} className="hover:text-zinc-900">Contact</a>
                 </nav>
-                <p className="text-zinc-500 md:ml-auto">© {new Date().getFullYear()} freeabtest.com</p>
+                <p className="text-zinc-500 md:ml-auto">© {new Date().getFullYear()} {LEGAL.entity}</p>
             </div>
         </footer>
     );

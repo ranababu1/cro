@@ -27,6 +27,7 @@ const publicFiles = [
     'app/blog/page.tsx', 'app/blog/[slug]/page.tsx', 'lib/blog.ts',
     ...fs.readdirSync(path.join(root, 'app/blog/_components')).map((f) => `app/blog/_components/${f}`),
     'app/legal/LegalDoc.tsx', 'app/legal/terms/page.tsx', 'app/legal/privacy/page.tsx', 'app/legal/dpa/page.tsx', 'app/legal/cookies/page.tsx',
+    'app/legal/refunds/page.tsx', 'app/legal/delivery/page.tsx', 'app/about/page.tsx', 'app/contact/page.tsx',
     'app/security/page.tsx', 'lib/legal.ts', 'app/not-found.tsx', 'app/error.tsx', 'app/global-error.tsx',
 ];
 

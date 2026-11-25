@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
-import { LEGAL, operatorName } from '@/lib/legal';
+import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
 
 export const metadata: Metadata = { title: 'Terms of Service', description: 'The terms for using freeabtest.com.' };
 
@@ -16,8 +16,13 @@ export default function TermsPage() {
                 <li>One person per login. Invite teammates instead of sharing a login.</li>
                 <li>You must be at least 16 and able to enter a contract.</li>
             </ul>
-            <h2>2. Plans, limits and changes</h2>
-            <p>The features and limits of each plan are shown on the <Link href="/pricing">pricing page</Link>. When a limit is reached, the Service stops enrolling new visitors or collecting data until the next period, as described there. Paid plans, fees and billing terms will be shown before you buy and form part of these terms. We may change plans and features; we will give reasonable notice of changes that reduce what a paid plan includes.</p>
+            <h2>2. Plans, limits, billing and refunds</h2>
+            <p>The features and limits of each plan are shown on the <Link href="/pricing">pricing page</Link>. When a limit is reached, the Service stops enrolling new visitors or collecting data until the next period, as described there.</p>
+            <p>Paid plans are priced in US dollars, in advance, monthly or yearly as shown on the pricing page. Pay yearly and get 2 months free. Prices do not include any tax that may apply; if tax is due, it will be shown before you pay.</p>
+            <p>When paid checkout is available, the price, billing period, payment method and these billing terms will be shown before you buy and form part of these terms. You authorise us and our payment partners to charge the payment method you choose at the start of each billing period until the subscription is cancelled.</p>
+            <p>Upgrades take effect once payment is confirmed. Downgrades and cancellations take effect at the end of the current billing period. You keep access to the paid plan until then. We do not give mid-cycle refunds when you cancel or downgrade, or for time you do not use in a period you have already paid for. If we charge you by mistake, or charge you twice for the same period, we will refund that charge.</p>
+            <p>We may change plans and features; we will give reasonable notice of changes that reduce what a paid plan includes. If we withdraw a paid plan you have already paid for, you keep access until the end of the period you paid for, or we refund the unused part.</p>
+            <p>Refunds and cancellations are also described on the <Link href="/legal/refunds">Refunds and cancellation</Link> page. How access is provided is described on the <Link href="/legal/delivery">Service delivery</Link> page.</p>
             <h2>3. Acceptable use</h2>
             <p>You may only install the script on websites you own or are allowed to operate. You must not:</p>
             <ul>
@@ -44,9 +49,9 @@ export default function TermsPage() {
             <h2>11. Changes to these terms</h2>
             <p>We may update these terms. We will post the new version here with a new date and, for material changes, tell account owners in the app or by email at least 14 days before they apply. Using the Service after that accepts them.</p>
             <h2>12. Law and disputes</h2>
-            <p>{LEGAL.governingLaw ? `These terms are governed by the laws of ${LEGAL.governingLaw}, and its courts have jurisdiction, unless your local consumer law gives you other rights.` : 'These terms are governed by the laws of the place where we are established, and its courts have jurisdiction, unless your local consumer law gives you other rights.'} Before going to court, contact us so we can try to resolve the issue.</p>
+            <p>{LEGAL.governingLaw ? `These terms are governed by the laws of ${LEGAL.governingLaw}${LEGAL.governingCourts ? `, and ${LEGAL.governingCourts} have jurisdiction` : ', and its courts have jurisdiction'}, unless your local consumer law gives you other rights.` : 'These terms are governed by the laws of the place where we are established, and its courts have jurisdiction, unless your local consumer law gives you other rights.'} Before going to court, contact us so we can try to resolve the issue.</p>
             <h2>13. Contact</h2>
-            <p>{op}{LEGAL.address ? `, ${LEGAL.address}` : ''}. Email: <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>.</p>
+            <p>{op}{LEGAL.address ? `, ${LEGAL.address}` : ''}. Email: <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>.{LEGAL.contactPhone ? <> Phone: <a href={contactPhoneHref()}>{LEGAL.contactPhone}</a>.</> : null}</p>
         </LegalDoc>
     );
 }
