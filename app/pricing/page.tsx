@@ -1,15 +1,17 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SiteFooter, SiteHeader } from '../components/site';
+import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
+import { ldJson } from '@/lib/blog';
+import { pageMetadata } from '@/lib/site/meta';
 import { BillingCards } from './BillingCards';
 import { canSessionCheckout } from '@/lib/billing/access';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+    path: '/pricing',
     title: 'Pricing',
     description: 'Start free with 10,000 tested visitors a month. Starter $20/mo, Growth $50/mo, Enterprise custom. No per-seat fees, no surprise bills.',
-};
+});
 
 const plans = ['Free', 'Starter', 'Growth', 'Enterprise'];
 
@@ -110,82 +112,100 @@ const faqJsonLd = {
     mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 };
 
-const Check = () => <span className="font-bold text-teal-600" aria-label="Included">✓</span>;
-const NotIncluded = () => <span className="text-xs text-zinc-500">Not included</span>;
-const PaidBadge = ({ tier }: { tier: number }) => <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
-const Soon = () => <span className="inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700">Coming soon</span>;
+const Check = () => <span className="font-semibold text-accent-700" aria-label="Included">✓</span>;
+const NotIncluded = () => <span className="text-[12px] text-muted">Not included</span>;
+const PaidBadge = ({ tier }: { tier: number }) => <span className={`ml-2 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset ${tier >= 2 ? 'bg-soft-blue text-navy-900 ring-blue-200' : 'bg-surface text-muted-strong ring-line'}`}>{tier >= 2 ? 'Growth and above' : 'Paid plans only'}</span>;
+const Soon = () => <span className="inline-block rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted-strong ring-1 ring-inset ring-line">Coming soon</span>;
+const Dash = () => <span className="text-muted">-</span>;
 
 export default async function PricingPage() {
     const checkout = await canSessionCheckout();
     return (
-        <div className="min-h-screen bg-[#f8faff] text-zinc-950">
+        <div className="min-h-screen bg-white text-navy-950">
             <SiteHeader />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-            <main className="mx-auto max-w-[1200px] px-5 pb-20 pt-4 sm:px-8">
-                <p className="text-[13px] font-semibold tracking-[0.2em] text-blue-600">PRICING</p>
-                <h1 className="mt-3 text-[34px] font-bold leading-tight tracking-[-0.03em] text-[#0b1630] sm:text-[44px]">Simple plans. A free tier you can actually use.</h1>
-                <p className="mt-3 max-w-2xl text-lg text-zinc-600">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
-
-                <BillingCards checkout={checkout} />
-
-                <section id="compare" className="mt-20 scroll-mt-6">
-                    <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Compare plans</h2>
-                    <p className="mt-2 text-sm text-zinc-600">Every limit of every plan, in plain numbers. Not included means the feature is only on the paid plans shown.</p>
-                    <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 bg-white" tabIndex={0}>
-                        <table className="w-full min-w-[760px] text-left text-sm">
-                            <thead className="bg-zinc-50 text-zinc-900">
-                                <tr><th className="sticky left-0 z-10 bg-zinc-50 p-4 font-semibold">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
-                            </thead>
-                            <tbody className="divide-y divide-zinc-100">
-                                {limits.map(([label, ...vals]) => (
-                                    <tr key={label}><td className="sticky left-0 z-10 bg-white p-4 font-medium text-zinc-900">{label}</td>{vals.map((v, i) => <td key={i} className="p-4 text-zinc-600">{v}</td>)}</tr>
-                                ))}
-                                <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Available today</td></tr>
-                                {availableToday.map((f) => (
-                                    <tr key={f.name}><td className="sticky left-0 z-10 bg-white p-4 text-zinc-900">{f.name}{f.tier > 0 && <PaidBadge tier={f.tier} />}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <NotIncluded />}</td>)}</tr>
-                                ))}
-                                <tr className="bg-zinc-50"><td colSpan={5} className="p-4 font-semibold text-zinc-900">Coming soon</td></tr>
-                                {comingSoon.map((f) => (
-                                    <tr key={f.name}><td className="p-4 text-zinc-900">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Soon /> : <span className="text-zinc-300">-</span>}</td>)}</tr>
-                                ))}
-                                <tr><td className="p-4 text-zinc-900">Custom contract and DPA</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-300">-</td><td className="p-4 text-zinc-600">Enterprise</td></tr>
-                            </tbody>
-                        </table>
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
+            <main>
+                <header className="border-b border-line bg-surface">
+                    <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-10 sm:px-8 sm:pt-12">
+                        <Breadcrumbs items={[{ href: '/pricing', label: 'Pricing' }]} />
+                        <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Pricing</p>
+                        <h1 className="mt-3 max-w-[760px] text-[36px] font-semibold leading-[1.1] tracking-[-0.02em] text-navy-950 sm:text-[48px]">Simple plans. A free tier you can actually use.</h1>
+                        <p className="mt-4 max-w-[640px] text-[18px] leading-[1.6] text-muted-strong">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>
+                        <BillingCards checkout={checkout} />
                     </div>
-                    <p className="mt-4 text-sm text-zinc-600">Heatmaps (live) and session recordings (coming soon) are on paid plans only (Starter and up). Coming soon means planned, not shipped. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
-                </section>
+                </header>
 
-                <section className="mt-16 rounded-2xl border border-teal-200 bg-teal-50/60 p-7">
-                    <h2 className="text-xl font-semibold text-[#0b1630]">Annual billing and overages</h2>
-                    <ul className="mt-4 space-y-2 text-sm text-zinc-700">
-                        <li>Pay yearly and get 2 months free: Starter $200/yr (about $16.67/mo), Growth $500/yr.</li>
-                        <li>You&apos;re never billed or upgraded automatically. Once you&apos;re over your limit, new visitors see the control and aren&apos;t counted.</li>
-                        <li>Your usage and limits are always shown on the Overview page.</li>
-                    </ul>
-                </section>
-
-                <section id="faq" className="mt-20 scroll-mt-6">
-                    <h2 className="text-[30px] font-bold tracking-tight text-[#0b1630]">Common questions</h2>
-                    <p className="mt-2 text-sm text-zinc-600">Plans and billing. For setup, tests, results and privacy, see the <Link href="/faq" className="font-medium text-blue-600 hover:underline">FAQ</Link>.</p>
-                    <div className="mt-6 divide-y divide-zinc-200 border-y border-zinc-200">
-                        {faqs.map((f) => (
-                            <details key={f.q} className="group py-5">
-                                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-zinc-900">
-                                    {f.q}
-                                    <span className="text-zinc-400 transition-transform group-open:rotate-45" aria-hidden>+</span>
-                                </summary>
-                                <p className="mt-3 max-w-3xl text-sm leading-6 text-zinc-600">{f.a}</p>
-                            </details>
-                        ))}
+                <section id="compare" className="scroll-mt-24 bg-white">
+                    <div className="mx-auto max-w-[1200px] px-5 py-16 sm:px-8 sm:py-20">
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Compare</p>
+                        <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.02em] text-navy-950 sm:text-[36px]">Compare plans</h2>
+                        <p className="mt-3 max-w-[720px] text-[16px] leading-[1.6] text-muted-strong">Every limit of every plan, in plain numbers. Not included means the feature is only on the paid plans shown.</p>
+                        <p className="mt-2 text-[13px] text-muted lg:hidden">Scroll the table sideways to see every plan.</p>
+                        <div className="mt-8 overflow-x-auto rounded-xl border border-line bg-white" tabIndex={0} role="region" aria-label="Plan comparison">
+                            <table className="w-full min-w-[760px] table-fixed text-left text-[14px]">
+                                <thead className="border-b border-line bg-surface text-navy-950">
+                                    <tr><th className="sticky left-0 z-10 w-[170px] bg-surface p-4 font-semibold sm:w-[240px] lg:w-[320px]">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
+                                </thead>
+                                <tbody className="divide-y divide-line">
+                                    {limits.map(([label, ...vals]) => (
+                                        <tr key={label}><td className="sticky left-0 z-10 bg-white p-4 font-medium text-navy-950">{label}</td>{vals.map((v, i) => <td key={i} className="p-4 text-muted-strong">{v}</td>)}</tr>
+                                    ))}
+                                    <tr className="bg-surface"><td colSpan={5} className="p-4 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted">Available today</td></tr>
+                                    {availableToday.map((f) => (
+                                        <tr key={f.name}><td className="sticky left-0 z-10 bg-white p-4 text-navy-950">{f.name}{f.tier > 0 && <PaidBadge tier={f.tier} />}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Check /> : <NotIncluded />}</td>)}</tr>
+                                    ))}
+                                    <tr className="bg-surface"><td colSpan={5} className="p-4 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted">Coming soon</td></tr>
+                                    {comingSoon.map((f) => (
+                                        <tr key={f.name}><td className="sticky left-0 z-10 bg-white p-4 text-navy-950">{f.name}</td>{plans.map((p, i) => <td key={p} className="p-4">{i >= f.tier ? <Soon /> : <Dash />}</td>)}</tr>
+                                    ))}
+                                    <tr><td className="sticky left-0 z-10 bg-white p-4 text-navy-950">Custom contract and DPA</td><td className="p-4"><Dash /></td><td className="p-4"><Dash /></td><td className="p-4"><Dash /></td><td className="p-4 text-muted-strong">Enterprise</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="mt-4 max-w-[860px] text-[14px] leading-[1.6] text-muted-strong">Heatmaps (live) and session recordings (coming soon) are on paid plans only (Starter and up). Coming soon means planned, not shipped. When a feature ships, it&apos;s included in the plans listed at no extra cost.</p>
                     </div>
                 </section>
 
-                <section className="mt-20 rounded-3xl bg-gradient-to-r from-[#2563eb] to-[#14b8a6] px-8 py-12 text-center text-white">
-                    <h2 className="text-[30px] font-bold tracking-tight">Run your first test in about 15 minutes.</h2>
-                    <p className="mx-auto mt-3 max-w-xl text-white/90">Free plan, no card needed. Add the snippet, create a test, read real results.</p>
-                    <div className="mt-8 flex flex-wrap justify-center gap-3">
-                        <Link href="/signin" className="inline-flex h-11 items-center rounded-lg bg-white px-6 text-sm font-semibold text-blue-700 hover:bg-blue-50">Start for free</Link>
-                        <Link href="/docs" className="inline-flex h-11 items-center rounded-lg border border-white/70 px-6 text-sm font-semibold text-white hover:bg-white/10">Read the quick start</Link>
+                <section aria-labelledby="annual-title" className="border-y border-line bg-surface">
+                    <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
+                        <h2 id="annual-title" className="text-[22px] font-semibold tracking-[-0.01em] text-navy-950">Annual billing and overages</h2>
+                        <ul className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+                            {['Pay yearly and get 2 months free: Starter $200/yr (about $16.67/mo), Growth $500/yr.', 'You\'re never billed or upgraded automatically. Once you\'re over your limit, new visitors see the control and aren\'t counted.', 'Your usage and limits are always shown on the Overview page.'].map((t) => (
+                                <li key={t} className="rounded-xl border border-line bg-white p-5 text-[15px] leading-[1.6] text-muted-strong shadow-xs">{t}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="faq" className="scroll-mt-24 bg-white">
+                    <div className="mx-auto max-w-[820px] px-5 py-16 sm:px-8 sm:py-20">
+                        <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">FAQ</p>
+                        <h2 className="mt-3 text-[30px] font-semibold tracking-[-0.02em] text-navy-950 sm:text-[36px]">Common questions</h2>
+                        <p className="mt-3 text-[16px] leading-[1.6] text-muted-strong">Plans and billing. For setup, tests, results and privacy, see the <Link href="/faq" className="font-medium text-accent-700 hover:underline">FAQ</Link>.</p>
+                        <div className="mt-8 divide-y divide-line rounded-xl border border-line bg-white">
+                            {faqs.map((f) => (
+                                <details key={f.q} className="group p-5">
+                                    <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[16px] font-semibold text-navy-950">
+                                        <span>{f.q}</span>
+                                        <span className="mt-0.5 shrink-0 text-muted transition-transform group-open:rotate-45" aria-hidden>+</span>
+                                    </summary>
+                                    <p className="mt-3 text-[15px] leading-[1.65] text-muted-strong">{f.a}</p>
+                                </details>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section className="bg-navy-950 text-white">
+                    <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-5 py-14 sm:px-8 md:flex-row md:items-center md:justify-between md:py-16">
+                        <div className="max-w-[640px]">
+                            <h2 className="text-[26px] font-semibold tracking-[-0.02em] sm:text-[30px]">Run your first test in about 15 minutes.</h2>
+                            <p className="mt-2 text-[16px] text-white/75">Free plan, no card needed. Add the snippet, create a test, read real results.</p>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <Link href="/signin" className="inline-flex h-11 items-center rounded-lg bg-white px-5 text-[15px] font-semibold text-navy-950 hover:bg-surface">Start for free</Link>
+                            <Link href="/docs/quick-start" className="inline-flex h-11 items-center rounded-lg border border-white/40 px-5 text-[15px] font-semibold text-white hover:bg-white/10">Read the quick start</Link>
+                        </div>
                     </div>
                 </section>
             </main>

@@ -18,7 +18,9 @@
 > /statistical-methodology, content and computed examples in `lib/site/methodology.ts`. Resources (PR H): /resources,
 > /guides (`lib/site/resources.ts`), /faq (`lib/site/faq.ts`, product questions only; billing stays on /pricing#faq) and
 > /changelog (curated notes in `content/changelog/releases.json`, never the engineering log); blog index on the site tokens.
-> Next is PR I (pricing and legal). Brief URLs not built yet: redirects /privacy, /terms, /cookie-policy.
+> Pricing and legal (PR I): /pricing and the LegalDoc frame (legal pages, /about, /contact, /security) use the site
+> design with the same numbers and legal text; /privacy, /terms and /cookie-policy 301 to the /legal pages. Every brief
+> URL now exists. Next is PR J (SEO and QA pass).
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone
