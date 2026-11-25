@@ -188,8 +188,10 @@ Desktop opens on click and hover-intent, closes on Escape and outside click, key
 
 Done in PR A. Decisions: tokens are `navy-*`, `accent-*` (emerald), `surface`, `line`, `soft-blue`, `muted`, `muted-strong`; primitives built now are Container, Section, SectionHeading, PageHero, CtaBand, SampleDataFrame, SiteCard, SiteButton. StepFlow, AudienceSplit, CodeTabs, StatExample, FaqList, Breadcrumbs and PlanBadge are built in the phase that first needs them. The docs shell keeps its own header until PR F. Each later PR that ships a page swaps its placeholder href in `app/components/site/nav.ts`.
 
-### Phase 3: homepage (PR B)
+### Phase 3: homepage (PR B, done)
 Sections in brief order: hero (exact headline and lede, CTAs Start experimenting -> /signin, Explore features -> /features), audience split, core capabilities (verified only), seven-step workflow, product preview (real screenshot or labelled sample), for marketers, for developers (real script tag and REST snippet), statistical engine summary (sequential, Wilson, worked example), pricing summary (four tiers, free limits), FAQ (8 brief questions, short, links to /faq), final CTA. Remove blobs, Caveat, gradient text. Update metadata.
+
+Done in PR B. Notes: AI-powered positioning (badge, hero line, title, description, #ai section) is kept and gated on `aiConfigured()`, as Imran wants it to lead when AI is on. Explore features points at /pricing#compare until /features ships (PR C swaps it). Marketer and developer cards link to docs until the solution and developer pages ship. The homepage preview is illustrative (no seeded demo account yet); replace with real screenshots when one exists.
 
 ### Phase 4: product and solutions (PR C product pages, PR D solutions)
 - PR C: /product, /features, /how-it-works, /experiment-analytics.
