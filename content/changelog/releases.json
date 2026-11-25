@@ -1,0 +1,117 @@
+[
+  {
+    "id": "2026-11-26-website",
+    "date": "2026-11-26",
+    "title": "A new website, docs and resources",
+    "summary": "The site has a new design and clearer pages for each part of the product.",
+    "items": [
+      { "text": "New Product, Features, How it works and Experiment analytics pages.", "href": "/product" },
+      { "text": "Solutions pages for marketing, SaaS, ecommerce and startup teams.", "href": "/solutions" },
+      { "text": "A developer hub with setup steps, code examples, the API and webhooks.", "href": "/developers" },
+      { "text": "The docs have a new design. The JavaScript SDK reference now lives at /docs/javascript-sdk, and old links still work.", "href": "/docs/javascript-sdk" },
+      { "text": "A new Integrations page lists what connects today and which plan each needs.", "href": "/docs/integrations" },
+      { "text": "A Statistical methodology page explains every test we run, with formulas and worked examples.", "href": "/statistical-methodology" },
+      { "text": "Resources, curated guides, a product FAQ and this changelog.", "href": "/resources" }
+    ]
+  },
+  {
+    "id": "2026-11-25-plans",
+    "date": "2026-11-25",
+    "title": "Paid plan prices and limits",
+    "items": [
+      { "text": "Starter is $20 a month or $200 a year. Growth is $50 a month or $500 a year.", "href": "/pricing" },
+      { "text": "Starter includes 250,000 tested visitors a month and 20 running tests. Growth includes 1,000,000 tested visitors a month with no cap on running tests.", "href": "/pricing" },
+      { "text": "New About, Contact, Refunds and Service delivery pages.", "href": "/about" }
+    ]
+  },
+  {
+    "id": "2026-11-05-legal",
+    "date": "2026-11-05",
+    "title": "Legal and security pages",
+    "items": [
+      { "text": "Terms of Service, Privacy Policy, Data Processing Agreement and Cookie Policy.", "href": "/legal/terms" },
+      { "text": "A Security page that explains how your data and keys are protected.", "href": "/security" }
+    ]
+  },
+  {
+    "id": "2026-10-29-ai",
+    "date": "2026-10-29",
+    "title": "AI suggestions and tidier test lists",
+    "items": [
+      { "text": "AI suggestions for test ideas, hypotheses, copy and result summaries, using your own API key.", "plan": "Growth and above", "doc": "ai", "href": "/docs/ai" },
+      { "text": "Every test can have a hypothesis, an expected outcome and up to 10 tags.", "href": "/docs/experiments#notes" },
+      { "text": "Duplicate a test into a new draft, and archive paused or completed tests.", "href": "/docs/experiments#duplicate" }
+    ]
+  },
+  {
+    "id": "2026-10-20-free",
+    "date": "2026-10-20",
+    "title": "Free plan update",
+    "items": [
+      { "text": "The free plan includes 1 new test each month and 1 click goal per test, with no card and no time limit.", "href": "/pricing" }
+    ]
+  },
+  {
+    "id": "2026-10-19-server",
+    "date": "2026-10-19",
+    "title": "Server-side tests, multivariate tests and webhooks",
+    "items": [
+      { "text": "Assign visitors and send events from your server with a secret key.", "feature": "Server-side assignment", "href": "/docs/server-side" },
+      { "text": "Multi-page tests and multivariate tests that try every combination of up to three changes.", "feature": "Multi-page and multivariate tests", "href": "/docs/variations" },
+      { "text": "Webhooks for winners, completed tests, split warnings and plan limits.", "feature": "Webhooks", "href": "/docs/webhooks" },
+      { "text": "Download results as CSV.", "feature": "CSV download and share links", "href": "/docs/results" },
+      { "text": "Test planner: a board of test ideas with hypotheses, priorities and duration estimates.", "feature": "Test planner", "href": "/docs/experiments" },
+      { "text": "Heatmaps for any page, even one without a test.", "feature": "Heatmaps and error tracking", "href": "/docs/results" }
+    ]
+  },
+  {
+    "id": "2026-10-19-stats",
+    "date": "2026-10-19",
+    "title": "Peeking-safe results, rollouts and teams",
+    "items": [
+      { "text": "Every variant is compared with the control by a sequential test, so checking results often does not raise false winners.", "feature": "Sequential significance", "href": "/statistical-methodology" },
+      { "text": "Roll out the winning version to every visitor in one click while you update your code.", "feature": "Roll out the winner", "href": "/docs/choosing-a-winner#rollout" },
+      { "text": "Schedule a start and end time, and ramp traffic up gradually.", "feature": "Scheduling and gradual ramp", "href": "/docs/experiments" },
+      { "text": "Results by device, traffic source and new or returning visitors.", "feature": "Results by segment", "href": "/docs/results" },
+      { "text": "Preview links to check each version before you start.", "feature": "Safe edits and preview links", "href": "/docs/experiments" },
+      { "text": "Invite teammates with roles, and read every change in the audit log.", "feature": "Team roles and audit log", "href": "/docs/organizations-and-projects" }
+    ]
+  },
+  {
+    "id": "2026-10-18-editor",
+    "date": "2026-10-18",
+    "title": "Visual editor, popups, surveys and funnels",
+    "items": [
+      { "text": "A visual editor that changes text and layout on your page without code.", "plan": "Growth and above", "doc": "variations", "href": "/docs/variations" },
+      { "text": "Popups and calls to action on your pages.", "feature": "Popups and calls to action", "href": "/docs/popups" },
+      { "text": "On-page surveys, including NPS.", "feature": "Surveys", "href": "/docs/surveys" },
+      { "text": "JavaScript error tracking for each version.", "feature": "JavaScript errors", "href": "/docs/results" },
+      { "text": "Traffic overview of page views, sources and new visitors.", "feature": "Traffic overview", "href": "/docs/results" },
+      { "text": "A Google Analytics 4 event for every version a visitor sees.", "feature": "Google Analytics 4 events", "href": "/docs/integrations" },
+      { "text": "Auto-shift sends more traffic to versions that are doing better.", "feature": "Auto-shift traffic to the winner", "href": "/docs/variations" },
+      { "text": "Revenue goals and funnels with a completion trend.", "feature": "Funnels", "href": "/docs/results" }
+    ]
+  },
+  {
+    "id": "2026-10-15-goals",
+    "date": "2026-10-15",
+    "title": "Goals, targeting and share links",
+    "items": [
+      { "text": "Form, page visit and custom event goals, alongside click goals.", "feature": "Form, page visit and custom event goals", "href": "/docs/goals" },
+      { "text": "Target visitors by device, campaign, referrer and new or returning.", "feature": "Targeting", "href": "/docs/experiments#targeting" },
+      { "text": "Read-only share links for results.", "feature": "Share links", "href": "/docs/results#sharing" },
+      { "text": "A warning when visitors are not split as expected.", "feature": "Sample ratio check", "href": "/docs/results#srm" },
+      { "text": "Install guides for Google Tag Manager and WordPress.", "href": "/docs/install-guides" }
+    ]
+  },
+  {
+    "id": "2026-10-14-docs",
+    "date": "2026-10-14",
+    "title": "Documentation and split URL tests",
+    "items": [
+      { "text": "Documentation for setup, features and the API.", "href": "/docs" },
+      { "text": "Split URL tests with a step-by-step setup.", "feature": "A/B and split URL tests", "href": "/docs/variations" },
+      { "text": "Development, staging and production environments, each with its own keys.", "feature": "Environments and keys", "href": "/docs/environments-and-keys" }
+    ]
+  }
+]

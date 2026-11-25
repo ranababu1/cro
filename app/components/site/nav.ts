@@ -81,9 +81,11 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'Learn',
                 items: [
-                    { href: '/blog', title: 'Blog', body: 'Guides on testing, statistics and ideas' },
+                    { href: '/guides', title: 'Guides', body: 'Plan tests, read results and set up' },
+                    { href: '/blog', title: 'Blog', body: 'Articles on testing, statistics and ideas' },
                     { href: '/docs', title: 'Documentation', body: 'Setup, features and reference' },
-                    { href: '/pricing#faq', title: 'FAQ', body: 'Plans, limits and how things work' },
+                    { href: '/faq', title: 'FAQ', body: 'Short answers to common questions' },
+                    { href: '/changelog', title: 'Changelog', body: 'What is new in the product' },
                 ],
             },
             {
@@ -95,7 +97,7 @@ export const NAV_MENUS: NavMenu[] = [
                 ],
             },
         ],
-        feature: { eyebrow: 'From the blog', title: 'Statistical significance, explained', body: 'What a p-value tells you and when to stop a test.', href: '/blog/statistical-significance-ab-test', cta: 'Read the post' },
+        feature: { eyebrow: 'Resources', title: 'Everything in one place', body: 'Guides, docs, answers and what is new.', href: '/resources', cta: 'Browse resources' },
     },
 ];
 
@@ -124,10 +126,12 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
         { href: '/docs/integrations', title: 'Integrations' },
     ] },
     { heading: 'Resources', links: [
+        { href: '/resources', title: 'All resources' },
+        { href: '/guides', title: 'Guides' },
         { href: '/blog', title: 'Blog' },
-        { href: '/docs/quick-start', title: 'Quick start' },
         { href: '/statistical-methodology', title: 'Statistical methodology' },
-        { href: '/pricing#faq', title: 'FAQ' },
+        { href: '/faq', title: 'FAQ' },
+        { href: '/changelog', title: 'Changelog' },
         { href: '/docs/troubleshooting', title: 'Troubleshooting' },
     ] },
     { heading: 'Company', links: [

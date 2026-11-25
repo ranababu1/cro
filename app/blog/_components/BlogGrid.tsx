@@ -8,14 +8,14 @@ export function BlogGrid({ posts, categories }: { posts: CardPost[]; categories:
     const shown = active === 'All' ? posts : posts.filter((p) => p.category === active);
     const chips = ['All', ...categories];
     return (
-        <section aria-labelledby="all-posts" className="mt-20">
+        <section aria-labelledby="all-posts" className="mt-16">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <h2 id="all-posts" className="text-[24px] font-bold tracking-[-0.02em] text-[#0b1630]">All articles</h2>
+                <h2 id="all-posts" className="text-[24px] font-semibold tracking-[-0.02em] text-navy-950">All articles</h2>
                 {chips.length > 2 && (
                     <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
                         {chips.map((c) => (
                             <button key={c} type="button" aria-pressed={active === c} onClick={() => setActive(c)}
-                                className={`rounded-full px-4 py-1.5 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 motion-reduce:transition-none ${active === c ? 'bg-[#0b1630] text-white' : 'bg-white text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:bg-blue-50 hover:text-blue-800 hover:ring-blue-200'}`}>
+                                className={`rounded-full px-4 py-1.5 text-[14px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600 motion-reduce:transition-none ${active === c ? 'bg-navy-950 text-white' : 'bg-white text-muted-strong ring-1 ring-inset ring-line hover:bg-surface hover:text-navy-950'}`}>
                                 {c}
                             </button>
                         ))}
@@ -24,10 +24,10 @@ export function BlogGrid({ posts, categories }: { posts: CardPost[]; categories:
             </div>
             <p className="sr-only" aria-live="polite">{shown.length} articles shown</p>
             {shown.length ? (
-                <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {shown.map((p) => <li key={p.slug}><PostCard p={p} /></li>)}
                 </ul>
-            ) : <p className="mt-8 rounded-2xl border border-dashed border-zinc-300 p-8 text-center text-zinc-500">New guides are on the way.</p>}
+            ) : <p className="mt-8 rounded-xl border border-dashed border-line p-8 text-center text-muted">No articles in this category.</p>}
         </section>
     );
 }

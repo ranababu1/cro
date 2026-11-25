@@ -8,13 +8,15 @@ describe('public copy matches the code', () => {
     it('significance: the verdict is the peeking-safe sequential test everywhere', () => {
         const results = read('lib/docs/content/results.ts');
         const pricing = read('app/pricing/page.tsx');
+        // The statistics answer moved from the pricing FAQ to /faq (lib/site/faq.ts) with the redesign.
+        const faq = read('lib/site/faq.ts');
         const intro = read('lib/docs/content/introduction.ts');
         // lib/results.ts runs the sequential test for every variant and picks the winner from it.
         const engine = read('lib/results.ts');
         expect(engine).toMatch(/sequentialTest\(control, v, others\.length\)/);
         expect(engine).toMatch(/v\.sequential_significant && v\.conversion_rate > control\.conversion_rate/);
-        for (const s of [results, pricing, intro]) expect(s).toMatch(/sequential/i);
-        for (const s of [results, pricing, intro]) expect(s).toMatch(/chance to beat (the )?control/i);
+        for (const s of [results, faq, intro]) expect(s).toMatch(/sequential/i);
+        for (const s of [results, pricing, faq, intro]) expect(s).toMatch(/chance to beat (the )?control/i);
         for (const s of [pricing, intro]) expect(s).not.toMatch(/two-proportion z-test/);
     });
     it('weights: running tests can change the split, and the docs say so', () => {

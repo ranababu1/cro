@@ -203,7 +203,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 - PR G: /statistical-methodology with formulas, worked examples (reuse docs diagrams), interpretation guide. Done: page in app/statistical-methodology, examples computed by `lib/site/methodology.ts` with the app's statistics functions, interval diagram reused from the docs, tests/methodologyPage.test.ts checks formulas against lib source.
 
 ### Phase 6: resources and commercial (PR H resources, PR I pricing and legal)
-- PR H: /resources, /guides, /faq, /changelog (content/changelog), blog index restyle.
+- PR H: /resources, /guides, /faq, /changelog (content/changelog), blog index restyle. Done: hub in app/resources, curated guides in `lib/site/resources.ts`, product FAQ in `lib/site/faq.ts` (no question shared with the pricing FAQ), public release notes in `content/changelog/releases.json` via `lib/changelog.ts`, blog index restyled; checked by tests/resourcesPages.test.ts.
 - PR I: /pricing redesign (same numbers), /about restyle, legal restyle, redirects /privacy, /terms, /cookie-policy.
 
 ### Phase 7: SEO, accessibility, QA (PR J)
