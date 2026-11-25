@@ -3,7 +3,7 @@ title: "25 A/B test ideas for SaaS landing pages, ranked by traffic"
 meta_description: "25 SaaS landing page A/B test ideas ranked by the visitors each needs, from 4,552 for a headline rewrite to 147,706 for a button color, with the math shown."
 slug: ab-test-ideas-saas-landing-pages
 date: 2026-10-31
-updated: 2026-10-31
+updated: 2026-11-25
 author: "Imraan, freeabtest.com"
 keywords: ["a/b test ideas", "landing page test ideas", "saas ab test examples", "landing page ab testing", "what to a/b test on a landing page"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "25 A/B test ideas for SaaS landing pages, ranked by traffic",
     "datePublished": "2026-10-31",
-    "dateModified": "2026-10-31",
+    "dateModified": "2026-11-25",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/ab-test-ideas-saas-landing-pages",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -215,7 +215,7 @@ Every idea in this list can run as a split URL test on any plan. Your current la
 
 What changes by plan:
 
-| | Free | Starter ($10 a month) | Growth ($50 a month) |
+| | Free | Starter ($20 a month) | Growth ($50 a month) |
 |---|---|---|---|
 | Tested visitors a month | 10,000 (300 a day) | 250,000 | 1,000,000 |
 | Running tests at a time | 1 | 20 | Unlimited |

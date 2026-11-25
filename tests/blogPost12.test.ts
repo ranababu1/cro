@@ -31,7 +31,7 @@ describe('post: Optimizely alternatives for small teams and startups', () => {
         expect(PLAN_PROJECTS.slice(1, 3)).toEqual([3, 10]);
         expect(PLAN_SEATS.slice(1, 3)).toEqual([5, 15]);
         const cards = fs.readFileSync('app/pricing/BillingCards.tsx', 'utf8');
-        expect(cards).toContain("name: 'Starter', monthly: 10, yearly: 100");
+        expect(cards).toContain("name: 'Starter', monthly: 20, yearly: 200");
         expect(cards).toContain("name: 'Growth', monthly: 50, yearly: 500");
         expect(cards).toContain('250,000 tested visitors a month');
         expect(cards).toContain('1,000,000 tested visitors a month');
@@ -41,7 +41,7 @@ describe('post: Optimizely alternatives for small teams and startups', () => {
         expect(p.markdown).toContain('a fifth of the tested-visitor allowance of freeabtest Starter');
     });
     it('12-month costs and the sample size table add up', () => {
-        for (const [m, y] of [[120, 100], [600, 500], [1788, 1344], [4788, 3588], [7188, 5040]]) expect(p.markdown).toContain(`$${m.toLocaleString('en-US')} | $${y.toLocaleString('en-US')}`);
+        for (const [m, y] of [[240, 200], [600, 500], [1788, 1344], [4788, 3588], [7188, 5040]]) expect(p.markdown).toContain(`$${m.toLocaleString('en-US')} | $${y.toLocaleString('en-US')}`);
         expect(p.markdown).toContain('From $5,940');
         expect(p.markdown).toContain('| 20% (3.0% to 3.6%) | 13,914 | 27,828 | 93 |');
     });

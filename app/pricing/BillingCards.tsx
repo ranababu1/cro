@@ -7,7 +7,7 @@ type Tier = { name: string; monthly: number | null; yearly: number | null; body:
 
 const tiers: Tier[] = [
     { name: 'Free', monthly: 0, yearly: 0, body: 'For side projects and trying it out.', cta: 'Start for free', href: '/signin' },
-    { name: 'Starter', monthly: 10, yearly: 100, body: 'For one growing site that tests regularly.', cta: 'Choose Starter', href: '/signin' },
+    { name: 'Starter', monthly: 20, yearly: 200, body: 'For one growing site that tests regularly.', cta: 'Choose Starter', href: '/signin' },
     { name: 'Growth', monthly: 50, yearly: 500, body: 'For teams running tests every week.', cta: 'Choose Growth', href: '/signin', popular: true },
     { name: 'Enterprise', monthly: null, yearly: null, body: 'For high traffic, compliance and procurement needs.', cta: 'Contact us', href: 'mailto:hello@freeabtest.com' },
 ];

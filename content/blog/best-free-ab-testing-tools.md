@@ -3,7 +3,7 @@ title: "Best free A/B testing tools in 2026, compared honestly"
 meta_description: "A free-forever A/B testing plan at freeabtest.com versus VWO, Convert, Optimizely, Crazy Egg and other paid tools. Prices checked 15 Oct 2026."
 slug: best-free-ab-testing-tools
 date: 2026-10-15
-updated: 2026-11-07
+updated: 2026-11-25
 author: "Imraan, freeabtest.com"
 keywords:
   - free a/b testing tool
@@ -31,7 +31,7 @@ faq_schema: |
     "@type": "FAQPage",
     "mainEntity": [
       {"@type": "Question", "name": "What is the best free A/B testing tool in 2026?",
-       "acceptedAnswer": {"@type": "Answer", "text": "For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. Enterprise platforms such as VWO, Optimizely and AB Tasty publish no permanent free plan on their pricing pages."}},
+       "acceptedAnswer": {"@type": "Answer", "text": "For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan with 10,000 tested visitors a month, then Starter at $20 and Growth at $50. Enterprise platforms such as VWO, Optimizely and AB Tasty publish no permanent free plan on their pricing pages."}},
       {"@type": "Question", "name": "Does VWO have a free plan?",
        "acceptedAnswer": {"@type": "Answer", "text": "VWO's pricing page, checked on 15 October 2026, lists Growth, Pro and Enterprise plans with a demo request and no published price. It does not list a free plan."}},
       {"@type": "Question", "name": "How much does Convert Experiences cost?",
@@ -46,7 +46,7 @@ faq_schema: |
   }
 ---
 
-The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $10 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
+The best free A/B testing tool for most small websites in 2026 is freeabtest.com: a free-forever plan with 10,000 tested visitors a month, then Starter at $20 and Growth at $50. The well-known alternatives (VWO, Convert, Optimizely, Crazy Egg, AB Tasty, Kameleoon and Unbounce) either charge from about $99 to $495 a month for published plans, or ask you to request a quote.
 
 We make freeabtest.com, so read this with that in mind. We have tried to make the comparison useful even if you never sign up with us, and we say where other tools still do things we don't. This article compares freeabtest.com with platforms that cost more, or that are a weaker fit for developers and small teams who want plain A/B tests.
 
@@ -66,7 +66,7 @@ Prices are what each vendor published on 15 October 2026. Where a page only offe
 
 | Tool | Free or trial | Published paid entry (A/B) | Main catch | Best for |
 |---|---|---|---|---|
-| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 1 new test a month, 1 click goal per test, control plus 1 variation | Starter $10/month (250,000 visitors, 20 active experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test a month, one variation and one click goal. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $10 |
+| freeabtest.com | Free forever: 10,000 tested visitors a month (300 a day), 1 running test, 1 new test a month, 1 click goal per test, control plus 1 variation | Starter $20/month (250,000 visitors, 20 active experiments); Growth $50/month (1,000,000, unlimited experiments) | Free is one test a month, one variation and one click goal. Visual editor starts on Growth | Developers and small teams who want code-first testing, plain statistics and paid features from $20 |
 | Convert Experiences | 15-day free trial, no card | Growth $399/month monthly or $299/month billed annually for 100,000 MTU | Starts near $300 a month even on annual billing | Teams that want a published enterprise-style suite and can pay for it |
 | Crazy Egg | 30-day free trial | Plus $99/month billed annually (A/B starts here; 150,000 tracked pageviews) | Starter at $29 has no A/B. All plans billed annually | Marketers who want session recordings bundled with A/B |
 | Kameleoon (PBX Starter) | 30-day free trial, up to 3 experiments, no card | From $495/month for up to 10 experiments and 50,000 tested visitors | Entry paid plan is nearly 50× freeabtest Starter | Teams buying prompt-based experimentation |
@@ -75,9 +75,9 @@ Prices are what each vendor published on 15 October 2026. Where a page only offe
 | Optimizely | No free plan listed | Quote only (custom packaging) | No public price | Large enterprises |
 | AB Tasty | No self-serve free plan | Quote only (custom proposal by traffic and modules) | No public price; access is through their commercial team | Mid-market and enterprise CRO programs |
 
-Yearly billing on freeabtest.com gets 2 months free (Starter $100/year, Growth $500/year). None of the quote-only vendors published a self-serve price we could check.
+Yearly billing on freeabtest.com gets 2 months free (Starter $200/year, Growth $500/year). None of the quote-only vendors published a self-serve price we could check.
 
-## freeabtest.com: free forever, then $10 or $50
+## freeabtest.com: free forever, then $20 or $50
 
 This is our product, so here is what it does today. Plan limits match our [pricing](https://www.freeabtest.com/pricing) page. Feature availability matches the live product as of 19 October 2026.
 
@@ -98,9 +98,9 @@ This is our product, so here is what it does today. Plan limits match our [prici
 
 Form submit, page visit and custom event goals, revenue goals and conversions sent from your own code (`trackConversion`) are paid features, and so are heatmaps, funnels, popups, surveys, JS error tracking, the WordPress plugin, the visual editor and auto-shift.
 
-### Starter ($10/month) and Growth ($50/month)
+### Starter ($20/month) and Growth ($50/month)
 
-Paid plans allow up to 50 variations. Starter is $10 a month for 250,000 tested visitors, 20 active experiments, 3 projects and 5 seats. Growth is $50 a month for 1,000,000 visitors, unlimited active experiments, 10 projects and 15 seats. Enterprise is custom. Audit log retention is 90 days on Starter, 1 year on Growth and 2 years on Enterprise.
+Paid plans allow up to 50 variations. Starter is $20 a month for 250,000 tested visitors, 20 active experiments, 3 projects and 5 seats. Growth is $50 a month for 1,000,000 visitors, unlimited active experiments, 10 projects and 15 seats. Enterprise is custom. Audit log retention is 90 days on Starter, 1 year on Growth and 2 years on Enterprise.
 
 **Starter and up** adds:
 
@@ -132,7 +132,7 @@ Convert includes a visual editor, split URL tests, heatmaps and SRM checks on Gr
 
 Crazy Egg's pricing page lists Starter at $29, Plus at $99, Pro at $249 and Enterprise at $599, all per month and billed annually, with a 30-day free trial. A/B testing, CTAs and error tracking start on Plus, not on Starter. Plus includes 150,000 tracked pageviews a month and unlimited A/B tests. Pro adds targeting by country, UTMs and conversions.
 
-Crazy Egg is strongest if you want session recordings in the same product as A/B tests. freeabtest.com ships heatmaps and error tracking on Starter and up, but session recordings are still planned. If recordings are a must-have today, Crazy Egg or a dedicated session tool still fits. If you mainly need a clean A/B split, heatmaps and statistics, freeabtest Starter at $10 is the cheaper published path.
+Crazy Egg is strongest if you want session recordings in the same product as A/B tests. freeabtest.com ships heatmaps and error tracking on Starter and up, but session recordings are still planned. If recordings are a must-have today, Crazy Egg or a dedicated session tool still fits. If you mainly need a clean A/B split, heatmaps and statistics, freeabtest Starter at $20 is the cheaper published path.
 
 ## Kameleoon: from $495 a month on PBX Starter
 
@@ -187,7 +187,7 @@ If you get 10,000 visitors a week to the page you want to test, you can detect a
 ## Frequently asked questions
 
 **What is the best free A/B testing tool in 2026?**
-For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan, then Starter at $10 and Growth at $50. VWO, Optimizely and AB Tasty do not publish a permanent free plan.
+For developers and small teams who can paste a script tag, freeabtest.com is the strongest free option we checked among tools that otherwise charge hundreds a month. It has a free-forever plan, then Starter at $20 and Growth at $50. VWO, Optimizely and AB Tasty do not publish a permanent free plan.
 
 **Does VWO have a free plan?**
 VWO's pricing page, checked on 15 October 2026, lists Growth, Pro and Enterprise with a demo request and no published price. It does not list a free plan.

@@ -16,7 +16,7 @@ export const BILLING_PERIODS: readonly BillingPeriod[] = ['monthly', 'yearly'];
 
 /** USD prices, as on the pricing page. */
 export const PLAN_PRICES_USD: Record<PaidPlan, Record<BillingPeriod, number>> = {
-    starter: { monthly: 10, yearly: 100 },
+    starter: { monthly: 20, yearly: 200 },
     growth: { monthly: 50, yearly: 500 },
 };
 

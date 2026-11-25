@@ -19,8 +19,8 @@ if (!id || !secret) { console.error('Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECR
 if (webhookUrl && !/^https:\/\//.test(webhookUrl)) { console.error('--webhook-url must be an https URL.'); process.exit(1); }
 
 const PLANS = [
-    { env: 'PAYPAL_PLAN_STARTER_MONTHLY', name: 'Starter monthly', unit: 'MONTH', price: '10' },
-    { env: 'PAYPAL_PLAN_STARTER_YEARLY', name: 'Starter yearly', unit: 'YEAR', price: '100' },
+    { env: 'PAYPAL_PLAN_STARTER_MONTHLY', name: 'Starter monthly', unit: 'MONTH', price: '20' },
+    { env: 'PAYPAL_PLAN_STARTER_YEARLY', name: 'Starter yearly', unit: 'YEAR', price: '200' },
     { env: 'PAYPAL_PLAN_GROWTH_MONTHLY', name: 'Growth monthly', unit: 'MONTH', price: '50' },
     { env: 'PAYPAL_PLAN_GROWTH_YEARLY', name: 'Growth yearly', unit: 'YEAR', price: '500' },
 ];

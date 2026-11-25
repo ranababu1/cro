@@ -3,7 +3,7 @@ title: "Google Optimize alternatives for developers in 2026"
 meta_description: "Google Optimize shut down on 30 Sept 2023. Free and paid replacements for developers, how each connects to GA4, and prices checked 23 October 2026."
 slug: google-optimize-alternatives-developers
 date: 2026-10-23
-updated: 2026-11-07
+updated: 2026-11-25
 author: "Imraan, freeabtest.com"
 keywords: ["google optimize alternative free", "google optimize replacement", "optimize sunset alternative", "google optimize alternative ga4", "experience_impression ga4"]
 article_schema: |
@@ -12,7 +12,7 @@ article_schema: |
     "@type": "BlogPosting",
     "headline": "Google Optimize alternatives for developers in 2026",
     "datePublished": "2026-10-23",
-    "dateModified": "2026-11-07",
+    "dateModified": "2026-11-25",
     "mainEntityOfPage": "https://www.freeabtest.com/blog/google-optimize-alternatives-developers",
     "author": {"@type": "Person", "name": "Imraan"},
     "publisher": {"@type": "Organization", "name": "freeabtest.com", "url": "https://www.freeabtest.com"}
@@ -60,7 +60,7 @@ faq_schema: |
       {"@type": "Question", "name": "Can freeabtest.com send A/B test data to GA4?",
        "acceptedAnswer": {"@type": "Answer", "text": "Yes, on every plan including Free. When a visitor sees a version of a running test, the snippet sends a GA4 experience_impression event through gtag.js, or pushes it to the Google Tag Manager dataLayer, with exp_variant_string, experiment_id, variation_id, variation_name and is_control. You register the parameter as a custom dimension and build one audience per version yourself."}},
       {"@type": "Question", "name": "How much does a Google Optimize replacement cost?",
-       "acceptedAnswer": {"@type": "Answer", "text": "On pricing pages checked on 23 October 2026: freeabtest.com is $0 on Free, $10 a month on Starter and $50 on Growth. Crazy Egg's A/B plan is $99 a month billed annually, Convert Growth is $299 a month billed annually or $399 monthly, and Kameleoon PBX Starter starts at $495 a month. VWO, AB Tasty and Optimizely are not published and need a sales quote."}}
+       "acceptedAnswer": {"@type": "Answer", "text": "On pricing pages checked on 23 October 2026: freeabtest.com is $0 on Free, $20 a month on Starter and $50 on Growth. Crazy Egg's A/B plan is $99 a month billed annually, Convert Growth is $299 a month billed annually or $399 monthly, and Kameleoon PBX Starter starts at $495 a month. VWO, AB Tasty and Optimizely are not published and need a sales quote."}}
     ]
   }
 ---
@@ -114,7 +114,7 @@ Prices are from each vendor's own pricing page, checked on 23 October 2026. "Not
 
 | Tool | Free plan or trial | Cheapest published plan with A/B tests | On Google's partner list | Main catch |
 |---|---|---|---|---|
-| freeabtest.com | Free plan, free forever, no card: 10,000 tested visitors a month (300 a day), 1 running test, 1 new test a month, 1 click goal, control plus 1 variation | Starter $10/month (250,000 tested visitors, 20 active experiments) | No; sends `experience_impression` on every plan, you build the audiences | Free is one small test a month. Visual editor starts on Growth ($50/month) |
+| freeabtest.com | Free plan, free forever, no card: 10,000 tested visitors a month (300 a day), 1 running test, 1 new test a month, 1 click goal, control plus 1 variation | Starter $20/month (250,000 tested visitors, 20 active experiments) | No; sends `experience_impression` on every plan, you build the audiences | Free is one small test a month. Visual editor starts on Growth ($50/month) |
 | Crazy Egg | 30-day free trial | Plus $99/month, billed annually (150,000 tracked pageviews a month) | No | Starter ($29) has no A/B testing. All plans billed annually |
 | Convert Experiences | 15-day free trial, no card | Growth $299/month billed annually ($3,588 a year) or $399 monthly, 100,000 tested users a month | No | Growth allows 5 active experiences per project |
 | Kameleoon | PBX Starter trial: 30 days, up to 3 experiments, no card | PBX Starter from $495/month (up to 10 experiments, 50,000 visitors a month) | No | Tests and data from the trial are not saved |
@@ -132,7 +132,7 @@ Here is exactly what our [Free plan](https://www.freeabtest.com/pricing) include
 
 Free also includes sticky assignment, targeting by device, UTM, referrer and new or returning visitors, a sample ratio mismatch warning, QA preview links, a peeking-safe sequential test with Wilson 95% intervals and chance to beat control, and the GA4 `experience_impression` event.
 
-Form submit, page visit and custom event goals, revenue goals, heatmaps, funnels and results by segment start on Starter at $10 a month. The visual editor starts on Growth at $50. If you relied on point-and-click editing, budget for Growth or build the variant as a second URL.
+Form submit, page visit and custom event goals, revenue goals, heatmaps, funnels and results by segment start on Starter at $20 a month. The visual editor starts on Growth at $50. If you relied on point-and-click editing, budget for Growth or build the variant as a second URL.
 
 The 300 a day cap matters more than the monthly one. Fixed-sample planning estimates at a 3% baseline, 95% confidence and 80% power (standard two-proportion formula):
 
@@ -196,7 +196,7 @@ We multiplied each published plan price by 12. Traffic units differ, so read the
 | Plan | 12 months, billed monthly | 12 months, billed annually | Traffic included |
 |---|---|---|---|
 | freeabtest.com Free | $0 | $0 | 10,000 tested visitors a month (300 a day) |
-| freeabtest.com Starter | $120 | $100 | 250,000 tested visitors a month |
+| freeabtest.com Starter | $240 | $200 | 250,000 tested visitors a month |
 | freeabtest.com Growth | $600 | $500 | 1,000,000 tested visitors a month |
 | Crazy Egg Plus | Not offered | $1,188 | 150,000 tracked pageviews a month |
 | Convert Experiences Growth | $4,788 | $3,588 | 100,000 tested users a month |
@@ -224,6 +224,6 @@ Google's Optimize sunset page lists AB Tasty, Optimizely and VWO as the provider
 Yes, on every plan including Free. When a visitor sees a version of a running test, the snippet sends a GA4 `experience_impression` event through gtag.js, or pushes it to the Google Tag Manager `dataLayer`, with `exp_variant_string`, `experiment_id`, `variation_id`, `variation_name` and `is_control`. You register the parameter as a custom dimension and build one audience per version yourself.
 
 **How much does a Google Optimize replacement cost?**
-On pricing pages checked on 23 October 2026: freeabtest.com is $0 on Free, $10 a month on Starter and $50 on Growth. Crazy Egg's A/B plan is $99 a month billed annually, Convert Growth is $299 a month billed annually or $399 monthly, and Kameleoon PBX Starter starts at $495 a month. VWO, AB Tasty and Optimizely are not published and need a sales quote.
+On pricing pages checked on 23 October 2026: freeabtest.com is $0 on Free, $20 a month on Starter and $50 on Growth. Crazy Egg's A/B plan is $99 a month billed annually, Convert Growth is $299 a month billed annually or $399 monthly, and Kameleoon PBX Starter starts at $495 a month. VWO, AB Tasty and Optimizely are not published and need a sales quote.
 
 If you ran one or two Optimize tests a quarter on a small site, start small: put the snippet on one page, run one test with a bold change, and check that `experience_impression` shows up in GA4 before you trust any result. Move to a paid plan, ours or anyone's, when a specific limit gets in the way, such as the 300 visitors a day, the single click goal or the lack of a visual editor. Prices change, so check each vendor's page again before you commit to a year.
