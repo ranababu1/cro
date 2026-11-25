@@ -9,8 +9,8 @@ export function SiteFooter() {
     return (
         <footer className="border-t border-line bg-surface">
             <Container className="py-14">
-                <div className="grid gap-10 lg:grid-cols-[1.2fr_repeat(5,1fr)]">
-                    <div className="max-w-xs">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(5,1fr)]">
+                    <div className="col-span-2 max-w-xs sm:col-span-3 lg:col-span-1">
                         <Logo />
                         <p className="mt-4 text-[14px] leading-[1.6] text-muted-strong">A/B testing for marketers and developers, with results you can trust.</p>
                         <a href={`mailto:${LEGAL.contactEmail}`} className="mt-4 inline-block text-[14px] font-medium text-accent-700 hover:underline">{LEGAL.contactEmail}</a>

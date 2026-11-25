@@ -1,11 +1,16 @@
 # Current State
 
-> **SITE REDESIGN (started 2026-11-25).** Phase 1 (assessment and plan) is done: see `docs/plan.md` for the sitemap decisions,
-> the verified capability inventory, conflicts between the brief and the product, the design system spec and the PR order, and
-> `docs/instructions.md` for the rules. No public page has changed yet. The live marketing site is still the current landing page,
-> pricing, docs, blog, about, contact, security, wordpress and /legal/* pages. Brief URLs not built yet: /product, /features,
-> /how-it-works, /experiment-analytics, /solutions/*, /developers, /docs/javascript-sdk (today /docs/sdk), /docs/integrations,
-> /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms, /cookie-policy.
+> **SITE REDESIGN (started 2026-11-25).** Phase 1 (plan, PR #125) and Phase 2 (shared chrome, PR A) are done. See `docs/plan.md`
+> and `docs/instructions.md`. Public pages that had the old header (landing, pricing, blog, wordpress, legal, about, contact,
+> security) now use `app/components/site`: sticky header with Product, Solutions, Developers and Resources mega menus, Pricing,
+> Sign in and Start for free, an accordion mobile menu below 1024px, and a grouped footer. Links live in
+> `app/components/site/nav.ts`; until a brief page ships, its menu item points at the closest existing page (for example
+> Features at /pricing#compare, JavaScript SDK at /docs/sdk), and tests/siteNav.test.ts fails on any link without a page.
+> Marketing tokens (`navy-*`, `accent-*`, `surface`, `line`, `soft-blue`, `muted`) are in globals.css; the signed-in app and
+> docs shell are unchanged. The homepage body is still the old design (Phase 3 next). Brief URLs not built yet: /product,
+> /features, /how-it-works, /experiment-analytics, /solutions/*, /developers, /docs/javascript-sdk (today /docs/sdk),
+> /docs/integrations, /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms,
+> /cookie-policy.
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone
