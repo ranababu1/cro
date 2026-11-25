@@ -76,7 +76,7 @@ Rules for how to build each phase are in `docs/instructions.md`. What is live is
 | Typography Geist or Inter | Inter already loaded | Keep Inter (no new font download). Drop Caveat from the marketing site. |
 | Palette emerald #16A36A for CTAs | White text on #16A36A is 3.24:1, fails WCAG AA for normal text | Use emerald-700 #0F7A52 (5.35:1) for filled buttons and text links; #16A36A for icons, large text and charts. Navy stays the primary CTA colour. |
 | "Sign in" label | Header says "Log in" | Change to "Sign in". |
-| Session recordings, A/B tasty-style claims | Session recordings are postponed | Keep only as a Coming soon row on /pricing. Not in nav, features or homepage. |
+| Session recordings | Session recordings are postponed | Keep only as a Coming soon row on /pricing. Not in nav, features or homepage. |
 
 Public-site rules that override the brief are listed in `docs/instructions.md` section 6.
 
