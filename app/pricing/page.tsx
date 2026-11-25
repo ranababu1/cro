@@ -142,9 +142,9 @@ export default async function PricingPage() {
                         <p className="mt-3 max-w-[720px] text-[16px] leading-[1.6] text-muted-strong">Every limit of every plan, in plain numbers. Not included means the feature is only on the paid plans shown.</p>
                         <p className="mt-2 text-[13px] text-muted lg:hidden">Scroll the table sideways to see every plan.</p>
                         <div className="mt-8 overflow-x-auto rounded-xl border border-line bg-white" tabIndex={0} role="region" aria-label="Plan comparison">
-                            <table className="w-full min-w-[760px] text-left text-[14px]">
+                            <table className="w-full min-w-[760px] table-fixed text-left text-[14px]">
                                 <thead className="border-b border-line bg-surface text-navy-950">
-                                    <tr><th className="sticky left-0 z-10 bg-surface p-4 font-semibold">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
+                                    <tr><th className="sticky left-0 z-10 w-[170px] bg-surface p-4 font-semibold sm:w-[240px] lg:w-[320px]">Limits</th>{plans.map((p) => <th key={p} className="p-4 font-semibold">{p}</th>)}</tr>
                                 </thead>
                                 <tbody className="divide-y divide-line">
                                     {limits.map(([label, ...vals]) => (
