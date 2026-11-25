@@ -1,5 +1,12 @@
 # Current State
 
+> **SITE REDESIGN (started 2026-11-25).** Phase 1 (assessment and plan) is done: see `docs/plan.md` for the sitemap decisions,
+> the verified capability inventory, conflicts between the brief and the product, the design system spec and the PR order, and
+> `docs/instructions.md` for the rules. No public page has changed yet. The live marketing site is still the current landing page,
+> pricing, docs, blog, about, contact, security, wordpress and /legal/* pages. Brief URLs not built yet: /product, /features,
+> /how-it-works, /experiment-analytics, /solutions/*, /developers, /docs/javascript-sdk (today /docs/sdk), /docs/integrations,
+> /statistical-methodology, /resources, /guides, /faq, /changelog, and redirects /privacy, /terms, /cookie-policy.
+
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone
 > +91 9964 180587; email hello@freeabtest.com. Public pages: /about, /contact, /legal/terms (billing, renewal, tax and refund terms
@@ -69,7 +76,7 @@ experiments (belong to a project, owned by a user; hypothesis, expected_outcome,
 - `POST /api/assign` and `POST /api/track` require an SDK key in `X-API-Key`, reject secret keys, only see experiments in the key's project,
   record the environment, and are rate limited per key and client IP (default 600 per minute, `RATE_LIMIT_PER_MINUTE`). CORS preflight is supported.
 - Management API (`/api/experiments...`) accepts a session or `Authorization: Bearer cro_sk_...` for reads. Creating experiments needs a session.
-- Results: conversion rate per variation, Wilson confidence intervals, two-proportion z-test, optional `?environment=dev|staging|prod` filter.
+- Results: conversion rate per variation, Wilson confidence intervals, two-proportion z-test (API field only; the winner is decided by the sequential test, see docs/plan.md 1.5), optional `?environment=dev|staging|prod` filter.
   Conversions count unique converting visitors, so rates cannot exceed 100%.
 - Audit log entries for org creation, experiment create, update, status change and delete, and key create and revoke.
 - Platform admin: super-admins are listed in `PLATFORM_ADMIN_EMAILS` (separate from org roles; secret keys never grant it).
