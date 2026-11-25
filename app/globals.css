@@ -6,7 +6,6 @@
  */
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-hand: var(--font-hand-face), cursive;
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Green accent. 600/700 keep AA contrast with white text. */
@@ -52,10 +51,6 @@
     @apply bg-white text-zinc-900 font-sans antialiased;
     font-feature-settings: "cv11", "ss01";
   }
-  /* Anchor links on marketing pages land below the sticky site header. */
-  html:has([data-site-header]) {
-    scroll-padding-top: 88px;
-  }
   ::selection {
     @apply bg-brand-100;
   }
@@ -64,37 +59,10 @@
   }
 }
 
-/* Marketing page background blobs. Transform-only animation, disabled for reduced motion. */
-@keyframes blob-drift-a {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
-  33% { transform: translate3d(4%, -3%, 0) scale(1.08) rotate(8deg); }
-  66% { transform: translate3d(-3%, 4%, 0) scale(0.95) rotate(-6deg); }
-}
-@keyframes blob-drift-b {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
-  50% { transform: translate3d(-5%, 3%, 0) scale(1.12) rotate(-10deg); }
-}
-@keyframes blob-drift-c {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); }
-  40% { transform: translate3d(3%, 5%, 0) scale(0.92); }
-  75% { transform: translate3d(-4%, -2%, 0) scale(1.1); }
-}
-.blob {
-  position: absolute;
-  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
-  filter: blur(48px);
-  will-change: transform;
-  pointer-events: none;
-}
-.blob-a { animation: blob-drift-a 22s ease-in-out infinite; }
-.blob-b { animation: blob-drift-b 28s ease-in-out infinite; }
-.blob-c { animation: blob-drift-c 18s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) {
-  .blob-a, .blob-b, .blob-c { animation: none; }
-}
-
 /* Blog article typography */
 html { scroll-padding-top: 1.5rem; }
+/* Anchor links on marketing pages land below the sticky site header. */
+html:has([data-site-header]) { scroll-padding-top: 88px; }
 @media (prefers-reduced-motion: no-preference) { html:focus-within { scroll-behavior: smooth; } }
 .blog-prose { color: #3f3f46; font-size: 18px; line-height: 1.78; }
 .blog-prose > :first-child { margin-top: 0; }

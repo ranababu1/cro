@@ -36,7 +36,7 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'By team',
                 items: [
-                    { href: '/#test-anything', title: 'Marketing teams', body: 'Headlines, calls to action and landing pages' },
+                    { href: '/#marketers', title: 'Marketing teams', body: 'Headlines, calls to action and landing pages' },
                     { href: '/blog/ab-test-ideas-saas-landing-pages', title: 'SaaS products', body: 'Test ideas for pricing and signup pages' },
                 ],
             },

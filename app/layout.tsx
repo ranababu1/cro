@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono, Caveat } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { themeInitScript } from '@/lib/theme';
 import AuthProvider from './components/AuthProvider';
@@ -7,8 +7,6 @@ import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ variable: '--font-inter', subsets: ['latin'], display: 'swap' });
 const mono = JetBrains_Mono({ variable: '--font-mono-face', subsets: ['latin'], display: 'swap' });
-// Handwritten accent used for one annotation on the landing page.
-const hand = Caveat({ variable: '--font-hand-face', subsets: ['latin'], display: 'swap', weight: ['500'] });
 
 export const metadata: Metadata = {
     title: { default: 'freeabtest.com: A/B testing and experimentation', template: '%s · freeabtest.com' },
@@ -26,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
-        <html lang="en" className={`${inter.variable} ${mono.variable} ${hand.variable}`} suppressHydrationWarning>
+        <html lang="en" className={`${inter.variable} ${mono.variable}`} suppressHydrationWarning>
             <head>
                 <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
             </head>

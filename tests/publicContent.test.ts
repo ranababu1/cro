@@ -21,7 +21,7 @@ const FORBIDDEN: RegExp[] = [
 const root = path.join(__dirname, '..');
 const publicFiles = [
     'app/page.tsx', 'app/pricing/page.tsx', 'app/pricing/BillingCards.tsx', 'app/sitemap.ts',
-    ...fs.readdirSync(path.join(root, 'app/components/landing')).map((f) => `app/components/landing/${f}`),
+    'lib/site/home.ts',
     ...fs.readdirSync(path.join(root, 'app/components/site')).map((f) => `app/components/site/${f}`),
     ...fs.readdirSync(path.join(root, 'app/docs/_components')).map((f) => `app/docs/_components/${f}`),
     'app/docs/layout.tsx', 'app/docs/page.tsx', 'app/docs/[slug]/page.tsx', 'app/share/[token]/page.tsx', 'lib/shareView.ts', 'app/components/SrmWarning.tsx',
@@ -255,7 +255,7 @@ describe('blog rendering', () => {
 });
 
 describe('demo page removed', () => {
-    it('has no files, no links in the site chrome, and the hero CTA points at #', () => {
+    it('has no files, no links in the site chrome, and no demo or placeholder CTA on the homepage', () => {
         expect(fs.existsSync(path.join(root, 'public/demo.html'))).toBe(false);
         expect(fs.existsSync(path.join(root, 'public/demo'))).toBe(false);
         expect(fs.existsSync(path.join(root, 'app/demo'))).toBe(false);
@@ -263,7 +263,7 @@ describe('demo page removed', () => {
             expect(fs.readFileSync(path.join(root, f), 'utf8'), f).not.toMatch(/\/demo(\.html|\/|['"])/);
         }
         const home = fs.readFileSync(path.join(root, 'app/page.tsx'), 'utf8');
-        expect(home).toMatch(/<a href="#"[^>]*>[\s\S]{0,400}See the demo/);
+        expect(home).not.toMatch(/See the demo|href="#"/);
         expect(home).not.toContain('Sample page');
     });
     it('redirects old demo addresses to the homepage', () => {

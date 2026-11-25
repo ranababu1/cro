@@ -332,7 +332,7 @@ describe('AI public copy', () => {
         const home = read('app/page.tsx');
         expect(home).toContain('const aiLive = aiConfigured();');
         expect(home).toMatch(/\{aiLive && \(\s*<section id="ai"/);
-        expect(home).toContain("if (!aiConfigured()) return { title: { absolute: HOME_TITLE } };");
+        expect(home).toMatch(/if \(!aiConfigured\(\)\) return \{ \.\.\.base, title: \{ absolute: HOME_TITLE \}/);
         expect(home).not.toMatch(/image/i);
     });
 
