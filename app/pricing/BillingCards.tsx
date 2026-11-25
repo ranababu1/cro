@@ -19,7 +19,8 @@ const highlights: Record<string, string[]> = {
     Enterprise: ['Custom tested visitors', 'Unlimited team seats', 'Audit log kept 2 years', 'Named contact with an SLA'],
 };
 
-export function BillingCards() {
+/** checkout: paid checkout is on, so Starter and Growth go to Billing (through sign-in when signed out). Off: sign-in as before. */
+export function BillingCards({ checkout = false }: { checkout?: boolean }) {
     const [yearly, setYearly] = useState(false);
     return (
         <div>
@@ -31,6 +32,8 @@ export function BillingCards() {
                 {tiers.map((t) => {
                     const price = t.monthly === null ? 'Custom' : `$${yearly ? t.yearly : t.monthly}`;
                     const unit = t.monthly === null ? '' : yearly ? '/yr' : '/mo';
+                    const paid = checkout && (t.name === 'Starter' || t.name === 'Growth');
+                    const href = paid ? `/signin?callbackUrl=${encodeURIComponent(`/settings/billing?plan=${t.name.toLowerCase()}&period=${yearly ? 'yearly' : 'monthly'}`)}` : t.href;
                     const note = t.monthly === null ? 'Contact us' : t.monthly === 0 ? 'Free forever, no card' : yearly ? `About $${((t.yearly as number) / 12).toFixed(2)}/mo, billed yearly` : 'Billed monthly';
                     return (
                         <div key={t.name} className={`relative flex flex-col rounded-2xl border bg-white p-6 ${t.popular ? 'border-blue-600 ring-1 ring-blue-600' : 'border-zinc-200'}`}>
@@ -43,7 +46,7 @@ export function BillingCards() {
                                 {highlights[t.name].map((i) => <li key={i} className="flex gap-2"><span className="text-teal-600" aria-hidden>✓</span>{i}</li>)}
                             </ul>
                             <a href="#compare" className="mt-4 text-sm font-medium text-blue-700 hover:underline">See all plan details</a>
-                            <Link href={t.href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold ${t.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-zinc-300 text-zinc-900 hover:bg-zinc-50'}`}>{t.cta}</Link>
+                            <Link href={href} className={`mt-6 inline-flex h-11 items-center justify-center rounded-lg text-sm font-semibold ${t.popular ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-zinc-300 text-zinc-900 hover:bg-zinc-50'}`}>{t.cta}</Link>
                         </div>
                     );
                 })}

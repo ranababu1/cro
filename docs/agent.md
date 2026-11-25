@@ -102,5 +102,12 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Do not claim paid checkout is live until it ships. Billing terms in the Terms (section 2) and /legal/refunds already state: no mid-cycle refunds; access continues until the period ends; cancellations and downgrades take effect at period end (same as the pricing FAQ).
 - When the Terms or Privacy Policy change in substance, bump `LEGAL_VERSION` and `LEGAL_UPDATED`. Keep `tests/policyPages.test.ts` in sync if the entity, address, phone or refund rules change.
 
+## Billing
+- All payment code lives in lib/billing. Routes and pages never call a provider directly. A new provider (Razorpay INR next) adds an adapter that returns a ProviderSubscription (lib/billing/provider.ts) and reuses applySubscription.
+- Never grant a plan from the browser or a webhook body. Always re-read the subscription from the provider (syncPayPalSubscription). Webhooks are verified with the raw body and recorded by event id in billing_webhook_events before they are applied.
+- Billing writes organizations.plan and plan_ends_at only. Do not touch plan_override, special-friend allowances or platform admin rules from billing code; they keep winning in lib/entitlements.ts.
+- Billing stays hidden until paypalConfig() returns a config. Any new billing UI or route must check it and fall back to today's behaviour. Billing routes use the Node runtime.
+- Public copy must not say checkout is live until the variables are set in production. Keep PayPal variable names out of public pages and docs. Keep tests/billing.test.ts in sync.
+
 ## Public roadmap
 - There is no public roadmap. Do not add /roadmap links, phase numbers or "see roadmap" wording to public pages, docs or blog posts. Planned features appear only as Coming soon rows on the pricing page. Keep docs/roadmap.md as the internal plan (step 3 of Required on every change still applies).
