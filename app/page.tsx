@@ -80,7 +80,7 @@ export default function LandingPage() {
                             )}
                             <div className="mt-8 flex flex-wrap gap-3">
                                 <SiteButton href="/signin" className="h-12 px-6 text-[16px]">Start experimenting <ArrowIcon /></SiteButton>
-                                <SiteButton href="/pricing#compare" variant="secondary" className="h-12 px-6 text-[16px]">Explore features</SiteButton>
+                                <SiteButton href="/features" variant="secondary" className="h-12 px-6 text-[16px]">Explore features</SiteButton>
                             </div>
                             <ul className="mt-10 grid gap-3 text-[15px] text-navy-950 sm:grid-cols-3 sm:gap-6">
                                 <li className="flex gap-2"><Check /><span><strong className="font-semibold">Accessible.</strong> A free plan and no-code split URL tests.</span></li>
@@ -132,6 +132,7 @@ export default function LandingPage() {
                             </li>
                         ))}
                     </ul>
+                    <p className="mt-8 text-[15px]"><Link href="/features" className="font-medium text-accent-700 hover:underline">See every feature with its limits and plan</Link></p>
                 </Section>
 
                 {/* 4. How it works */}
@@ -149,6 +150,7 @@ export default function LandingPage() {
                             </li>
                         ))}
                     </ol>
+                    <p className="mt-8 text-[15px]"><Link href="/how-it-works" className="font-medium text-accent-700 hover:underline">See each step with a worked example</Link></p>
                 </Section>
 
                 {/* 5. Product preview */}
@@ -254,7 +256,7 @@ export default function LandingPage() {
                         <p className="text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Inconclusive tests.</strong> No verdict before every version has 100 visitors. Many tests end with no significant difference; ship the simpler version and test a bolder idea.</p>
                         <p className="text-[14px] leading-[1.6] text-muted-strong"><strong className="text-navy-950">Sample ratio check.</strong> If visitors are not split the way you set the weights, the results page warns you before you trust the numbers.</p>
                     </div>
-                    <p className="mt-8 text-[14px] text-muted">Worked example with example numbers. <Link href="/docs/results" className="font-medium text-accent-700 hover:underline">Read how results are calculated</Link></p>
+                    <p className="mt-8 text-[14px] text-muted">Worked example with example numbers. <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">Read how results are calculated</Link></p>
                 </Section>
 
                 {/* 9. Pricing */}

@@ -10,21 +10,21 @@ export const fmt = (n: number) => n.toLocaleString('en-US');
 export type Capability = { title: string; body: string; points: string[]; href: string };
 
 export const CAPABILITIES: Capability[] = [
-    { title: 'Experiment management', body: 'Plan, run and change tests without losing data.', href: '/docs/experiments',
+    { title: 'Experiment management', body: 'Plan, run and change tests without losing data.', href: '/features#experiment-management',
         points: ['A/B and split URL tests on every plan', `Up to ${PAID_MAX_VARIATIONS} variations per test on paid plans`, 'Scheduled start and stop, preview links, safe edits while running'] },
-    { title: 'Traffic allocation', body: 'Decide who enters a test and how traffic splits.', href: '/docs/variations#traffic-allocation',
+    { title: 'Traffic allocation', body: 'Decide who enters a test and how traffic splits.', href: '/features#traffic-allocation',
         points: ['Traffic share and per-variation weights', 'Gradual ramp-up on a schedule', 'Roll out the winner, or auto-shift traffic on Growth'] },
-    { title: 'Deterministic assignment', body: 'The same visitor sees the same version every time.', href: '/docs/sdk#init',
+    { title: 'Deterministic assignment', body: 'The same visitor sees the same version every time.', href: '/features#assignment',
         points: ['Visitor ID hashed with the test ID', 'Raising traffic never moves people already in the test', 'Use your own user IDs, in the browser or on your server'] },
-    { title: 'Conversion tracking', body: 'Count the actions that matter to you.', href: '/docs/goals',
+    { title: 'Conversion tracking', body: 'Count the actions that matter to you.', href: '/features#conversion-tracking',
         points: ['Click goals on a CSS selector on every plan', 'Form submit, page visit, custom event and revenue goals on paid plans', `Up to ${PAID_MAX_GOALS} goals per test on paid plans`] },
-    { title: 'Statistical analysis', body: 'Verdicts that stay valid however often you look.', href: '/docs/results#significance',
+    { title: 'Statistical analysis', body: 'Verdicts that stay valid however often you look.', href: '/features#statistics',
         points: ['Sequential test of each variant against the control', 'Wilson score interval for every conversion rate', 'Chance to beat control and a sample ratio check'] },
-    { title: 'Experiment reporting', body: 'See what is happening while the test runs.', href: '/docs/results',
+    { title: 'Experiment reporting', body: 'See what is happening while the test runs.', href: '/features#reporting',
         points: ['Live results with lift and its interval', 'CSV export and read-only share links', 'Funnels, segments and heatmaps on paid plans'] },
-    { title: 'Developer integration', body: 'One script tag, a JavaScript API and a REST API.', href: '/docs/rest-api',
+    { title: 'Developer integration', body: 'One script tag, a JavaScript API and a REST API.', href: '/features#developers',
         points: ['Public SDK keys and server-only secret keys per environment', 'Server-side assignment and event tracking', 'GA4 events, Google Tag Manager and WordPress guides'] },
-    { title: 'Privacy and security', body: 'Controls for consent and visitor data.', href: '/security',
+    { title: 'Privacy and security', body: 'Controls for consent and visitor data.', href: '/features#privacy',
         points: ['Consent mode: nothing stored or sent until you allow it', 'Erase one visitor or export your account data', 'Keys shown once and stored hashed; audit log on paid plans'] },
 ];
 

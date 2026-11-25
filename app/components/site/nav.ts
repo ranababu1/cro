@@ -14,9 +14,10 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'Platform',
                 items: [
-                    { href: '/#how-it-works', title: 'How it works', body: 'Create a test, add the snippet, read the result' },
-                    { href: '/pricing#compare', title: 'Features', body: 'Every feature and the plan that includes it' },
-                    { href: '/docs/results', title: 'Experiment analytics', body: 'Conversion rates, intervals and the verdict' },
+                    { href: '/product', title: 'Overview', body: 'One platform for marketers and developers' },
+                    { href: '/features', title: 'Features', body: 'Every feature, its limits and its plan' },
+                    { href: '/how-it-works', title: 'How it works', body: 'From hypothesis to decision in seven steps' },
+                    { href: '/experiment-analytics', title: 'Experiment analytics', body: 'Conversion rates, intervals and the verdict' },
                 ],
             },
             {
@@ -105,8 +106,10 @@ export type FooterColumn = { heading: string; links: { href: string; title: stri
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
     { heading: 'Product', links: [
-        { href: '/#how-it-works', title: 'How it works' },
-        { href: '/pricing#compare', title: 'Features' },
+        { href: '/product', title: 'Overview' },
+        { href: '/features', title: 'Features' },
+        { href: '/how-it-works', title: 'How it works' },
+        { href: '/experiment-analytics', title: 'Experiment analytics' },
         { href: '/pricing', title: 'Pricing' },
         { href: '/wordpress', title: 'WordPress plugin' },
     ] },

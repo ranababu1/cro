@@ -13,6 +13,7 @@ Applies to every PR in the redesign (`docs/plan.md`). General repo rules stay in
 - Shared marketing components go in `app/components/site/`. The app shell (`app/components/shell`) and app UI kit (`app/components/ui`) are reused, not forked. If a primitive fits both, put it in `ui`.
 - Marketing tokens are new `@theme` names (`navy-*`, `emerald-*`, `surface`). Do not redefine `brand-*` or zinc values; the app depends on them, and its dark mode lives under `.app-scope` only.
 - Page content that is long or reused (FAQ entries, feature lists, changelog entries, solution examples) lives in typed data modules (`lib/site/*.ts`) or Markdown (`content/`), not inline JSX, so tests can scan it.
+- New marketing pages use `SitePage`, `PageHero` with `Breadcrumbs`, and `pageMetadata({ path, title, description })` from `lib/site/meta.ts` (canonical, Open Graph and X). Add the file to the publicContent file list, the sitemap, and a test that runs `checkHref` from `tests/helpers/links.ts` on every link.
 - Never move or rename `/legal/*`, `/sdk.js` and other customer scripts, `/api/*`, `/signin`, `/share/*`, `/invite/*`, or app routes. New public URLs that differ from existing ones get a 301 in `next.config.js` redirects.
 - No new runtime dependencies without a reason written in the PR. Diagrams are inline SVG or HTML/CSS; reuse `app/docs/_components/Diagrams.tsx` where possible.
 - Every new public route exports `metadata` with a unique title and description, and is added to `app/sitemap.ts`.
