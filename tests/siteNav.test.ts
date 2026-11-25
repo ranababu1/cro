@@ -2,31 +2,10 @@ import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { FOOTER_COLUMNS, NAV_LINKS, NAV_MENUS, allChromeHrefs } from '@/app/components/site/nav';
-import { docPages, headingId } from '@/lib/docs';
-import { getAllPosts } from '@/lib/blog';
+import { anchorExists, routeExists } from './helpers/links';
 
 const root = path.join(__dirname, '..');
 const read = (f: string) => fs.readFileSync(path.join(root, f), 'utf8');
-
-/** True when `pathname` is served by a page in app/ (static segments, docs slugs and blog slugs). */
-function routeExists(pathname: string): boolean {
-    if (pathname === '/') return fs.existsSync(path.join(root, 'app/page.tsx'));
-    const docs = pathname.match(/^\/docs\/([^/]+)$/);
-    if (docs) return docPages.some((p) => p.slug === docs[1]);
-    const blog = pathname.match(/^\/blog\/([^/]+)$/);
-    if (blog) return getAllPosts().some((p) => p.slug === blog[1]);
-    return fs.existsSync(path.join(root, 'app', pathname, 'page.tsx'));
-}
-
-function anchorExists(pathname: string, hash: string): boolean {
-    const docs = pathname.match(/^\/docs\/([^/]+)$/);
-    if (docs) {
-        const page = docPages.find((p) => p.slug === docs[1]);
-        return !!page && page.blocks.some((b) => (b.type === 'h2' || b.type === 'h3') && headingId(b) === hash);
-    }
-    const file = pathname === '/' ? 'app/page.tsx' : `app${pathname}/page.tsx`;
-    return read(file).includes(`id="${hash}"`);
-}
 
 describe('marketing navigation', () => {
     it('has the four mega menus and Pricing, each menu with grouped items and short descriptions', () => {
