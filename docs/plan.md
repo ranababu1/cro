@@ -186,7 +186,7 @@ Desktop opens on click and hover-intent, closes on Escape and outside click, key
 4. Keep existing link targets working; menu items for pages not built yet point to the nearest existing page until their PR lands (no 404s, no placeholder links).
 5. Tests: update mobileNav, mobileA11y, publicContent file lists; add a nav link test that every menu href resolves to a route or redirect.
 
-Done in PR A. Decisions: tokens are `navy-*`, `accent-*` (emerald), `surface`, `line`, `soft-blue`, `muted`, `muted-strong`; primitives built now are Container, Section, SectionHeading, PageHero, CtaBand, SampleDataFrame, SiteCard, SiteButton. StepFlow, AudienceSplit, CodeTabs, StatExample, FaqList, Breadcrumbs and PlanBadge are built in the phase that first needs them. The docs shell keeps its own header until PR F. Each later PR that ships a page swaps its placeholder href in `app/components/site/nav.ts`.
+Done in PR A. Decisions: tokens are `navy-*`, `accent-*` (emerald), `surface`, `line`, `soft-blue`, `muted`, `muted-strong`; primitives built now are Container, Section, SectionHeading, PageHero, CtaBand, SampleDataFrame, SiteCard, SiteButton. StepFlow, AudienceSplit, CodeTabs, StatExample, FaqList, Breadcrumbs and PlanBadge are built in the phase that first needs them. The docs shell kept its own header until PR F, which moved it onto the site header and footer. Each later PR that ships a page swaps its placeholder href in `app/components/site/nav.ts`.
 
 ### Phase 3: homepage (PR B, done)
 Sections in brief order: hero (exact headline and lede, CTAs Start experimenting -> /signin, Explore features -> /features), audience split, core capabilities (verified only), seven-step workflow, product preview (real screenshot or labelled sample), for marketers, for developers (real script tag and REST snippet), statistical engine summary (sequential, Wilson, worked example), pricing summary (four tiers, free limits), FAQ (8 brief questions, short, links to /faq), final CTA. Remove blobs, Caveat, gradient text. Update metadata.
@@ -199,7 +199,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 
 ### Phase 5: developer ecosystem (PR E developers hub, PR F docs changes, PR G statistical methodology)
 - PR E: /developers. Done: content in `lib/site/developers.ts` (code samples copied from `lib/docs/content`, checked by tests/developersPage.test.ts), `CodeBlock` component, Developer hub first in the Developers menu and footer column, homepage developer links point at /developers.
-- PR F: rename `/docs/sdk` to `/docs/javascript-sdk` with redirect and link updates; new `/docs/integrations`; restyle docs shell; add docs pages to sitemap.
+- PR F: rename `/docs/sdk` to `/docs/javascript-sdk` with redirect and link updates; new `/docs/integrations`; restyle docs shell; add docs pages to sitemap. Done: 301 in next.config.js, docs shell uses SiteHeader and SiteFooter plus a docs bar, integrations page in `lib/docs/content/integrations.ts`, tests/docsShell.test.ts.
 - PR G: /statistical-methodology with formulas, worked examples (reuse docs diagrams), interpretation guide.
 
 ### Phase 6: resources and commercial (PR H resources, PR I pricing and legal)

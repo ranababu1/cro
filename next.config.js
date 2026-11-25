@@ -16,6 +16,8 @@ const nextConfig = {
             { source: '/demo/:path*', destination: '/', permanent: false },
             // The public roadmap was retired; what each plan includes lives on the pricing page.
             { source: '/roadmap', destination: '/pricing', statusCode: 301 },
+            // The SDK docs moved; the old address keeps working, anchors included.
+            { source: '/docs/sdk', destination: '/docs/javascript-sdk', statusCode: 301 },
         ];
     },
     async headers() {

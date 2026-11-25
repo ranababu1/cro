@@ -159,7 +159,7 @@ Rebuild the test as a [split URL test](https://www.freeabtest.com/blog/split-url
 4. **Register a custom dimension.** In GA4, create an event-scoped custom dimension for `variation_name` or `exp_variant_string`.
 5. **Build one GA4 audience per version**, including the control, with the condition "event `experience_impression` where `exp_variant_string` exactly matches" that version's value. Audiences only fill from the day you create them, so set them up before the test starts.
 
-The [SDK docs](https://www.freeabtest.com/docs/sdk) cover the GA4 setup step by step, and `data-analytics="off"` on the script tag turns the event off. The [quick start](https://www.freeabtest.com/docs/quick-start) goes from sign-in to a running test.
+The [SDK docs](https://www.freeabtest.com/docs/javascript-sdk) cover the GA4 setup step by step, and `data-analytics="off"` on the script tag turns the event off. The [quick start](https://www.freeabtest.com/docs/quick-start) goes from sign-in to a running test.
 
 When your own code needs the assignment, `ABTest.bootstrap()` returns the matched variation (call it again after a route change in a single-page app), and `ABTest.getUserId()` returns the visitor ID for joining with your own analytics:
 

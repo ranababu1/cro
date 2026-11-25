@@ -179,7 +179,7 @@ That is how freeabtest.com works. Per our [experiment docs](https://www.freeabte
 
 When the ID that goes into the hash changes. A deterministic hash is only as stable as its input, and the input is usually a browser ID.
 
-The freeabtest.com [SDK docs](https://www.freeabtest.com/docs/sdk) are direct about it: a generated visitor ID lives in localStorage, so it survives reloads but not a different browser, a different device or cleared storage. Safari adds a time limit. WebKit's [tracking prevention policy](https://webkit.org/tracking-prevention/) says Intelligent Tracking Prevention deletes all script-writable storage, including localStorage, after 7 days of no user interaction with the website. A Safari visitor who comes back after more than 7 days without interacting with your site can arrive with a new ID.
+The freeabtest.com [SDK docs](https://www.freeabtest.com/docs/javascript-sdk) are direct about it: a generated visitor ID lives in localStorage, so it survives reloads but not a different browser, a different device or cleared storage. Safari adds a time limit. WebKit's [tracking prevention policy](https://webkit.org/tracking-prevention/) says Intelligent Tracking Prevention deletes all script-writable storage, including localStorage, after 7 days of no user interaction with the website. A Safari visitor who comes back after more than 7 days without interacting with your site can arrive with a new ID.
 
 A new ID is a new draw, and in a 50/50 test a new draw matches the old version 1 time in 2. That gives a simple estimate of how much cross-over to expect.
 

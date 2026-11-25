@@ -13,7 +13,7 @@ const Check = () => (
     <svg viewBox="0 0 20 20" className="mt-[3px] h-4 w-4 shrink-0 text-accent-600" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 10 3.5 3.5L15 7" /></svg>
 );
 
-/** What happens on one page view, left to right. Mirrors the SDK flow in /docs/sdk#automatic. */
+/** What happens on one page view, left to right. Mirrors the SDK flow in /docs/javascript-sdk#automatic. */
 const FLOW = [
     { title: 'Visitor arrives', body: 'The snippet loads in the head and reads the visitor ID, or creates a random one.' },
     { title: 'Test matches', body: 'The page address and the targeting rules decide whether the visitor can enter.' },
@@ -87,7 +87,7 @@ export default function HowItWorksPage() {
                     ))}
                 </ol>
                 <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px]">
-                    <Link href="/docs/sdk" className="font-medium text-accent-700 hover:underline">JavaScript SDK</Link>
+                    <Link href="/docs/javascript-sdk" className="font-medium text-accent-700 hover:underline">JavaScript SDK</Link>
                     <Link href="/docs/server-side" className="font-medium text-accent-700 hover:underline">Server-side testing</Link>
                     <Link href="/experiment-analytics" className="font-medium text-accent-700 hover:underline">How results are read</Link>
                 </div>

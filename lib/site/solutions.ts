@@ -100,7 +100,7 @@ export const SOLUTIONS: Solution[] = [
             ],
         },
         ideas: [
-            { title: 'Pricing page layout', body: 'Number of plans, monthly or yearly default, and the plan you highlight.', feature: 'A/B test with custom events', plan: 'Paid plans', href: '/docs/sdk#bootstrap' },
+            { title: 'Pricing page layout', body: 'Number of plans, monthly or yearly default, and the plan you highlight.', feature: 'A/B test with custom events', plan: 'Paid plans', href: '/docs/javascript-sdk#bootstrap' },
             { title: 'Signup form length', body: 'Fewer fields against more context, measured on completed signups.', feature: 'Form submit goal', plan: 'Paid plans', href: '/docs/goals' },
             { title: 'Onboarding steps', body: 'Test the first screens after signup, assigned from your server.', feature: 'Server-side assignment', plan: 'Every plan', href: '/docs/server-side' },
             { title: 'Homepage message', body: 'Lead with the outcome or the feature, measured on trial starts.', feature: 'A/B test with a click goal', plan: 'Every plan', href: '/blog/ab-test-ideas-saas-landing-pages' },
@@ -118,7 +118,7 @@ export const SOLUTIONS: Solution[] = [
             { plan: 'Starter', body: `$${PLAN_PRICES_USD.starter.monthly} a month: custom events, up to ${PAID_MAX_GOALS} goals per test, funnels, webhooks and 5 team seats.` },
             { plan: 'Growth', body: `$${PLAN_PRICES_USD.growth.monthly} a month: multi-page tests, auto-shift and 15 team seats.` },
         ],
-        links: [{ href: '/docs/sdk', label: 'JavaScript SDK' }, { href: '/docs/server-side', label: 'Server-side testing' }, { href: '/docs/environments-and-keys', label: 'Environments and keys' }],
+        links: [{ href: '/docs/javascript-sdk', label: 'JavaScript SDK' }, { href: '/docs/server-side', label: 'Server-side testing' }, { href: '/docs/environments-and-keys', label: 'Environments and keys' }],
     },
     {
         slug: 'ecommerce', name: 'Ecommerce', navBody: 'Product pages, checkout and revenue per visitor',

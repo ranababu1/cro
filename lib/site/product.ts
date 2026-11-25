@@ -83,17 +83,17 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     {
         id: 'assignment', title: 'Deterministic assignment', summary: 'The same visitor sees the same version, every time.',
         features: [
-            { name: 'Sticky assignment', plan: 'Every plan', href: '/docs/sdk#init',
+            { name: 'Sticky assignment', plan: 'Every plan', href: '/docs/javascript-sdk#init',
                 what: 'Each visitor is placed in one version and stays there.',
                 how: 'The visitor ID is hashed together with the test ID to pick the version, so the result never changes.',
                 benefit: 'Visitors never see the page switch, and the results stay clean.',
                 limits: 'Raising traffic adds new visitors and never moves the ones already in the test.' },
-            { name: 'Your own user IDs', plan: 'Every plan', href: '/docs/sdk#init',
+            { name: 'Your own user IDs', plan: 'Every plan', href: '/docs/javascript-sdk#init',
                 what: 'Use your login ID so a person sees the same version on every device.',
                 how: 'Pass userId to init in the browser, or user_id to the server endpoints.',
                 benefit: 'Logged-in products keep one experience across phone and laptop.',
                 limits: 'Without your own ID, the snippet keeps a random ID in the browser, so a new device is a new visitor.' },
-            { name: 'Flicker-free snippet', plan: 'Every plan', href: '/docs/sdk#flicker',
+            { name: 'Flicker-free snippet', plan: 'Every plan', href: '/docs/javascript-sdk#flicker',
                 what: 'Visitors do not see the original page flash before their version.',
                 how: 'The snippet hides the page for at most 0.8 seconds while it decides, then shows the right version.',
                 benefit: 'No flash of the old headline, which can skew results.',
@@ -123,7 +123,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
                 how: 'Results show buyers, orders, revenue, revenue per visitor and average order value for each version.',
                 benefit: 'See whether a change brings more money, not only more orders.',
                 limits: 'A few large orders move the average, so revenue needs a larger sample.' },
-            { name: 'Google Analytics 4 events', plan: 'Every plan', href: '/docs/sdk#ga4',
+            { name: 'Google Analytics 4 events', plan: 'Every plan', href: '/docs/javascript-sdk#ga4',
                 what: 'Each test view is sent to Google Analytics 4.',
                 how: 'The snippet sends an experience_impression event, or pushes it to the Tag Manager dataLayer.',
                 benefit: 'Compare versions inside the analytics you already use.',
@@ -188,7 +188,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     {
         id: 'developers', title: 'Developer integration', summary: 'One script tag, a JavaScript API and a REST API.',
         features: [
-            { name: 'JavaScript SDK', plan: 'Every plan', href: '/docs/sdk',
+            { name: 'JavaScript SDK', plan: 'Every plan', href: '/docs/javascript-sdk',
                 what: 'One script tag that assigns, applies versions and tracks goals.',
                 how: 'It reads your public key from data-key and starts on its own. ABTest.track sends custom events.',
                 benefit: 'Works on any site, including through Tag Manager or WordPress.',
@@ -228,7 +228,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = [
     {
         id: 'privacy', title: 'Privacy and security', summary: 'Controls for consent, visitor data and your team.',
         features: [
-            { name: 'Consent mode', plan: 'Every plan', href: '/docs/sdk#consent',
+            { name: 'Consent mode', plan: 'Every plan', href: '/docs/javascript-sdk#consent',
                 what: 'Nothing is stored or sent until the visitor agrees.',
                 how: 'Add data-consent="required" to the script tag and call consent(true) from your banner.',
                 benefit: 'Fits a consent banner you already run.',

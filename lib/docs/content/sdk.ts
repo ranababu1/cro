@@ -1,7 +1,7 @@
 import type { DocPage } from '../types';
 
 export const sdk: DocPage = {
-    slug: 'sdk',
+    slug: 'javascript-sdk',
     title: 'JavaScript SDK',
     description: 'Install the browser SDK, the full API, single-page apps and how to avoid flicker.',
     group: 'Guides',

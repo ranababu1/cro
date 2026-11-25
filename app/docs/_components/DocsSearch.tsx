@@ -65,7 +65,7 @@ export function DocsSearch({ index }: { index: SearchEntry[] }) {
     return (
         <div className="relative w-full">
             <label htmlFor="docs-search" className="sr-only">Search docs</label>
-            <svg viewBox="0 0 20 20" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" aria-hidden>
+            <svg viewBox="0 0 20 20" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden>
                 <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" fill="none" /><path d="m14 14 4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
             <input
@@ -87,13 +87,13 @@ export function DocsSearch({ index }: { index: SearchEntry[] }) {
                 role="combobox"
                 aria-expanded={open && results.length > 0}
                 aria-controls="docs-search-results"
-                className="h-9 w-full rounded-md border border-zinc-200 bg-white pl-9 pr-10 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="h-9 w-full rounded-md border border-line bg-white pl-9 pr-10 text-sm text-navy-950 placeholder:text-muted focus:border-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-100"
             />
-            <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-zinc-200 px-1.5 text-[10px] text-zinc-400 sm:block">/</kbd>
+            <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-line px-1.5 text-[10px] text-muted sm:block">/</kbd>
             {open && q && (
-                <div id="docs-search-results" role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-lg border border-zinc-200 bg-white p-1.5 shadow-pop sm:min-w-[26rem]">
+                <div id="docs-search-results" role="listbox" className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-lg border border-line bg-white p-1.5 shadow-pop sm:min-w-[26rem]">
                     {results.length === 0 ? (
-                        <p className="px-3 py-4 text-sm text-zinc-500">No results for &quot;{q}&quot;</p>
+                        <p className="px-3 py-4 text-sm text-muted">No results for &quot;{q}&quot;</p>
                     ) : results.map((r, i) => (
                         <button
                             key={r.href}
@@ -103,11 +103,11 @@ export function DocsSearch({ index }: { index: SearchEntry[] }) {
                             onMouseDown={(e) => e.preventDefault()}
                             onMouseEnter={() => setActive(i)}
                             onClick={() => go(r.href)}
-                            className={`block w-full rounded-md px-3 py-2 text-left ${i === active ? 'bg-brand-50' : ''}`}
+                            className={`block w-full rounded-md px-3 py-2 text-left ${i === active ? 'bg-accent-50' : ''}`}
                         >
-                            <span className="block text-[11px] font-medium text-zinc-400">{r.page}</span>
-                            <span className="block text-sm font-medium text-zinc-900">{r.heading}</span>
-                            <span className="mt-0.5 block line-clamp-2 text-xs text-zinc-500">{r.snippet}</span>
+                            <span className="block text-[11px] font-medium text-muted">{r.page}</span>
+                            <span className="block text-sm font-medium text-navy-950">{r.heading}</span>
+                            <span className="mt-0.5 block line-clamp-2 text-xs text-muted">{r.snippet}</span>
                         </button>
                     ))}
                 </div>

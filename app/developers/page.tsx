@@ -161,6 +161,7 @@ export default function DevelopersPage() {
                         </li>
                     ))}
                 </ul>
+                <p className="mt-6 text-[14px] text-muted-strong"><Link href="/docs/integrations" className="font-medium text-accent-700 hover:underline">All integrations and the plan each needs</Link></p>
             </Section>
 
             <Section tone="surface" className="border-t border-line" labelledBy="docs-title">

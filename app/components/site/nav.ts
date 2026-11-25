@@ -59,7 +59,7 @@ export const NAV_MENUS: NavMenu[] = [
                 heading: 'Integrate',
                 items: [
                     { href: '/developers', title: 'Developer hub', body: 'Setup, code examples, keys and webhooks' },
-                    { href: '/docs/sdk', title: 'JavaScript SDK', body: 'One script tag and the ABTest API' },
+                    { href: '/docs/javascript-sdk', title: 'JavaScript SDK', body: 'One script tag and the ABTest API' },
                     { href: '/docs/rest-api', title: 'REST API', body: 'Assign, track and read results over HTTP' },
                     { href: '/docs/server-side', title: 'Server-side testing', body: 'Assign visitors from your backend' },
                 ],
@@ -67,7 +67,7 @@ export const NAV_MENUS: NavMenu[] = [
             {
                 heading: 'Connect',
                 items: [
-                    { href: '/docs/install-guides', title: 'Integrations', body: 'Google Tag Manager, WordPress and GA4' },
+                    { href: '/docs/integrations', title: 'Integrations', body: 'Google Tag Manager, WordPress and GA4' },
                     { href: '/docs/webhooks', title: 'Webhooks', body: 'Signed events when a test changes' },
                     { href: '/docs/results#significance', title: 'Statistical methods', body: 'Sequential testing and Wilson intervals' },
                 ],
@@ -119,9 +119,9 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     { heading: 'Developers', links: [
         { href: '/developers', title: 'Developer hub' },
         { href: '/docs', title: 'Documentation' },
-        { href: '/docs/sdk', title: 'JavaScript SDK' },
+        { href: '/docs/javascript-sdk', title: 'JavaScript SDK' },
         { href: '/docs/rest-api', title: 'REST API' },
-        { href: '/docs/install-guides', title: 'Integrations' },
+        { href: '/docs/integrations', title: 'Integrations' },
     ] },
     { heading: 'Resources', links: [
         { href: '/blog', title: 'Blog' },

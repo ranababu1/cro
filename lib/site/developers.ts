@@ -16,11 +16,11 @@ export const ONBOARDING: { title: string; body: string; href: string; link: stri
 export type Snippet = { id: string; title: string; body: string; label: string; code: string; href: string; link: string };
 
 export const SNIPPETS: Snippet[] = [
-    { id: 'browser', title: 'Browser SDK', body: 'One script tag assigns visitors, applies versions, handles split URL redirects and counts click, form and page visit goals.', label: 'HTML', href: '/docs/sdk', link: 'SDK reference',
+    { id: 'browser', title: 'Browser SDK', body: 'One script tag assigns visitors, applies versions, handles split URL redirects and counts click, form and page visit goals.', label: 'HTML', href: '/docs/javascript-sdk', link: 'SDK reference',
         code: `<script src="${SITE_HOST}/sdk.js" data-key="cro_pk_prod_..." async></script>` },
-    { id: 'events', title: 'Custom events', body: 'Count actions that happen in your own code, with an order value for revenue goals. Paid plans.', label: 'JavaScript', href: '/docs/sdk#track', link: 'track()',
+    { id: 'events', title: 'Custom events', body: 'Count actions that happen in your own code, with an order value for revenue goals. Paid plans.', label: 'JavaScript', href: '/docs/javascript-sdk#track', link: 'track()',
         code: `ABTest.track('signup');\nABTest.track('purchase', { revenue: 49.99 });` },
-    { id: 'bootstrap', title: 'Read the version in your code', body: 'Render your own component for the visitor\u2019s version, for example in a single-page app.', label: 'JavaScript', href: '/docs/sdk#bootstrap', link: 'bootstrap()',
+    { id: 'bootstrap', title: 'Read the version in your code', body: 'Render your own component for the visitor\u2019s version, for example in a single-page app.', label: 'JavaScript', href: '/docs/javascript-sdk#bootstrap', link: 'bootstrap()',
         code: `ABTest.bootstrap().then(function (r) {\n  if (r.matched && r.variation_name === 'Variant B') {\n    document.body.classList.add('variant-b');\n  }\n});` },
     { id: 'server', title: 'Assign from your server', body: 'Use a secret key from your backend. The same visitor ID gets the same version as in the browser.', label: 'curl', href: '/docs/server-side', link: 'Server-side testing',
         code: `curl -X POST ${SITE_HOST}/api/server/assign \\\n  -H 'Authorization: Bearer cro_sk_prod_...' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"experiment_id": "exp_123", "user_id": "user_42"}'` },
@@ -29,12 +29,12 @@ export const SNIPPETS: Snippet[] = [
 ];
 
 export const SDK_METHODS: { name: string; body: string; plan: Plan; href: string }[] = [
-    { name: 'track(eventName, options)', body: 'Counts a custom event goal for every running test with that event name, once per visitor. Pass revenue for order value.', plan: 'Paid plans', href: '/docs/sdk#track' },
-    { name: 'trackConversion(experimentId, eventName)', body: 'Records a conversion for one test, for the version the visitor sees on this page.', plan: 'Paid plans', href: '/docs/sdk#track-conversion' },
-    { name: 'bootstrap()', body: 'Matches the page to a running test and returns the visitor\u2019s version. Call it again on route changes in single-page apps.', plan: 'Every plan', href: '/docs/sdk#bootstrap' },
-    { name: 'init(options)', body: 'Sets the key, the API address or your own user ID when you load the script without data-key.', plan: 'Every plan', href: '/docs/sdk#init' },
-    { name: 'getUserId()', body: 'Returns the visitor ID in use, for debugging, joining with your analytics, or erasing one visitor.', plan: 'Every plan', href: '/docs/sdk#get-user-id' },
-    { name: 'consent(granted)', body: 'With data-consent="required" on the tag, nothing is stored or sent until you call consent(true).', plan: 'Every plan', href: '/docs/sdk#consent' },
+    { name: 'track(eventName, options)', body: 'Counts a custom event goal for every running test with that event name, once per visitor. Pass revenue for order value.', plan: 'Paid plans', href: '/docs/javascript-sdk#track' },
+    { name: 'trackConversion(experimentId, eventName)', body: 'Records a conversion for one test, for the version the visitor sees on this page.', plan: 'Paid plans', href: '/docs/javascript-sdk#track-conversion' },
+    { name: 'bootstrap()', body: 'Matches the page to a running test and returns the visitor\u2019s version. Call it again on route changes in single-page apps.', plan: 'Every plan', href: '/docs/javascript-sdk#bootstrap' },
+    { name: 'init(options)', body: 'Sets the key, the API address or your own user ID when you load the script without data-key.', plan: 'Every plan', href: '/docs/javascript-sdk#init' },
+    { name: 'getUserId()', body: 'Returns the visitor ID in use, for debugging, joining with your analytics, or erasing one visitor.', plan: 'Every plan', href: '/docs/javascript-sdk#get-user-id' },
+    { name: 'consent(granted)', body: 'With data-consent="required" on the tag, nothing is stored or sent until you call consent(true).', plan: 'Every plan', href: '/docs/javascript-sdk#consent' },
 ];
 
 export type Endpoint = { method: 'GET' | 'POST' | 'PATCH'; path: string; auth: 'SDK key' | 'Secret key'; body: string; href: string };
@@ -64,10 +64,10 @@ export const WEBHOOK_EVENTS: { name: string; body: string }[] = [
 ];
 
 export const INTEGRATIONS: { title: string; body: string; plan: Plan; href: string }[] = [
-    { title: 'Google Tag Manager', body: 'Add the snippet as a custom HTML tag. Test views are pushed to the dataLayer.', plan: 'Every plan', href: '/docs/install-guides' },
+    { title: 'Google Tag Manager', body: 'Add the snippet as a custom HTML tag. Test views are pushed to the dataLayer.', plan: 'Every plan', href: '/docs/install-guides#gtm' },
     { title: 'WordPress', body: 'Paste the snippet with any header plugin, or use our plugin on paid plans.', plan: 'Every plan', href: '/wordpress' },
-    { title: 'Google Analytics 4', body: 'An experience_impression event for each test view, to compare versions in your reports.', plan: 'Every plan', href: '/docs/sdk#ga4' },
-    { title: 'Single-page apps', body: 'Call bootstrap on each route change, for example in a React effect.', plan: 'Every plan', href: '/docs/sdk#spa' },
+    { title: 'Google Analytics 4', body: 'An experience_impression event for each test view, to compare versions in your reports.', plan: 'Every plan', href: '/docs/javascript-sdk#ga4' },
+    { title: 'Single-page apps', body: 'Call bootstrap on each route change, for example in a React effect.', plan: 'Every plan', href: '/docs/javascript-sdk#spa' },
 ];
 
 export const ERRORS: [string, string][] = [
@@ -80,11 +80,11 @@ export const ERRORS: [string, string][] = [
 
 export const DOC_LINKS: { href: string; title: string; body: string }[] = [
     { href: '/docs/quick-start', title: 'Quick start', body: 'From sign in to a running test' },
-    { href: '/docs/sdk', title: 'JavaScript SDK', body: 'Install, methods, consent and flicker' },
+    { href: '/docs/javascript-sdk', title: 'JavaScript SDK', body: 'Install, methods, consent and flicker' },
     { href: '/docs/rest-api', title: 'REST API', body: 'Authentication, endpoints and errors' },
     { href: '/docs/server-side', title: 'Server-side testing', body: 'Assign and track from your backend' },
     { href: '/docs/environments-and-keys', title: 'Environments and keys', body: 'Dev, staging, production and rotation' },
     { href: '/docs/webhooks', title: 'Webhooks', body: 'Events, delivery and signatures' },
-    { href: '/docs/install-guides', title: 'Install guides', body: 'Tag Manager and WordPress' },
+    { href: '/docs/integrations', title: 'Integrations', body: 'Tag Manager, WordPress, GA4 and webhooks' },
     { href: '/docs/troubleshooting', title: 'Troubleshooting', body: 'When a test does not show or count' },
 ];

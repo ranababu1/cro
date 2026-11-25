@@ -20,13 +20,13 @@ export function Toc({ items }: { items: { id: string; text: string; level: 2 | 3
     if (!items.length) return null;
     return (
         <nav aria-label="On this page">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">On this page</p>
-            <ul className="mt-3 space-y-1.5 border-l border-zinc-200 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">On this page</p>
+            <ul className="mt-3 space-y-1.5 border-l border-line text-sm">
                 {items.map((i) => (
                     <li key={i.id}>
                         <a
                             href={`#${i.id}`}
-                            className={`-ml-px block border-l py-0.5 ${i.level === 3 ? 'pl-6' : 'pl-3'} ${active === i.id ? 'border-brand-600 font-medium text-brand-700' : 'border-transparent text-zinc-500 hover:text-zinc-900'}`}
+                            className={`-ml-px block border-l py-0.5 ${i.level === 3 ? 'pl-6' : 'pl-3'} ${active === i.id ? 'border-accent-600 font-medium text-accent-700' : 'border-transparent text-muted hover:text-navy-950'}`}
                         >
                             {i.text}
                         </a>
