@@ -98,7 +98,7 @@ describe('platform admin role', () => {
     it('validates admin updates', async () => {
         as('admin');
         expect((await patchOrg(r('PATCH', '/', {}), p(orgs.tenant))).status).toBe(400);
-        expect((await patchOrg(r('PATCH', '/', { monthly_visitor_limit: -1 }), p(orgs.tenant))).status).toBe(400);
+        expect((await patchOrg(r('PATCH', '/', { monthly_visitor_limit: -2 }), p(orgs.tenant))).status).toBe(400);
         expect((await patchOrg(r('PATCH', '/', { name: 'x' }), p(orgs.tenant))).status).toBe(400);
         expect((await patchOrg(r('PATCH', '/', { plan: 'pro' }), p('org_missing'))).status).toBe(404);
     });

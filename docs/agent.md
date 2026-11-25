@@ -63,6 +63,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Public copy: the Free card on /pricing shows three ticks and links to the comparison table (#compare), which lists every free limit in plain numbers with no footnotes. Never call Free "unlimited", "all features free" or a "free trial". Label paid-only features. `tests/publicCopyMatchesApp.test.ts` checks this.
 - Duplicating a test is a create path: POST /api/experiments/[id]/duplicate calls `checkNewTest` and `recordNewTest` and re-checks plan limits on what it copies. Keep that for any future copy or import feature.
 - Tests that are not about the free plan should put their org on a paid plan with `makePaid` (tests/helpers.ts), or clear the monthly counter with `resetFreeTestUsage`.
+- Paid defaults (as on /pricing): Starter 250,000 tested visitors a month and 20 running tests; Growth 1,000,000 tested visitors and no running-test cap; both have 50 goals and 50 variations, with 3/5 and 10/15 projects and seats. Enterprise tested visitors and projects are custom (no default cap), with unlimited running tests and seats, still 50 goals and 50 variations. Published plans have no pageview cap. `organizations.monthly_visitor_limit` and `monthly_pageview_limit`: null is the plan default, -1 is unlimited. Keep `tests/publicCopyMatchesApp.test.ts` and `tests/paidPlanLimits.test.ts` in sync when those numbers change.
 
 
 ## Sign-up protection

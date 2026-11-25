@@ -28,7 +28,7 @@ export const organizations: DocPage = {
             ['Experiment starts per month, when your plan has one', 'Starting a new experiment returns `403`. Resuming a paused one is not a new start.'],
             ['Projects and team seats', 'Adding a project or creating an invite returns `403` with an upgrade note. Existing projects and members are kept after a downgrade.'],
         ] },
-        { type: 'p', text: 'Monthly limits reset at the start of each calendar month (UTC). Contact support to change your plan.' },
+        { type: 'p', text: 'Tested visitors a month: 10,000 on Free (and up to 300 a day), 250,000 on Starter, 1,000,000 on Growth, and a custom number on Enterprise. Running tests at a time: 1 on Free, 20 on Starter, and no cap on Growth and Enterprise. Monthly limits reset at the start of each calendar month (UTC). Contact support to change your plan.' },
         { type: 'h2', text: 'Audit log', id: 'audit-log' },
         { type: 'p', text: 'On paid plans, **Audit log** in the sidebar lists who changed what in your organization: tests, goals, funnels, traffic splits, visual changes, surveys, popups, domains, API keys and share links, newest first. Filter by type, and choose **Show older entries** to page back. The log is read-only; nobody in your organization can edit or delete entries.' },
         { type: 'p', text: 'Changes made with a secret API key show **API**, traffic splits changed by auto-shift show **Auto**, and plan or account changes made by our team show **Support** without the internal notes.' },

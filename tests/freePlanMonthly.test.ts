@@ -119,14 +119,18 @@ describe('free: 1 new test per calendar month', () => {
 });
 
 describe('free: exactly 1 goal, a click on a CSS selector', () => {
-    it('goalPlanError: free allows one click goal only; paid allows any', () => {
+    it('goalPlanError: free allows one click goal only; paid allows up to 50', () => {
         const free = { maxGoals: 1, advancedGoals: false };
         expect(goalPlanError(free, [{ type: 'click' }])).toBeNull();
         expect(goalPlanError(free, [{}])).toBeNull();
         expect(goalPlanError(free, [{ type: 'click' }, { type: 'click' }])).toMatch(/1 goal per test/);
         for (const type of ['form', 'page', 'event']) expect(goalPlanError(free, [{ type }])).toMatch(/click on a CSS selector/);
         expect(goalPlanError(free, [{ type: 'click' }], 1)).toMatch(/1 goal per test/);
-        expect(goalPlanError({ maxGoals: null, advancedGoals: true }, [{ type: 'event' }, { type: 'page' }, { type: 'form' }], 3)).toBeNull();
+        const paid = { maxGoals: 50, advancedGoals: true };
+        expect(goalPlanError(paid, [{ type: 'event' }, { type: 'page' }, { type: 'form' }], 3)).toBeNull();
+        expect(goalPlanError(paid, [{ type: 'click' }], 50)).toMatch(/50 goals per test/);
+        expect(goalPlanError(paid, [{ type: 'click' }], 50)).toMatch(/Remove a goal first/);
+        expect(goalPlanError(paid, [{ type: 'click' }], 50)).not.toMatch(/Upgrade/);
     });
 
     it('create refuses a second goal or a non-click goal on free', async () => {

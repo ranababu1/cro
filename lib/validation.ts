@@ -143,7 +143,8 @@ export const adminUpdateOrgSchema = z
         plan: z.string().trim().min(1).max(50),
         // Admin-assigned plan. Overrides billing until removed (null).
         plan_override: z.enum(['free', 'starter', 'growth', 'enterprise']).nullable(),
-        monthly_visitor_limit: limit,
+        // null = plan default, -1 = unlimited (same as monthly_pageview_limit)
+        monthly_visitor_limit: z.number().int().min(-1).max(1_000_000_000).nullable(),
         monthly_experiment_limit: limit,
         // null = plan default, -1 = unlimited
         monthly_pageview_limit: z.number().int().min(-1).max(1_000_000_000).nullable(),
