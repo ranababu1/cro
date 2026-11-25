@@ -10,6 +10,7 @@ import { SIGN_IN_HREF, START_HREF } from './nav';
 export function SiteHeader() {
     return (
         <header data-site-header className="sticky top-0 z-50 border-b border-line bg-white">
+            <a href="#main" className="sr-only rounded-lg bg-navy-950 px-4 py-2 text-[14px] font-medium text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:px-4 focus:py-2">Skip to content</a>
             <div className="relative">
                 <div className="mx-auto flex h-[72px] max-w-[1200px] items-center gap-6 px-5 sm:px-8">
                     <Logo size="lg" />

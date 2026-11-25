@@ -97,8 +97,11 @@ function toHtml(md: string): string {
     } } });
     const clean = sanitizeHtml(m.parse(md, { async: false }) as string, SANITIZE);
     // Presentation only, applied to already sanitized HTML with fixed strings.
+    let tables = 0;
     return clean
-        .replace(/<table>/g, '<div class="table-wrap" tabindex="0" role="region" aria-label="Table"><table>').replace(/<\/table>/g, '</table></div>')
+        .replace(/<table>/g, () => `<div class="table-wrap" tabindex="0" role="region" aria-label="Table ${++tables}"><table>`).replace(/<\/table>/g, '</table></div>')
+        .replace(/<pre>/g, '<pre tabindex="0">')
+        .replace(/<th( align="[a-z]+")?><\/th>/g, '<td$1></td>')
         .replace(/<blockquote>\s*<p><strong>(Note|Tip|Warning|Important):<\/strong>/g, (_, k: string) => `<blockquote class="callout callout-${k.toLowerCase()}"><p><strong>${k}:</strong>`);
 }
 

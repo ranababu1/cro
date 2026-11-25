@@ -20,7 +20,9 @@
 > /changelog (curated notes in `content/changelog/releases.json`, never the engineering log); blog index on the site tokens.
 > Pricing and legal (PR I): /pricing and the LegalDoc frame (legal pages, /about, /contact, /security) use the site
 > design with the same numbers and legal text; /privacy, /terms and /cookie-policy 301 to the /legal pages. Every brief
-> URL now exists. Next is PR J (SEO and QA pass).
+> URL now exists. SEO, accessibility and QA (PR J): shared metadata with canonical, OG and a default share image on every
+> public page, skip link and landmarks, axe 0 violations on every sitemap page, Lighthouse accessibility and SEO 100.
+> The site redesign is complete.
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone

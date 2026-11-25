@@ -208,6 +208,7 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 
 ### Phase 7: SEO, accessibility, QA (PR J)
 `metadataBase`, canonical, OG and Twitter on every public page, default OG image, breadcrumbs, sitemap with every public page and docs, robots check, internal link checker test, axe-style checks, 390/768/1280 screenshots, Lighthouse pass, full `npm test` and build.
+Done (PR J): see docs/changelog.md; checked by tests/seoA11y.test.ts. The audit scripts used (SEO crawl, axe, Lighthouse) are kept outside the repo.
 
 ## 7. Risks
 - Public copy tests are strict (publicContent, publicCopyMatchesApp, copyConsistency, claimsAudit). New pages must be added to their file lists so the rules apply.

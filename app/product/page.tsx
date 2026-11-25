@@ -6,8 +6,8 @@ import { HeroPreview } from '../components/site/Previews';
 
 export const metadata = pageMetadata({
     path: '/product',
-    title: 'Product: one A/B testing platform for marketers and developers',
-    description: 'FreeABTest is one experimentation platform with two ways in: no-code tests for marketers and a JavaScript SDK and REST API for developers, sharing the same assignment and statistics.',
+    title: 'A/B testing platform for marketers and developers',
+    description: 'One experimentation platform with two ways in: no-code tests for marketers, and a JavaScript SDK and REST API for developers, with shared statistics.',
 });
 
 const JOURNEYS = [

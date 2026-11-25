@@ -1,9 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
 
-export const metadata: Metadata = { title: 'Privacy Policy', description: 'What freeabtest.com collects, why, how long it is kept and your rights.' };
+export const metadata = pageMetadata({
+    path: '/legal/privacy',
+    title: 'Privacy Policy',
+    description: 'What freeabtest.com collects about account holders and website visitors, why, how long it is kept, who processes it and your rights.',
+});
 
 export default function PrivacyPage() {
     const op = operatorName();
@@ -16,7 +20,7 @@ export default function PrivacyPage() {
                 <li><strong>Visitors of our customers&apos; websites.</strong> When a customer installs our script, we process data about their visitors on the customer&apos;s instructions (we are the processor, the customer is the controller). Section 5 covers this, and the <Link href="/legal/dpa">Data Processing Agreement</Link> sets the rules. Visitors with a request should contact the website they visited; we help that website answer it.</li>
             </ul>
             <h2>2. Data about account holders</h2>
-            <table>
+            <table tabIndex={0}>
                 <thead><tr><th>What</th><th>Why</th></tr></thead>
                 <tbody>
                     <tr><td>Name, email address and profile picture from the sign-in provider you choose</td><td>Create and secure your account, sign you in</td></tr>

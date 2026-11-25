@@ -4,7 +4,7 @@ import type { DocPage } from '../types';
 export const quickStart: DocPage = {
     slug: 'quick-start',
     title: 'Quick start',
-    description: 'From sign in to a running URL split test with click goals.',
+    description: 'From sign in to a running split URL test with click goals: add your domain, install the snippet, create the test and check that it works.',
     group: 'Getting started',
     blocks: [
         { type: 'p', text: 'This guide creates a URL split test: a control page, one or more variation pages, and click goals. You only add one script tag to each page.' },

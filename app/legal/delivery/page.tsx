@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../LegalDoc';
 import { LEGAL, contactPhoneHref } from '@/lib/legal';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+    path: '/legal/delivery',
     title: 'Service delivery',
-    description: 'How freeabtest.com is delivered: a digital service with no physical shipping.',
-};
+    description: 'How freeabtest.com is delivered: a digital service you use in the browser, available once you sign in, with no physical shipping.',
+});
 
 export default function DeliveryPage() {
     const mail = <a href={`mailto:${LEGAL.contactEmail}`}>{LEGAL.contactEmail}</a>;

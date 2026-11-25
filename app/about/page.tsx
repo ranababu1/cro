@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
+import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../legal/LegalDoc';
 import { LEGAL, contactPhoneHref, operatorName, organizationJsonLd } from '@/lib/legal';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+    path: '/about',
     title: 'About',
-    description: 'Who operates freeabtest.com and how to reach us.',
-};
+    description: 'Who operates freeabtest.com, an A/B testing service run from Bengaluru, India, and how to reach us by email or phone.',
+});
 
 const jsonLd = {
     '@context': 'https://schema.org',

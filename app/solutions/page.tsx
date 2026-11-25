@@ -6,8 +6,8 @@ import { ArrowIcon, Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, Sit
 
 export const metadata = pageMetadata({
     path: '/solutions',
-    title: 'Solutions: A/B testing for marketing, SaaS, ecommerce and startups',
-    description: 'How marketing teams, SaaS products, online stores and startups use FreeABTest: a worked workflow, test ideas, the goals to measure and the plan that fits each one.',
+    title: 'A/B testing for marketing, SaaS, ecommerce, startups',
+    description: 'How marketing teams, SaaS products, online stores and startups use FreeABTest: a worked workflow, test ideas, goals to measure and the plan that fits.',
 });
 
 const BY_GOAL: { goal: string; slug: (typeof SOLUTIONS)[number]['slug'] }[] = [

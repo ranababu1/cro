@@ -8,7 +8,7 @@ import { Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, SitePage } fro
 export const metadata = pageMetadata({
     path: '/guides',
     title: 'A/B testing guides: plan tests, read results, set up',
-    description: 'Hand-picked guides for planning A/B tests, working out sample size and run time, reading results correctly and setting up tests in the browser or on your server.',
+    description: 'Hand-picked guides for planning A/B tests, working out sample size and run time, reading results correctly and setting up tests in the browser or on a server.',
 });
 
 /** Resolves a guide to its link, title and label. Throws at build time if a slug no longer exists. */

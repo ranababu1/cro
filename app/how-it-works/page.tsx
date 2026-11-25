@@ -6,7 +6,7 @@ import { Breadcrumbs, Container, CtaBand, PageHero, ProductSubnav, Section, Sect
 export const metadata = pageMetadata({
     path: '/how-it-works',
     title: 'How website experimentation works, step by step',
-    description: 'The full A/B testing lifecycle in FreeABTest: create an experiment, define variants and traffic, add the snippet or API, assign visitors, track conversions, analyse results and decide.',
+    description: 'The A/B testing lifecycle in FreeABTest: create a test, set variants and traffic, add the snippet, assign visitors, track conversions and read results.',
 });
 
 const Check = () => (
@@ -51,7 +51,7 @@ export default function HowItWorksPage() {
                 {LIFECYCLE.map((s, i) => (
                     <section key={s.id} id={s.id} aria-labelledby={`${s.id}-title`} className={`scroll-mt-20 py-14 md:py-20 ${i % 2 ? 'bg-white' : 'bg-surface'}`}>
                         <Container className="grid gap-8 lg:grid-cols-[80px_minmax(0,1fr)_minmax(0,420px)] lg:gap-12">
-                            <div className="text-[40px] font-semibold leading-none tracking-[-0.03em] text-slate-300" aria-hidden>{String(i + 1).padStart(2, '0')}</div>
+                            <div className="text-[40px] font-semibold leading-none tracking-[-0.03em] text-muted" aria-hidden>{String(i + 1).padStart(2, '0')}</div>
                             <div>
                                 <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Step {i + 1}</p>
                                 <h2 id={`${s.id}-title`} className="mt-2 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-navy-950 md:text-[30px]">{s.title}</h2>

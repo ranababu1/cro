@@ -124,7 +124,7 @@ export default async function PricingPage() {
         <div className="min-h-screen bg-white text-navy-950">
             <SiteHeader />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
-            <main>
+            <main id="main">
                 <header className="border-b border-line bg-surface">
                     <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-10 sm:px-8 sm:pt-12">
                         <Breadcrumbs items={[{ href: '/pricing', label: 'Pricing' }]} />

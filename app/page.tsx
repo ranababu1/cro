@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { aiConfigured } from '@/lib/ai/crypto';
 import { SITE_URL, ldJson } from '@/lib/blog';
+import { OG_IMAGE } from '@/lib/site/meta';
+import { organizationJsonLd } from '@/lib/legal';
 import { FREE_MONTHLY_VISITORS } from '@/lib/plans';
 import { CAPABILITIES, HOME_FAQ, MARKETER_USE_CASES, PLAN_SUMMARY, STEPS, WORKED_EXAMPLE, fmt } from '@/lib/site/home';
 import { ArrowIcon, Container, CtaBand, SampleDataFrame, Section, SectionHeading, SiteButton, SiteFooter, SiteHeader } from './components/site';
@@ -18,15 +20,23 @@ const aiFeatures = [
 ];
 
 const HOME_TITLE = 'freeabtest.com: A/B testing for marketers and developers';
-const HOME_DESCRIPTION = 'Better decisions, backed by experiments. Run A/B and split URL tests with one script tag or a REST API, and read results from a peeking-safe sequential test. Free plan, no card.';
+const HOME_DESCRIPTION = 'Better decisions, backed by experiments. Run A/B and split URL tests with one script tag or a REST API, with peeking-safe results. Free plan, no card.';
 const HOME_TITLE_AI = 'freeabtest.com: AI-powered A/B testing platform';
-const HOME_DESCRIPTION_AI = 'Better decisions, backed by experiments. AI-powered A/B testing: run tests with one script tag or a REST API, read peeking-safe results, and on Growth get test ideas and result summaries from your own AI key.';
+const HOME_DESCRIPTION_AI = 'AI-powered A/B testing: run tests with one script tag or a REST API, read peeking-safe results, and on Growth get test ideas from your own AI key.';
 
 export function generateMetadata(): Metadata {
     const base = { alternates: { canonical: `${SITE_URL}/` } };
-    if (!aiConfigured()) return { ...base, title: { absolute: HOME_TITLE }, description: HOME_DESCRIPTION, openGraph: { title: HOME_TITLE, description: HOME_DESCRIPTION, url: `${SITE_URL}/`, type: 'website' }, twitter: { card: 'summary', title: HOME_TITLE, description: HOME_DESCRIPTION } };
-    return { ...base, title: { absolute: HOME_TITLE_AI }, description: HOME_DESCRIPTION_AI, openGraph: { title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI, url: `${SITE_URL}/`, type: 'website' }, twitter: { card: 'summary', title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI } };
+    if (!aiConfigured()) return { ...base, title: { absolute: HOME_TITLE }, description: HOME_DESCRIPTION, openGraph: { title: HOME_TITLE, description: HOME_DESCRIPTION, url: `${SITE_URL}/`, type: 'website', siteName: 'freeabtest.com', images: [OG_IMAGE] }, twitter: { card: 'summary_large_image', title: HOME_TITLE, description: HOME_DESCRIPTION, images: [OG_IMAGE.url] } };
+    return { ...base, title: { absolute: HOME_TITLE_AI }, description: HOME_DESCRIPTION_AI, openGraph: { title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI, url: `${SITE_URL}/`, type: 'website', siteName: 'freeabtest.com', images: [OG_IMAGE] }, twitter: { card: 'summary_large_image', title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI, images: [OG_IMAGE.url] } };
 }
+
+const siteJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+        { ...organizationJsonLd(), '@id': `${SITE_URL}/#organization`, logo: `${SITE_URL}/icon-512.png` },
+        { '@type': 'WebSite', '@id': `${SITE_URL}/#website`, url: `${SITE_URL}/`, name: 'freeabtest.com', publisher: { '@id': `${SITE_URL}/#organization` } },
+    ],
+};
 
 const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -44,7 +54,7 @@ function Code({ label, code }: { label: string; code: string }) {
     return (
         <figure className="overflow-hidden rounded-xl border border-navy-800 bg-navy-950">
             <figcaption className="border-b border-white/10 px-4 py-2 text-[12px] font-medium text-slate-300">{label}</figcaption>
-            <pre className="overflow-x-auto px-4 py-4 text-[13px] leading-[1.7] text-slate-100"><code className="font-mono">{code}</code></pre>
+            <pre tabIndex={0} className="overflow-x-auto px-4 py-4 text-[13px] leading-[1.7] text-slate-100 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent-600"><code className="font-mono">{code}</code></pre>
         </figure>
     );
 }
@@ -56,9 +66,10 @@ export default function LandingPage() {
     const ex = WORKED_EXAMPLE;
     return (
         <div className="min-h-screen bg-white text-navy-950">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(siteJsonLd)) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
             <SiteHeader />
-            <main>
+            <main id="main">
                 {/* 1. Hero */}
                 <section className="border-b border-line bg-surface" aria-labelledby="hero-title">
                     <Container className="grid gap-12 py-14 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,500px)] lg:items-center lg:gap-16">

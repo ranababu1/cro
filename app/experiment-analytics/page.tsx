@@ -7,8 +7,8 @@ import { DashboardPreview, exampleEarly, exampleResults } from '../components/si
 
 export const metadata = pageMetadata({
     path: '/experiment-analytics',
-    title: 'Experiment analytics: conversion rates, intervals and significance',
-    description: 'How FreeABTest reports an A/B test: conversion rate, lift, 95% Wilson intervals, chance to beat control, peeking-safe sequential significance, sample ratio checks, funnels, revenue and segments.',
+    title: 'Experiment analytics: rates, intervals, significance',
+    description: 'How FreeABTest reports a test: conversion rate, lift, Wilson intervals, chance to beat control, peeking-safe significance, sample ratio checks and more.',
 });
 
 const pct = (x: number, d = 1) => `${(x * 100).toFixed(d)}%`;

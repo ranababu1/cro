@@ -36,8 +36,8 @@ export type Solution = {
 export const SOLUTIONS: Solution[] = [
     {
         slug: 'marketing', name: 'Marketing teams', navBody: 'Landing pages, headlines and campaign tests',
-        metaTitle: 'A/B testing for marketing teams: landing pages, headlines and CTAs',
-        metaDescription: 'Test landing pages, headlines, calls to action and campaign pages without waiting for a release. Split URL tests, click goals, targeting by UTM, and a visual editor on Growth.',
+        metaTitle: 'A/B testing for marketing teams and landing pages',
+        metaDescription: 'Test landing pages, headlines and calls to action without waiting for a release. Split URL tests, click goals, UTM targeting and a visual editor on Growth.',
         eyebrow: 'For marketing teams', title: 'Test the pages your campaigns depend on',
         lede: 'Change a headline, a call to action or a whole landing page, show it to part of your traffic, and see which version brings more signups. Most tests need one script tag and no engineering time.',
         challenges: [
@@ -79,8 +79,8 @@ export const SOLUTIONS: Solution[] = [
     },
     {
         slug: 'saas', name: 'SaaS products', navBody: 'Pricing pages, signup flows and in-app tests',
-        metaTitle: 'A/B testing for SaaS: pricing pages, signup flows and server-side tests',
-        metaDescription: 'Test pricing pages, signup flows and in-product changes. Server-side assignment with a secret key, custom events from your code, your own user IDs and separate environments.',
+        metaTitle: 'A/B testing for SaaS pricing pages and signups',
+        metaDescription: 'Test pricing pages, signup flows and in-product changes, with server-side assignment, custom events from your code, your own user IDs and environments.',
         eyebrow: 'For SaaS products', title: 'Test from the pricing page to the product',
         lede: 'Run marketing tests on the public site and product tests inside your app with the same assignment and statistics. Use your own user IDs so a person sees one version on every device.',
         challenges: [
@@ -122,7 +122,7 @@ export const SOLUTIONS: Solution[] = [
     },
     {
         slug: 'ecommerce', name: 'Ecommerce', navBody: 'Product pages, checkout and revenue per visitor',
-        metaTitle: 'A/B testing for ecommerce: product pages, checkout and revenue',
+        metaTitle: 'A/B testing for ecommerce product pages and revenue',
         metaDescription: 'Test product pages, offers and checkout steps, and measure revenue per visitor and average order value. Works on any store where you can add one script tag.',
         eyebrow: 'For online stores', title: 'Measure revenue, not just clicks',
         lede: 'A version that gets more add-to-cart clicks can still bring less money. Send the order value with each purchase and compare revenue per visitor and average order value for every version.',
@@ -165,8 +165,8 @@ export const SOLUTIONS: Solution[] = [
     },
     {
         slug: 'startups', name: 'Startups', navBody: 'Free plan, low traffic and the first tests',
-        metaTitle: 'A/B testing for startups: a free plan and honest advice for low traffic',
-        metaDescription: `Start A/B testing for free with ${fmt(FREE_MONTHLY_VISITORS)} tested visitors a month. How to pick tests when traffic is low, how many visitors you need, and how to plan the next test.`,
+        metaTitle: 'A/B testing for startups with low traffic',
+        metaDescription: `Start A/B testing free with ${fmt(FREE_MONTHLY_VISITORS)} tested visitors a month, and learn how to pick, size and plan tests when traffic is low.`,
         eyebrow: 'For startups', title: 'Start testing before you have a big audience',
         lede: 'The free plan has no card and no time limit. With less traffic, the trick is to test big changes on the pages that matter, and to know how many visitors a test needs before you start.',
         challenges: [

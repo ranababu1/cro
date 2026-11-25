@@ -15,7 +15,7 @@ export function LegalDoc({ slug, title, intro, children }: { slug: string; title
     return (
         <div className="min-h-screen bg-white text-navy-950">
             <SiteHeader />
-            <main>
+            <main id="main">
                 <header className="border-b border-line bg-surface">
                     <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12">
                         <Breadcrumbs items={[{ href: self?.href ?? '/legal/terms', label: title }]} />

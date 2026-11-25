@@ -11,7 +11,7 @@ export const environments: DocPage = {
         { type: 'p', text: 'This lets you point your local and staging sites at the same experiment as production without polluting real results: use a dev key locally, a staging key on staging and a prod key on the live site. Filter results with `?environment=prod` on the results API.' },
         { type: 'callout', tone: 'info', text: 'A visitor assigned in one environment keeps that variation in the others, because assignment is per experiment and visitor ID.' },
         { type: 'h2', text: 'Key types' },
-        { type: 'table', head: ['', 'SDK key', 'Secret key'], rows: [
+        { type: 'table', head: ['Key', 'SDK key', 'Secret key'], rows: [
             ['Format', '`cro_pk_<env>_` plus 32 characters', '`cro_sk_<env>_` plus 32 characters'],
             ['Where', 'Browsers, page source', 'Servers only'],
             ['Can call', '`/api/assign` and `/api/track`', 'Experiment and results endpoints for its project'],
