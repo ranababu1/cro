@@ -98,7 +98,7 @@ function Bucketing() {
 function Interval() {
     const rows = [
         { label: 'Control', lo: 3.8, hi: 6.5, mid: 5.0, color: '#52525b' },
-        { label: 'Variant B', lo: 6.0, hi: 9.0, mid: 7.4, color: '#4f5bd5' },
+        { label: 'Variant B', lo: 6.0, hi: 9.0, mid: 7.4, color: '#4338ca' },
         { label: 'Variant C', lo: 3.6, hi: 7.6, mid: 5.4, color: '#2563eb' },
     ];
     const x = (v: number) => 110 + (v / 10) * 500;

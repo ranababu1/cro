@@ -4,6 +4,7 @@ import { formatDate, getAllPosts } from '@/lib/blog';
 import { latestReleases } from '@/lib/changelog';
 import { RESOURCE_LINKS, listablePost } from '@/lib/site/resources';
 import { Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/resources',
@@ -15,7 +16,7 @@ export default function ResourcesPage() {
     const posts = getAllPosts().filter(listablePost).slice(0, 3);
     const releases = latestReleases(3);
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/resources', label: 'Resources' }])]}>
             <PageHero eyebrow="Resources" title="Learn, set up and stay up to date"
                 lede="Guides for planning and reading tests, documentation for every feature, answers to common questions and what is new in the product."
                 actions={[{ href: '/guides', label: 'Start with the guides' }, { href: '/docs', label: 'Read the docs' }]}>

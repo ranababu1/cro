@@ -15,7 +15,7 @@ describe('post: Google Optimize alternatives for developers in 2026', () => {
         expect(JSON.parse(p.itemListSchema!)).toMatchObject({ '@type': 'ItemList', numberOfItems: 7 });
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
-        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('ldJson(p.itemListSchema)');
+        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('parseSchema(p.itemListSchema)');
     });
     it('matches the Free plan and the SDK GA4 event, with no em dashes', () => {
         expect(p.markdown).toMatch(/1 new test a month/);

@@ -77,7 +77,7 @@ function DayChart({ days }: { days: TrafficSummary['days'] }) {
             <div className="flex h-40 items-end gap-[2px]" role="img" aria-label="Page views per day">
                 {days.map((d) => (
                     <div key={d.day} className="group relative flex-1">
-                        <div className="w-full rounded-t bg-gradient-to-t from-[#4f5bd5] to-[#6f7cf5]" style={{ height: `${Math.max((d.views / max) * 160, d.views > 0 ? 2 : 0)}px` }} title={`${d.day}: ${d.views.toLocaleString()} page views`} />
+                        <div className="w-full rounded-t bg-gradient-to-t from-[#4338ca] to-[#6366f1]" style={{ height: `${Math.max((d.views / max) * 160, d.views > 0 ? 2 : 0)}px` }} title={`${d.day}: ${d.views.toLocaleString()} page views`} />
                     </div>
                 ))}
             </div>

@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { canDownloadPlugin } from '@/lib/pluginDownload';
-import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
+import { Breadcrumbs, SiteFooter, SiteHeader, JsonLd } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/wordpress',
@@ -22,7 +23,8 @@ export default async function WordPressPage({ searchParams }: { searchParams: Pr
     const limited = (await searchParams).download === 'limit';
     const back = encodeURIComponent(DOWNLOAD);
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[breadcrumbListNode([{ href: '/wordpress', label: 'WordPress plugin' }])]} />
             <SiteHeader />
             <main id="main" className="mx-auto max-w-[900px] px-5 pb-20 pt-10 sm:px-8">
                 <Breadcrumbs items={[{ href: '/wordpress', label: 'WordPress plugin' }]} />

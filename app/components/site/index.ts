@@ -10,3 +10,6 @@ export { SitePage } from './SitePage';
 export { PlanBadge } from './PlanBadge';
 export { ProductSubnav, SolutionsSubnav } from './ProductSubnav';
 export { CodeBlock } from './CodeBlock';
+export { JsonLd } from './JsonLd';
+export { SiteReveal } from './SiteReveal';
+export { breadcrumbListNode } from './Breadcrumbs';

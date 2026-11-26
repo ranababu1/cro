@@ -3,6 +3,7 @@ import { pageMetadata } from '@/lib/site/meta';
 import { FREE_LINE } from '@/lib/site/product';
 import { SOLUTIONS } from '@/lib/site/solutions';
 import { ArrowIcon, Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, SitePage, SolutionsSubnav } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/solutions',
@@ -19,7 +20,7 @@ const BY_GOAL: { goal: string; slug: (typeof SOLUTIONS)[number]['slug'] }[] = [
 
 export default function SolutionsPage() {
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/solutions', label: 'Solutions' }])]}>
             <PageHero eyebrow="Solutions" title="The same platform, used four ways"
                 lede="A marketing team testing headlines, a product team testing its pricing page, a store measuring revenue, and a startup running its first test all use the same assignment, goals and statistics. What changes is what they test and what they measure."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/features', label: 'See every feature' }]}>

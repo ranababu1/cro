@@ -81,9 +81,8 @@ describe('FAQ: product questions, no billing duplicates', () => {
 
     it('the page renders FAQPage JSON-LD from the same data', () => {
         const src = read('app/faq/page.tsx');
-        expect(src).toContain("'@type': 'FAQPage'");
-        expect(src).toContain('allFaqItems().map');
-        expect(src).toContain('ldJson(');
+        expect(src).toContain('faqPageNode(allFaqItems()');
+        expect(src).toContain('breadcrumbListNode(crumbs)');
     });
 });
 

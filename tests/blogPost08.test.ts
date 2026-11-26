@@ -41,7 +41,7 @@ describe('post: How to run a split URL test without a plugin', () => {
         const howto = JSON.parse(p.howtoSchema!);
         expect(howto['@type']).toBe('HowTo');
         expect(howto.step).toHaveLength(6);
-        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('ldJson(p.howtoSchema)');
+        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('parseSchema(p.howtoSchema)');
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
         expect(p.markdown).not.toContain('\u2014');
     });

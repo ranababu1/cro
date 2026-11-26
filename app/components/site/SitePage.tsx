@@ -1,10 +1,12 @@
+import { JsonLd } from './JsonLd';
 import { SiteFooter } from './SiteFooter';
 import { SiteHeader } from './SiteHeader';
 
-/** Marketing page shell: header, main and footer. */
-export function SitePage({ children }: { children: React.ReactNode }) {
+/** Marketing page shell: header, main and footer, plus one JSON-LD graph. */
+export function SitePage({ children, schema }: { children: React.ReactNode; schema?: unknown[] }) {
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={schema} />
             <SiteHeader />
             <main id="main">{children}</main>
             <SiteFooter />

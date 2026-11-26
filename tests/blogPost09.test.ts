@@ -29,7 +29,7 @@ describe('post: 25 A/B test ideas for SaaS landing pages, ranked by traffic', ()
         expect(list).toMatchObject({ '@type': 'ItemList', numberOfItems: 25 });
         expect(list.itemListElement).toHaveLength(25);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
-        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('ldJson(p.itemListSchema)');
+        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('parseSchema(p.itemListSchema)');
         expect(p.markdown).not.toContain('\u2014');
         expect(p.markdown).not.toMatch(/\bPhase \d|roadmap|session recording|self-host/i);
     });

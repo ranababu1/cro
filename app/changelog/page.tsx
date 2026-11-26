@@ -3,6 +3,7 @@ import { pageMetadata } from '@/lib/site/meta';
 import { formatDate } from '@/lib/blog';
 import { RELEASES, itemPlan } from '@/lib/changelog';
 import { Breadcrumbs, CtaBand, PageHero, PlanBadge, Section, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/changelog',
@@ -12,7 +13,7 @@ export const metadata = pageMetadata({
 
 export default function ChangelogPage() {
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/resources', label: 'Resources' }, { href: '/changelog', label: 'Changelog' }])]}>
             <PageHero eyebrow="Changelog" title="What is new"
                 lede="Features and improvements we have shipped, newest first. Each feature shows the plans it is part of today."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/features', label: 'See all features' }]}>

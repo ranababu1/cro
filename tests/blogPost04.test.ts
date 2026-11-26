@@ -13,7 +13,7 @@ describe('post: How to run an A/B test with plain JavaScript', () => {
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.howtoSchema!)).toMatchObject({ '@type': 'HowTo' });
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(5);
-        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('ldJson(p.howtoSchema)');
+        expect(fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8')).toContain('parseSchema(p.howtoSchema)');
     });
     it('matches the Free plan: 1 new test a month, 1 click goal, custom events paid', () => {
         expect(p.markdown).toMatch(/1 new test a month/);

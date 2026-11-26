@@ -17,7 +17,7 @@ export function SiteHeader() {
                     <div className="ml-4 hidden lg:block"><MegaNav /></div>
                     <div className="ml-auto flex items-center gap-2 sm:gap-3">
                         <Link href={SIGN_IN_HREF} className="hidden h-10 items-center rounded-lg px-3 text-[15px] font-medium text-muted-strong hover:text-navy-950 focus-visible:outline-2 focus-visible:outline-accent-700 sm:inline-flex">Sign in</Link>
-                        <Link href={START_HREF} className="hidden h-10 items-center gap-2 rounded-lg bg-navy-950 px-4 text-[15px] font-medium text-white hover:bg-navy-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 min-[400px]:inline-flex">Start for free <ArrowIcon /></Link>
+                        <Link href={START_HREF} className="btn-primary hidden h-10 items-center gap-2 rounded-lg px-4 text-[15px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700 min-[400px]:inline-flex">Start for free <ArrowIcon /></Link>
                         <MobileMenu />
                     </div>
                 </div>

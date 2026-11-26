@@ -4,6 +4,7 @@ import { WORKED_EXAMPLE, fmt } from '@/lib/site/home';
 import { ANALYTICS_EXTRAS, FREE_LINE, VERDICTS } from '@/lib/site/product';
 import { Breadcrumbs, CtaBand, PageHero, PlanBadge, ProductSubnav, SampleDataFrame, Section, SectionHeading, SitePage } from '../components/site';
 import { DashboardPreview, exampleEarly, exampleResults } from '../components/site/Previews';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/experiment-analytics',
@@ -30,7 +31,7 @@ export default function ExperimentAnalyticsPage() {
     const hi = Math.max(r.control.ci.upper, r.variant.ci.upper) + 0.005;
     const x = (v: number) => `${((v - lo) / (hi - lo)) * 100}%`;
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/product', label: 'Product' }, { href: '/experiment-analytics', label: 'Experiment analytics' }])]}>
             <PageHero eyebrow="Experiment analytics" title="Results you can read, and a verdict you can trust"
                 lede="Every test reports conversion rates with intervals, the lift against the control, the chance to beat it, and a sequential significance test that stays valid however often you check."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/docs/results', label: 'Read the results guide' }]}>

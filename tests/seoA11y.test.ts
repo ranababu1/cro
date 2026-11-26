@@ -88,8 +88,12 @@ describe('SEO: metadata on every public page', () => {
 
     it('the homepage has Organization and WebSite structured data', () => {
         const home = read('app/page.tsx');
-        expect(home).toContain("'@type': 'WebSite'");
-        expect(home).toContain('organizationJsonLd()');
+        expect(home).toContain('<JsonLd');
+        expect(home).toContain('faqPageNode(HOME_FAQ)');
+        const helper = read('lib/site/jsonLd.ts');
+        expect(helper).toContain("'@type': 'WebSite'");
+        expect(helper).toContain('organizationJsonLd()');
+        expect(helper).toContain("publisher: { '@id': ORGANIZATION_ID }");
     });
 });
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { pageMetadata } from '@/lib/site/meta';
 import { FREE_LINE, LIFECYCLE } from '@/lib/site/product';
 import { Breadcrumbs, Container, CtaBand, PageHero, ProductSubnav, Section, SectionHeading, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/how-it-works',
@@ -24,7 +25,7 @@ const FLOW = [
 
 export default function HowItWorksPage() {
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/product', label: 'Product' }, { href: '/how-it-works', label: 'How it works' }])]}>
             <PageHero eyebrow="How it works" title="From hypothesis to decision in seven steps"
                 lede="An experiment is a short loop: say what you expect, show versions to comparable visitors, count what they do, and act on a verdict you can trust. This is how each step works in FreeABTest."
                 actions={[{ href: '/signin', label: 'Start experimenting' }, { href: '/docs/quick-start', label: 'Open the quick start' }]}>

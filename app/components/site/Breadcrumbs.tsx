@@ -1,19 +1,13 @@
 import Link from 'next/link';
-import { SITE_URL, ldJson } from '@/lib/blog';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export type Crumb = { href: string; label: string };
 
-/** Visible breadcrumb trail plus BreadcrumbList structured data. The last crumb is the current page. */
+/** Visible breadcrumb trail. Structured data is merged into the page's single JSON-LD graph via breadcrumbListNode. */
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
     const all: Crumb[] = [{ href: '/', label: 'Home' }, ...items];
-    const json = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: all.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.label, item: `${SITE_URL}${c.href === '/' ? '/' : c.href}` })),
-    };
     return (
         <nav aria-label="Breadcrumb" className="mb-6">
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(json)) }} />
             <ol className="flex flex-wrap items-center gap-1.5 text-[14px] text-muted">
                 {all.map((c, i) => {
                     const last = i === all.length - 1;
@@ -28,3 +22,5 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
         </nav>
     );
 }
+
+export { breadcrumbListNode };

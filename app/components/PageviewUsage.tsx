@@ -4,7 +4,7 @@ import type { PageviewStatus } from '@/lib/pageviewQuota';
 /** Monthly tracked pageviews with a progress bar. Collection pauses at the cap until next month. */
 export function PageviewUsage({ status, plan }: { status: PageviewStatus; plan: string }) {
     const pct = status.limit ? Math.min(100, Math.round((status.used / status.limit) * 100)) : 0;
-    const bar = pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-gradient-to-r from-[#4f5bd5] to-[#6f7cf5]';
+    const bar = pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-gradient-to-r from-[#4338ca] to-[#6366f1]';
     return (
         <Card className="mt-6 p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">

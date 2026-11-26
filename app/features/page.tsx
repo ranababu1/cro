@@ -3,6 +3,7 @@ import { aiConfigured } from '@/lib/ai/crypto';
 import { pageMetadata } from '@/lib/site/meta';
 import { FEATURE_GROUPS, FREE_LINE, NOT_YET, type FeatureGroup } from '@/lib/site/product';
 import { Breadcrumbs, Container, CtaBand, PageHero, PlanBadge, ProductSubnav, Section, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/features',
@@ -39,7 +40,7 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 export default function FeaturesPage() {
     const groups = aiConfigured() ? [...FEATURE_GROUPS, AI_GROUP] : FEATURE_GROUPS;
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/product', label: 'Product' }, { href: '/features', label: 'Features' }])]}>
             <PageHero eyebrow="Features" title="Everything a test needs, and what each part can and cannot do"
                 lede="Each feature below is in the product today. For every one you can see how it works, why it helps, where it stops, and which plan includes it."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/pricing#compare', label: 'Compare plans' }]}>

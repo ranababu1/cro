@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { SiteFooter, SiteHeader } from '../../components/site';
-import { SITE_URL, formatDate, getAllPosts, getPost, ldJson, relatedPosts, renderPost } from '@/lib/blog';
+import { JsonLd, SiteFooter, SiteHeader } from '../../components/site';
+import { SITE_URL, formatDate, getAllPosts, getPost, relatedPosts, renderPost } from '@/lib/blog';
+import { parseSchema } from '@/lib/site/jsonLd';
 import { OG_IMAGE } from '@/lib/site/meta';
 import { CategoryTag, PostCard } from '../_components/PostCard';
 import { ReadingProgress } from '../_components/ReadingProgress';
@@ -29,12 +30,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     const { html, afterFaqHtml, toc, faq, faqHeading } = renderPost(p.markdown);
     const related = relatedPosts(p, getAllPosts()).map((r) => ({ slug: r.slug, title: r.title, description: r.description, date: r.date, dateLabel: formatDate(r.date), readingMinutes: r.readingMinutes, category: r.category }));
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
-            {p.articleSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.articleSchema) }} />}
-            {p.faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.faqSchema) }} />}
-            {p.breadcrumbSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.breadcrumbSchema) }} />}
-            {p.howtoSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.howtoSchema) }} />}
-            {p.itemListSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.itemListSchema) }} />}
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[...parseSchema(p.articleSchema), ...parseSchema(p.faqSchema), ...parseSchema(p.breadcrumbSchema), ...parseSchema(p.howtoSchema), ...parseSchema(p.itemListSchema)]} />
             <ReadingProgress target="article-body" />
             <SiteHeader />
             <main id="main">

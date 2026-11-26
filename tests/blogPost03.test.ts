@@ -15,7 +15,8 @@ describe('post: A/B testing with low traffic', () => {
     });
     it('the post page renders every JSON-LD block', () => {
         const page = fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8');
-        for (const k of ['articleSchema', 'faqSchema', 'breadcrumbSchema']) expect(page).toContain(`ldJson(p.${k})`);
+        expect(page).toContain('<JsonLd extra={[');
+        for (const k of ['articleSchema', 'faqSchema', 'breadcrumbSchema']) expect(page).toContain(`parseSchema(p.${k})`);
         // Posts 01 and 02 carry breadcrumbs too since they were republished.
         for (const slug of ['best-free-ab-testing-tools', 'how-long-to-run-an-ab-test']) {
             expect(JSON.parse(getPost(slug)!.breadcrumbSchema!).itemListElement).toHaveLength(3);

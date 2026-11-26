@@ -28,6 +28,12 @@
 > The green accent is now indigo from that gradient (accent-600 #6F7CF5, accent-700 #4F5BD5, accent-800 #3E48C4).
 > Footer copyright is "© YEAR FREEABTEST". Cards and buttons have short hover motion and a tinted shadow.
 > Emerald, amber and red remain for result status (winner, lift, failure). Nav structure is unchanged.
+> Visual correction (2026-11-26): the site-wide gradient was removed. Public pages use a neutral canvas (#FAFBFF).
+> Indigo accents follow the approved palette (#6366F1, #4338CA, #312E81, tints #EEF2FF / #E0E7FF). Gradients appear only
+> as a faint hero glow, primary buttons, light tints, data-viz highlights and a stronger closing CTA. The Solutions
+> mega menu has an intro, By Team and By Use Case groups and a featured card; the same panel is used for Product,
+> Developers and Resources. Mobile navigation is a spacious slide-out with Back and Close. Each public page emits
+> one JSON-LD script (`@graph` with Organization, WebSite and page-specific types).
 
 > **LEGAL PAGES (updated 2026-11-26).** Operator details are filled in `lib/legal.ts`: the public operator name is FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone

@@ -4,6 +4,7 @@ import { getPost } from '@/lib/blog';
 import { getDocPage } from '@/lib/docs';
 import { GUIDE_SECTIONS, type GuideRef } from '@/lib/site/resources';
 import { Breadcrumbs, CtaBand, PageHero, Section, SectionHeading, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/guides',
@@ -28,7 +29,7 @@ function resolve(g: GuideRef): { href: string; title: string; label: string; min
 
 export default function GuidesPage() {
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/resources', label: 'Resources' }, { href: '/guides', label: 'Guides' }])]}>
             <PageHero eyebrow="Guides" title="Guides for running better tests"
                 lede="A short reading list in three parts: plan a test, read the results and set things up. Each guide is an article or docs page you can read in a few minutes."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/resources', label: 'All resources' }]}>

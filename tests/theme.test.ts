@@ -31,21 +31,30 @@ describe('app theme', () => {
 describe('marketing colour tokens', () => {
     const css = fs.readFileSync('app/globals.css', 'utf8');
     const footer = fs.readFileSync('app/components/site/SiteFooter.tsx', 'utf8');
-    const gradient = 'radial-gradient(60% 55% at 80% 20%, rgb(238, 240, 255) 0%, transparent 70%), radial-gradient(70% 60% at 12% 90%, rgb(111, 124, 245) 0%, transparent 70%), linear-gradient(160deg, rgb(174, 183, 255), rgb(217, 221, 255) 50%, rgb(179, 163, 255))';
 
-    it('defines the site gradient once and uses it on public shells, heroes and the closing band', () => {
-        expect(css).toContain(`--background-image-site-gradient: ${gradient};`);
-        expect(css).toContain('--color-accent-600: #6f7cf5;');
-        expect(css).toContain('--color-accent-700: #4f5bd5;');
-        expect(css).toContain('--color-accent-800: #3e48c4;');
+    it('uses the approved indigo palette on a neutral canvas, not a site-wide gradient', () => {
+        expect(css).toContain('--color-accent-600: #6366f1;');
+        expect(css).toContain('--color-accent-700: #4338ca;');
+        expect(css).toContain('--color-accent-800: #312e81;');
+        expect(css).toContain('--color-accent-50: #eef2ff;');
+        expect(css).toContain('--color-accent-100: #e0e7ff;');
+        expect(css).toContain('--color-canvas: #fafbff;');
+        expect(css).toContain('--color-line: #e5e7eb;');
+        expect(css).toContain('--background-image-hero-glow:');
+        expect(css).toContain('--background-image-btn-primary:');
+        expect(css).not.toContain('--background-image-site-gradient');
+        expect(css).not.toContain('#6f7cf5');
         expect(css).not.toContain('#16a36a');
         expect(css).not.toContain('#0f7a52');
-        expect(fs.readFileSync('app/components/site/SitePage.tsx', 'utf8')).toContain('bg-site-gradient');
-        expect(fs.readFileSync('app/page.tsx', 'utf8')).toContain('bg-site-gradient');
-        const hero = fs.readFileSync('app/components/site/Blocks.tsx', 'utf8');
-        expect(hero).not.toMatch(/PageHero[\s\S]*bg-surface/);
-        expect(hero).toContain('variant="primary"');
-        expect(hero).not.toContain('variant="onDark"');
+        expect(fs.readFileSync('app/components/site/SitePage.tsx', 'utf8')).toContain('bg-canvas');
+        expect(fs.readFileSync('app/page.tsx', 'utf8')).toContain('bg-canvas');
+        expect(fs.readFileSync('app/page.tsx', 'utf8')).toContain('hero-glow');
+        const blocks = fs.readFileSync('app/components/site/Blocks.tsx', 'utf8');
+        expect(blocks).not.toMatch(/PageHero[\s\S]*bg-surface/);
+        expect(blocks).toContain("variant={i === 0 ? 'primary' : 'secondary'}");
+        expect(blocks).toContain('cta-band');
+        expect(blocks).toContain('variant="onDark"');
+        expect(fs.readFileSync('app/components/site/Buttons.tsx', 'utf8')).toContain('btn-primary');
     });
 
     it('the footer copyright is only the service name and year', () => {
@@ -53,4 +62,3 @@ describe('marketing colour tokens', () => {
         expect(footer).not.toContain('LEGAL.entity');
     });
 });
-

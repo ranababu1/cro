@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { aiConfigured } from '@/lib/ai/crypto';
-import { SITE_URL, ldJson } from '@/lib/blog';
+import { SITE_URL } from '@/lib/blog';
 import { OG_IMAGE } from '@/lib/site/meta';
-import { organizationJsonLd } from '@/lib/legal';
+import { faqPageNode } from '@/lib/site/jsonLd';
 import { FREE_MONTHLY_VISITORS } from '@/lib/plans';
 import { CAPABILITIES, HOME_FAQ, MARKETER_USE_CASES, PLAN_SUMMARY, STEPS, WORKED_EXAMPLE, fmt } from '@/lib/site/home';
-import { ArrowIcon, Container, CtaBand, SampleDataFrame, Section, SectionHeading, SiteButton, SiteFooter, SiteHeader } from './components/site';
+import { ArrowIcon, Container, CtaBand, JsonLd, SampleDataFrame, Section, SectionHeading, SiteButton, SiteFooter, SiteHeader, SiteReveal } from './components/site';
 import { DashboardPreview, HeroPreview, exampleEarly, exampleResults } from './components/site/Previews';
 
 // AI suggestions (Growth and Enterprise, with the customer's own provider key). The homepage only talks about them
@@ -30,20 +30,6 @@ export function generateMetadata(): Metadata {
     return { ...base, title: { absolute: HOME_TITLE_AI }, description: HOME_DESCRIPTION_AI, openGraph: { title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI, url: `${SITE_URL}/`, type: 'website', siteName: 'freeabtest.com', images: [OG_IMAGE] }, twitter: { card: 'summary_large_image', title: HOME_TITLE_AI, description: HOME_DESCRIPTION_AI, images: [OG_IMAGE.url] } };
 }
 
-const siteJsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-        { ...organizationJsonLd(), '@id': `${SITE_URL}/#organization`, logo: `${SITE_URL}/icon-512.png` },
-        { '@type': 'WebSite', '@id': `${SITE_URL}/#website`, url: `${SITE_URL}/`, name: 'freeabtest.com', publisher: { '@id': `${SITE_URL}/#organization` } },
-    ],
-};
-
-const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: HOME_FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-};
-
 const pct = (x: number, d = 1) => `${(x * 100).toFixed(d)}%`;
 
 const Check = () => (
@@ -65,22 +51,23 @@ export default function LandingPage() {
     const early = exampleEarly();
     const ex = WORKED_EXAMPLE;
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(siteJsonLd)) }} />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[faqPageNode(HOME_FAQ)]} />
             <SiteHeader />
             <main id="main">
                 {/* 1. Hero */}
-                <section className="border-b border-line" aria-labelledby="hero-title">
+                <section className="hero-glow border-b border-line" aria-labelledby="hero-title">
                     <Container className="grid gap-12 py-14 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,500px)] lg:items-center lg:gap-16">
                         <div>
                             <p className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-semibold tracking-[0.04em] text-accent-700 ring-1 ring-inset ring-line">
                                 <span className="h-2 w-2 rounded-full bg-accent-600" aria-hidden />
                                 {aiLive ? 'AI-POWERED A/B TESTING' : 'A/B TESTING FOR MARKETERS AND DEVELOPERS'}
                             </p>
+                            <SiteReveal>
                             <h1 id="hero-title" className="mt-6 text-[44px] font-bold leading-[1.05] tracking-[-0.035em] text-navy-950 sm:text-[56px] xl:text-[64px]">
                                 Better decisions.<br />Backed by experiments.
                             </h1>
+                            </SiteReveal>
                             <p className="mt-6 max-w-[560px] text-[18px] leading-[1.6] text-muted-strong sm:text-[20px]">
                                 Run A/B tests, understand your audience and improve your product without expensive experimentation platforms.
                             </p>
@@ -99,7 +86,7 @@ export default function LandingPage() {
                                 <li className="flex gap-2"><Check /><span><strong className="font-semibold">Sound statistics.</strong> Results you can check at any time.</span></li>
                             </ul>
                         </div>
-                        <SampleDataFrame><HeroPreview /></SampleDataFrame>
+                        <SiteReveal><SampleDataFrame><HeroPreview /></SampleDataFrame></SiteReveal>
                     </Container>
                 </section>
 
@@ -167,7 +154,7 @@ export default function LandingPage() {
                 {/* 5. Product preview */}
                 <Section id="preview" tone="surface" labelledBy="preview-title">
                     <SectionHeading id="preview-title" eyebrow="Product preview" title="Status, variants and statistics on one screen" lede="An illustration of the experiments list and the results tab. The numbers are example data computed with the same statistics the app uses." />
-                    <SampleDataFrame className="mt-12"><DashboardPreview /></SampleDataFrame>
+                    <SiteReveal className="mt-12"><SampleDataFrame><DashboardPreview /></SampleDataFrame></SiteReveal>
                 </Section>
 
                 {/* AI suggestions, shown once they are switched on */}

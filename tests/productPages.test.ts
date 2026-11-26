@@ -20,7 +20,7 @@ describe('product pages', () => {
         for (const [path, file] of Object.entries(PAGES)) {
             const src = read(file);
             expect(src, file).toContain(`path: '${path}'`);
-            expect(src, file).toContain('<SitePage>');
+            expect(src, file).toContain('<SitePage');
             expect(src, file).toMatch(/<Breadcrumbs items=/);
             expect(src, file).toContain(`<ProductSubnav current="${path}" />`);
             expect(src, file).toMatch(/<PageHero /);

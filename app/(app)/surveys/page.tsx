@@ -137,7 +137,7 @@ function ResultsView({ survey, onBack }: { survey: Survey; onBack: () => void })
                         {r.answers.breakdown.map((b) => (
                             <div key={b.answer}>
                                 <div className="mb-1 flex justify-between text-sm"><span className="text-zinc-800">{c.type === 'rating' ? `${b.answer} of 5` : c.type === 'nps' ? `${b.answer} of 10` : b.answer}</span><span className="tabular-nums text-zinc-600">{b.count.toLocaleString()} ({pct(b.share)})</span></div>
-                                <div className="h-2 rounded bg-zinc-100"><div className="h-2 rounded bg-gradient-to-r from-[#4f5bd5] to-[#6f7cf5]" style={{ width: `${b.share * 100}%` }} /></div>
+                                <div className="h-2 rounded bg-zinc-100"><div className="h-2 rounded bg-gradient-to-r from-[#4338ca] to-[#6366f1]" style={{ width: `${b.share * 100}%` }} /></div>
                             </div>
                         ))}
                         {r.stats.responses > r.answers.total && <p className="text-xs text-zinc-500">The answer total counts every answer. Up to 500 answers per survey per day are kept for the breakdown and the download.</p>}
