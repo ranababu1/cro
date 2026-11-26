@@ -29,7 +29,7 @@
 > Footer copyright is "© YEAR FREEABTEST". Cards and buttons have short hover motion and a tinted shadow.
 > Emerald, amber and red remain for result status (winner, lift, failure). Nav structure is unchanged.
 
-> **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
+> **LEGAL PAGES (updated 2026-11-26).** Operator details are filled in `lib/legal.ts`: the public operator name is FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone
 > +91 9964 180587; email hello@freeabtest.com. Public pages: /about, /contact, /legal/terms (billing, renewal, tax and refund terms
 > in section 2), /legal/privacy, /legal/dpa, /legal/cookies, /legal/refunds, /legal/delivery and /security. Paid checkout is not live

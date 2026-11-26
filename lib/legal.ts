@@ -5,15 +5,15 @@
  * Bump LEGAL_VERSION whenever the Terms or Privacy Policy change in substance. New sign-ups record the version they
  * accepted (users.terms_version).
  */
-export const LEGAL_VERSION = '2026-11-25';
+export const LEGAL_VERSION = '2026-11-26';
 /** Shown as "Last updated" on every legal page. */
-export const LEGAL_UPDATED = '25 November 2026';
+export const LEGAL_UPDATED = '26 November 2026';
 
 export const LEGAL = {
     /** Brand the service is offered under. */
     service: 'freeabtest.com',
-    /** Registered legal name of the operator. */
-    entity: 'Imranul Haque Mazumder, trading as FREEABTEST',
+    /** Public name of the operator. */
+    entity: 'FREEABTEST',
     /** Registered address of the operator. */
     address: '5A-606, Provident Park Square, Kanakpura Rd, Judicial Layout 2nd Phase, Vakil Garden City, Mallasandra, Bengaluru, Karnataka 560109, India',
     /** Country whose law governs the Terms. */
@@ -29,9 +29,9 @@ export const LEGAL = {
     siteUrl: 'https://www.freeabtest.com',
 } as const;
 
-/** "Imranul Haque Mazumder, trading as FREEABTEST (freeabtest.com)", or just the service name if the entity is unset. */
+/** Public operator name shown on legal and company pages. */
 export function operatorName(): string {
-    return LEGAL.entity ? `${LEGAL.entity} (${LEGAL.service})` : LEGAL.service;
+    return LEGAL.entity || LEGAL.service;
 }
 
 /** tel: link for the published contact phone. */
