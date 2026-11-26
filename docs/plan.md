@@ -140,17 +140,17 @@ New tokens apply to marketing, docs, blog, legal and pricing pages. The signed-i
 ### 5.2 Colour tokens (add to `@theme` as new names, do not redefine `brand-*`)
 | Token | Value | Use |
 |---|---|---|
-| `--color-navy-950` | #101827 | Headings, primary buttons, text on the site gradient |
-| `--color-navy-800` | #1F2A3D | Primary button hover |
-| `--color-accent-600` | #6F7CF5 | Icons, chart series, large display numbers (3.57:1, 24px+ or bold 19px+ only) |
-| `--color-accent-700` | #4F5BD5 | Text links and filled accent buttons with white text (5.54:1 on white). Use navy-950 for links that sit on the site gradient. |
-| `--color-accent-800` | #3E48C4 | Accent button hover (7.17:1) |
-| `--color-accent-50` | #EEF0FF | Tint backgrounds |
-| `--color-accent-100` | #D9DDFF | Stronger tints and rings |
-| `--color-surface` | #F8FAFC | Quiet surfaces (tables, chips) |
+| `--color-navy-950` | #101827 | Headings and primary dark text |
+| `--color-navy-800` | #1F2A3D | Dark button hover (header secondary, on-dark surfaces) |
+| `--color-accent-600` | #6366F1 | Icons, chart series, large display numbers (just under 4.5:1, 24px+ or bold 19px+ only) |
+| `--color-accent-700` | #4338CA | Text links and emphasis (~7.9:1 on white) |
+| `--color-accent-800` | #312E81 | Deep contrast, closing CTA band |
+| `--color-accent-50` | #EEF2FF | Soft indigo tint backgrounds |
+| `--color-accent-100` | #E0E7FF | Secondary highlights and rings |
+| `--color-canvas` / `--color-surface` | #FAFBFF | Public page background (`bg-canvas`) and quiet surfaces |
 | `--color-muted` / `--color-muted-strong` | #64748B / #475569 | Secondary text on white only |
-| `--background-image-site-gradient` | see globals.css | Public page background (`bg-site-gradient`). Heroes, highlight sections and the closing band are transparent so it shows through. |
-| Borders | #E2E8F0 (line) | 1px only |
+| `--background-image-hero-glow` / `--background-image-btn-primary` | see globals.css | Approved indigo treatments only: hero atmosphere, primary buttons. The closing CTA uses `.cta-band`. |
+| Borders | #E5E7EB (line) | 1px only |
 Status colours (emerald, amber, red) stay as in the app for sample data, winners, lift and failure. `--shadow-site` and `--shadow-site-btn` are indigo-tinted hover shadows.
 
 ### 5.3 Type
@@ -213,7 +213,10 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 Done (PR J): see docs/changelog.md; checked by tests/seoA11y.test.ts. The audit scripts used (SEO crawl, axe, Lighthouse) are kept outside the repo.
 
 ### Colour and visual refresh
-Shared `bg-site-gradient` on public page shells, indigo `accent-*` in place of the green accent, footer copyright shortened, hover lift and tinted shadows. Nav structure unchanged. Checked by tests/theme.test.ts.
+Shared `bg-site-gradient` on public page shells, indigo `accent-*` in place of the green accent, footer copyright shortened, hover lift and tinted shadows. Nav structure unchanged. Checked by tests/theme.test.ts. Superseded by the visual correction below.
+
+### Visual correction and Solutions mega menu
+The site-wide page gradient was removed. Neutral canvas (`#FAFBFF`) leads; indigo is an accent (hero glow, gradient primary buttons, light tints, data-viz highlights, a stronger closing CTA). The Solutions mega menu has an intro, By Team and By Use Case groups and a featured card; the same panel and motion are used for Product, Developers and Resources. Mobile navigation is a spacious slide-out with Back and Close. JSON-LD is a single `@graph` script per page. Checked by tests/theme.test.ts, tests/siteNav.test.ts, tests/seoJsonLd.test.ts.
 
 ## 7. Risks
 - Public copy tests are strict (publicContent, publicCopyMatchesApp, copyConsistency, claimsAudit). New pages must be added to their file lists so the rules apply.

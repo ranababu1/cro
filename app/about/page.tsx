@@ -1,7 +1,8 @@
 import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../legal/LegalDoc';
-import { LEGAL, contactPhoneHref, operatorName, organizationJsonLd } from '@/lib/legal';
+import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
+import { ORGANIZATION_ID, WEBSITE_ID } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/about',
@@ -9,21 +10,21 @@ export const metadata = pageMetadata({
     description: 'Who operates freeabtest.com, an A/B testing service run from Bengaluru, India, and how to reach us by email or phone.',
 });
 
-const jsonLd = {
-    '@context': 'https://schema.org',
+const aboutSchema = {
     '@type': 'AboutPage',
+    '@id': `${LEGAL.siteUrl}/about#page`,
     name: 'About freeabtest.com',
     url: `${LEGAL.siteUrl}/about`,
-    mainEntity: organizationJsonLd(),
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': ORGANIZATION_ID },
 };
 
 export default function AboutPage() {
     const op = operatorName();
     return (
-        <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-            <LegalDoc
+        <LegalDoc
                 slug="about"
+                schema={[aboutSchema]}
                 title="About"
                 intro={<p>{LEGAL.service} is an A/B testing service for websites. You run experiments, compare page variants and track goals from a dashboard.</p>}
             >
@@ -40,6 +41,5 @@ export default function AboutPage() {
                     <Link href="/legal/terms">Terms of Service</Link> and <Link href="/legal/privacy">Privacy Policy</Link> describe how the service is used and how we handle data.
                 </p>
             </LegalDoc>
-        </>
     );
 }

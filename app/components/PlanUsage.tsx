@@ -28,7 +28,7 @@ export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string
                 {limited.map((r) => {
                     const limit = r.limit as number;
                     const pct = limit > 0 ? Math.min(100, Math.round((r.used / limit) * 100)) : 100;
-                    const bar = r.capacity ? 'bg-gradient-to-r from-[#4f5bd5] to-[#6f7cf5]' : pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-gradient-to-r from-[#4f5bd5] to-[#6f7cf5]';
+                    const bar = r.capacity ? 'bg-gradient-to-r from-[#4338ca] to-[#6366f1]' : pct >= 100 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-gradient-to-r from-[#4338ca] to-[#6366f1]';
                     return (
                         <div key={r.label}>
                             <div className="flex items-baseline justify-between text-sm">

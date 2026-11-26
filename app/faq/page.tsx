@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { pageMetadata } from '@/lib/site/meta';
-import { ldJson, SITE_URL } from '@/lib/blog';
+import { SITE_URL } from '@/lib/blog';
+import { breadcrumbListNode, faqPageNode } from '@/lib/site/jsonLd';
 import { BILLING_QUESTIONS, FAQ_GROUPS, allFaqItems } from '@/lib/site/faq';
 import { Breadcrumbs, CtaBand, PageHero, Section, SitePage } from '../components/site';
 
@@ -11,19 +12,13 @@ export const metadata = pageMetadata({
 });
 
 export default function FaqPage() {
-    const schema = {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        url: `${SITE_URL}/faq`,
-        mainEntity: allFaqItems().map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-    };
+    const crumbs = [{ href: '/resources', label: 'Resources' }, { href: '/faq', label: 'FAQ' }];
     return (
-        <SitePage>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(schema)) }} />
+        <SitePage schema={[breadcrumbListNode(crumbs), faqPageNode(allFaqItems(), `${SITE_URL}/faq`)]}>
             <PageHero eyebrow="FAQ" title="Frequently asked questions"
                 lede="Short answers about setup, running tests, results, the SDK and privacy. Questions about plans and billing are answered on the pricing page."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/contact', label: 'Ask a question' }]}>
-                <Breadcrumbs items={[{ href: '/resources', label: 'Resources' }, { href: '/faq', label: 'FAQ' }]} />
+                <Breadcrumbs items={crumbs} />
             </PageHero>
 
             <nav aria-label="On this page" className="border-b border-line bg-white">

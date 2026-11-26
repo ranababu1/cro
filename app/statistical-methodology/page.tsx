@@ -5,6 +5,7 @@ import { FREE_LINE, VERDICTS } from '@/lib/site/product';
 import { CONSTANTS as K, SUMMARY, REVENUE_EXAMPLE, SRM_EXAMPLES, methodologyExamples } from '@/lib/site/methodology';
 import { Diagram } from '../docs/_components/Diagrams';
 import { Breadcrumbs, CtaBand, PageHero, PlanBadge, SampleDataFrame, Section, SectionHeading, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/statistical-methodology',
@@ -38,7 +39,7 @@ export default function StatisticalMethodologyPage() {
     const m = methodologyExamples();
     const ex = m.ex;
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/experiment-analytics', label: 'Experiment analytics' }, { href: '/statistical-methodology', label: 'Statistical methodology' }])]}>
             <PageHero eyebrow="Statistical methodology" title="How every result is calculated"
                 lede="The methods behind each number on the results page, with the formulas and worked examples. The examples are computed by the same code the app runs."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/docs/results', label: 'Read the results guide' }]}>

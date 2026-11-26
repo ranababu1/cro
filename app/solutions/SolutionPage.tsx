@@ -3,6 +3,7 @@ import { pageMetadata } from '@/lib/site/meta';
 import { FREE_LINE } from '@/lib/site/product';
 import { SOLUTIONS, solutionBySlug, type Solution } from '@/lib/site/solutions';
 import { Breadcrumbs, CtaBand, PageHero, PlanBadge, Section, SectionHeading, SitePage, SolutionsSubnav } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export function solutionMetadata(slug: Solution['slug']) {
     const s = solutionBySlug(slug);
@@ -15,7 +16,7 @@ export function SolutionPage({ slug }: { slug: Solution['slug'] }) {
     const path = `/solutions/${slug}`;
     const others = SOLUTIONS.filter((o) => o.slug !== slug);
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/solutions', label: 'Solutions' }, { href: path, label: s.name }])]}>
             <PageHero eyebrow={s.eyebrow} title={s.title} lede={s.lede} actions={[{ href: '/signin', label: 'Start for free' }, { href: s.links[0].href, label: s.links[0].label }]}>
                 <Breadcrumbs items={[{ href: '/solutions', label: 'Solutions' }, { href: path, label: s.name }]} />
             </PageHero>

@@ -56,3 +56,34 @@ describe('marketing navigation', () => {
         expect(fs.existsSync(path.join(root, 'app/components/landing/SiteChrome.tsx'))).toBe(false);
     });
 });
+
+describe('Solutions mega menu', () => {
+    it('has an intro, numbered By Team and By Use Case groups, a featured card, and only live destinations', () => {
+        const solutions = NAV_MENUS.find((m) => m.label === 'Solutions')!;
+        expect(solutions.intro).toMatchObject({
+            eyebrow: 'Solutions',
+            title: 'Experimentation for every team.',
+        });
+        expect(solutions.groups.map((g) => [g.kicker, g.heading])).toEqual([['01', 'By Team'], ['02', 'By Use Case']]);
+        expect(solutions.feature).toMatchObject({ href: '/how-it-works', cta: 'Explore how it works' });
+        const hrefs = [
+            ...solutions.groups.flatMap((g) => g.items.map((i) => i.href)),
+            solutions.feature!.href,
+        ];
+        for (const h of ['/solutions/marketing', '/solutions/saas', '/solutions/ecommerce', '/solutions/startups', '/solutions', '/developers', '/blog/split-url-testing', '/how-it-works']) {
+            expect(hrefs).toContain(h);
+        }
+        expect(NAV_MENUS.every((m) => m.intro)).toBe(true);
+    });
+
+    it('the desktop panel animates with a hover-intent delay, Escape, and reduced motion', () => {
+        const src = fs.readFileSync('app/components/site/MegaNav.tsx', 'utf8');
+        expect(src).toContain('OPEN_DELAY');
+        expect(src).toContain('CLOSE_DELAY');
+        expect(src).toContain('menu-reveal');
+        expect(src).toContain("e.key !== 'Escape'");
+        const css = fs.readFileSync('app/globals.css', 'utf8');
+        expect(css).toContain('keyframes textReveal');
+        expect(css).toContain('prefers-reduced-motion: reduce');
+    });
+});

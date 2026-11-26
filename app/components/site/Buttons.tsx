@@ -3,15 +3,15 @@ import { cn } from '../ui/cn';
 
 const base = 'inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-[15px] font-medium transition-colors transition-shadow duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700';
 const variants = {
-    primary: 'bg-navy-950 text-white hover:bg-navy-800 hover:shadow-site-btn',
-    accent: 'bg-accent-700 text-white hover:bg-accent-800 hover:shadow-site-btn',
+    primary: 'btn-primary',
+    accent: 'btn-primary',
     secondary: 'bg-white text-navy-950 ring-1 ring-inset ring-line hover:border-accent-200 hover:shadow-site',
     ghost: 'text-navy-950 hover:bg-surface',
     onDark: 'bg-white text-navy-950 hover:bg-surface',
     outlineDark: 'text-white ring-1 ring-inset ring-white/30 hover:bg-white/10',
 };
 
-/** Marketing call to action. Navy is the primary action; accent is for one emphasised action per view. onDark and outlineDark remain for any dark surface (cn does not merge conflicting classes, so do not override colours with className). */
+/** Marketing call to action. Primary and accent share the indigo gradient; onDark and outlineDark stay for dark surfaces (cn does not merge conflicting classes, so do not override colours with className). */
 export function SiteButton({ href, variant = 'primary', className, children, onClick }: {
     href: string; variant?: keyof typeof variants; className?: string; children: React.ReactNode; onClick?: () => void;
 }) {

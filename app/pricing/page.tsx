@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
-import { ldJson } from '@/lib/blog';
+import { Breadcrumbs, JsonLd, SiteFooter, SiteHeader } from '../components/site';
+import { breadcrumbListNode, faqPageNode } from '@/lib/site/jsonLd';
 import { pageMetadata } from '@/lib/site/meta';
 import { BillingCards } from './BillingCards';
 import { canSessionCheckout } from '@/lib/billing/access';
@@ -106,11 +106,6 @@ const faqs = [
     { q: 'Who should talk to you about Enterprise?', a: 'Sites over 1 million tested visitors a month, or teams that need a contract and DPA.' },
 ];
 
-const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-};
 
 const Check = () => <span className="font-semibold text-accent-700" aria-label="Included">✓</span>;
 const NotIncluded = () => <span className="text-[12px] text-muted">Not included</span>;
@@ -120,14 +115,15 @@ const Dash = () => <span className="text-muted">-</span>;
 
 export default async function PricingPage() {
     const checkout = await canSessionCheckout();
+    const crumbs = [{ href: '/pricing', label: 'Pricing' }];
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[breadcrumbListNode(crumbs), faqPageNode(faqs)]} />
             <SiteHeader />
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
             <main id="main">
                 <header className="border-b border-line">
                     <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-10 sm:px-8 sm:pt-12">
-                        <Breadcrumbs items={[{ href: '/pricing', label: 'Pricing' }]} />
+                        <Breadcrumbs items={crumbs} />
                         <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Pricing</p>
                         <h1 className="mt-3 max-w-[760px] text-[36px] font-semibold leading-[1.1] tracking-[-0.02em] text-navy-950 sm:text-[48px]">Simple plans. A free tier you can actually use.</h1>
                         <p className="mt-4 max-w-[640px] text-[18px] leading-[1.6] text-muted-strong">Start free with 10,000 tested visitors a month. Upgrade when your traffic grows. No per-seat fees, no surprise bills.</p>

@@ -121,7 +121,7 @@ function FunnelCard({ funnel, onRemove, onBucket }: { funnel: Funnel; onRemove: 
                                 <div key={s.goal_id} className="grid grid-cols-[8rem_1fr_11rem] items-center gap-3 text-sm sm:grid-cols-[13rem_1fr_16rem]">
                                     <span className="truncate text-zinc-700">{i + 1}. {s.name}</span>
                                     <span className="h-5 overflow-hidden rounded bg-zinc-100" aria-hidden>
-                                        <span className="block h-full rounded bg-gradient-to-r from-[#4f5bd5] to-[#6f7cf5]" style={{ width: `${Math.max(s.of_visitors * 100, s.users > 0 ? 1 : 0)}%` }} />
+                                        <span className="block h-full rounded bg-gradient-to-r from-[#4338ca] to-[#6366f1]" style={{ width: `${Math.max(s.of_visitors * 100, s.users > 0 ? 1 : 0)}%` }} />
                                     </span>
                                     <span className="text-right tabular-nums text-zinc-700">
                                         {s.users.toLocaleString()} <span className="text-zinc-500">({pct(s.of_visitors)}{i > 0 ? `, ${pct(s.of_previous)} of step ${i}` : ''})</span>

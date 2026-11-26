@@ -26,7 +26,8 @@ describe('pricing and legal pages use the site design', () => {
         expect(pricing).toContain('<section id="faq"');
         expect(pricing).toContain('Pay yearly and get 2 months free: Starter $200/yr (about $16.67/mo), Growth $500/yr.');
         expect(pricing).toContain("path: '/pricing'");
-        expect(pricing).toContain('ldJson(JSON.stringify(faqJsonLd))');
+        expect(pricing).toContain('faqPageNode(faqs)');
+        expect(pricing).toContain('<JsonLd')
         expect(pricing.match(/<h1/g)).toHaveLength(1);
         for (const h of [...hrefsIn(pricing), ...hrefsIn(cards)].filter((h) => h.startsWith('/'))) expect(checkHref(h), h).toBeNull();
     });

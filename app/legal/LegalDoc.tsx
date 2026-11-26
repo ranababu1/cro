@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
+import { Breadcrumbs, JsonLd, SiteFooter, SiteHeader } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 import { COMPANY_PAGES, LEGAL_PAGES, LEGAL_UPDATED } from '@/lib/legal';
 
 const COMPANY = [...COMPANY_PAGES, { slug: 'security', href: '/security', title: 'Security' }] as const;
@@ -8,17 +9,19 @@ const NAV = [...COMPANY_PAGES, ...LEGAL_PAGES, { slug: 'security', href: '/secur
 const PROSE = 'legal-prose min-w-0 space-y-4 text-[16px] leading-[1.7] text-muted-strong [&_a]:font-medium [&_a]:text-accent-700 [&_a]:underline [&_a]:underline-offset-2 [&_h2]:mt-12 [&_h2]:scroll-mt-24 [&_h2]:border-t [&_h2]:border-line [&_h2]:pt-8 [&_h2]:text-[22px] [&_h2]:font-semibold [&_h2]:tracking-[-0.01em] [&_h2]:text-navy-950 [&_h2:first-child]:mt-0 [&_h2:first-child]:border-0 [&_h2:first-child]:pt-0 [&_h3]:mt-6 [&_h3]:font-semibold [&_h3]:text-navy-950 [&_li]:ml-5 [&_li]:list-disc [&_li]:pl-1 [&_ul]:space-y-2 [&_strong]:text-navy-950 [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:rounded-xl [&_table]:border [&_table]:border-line [&_table]:text-[14px] [&_td]:border-t [&_td]:border-line [&_td]:px-4 [&_td]:py-3 [&_td]:align-top [&_th]:bg-surface [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_th]:text-navy-950';
 
 /** Shared frame for the legal and company policy pages: title, last updated date, links between the documents and readable prose. */
-export function LegalDoc({ slug, title, intro, children }: { slug: string; title: string; intro?: React.ReactNode; children: React.ReactNode }) {
+export function LegalDoc({ slug, title, intro, children, schema }: { slug: string; title: string; intro?: React.ReactNode; children: React.ReactNode; schema?: unknown[] }) {
     const isCompany = COMPANY.some((p) => p.slug === slug);
     const section = isCompany ? 'Company' : 'Legal';
     const self = NAV.find((p) => p.slug === slug);
+    const crumbs = [{ href: self?.href ?? '/legal/terms', label: title }];
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[breadcrumbListNode(crumbs), ...(schema ?? [])]} />
             <SiteHeader />
             <main id="main">
                 <header className="border-b border-line">
                     <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12">
-                        <Breadcrumbs items={[{ href: self?.href ?? '/legal/terms', label: title }]} />
+                        <Breadcrumbs items={crumbs} />
                         <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">{section}</p>
                         <h1 className="mt-3 max-w-[760px] text-[34px] font-semibold leading-[1.1] tracking-[-0.02em] text-navy-950 sm:text-[44px]">{title}</h1>
                         <p className="mt-3 text-[14px] text-muted">Last updated {LEGAL_UPDATED}</p>

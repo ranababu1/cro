@@ -23,16 +23,18 @@ export function PageHero({ eyebrow, title, lede, actions, children }: {
     );
 }
 
-/** Closing call to action band on the page gradient. */
+/** Closing call to action: a deeper indigo band with a primary button. */
 export function CtaBand({ title, body, href, label }: { title: string; body?: string; href: string; label: string }) {
     return (
         <section>
-            <Container className="flex flex-col items-start gap-6 py-14 md:flex-row md:items-center md:justify-between md:py-16">
-                <div className="max-w-[640px]">
-                    <h2 className="text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-navy-950 md:text-[32px]">{title}</h2>
-                    {body && <p className="mt-3 text-[17px] leading-[1.6] text-navy-900">{body}</p>}
+            <Container className="py-14 md:py-16">
+                <div className="cta-band flex flex-col items-start gap-6 rounded-3xl px-6 py-10 sm:px-10 md:flex-row md:items-center md:justify-between md:px-12 md:py-12">
+                    <div className="max-w-[640px]">
+                        <h2 className="text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-white md:text-[32px]">{title}</h2>
+                        {body && <p className="mt-3 text-[17px] leading-[1.6] text-white/85">{body}</p>}
+                    </div>
+                    <SiteButton href={href} variant="onDark">{label}<ArrowIcon /></SiteButton>
                 </div>
-                <SiteButton href={href} variant="primary">{label}<ArrowIcon /></SiteButton>
             </Container>
         </section>
     );

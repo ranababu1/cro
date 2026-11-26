@@ -1,7 +1,8 @@
 import { pageMetadata } from '@/lib/site/meta';
 import Link from 'next/link';
 import { LegalDoc } from '../legal/LegalDoc';
-import { LEGAL, contactPhoneHref, operatorName, organizationJsonLd } from '@/lib/legal';
+import { LEGAL, contactPhoneHref, operatorName } from '@/lib/legal';
+import { ORGANIZATION_ID, WEBSITE_ID } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/contact',
@@ -9,13 +10,18 @@ export const metadata = pageMetadata({
     description: 'Email, phone and postal address for freeabtest.com support, billing and legal questions, and what to include so we can help quickly.',
 });
 
-const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'ContactPage',
-    name: 'Contact freeabtest.com',
-    url: `${LEGAL.siteUrl}/contact`,
-    mainEntity: {
-        ...organizationJsonLd(),
+const contactSchema = [
+    {
+        '@type': 'ContactPage',
+        '@id': `${LEGAL.siteUrl}/contact#page`,
+        name: 'Contact freeabtest.com',
+        url: `${LEGAL.siteUrl}/contact`,
+        isPartOf: { '@id': WEBSITE_ID },
+        mainEntity: { '@id': ORGANIZATION_ID },
+    },
+    {
+        '@type': 'Organization',
+        '@id': ORGANIZATION_ID,
         contactPoint: {
             '@type': 'ContactPoint',
             contactType: 'customer support',
@@ -25,15 +31,14 @@ const jsonLd = {
             availableLanguage: 'English',
         },
     },
-};
+];
 
 export default function ContactPage() {
     const op = operatorName();
     return (
-        <>
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-            <LegalDoc
+        <LegalDoc
                 slug="contact"
+                schema={contactSchema}
                 title="Contact"
                 intro={<p>Use these details for support, billing and legal questions. We are a digital service and do not have a walk-in shop.</p>}
             >
@@ -70,6 +75,5 @@ export default function ContactPage() {
                     </li>
                 </ul>
             </LegalDoc>
-        </>
     );
 }

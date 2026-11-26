@@ -3,13 +3,15 @@
  * Items for pages that are not built yet point at the closest existing page; swap the href when the page ships.
  */
 export type NavItem = { href: string; title: string; body: string };
-export type NavGroup = { heading: string; items: NavItem[] };
+export type NavGroup = { heading: string; kicker?: string; items: NavItem[] };
 export type NavFeature = { eyebrow: string; title: string; body: string; href: string; cta: string };
-export type NavMenu = { label: string; groups: NavGroup[]; feature?: NavFeature };
+export type NavIntro = { eyebrow: string; title: string; body: string };
+export type NavMenu = { label: string; intro?: NavIntro; groups: NavGroup[]; feature?: NavFeature };
 
 export const NAV_MENUS: NavMenu[] = [
     {
         label: 'Product',
+        intro: { eyebrow: 'Product', title: 'One platform for marketers and developers.', body: 'Visual editing, a small JavaScript API and results you can check at any time.' },
         groups: [
             {
                 heading: 'Platform',
@@ -33,27 +35,34 @@ export const NAV_MENUS: NavMenu[] = [
     },
     {
         label: 'Solutions',
+        intro: { eyebrow: 'Solutions', title: 'Experimentation for every team.', body: 'From optimizing marketing campaigns to testing product experiences, make better decisions with experimentation.' },
         groups: [
             {
-                heading: 'By team',
+                heading: 'By Team',
+                kicker: '01',
                 items: [
-                    { href: '/solutions/marketing', title: 'Marketing teams', body: 'Landing pages, headlines and campaign tests' },
-                    { href: '/solutions/saas', title: 'SaaS products', body: 'Pricing pages, signup flows and in-app tests' },
+                    { href: '/solutions/marketing', title: 'Marketing and Growth', body: 'Landing pages, headlines and campaign tests' },
+                    { href: '/solutions/saas', title: 'Product Managers', body: 'Pricing pages, signup flows and in-app tests' },
+                    { href: '/developers', title: 'Engineering Teams', body: 'Setup, code examples, keys and webhooks' },
+                    { href: '/solutions/startups', title: 'Startup Founders', body: 'Free plan, low traffic and the first tests' },
                 ],
             },
             {
-                heading: 'By business',
+                heading: 'By Use Case',
+                kicker: '02',
                 items: [
-                    { href: '/solutions/ecommerce', title: 'Ecommerce', body: 'Product pages, checkout and revenue per visitor' },
-                    { href: '/solutions/startups', title: 'Startups', body: 'Free plan, low traffic and the first tests' },
+                    { href: '/blog/ab-test-ideas-saas-landing-pages', title: 'Landing Page Optimization', body: 'Ideas for headlines, sections and landing pages' },
+                    { href: '/solutions/ecommerce', title: 'Conversion Rate Optimization', body: 'Product pages, checkout and revenue per visitor' },
+                    { href: '/blog/split-url-testing', title: 'Split URL testing', body: 'Compare two whole pages and send each visitor to one' },
                     { href: '/solutions', title: 'All solutions', body: 'Workflows and test ideas for each team' },
                 ],
             },
         ],
-        feature: { eyebrow: 'Guide', title: 'Split URL testing', body: 'Compare two whole pages and send each visitor to one.', href: '/blog/split-url-testing', cta: 'Read the guide' },
+        feature: { eyebrow: 'How it works', title: 'Make every decision count.', body: 'Discover how structured experimentation helps teams move beyond assumptions.', href: '/how-it-works', cta: 'Explore how it works' },
     },
     {
         label: 'Developers',
+        intro: { eyebrow: 'Developers', title: 'Build experimentation into your product.', body: 'One script tag, a REST API and signed webhooks, with keys per environment.' },
         groups: [
             {
                 heading: 'Integrate',
@@ -77,6 +86,7 @@ export const NAV_MENUS: NavMenu[] = [
     },
     {
         label: 'Resources',
+        intro: { eyebrow: 'Resources', title: 'Guides, docs and answers in one place.', body: 'Learn how to plan tests, read results and keep up with what is new.' },
         groups: [
             {
                 heading: 'Learn',

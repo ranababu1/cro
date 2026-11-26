@@ -3,6 +3,7 @@ import { pageMetadata } from '@/lib/site/meta';
 import { FEATURE_GROUPS, FREE_LINE, PRODUCT_PAGES } from '@/lib/site/product';
 import { ArrowIcon, Breadcrumbs, CtaBand, PageHero, ProductSubnav, SampleDataFrame, Section, SectionHeading, SiteCard, SitePage } from '../components/site';
 import { HeroPreview } from '../components/site/Previews';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/product',
@@ -31,7 +32,7 @@ const SHARED = [
 
 export default function ProductPage() {
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/product', label: 'Product' }])]}>
             <PageHero eyebrow="Product" title="One experimentation platform, two ways in"
                 lede="Marketers run tests from the dashboard with one script tag. Developers build experiments into their product with the SDK and the REST API. Both use the same assignment, the same goals and the same statistics."
                 actions={[{ href: '/signin', label: 'Start for free' }, { href: '/features', label: 'See every feature' }]}>

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { pageMetadata } from '@/lib/site/meta';
-import { Breadcrumbs, SiteFooter, SiteHeader } from '../components/site';
+import { Breadcrumbs, JsonLd, SiteFooter, SiteHeader } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 import { SITE_URL, formatDate, getAllPosts } from '@/lib/blog';
 import { BlogGrid } from './_components/BlogGrid';
 import { CategoryTag, Meta, type CardPost } from './_components/PostCard';
@@ -18,7 +19,8 @@ export default function BlogIndex() {
     const [featured, ...rest] = posts;
     const categories = [...new Set(rest.map((p) => p.category))].sort();
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd extra={[breadcrumbListNode([{ href: '/resources', label: 'Resources' }, { href: '/blog', label: 'Blog' }])]} />
             <SiteHeader />
             <main id="main">
                 <header className="border-b border-line">

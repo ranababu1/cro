@@ -3,6 +3,7 @@ import { pageMetadata } from '@/lib/site/meta';
 import { FREE_LINE } from '@/lib/site/product';
 import { DOC_LINKS, ENDPOINTS, ERRORS, INTEGRATIONS, KEY_TYPES, ONBOARDING, SDK_METHODS, SNIPPETS, WEBHOOK_EVENTS } from '@/lib/site/developers';
 import { ArrowIcon, Breadcrumbs, CodeBlock, CtaBand, PageHero, PlanBadge, Section, SectionHeading, SitePage } from '../components/site';
+import { breadcrumbListNode } from '@/lib/site/jsonLd';
 
 export const metadata = pageMetadata({
     path: '/developers',
@@ -14,7 +15,7 @@ export const metadata = pageMetadata({
 export default function DevelopersPage() {
     const [browser, ...rest] = SNIPPETS;
     return (
-        <SitePage>
+        <SitePage schema={[breadcrumbListNode([{ href: '/developers', label: 'Developers' }])]}>
             <PageHero eyebrow="Developers" title="Build experimentation into your product"
                 lede="One script tag for the browser, a secret key for your backend, and a REST API for results. Assignment is deterministic, so the browser and your server always agree on a visitor's version."
                 actions={[{ href: '/docs/quick-start', label: 'Open the quick start' }, { href: '/docs/rest-api', label: 'REST API reference' }]}>

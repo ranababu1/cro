@@ -28,7 +28,7 @@ describe('post: the peeking problem, why daily checks create false winners', () 
         expect(JSON.parse(p.breadcrumbSchema!).itemListElement).toHaveLength(3);
         expect(JSON.parse(p.faqSchema!).mainEntity.length).toBe(6);
         const page = fs.readFileSync('app/blog/[slug]/page.tsx', 'utf8');
-        for (const k of ['articleSchema', 'faqSchema', 'breadcrumbSchema']) expect(page).toContain(`ldJson(p.${k})`);
+        for (const k of ['articleSchema', 'faqSchema', 'breadcrumbSchema']) expect(page).toContain(`parseSchema(p.${k})`);
         expect(p.markdown).not.toContain('\u2014');
         expect(p.markdown).not.toMatch(/\bPhase \d|roadmap|session recording|self-host/i);
     });

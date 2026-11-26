@@ -64,8 +64,18 @@ describe('mobile nav', () => {
         expect(src).toContain('useOverlay(mobileOpen'); expect(src).toContain('aria-expanded={mobileOpen}'); expect(src).toContain('role="dialog"');
     });
 
+    it('the slide-out has Back and Close controls and is not a squeezed mega menu', () => {
+        const src = read('app/components/site/MobileMenu.tsx');
+        expect(src).toContain('Back');
+        expect(src).toContain('Close');
+        expect(src).toContain('drawer-slide');
+        expect(src).toContain('max-w-[420px]');
+        expect(src).toContain('setSection');
+    });
+
     it('animations respect reduced motion', () => {
         const css = read('app/globals.css');
         expect(css).toMatch(/prefers-reduced-motion: no-preference\) \{\s*\.mnav-fade/);
+        expect(css).toContain('prefers-reduced-motion: reduce');
     });
 });

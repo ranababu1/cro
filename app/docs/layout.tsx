@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { buildSearchIndex, navGroups } from '@/lib/docs';
-import { SiteFooter, SiteHeader } from '../components/site';
+import { JsonLd, SiteFooter, SiteHeader } from '../components/site';
 import { DocsSearch } from './_components/DocsSearch';
 import { DocsMobileNav, DocsSidebar } from './_components/DocsNav';
 
@@ -12,7 +12,8 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     const groups = navGroups().map((g) => ({ group: g.group, pages: g.pages.map((p) => ({ slug: p.slug, title: p.title })) }));
     const index = buildSearchIndex();
     return (
-        <div className="min-h-screen bg-site-gradient text-navy-950">
+        <div className="min-h-screen bg-canvas text-navy-950">
+            <JsonLd />
             <SiteHeader />
             <div role="region" aria-label="Documentation tools" className="z-40 border-b border-line bg-white lg:sticky lg:top-[72px]">
                 <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3 sm:px-8 lg:h-14 lg:flex-nowrap lg:py-0">
