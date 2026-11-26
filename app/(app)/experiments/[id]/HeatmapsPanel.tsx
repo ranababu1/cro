@@ -241,7 +241,7 @@ function HeatView({ data, view, width, max: sharedMax, rows: sharedRows, preview
                 {data.scroll.map((s) => (
                     <div key={s.depth} className="flex items-center gap-3 text-sm">
                         <span className="w-24 text-zinc-500">{s.depth}% down</span>
-                        <div className="h-4 flex-1 rounded bg-zinc-100"><div className="h-4 rounded bg-gradient-to-r from-teal-500 to-blue-600" style={{ width: `${s.reach}%` }} /></div>
+                        <div className="h-4 flex-1 rounded bg-zinc-100"><div className="h-4 rounded bg-gradient-to-r from-[#6f7cf5] to-[#4f5bd5]" style={{ width: `${s.reach}%` }} /></div>
                         <span className="w-14 text-right text-zinc-800">{s.reach}%</span>
                     </div>
                 ))}

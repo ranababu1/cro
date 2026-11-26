@@ -23,6 +23,11 @@
 > URL now exists. SEO, accessibility and QA (PR J): shared metadata with canonical, OG and a default share image on every
 > public page, skip link and landmarks, axe 0 violations on every sitemap page, Lighthouse accessibility and SEO 100.
 > The site redesign is complete.
+> Colour and visual refresh (2026-11-26): public pages use a shared site gradient as the page
+> background (heroes, highlight bands and the closing CTA sit on it; white sections stay white for reading).
+> The green accent is now indigo from that gradient (accent-600 #6F7CF5, accent-700 #4F5BD5, accent-800 #3E48C4).
+> Footer copyright is "© YEAR FREEABTEST". Cards and buttons have short hover motion and a tinted shadow.
+> Emerald, amber and red remain for result status (winner, lift, failure). Nav structure is unchanged.
 
 > **LEGAL PAGES (updated 2026-11-25).** Operator details are filled in `lib/legal.ts`: Imranul Haque Mazumder, trading as FREEABTEST;
 > the Bengaluru address worded to match the Razorpay KYC record; governing law India and the courts of Bengaluru; contact phone

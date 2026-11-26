@@ -35,7 +35,7 @@ function Flow() {
             <text x="320" y="112" textAnchor="middle" style={sub}>/api/assign, /api/track</text>
             <rect x="480" y="20" width="150" height="60" rx="10" className={box} />
             <text x="555" y="55" textAnchor="middle" style={text}>Database</text>
-            <rect x="480" y="120" width="150" height="60" rx="10" className="fill-teal-50 stroke-teal-200" />
+            <rect x="480" y="120" width="150" height="60" rx="10" className="fill-accent-50 stroke-accent-200" />
             <text x="555" y="155" textAnchor="middle" style={text}>Dashboard results</text>
             <Arrow x1={162} y1={85} x2={243} y2={85} label="assign" />
             <Arrow x1={243} y1={118} x2={162} y2={118} label="variation" />
@@ -81,9 +81,9 @@ function Bucketing() {
             <rect x="200" y="70" width="140" height="50" rx="10" className="fill-brand-50 stroke-brand-200" />
             <text x="270" y="93" textAnchor="middle" style={text}>Traffic allocation</text>
             <text x="270" y="109" textAnchor="middle" style={sub}>share of visitors</text>
-            <rect x="420" y="15" width="200" height="40" rx="8" className="fill-teal-50 stroke-teal-200" />
+            <rect x="420" y="15" width="200" height="40" rx="8" className="fill-accent-50 stroke-accent-200" />
             <text x="520" y="40" textAnchor="middle" style={text}>Control (weight 50)</text>
-            <rect x="420" y="65" width="200" height="40" rx="8" className="fill-teal-50 stroke-teal-200" />
+            <rect x="420" y="65" width="200" height="40" rx="8" className="fill-accent-50 stroke-accent-200" />
             <text x="520" y="90" textAnchor="middle" style={text}>Variant B (weight 50)</text>
             <rect x="420" y="135" width="200" height="40" rx="8" className={box} />
             <text x="520" y="160" textAnchor="middle" style={sub}>Outside: default page, not counted</text>
@@ -98,7 +98,7 @@ function Bucketing() {
 function Interval() {
     const rows = [
         { label: 'Control', lo: 3.8, hi: 6.5, mid: 5.0, color: '#52525b' },
-        { label: 'Variant B', lo: 6.0, hi: 9.0, mid: 7.4, color: '#0d9488' },
+        { label: 'Variant B', lo: 6.0, hi: 9.0, mid: 7.4, color: '#4f5bd5' },
         { label: 'Variant C', lo: 3.6, hi: 7.6, mid: 5.4, color: '#2563eb' },
     ];
     const x = (v: number) => 110 + (v / 10) * 500;

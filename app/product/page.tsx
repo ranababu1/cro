@@ -43,19 +43,19 @@ export default function ProductPage() {
                 <SectionHeading eyebrow="Two journeys" title="Start where your team works" />
                 <div className="mt-10 grid gap-6 lg:grid-cols-2">
                     {JOURNEYS.map((j, i) => (
-                        <article key={j.audience} className={`rounded-2xl p-8 ${i ? 'bg-navy-950 text-white' : 'border border-line bg-white'}`}>
-                            <p className={`text-[13px] font-semibold uppercase tracking-[0.08em] ${i ? 'text-accent-100' : 'text-accent-700'}`}>{j.audience}</p>
+                        <article key={j.audience} className="site-lift rounded-2xl border border-line bg-white p-8">
+                            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">{j.audience}</p>
                             <h3 className="mt-3 text-[24px] font-semibold leading-[1.25] tracking-[-0.02em]">{j.title}</h3>
                             <ol className="mt-6 grid gap-3">
                                 {j.steps.map((s, k) => (
                                     <li key={s} className="flex gap-3 text-[15px] leading-[1.55]">
-                                        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold ${i ? 'bg-white/10 text-white' : 'bg-surface text-navy-950 ring-1 ring-inset ring-line'}`}>{k + 1}</span>
-                                        <span className={i ? 'text-slate-300' : 'text-muted-strong'}>{s}</span>
+                                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface text-[12px] font-semibold text-navy-950 ring-1 ring-inset ring-line">{k + 1}</span>
+                                        <span className="text-muted-strong">{s}</span>
                                     </li>
                                 ))}
                             </ol>
                             <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2">
-                                {j.links.map((l) => <Link key={l.href} href={l.href} className={`text-[14px] font-medium hover:underline ${i ? 'text-white' : 'text-accent-700'}`}>{l.label}</Link>)}
+                                {j.links.map((l) => <Link key={l.href} href={l.href} className="text-[14px] font-medium text-accent-700 hover:underline">{l.label}</Link>)}
                             </div>
                         </article>
                     ))}

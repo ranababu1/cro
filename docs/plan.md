@@ -140,16 +140,18 @@ New tokens apply to marketing, docs, blog, legal and pricing pages. The signed-i
 ### 5.2 Colour tokens (add to `@theme` as new names, do not redefine `brand-*`)
 | Token | Value | Use |
 |---|---|---|
-| `--color-navy-950` | #101827 | Headings, primary buttons, footer background |
+| `--color-navy-950` | #101827 | Headings, primary buttons, text on the site gradient |
 | `--color-navy-800` | #1F2A3D | Primary button hover |
-| `--color-emerald-600` | #16A36A | Icons, chart series, large display numbers (3:1 is enough only for 24px+ or bold 19px+) |
-| `--color-emerald-700` | #0F7A52 | Text links, filled accent buttons with white text (5.35:1) |
-| `--color-emerald-50` | #ECFDF5 | Positive tint backgrounds |
-| `--color-surface` | #F8FAFC | Section backgrounds (navy on it 16.98:1) |
-| `--color-slate-500` | #64748B | Secondary text on white only (4.76:1); on #F8FAFC use slate-600 #475569 (7.24:1) |
-| `--color-blue-100` | #DBEAFE | Info tints, code callouts, developer journey accents |
-| Borders | #E2E8F0 (slate-200) | 1px only |
-Status colours (amber, red) stay as in the app for sample data badges.
+| `--color-accent-600` | #6F7CF5 | Icons, chart series, large display numbers (3.57:1, 24px+ or bold 19px+ only) |
+| `--color-accent-700` | #4F5BD5 | Text links and filled accent buttons with white text (5.54:1 on white). Use navy-950 for links that sit on the site gradient. |
+| `--color-accent-800` | #3E48C4 | Accent button hover (7.17:1) |
+| `--color-accent-50` | #EEF0FF | Tint backgrounds |
+| `--color-accent-100` | #D9DDFF | Stronger tints and rings |
+| `--color-surface` | #F8FAFC | Quiet surfaces (tables, chips) |
+| `--color-muted` / `--color-muted-strong` | #64748B / #475569 | Secondary text on white only |
+| `--background-image-site-gradient` | see globals.css | Public page background (`bg-site-gradient`). Heroes, highlight sections and the closing band are transparent so it shows through. |
+| Borders | #E2E8F0 (line) | 1px only |
+Status colours (emerald, amber, red) stay as in the app for sample data, winners, lift and failure. `--shadow-site` and `--shadow-site-btn` are indigo-tinted hover shadows.
 
 ### 5.3 Type
 - Inter for everything, JetBrains Mono for code. Remove Caveat from the root layout once the landing page stops using it.
@@ -159,8 +161,8 @@ Status colours (amber, red) stay as in the app for sample data badges.
 ### 5.4 Space, radius, elevation
 - 4px scale; section padding 96px desktop, 64px mobile; content width 1200px, prose 720px.
 - Radius: 8px controls, 12px cards, 16px large panels. No pill buttons except badges.
-- Shadows: `shadow-xs` and `shadow-card` only; borders do most of the work. No glow, no glass.
-- Motion: hover and menu transitions under 200ms; respect `prefers-reduced-motion`. Retire the animated blobs and the gradient headline on marketing pages.
+- Shadows: `shadow-xs`, `shadow-card`, and on the marketing site the tinted `shadow-site` / `shadow-site-btn` on hover. Borders still do most of the work. No glow and no glass on the header (a solid header keeps the mobile menu from being clipped).
+- Motion: hover and menu transitions around 200 to 280ms; card lift and button shadows respect `prefers-reduced-motion`. Do not add animated headline fills, looping button gradients or blobs.
 
 ### 5.5 Shared components (new folder `app/components/site`)
 SiteHeader with MegaMenu (Product, Solutions, Developers, Resources, Pricing link; Sign in, Start for free), MobileNav (accordion, focus trap, Escape closes), SiteFooter (grouped columns incl. legal and contact), PageHero, Section, SectionHeading (eyebrow, title, lede), FeatureGrid and FeatureCard, StepFlow (numbered workflow diagram), AudienceSplit (two entry cards), CodeTabs (HTML, curl, JavaScript; reuse CodeBlock), StatExample (worked calculation), SampleDataFrame (wraps any mock UI with an "Example data" label), FaqList (accordion with optional JSON-LD), CtaBand, Breadcrumbs (with BreadcrumbList JSON-LD), PlanBadge (Free, Starter, Growth).
@@ -209,6 +211,9 @@ Done in PR B. Notes: AI-powered positioning (badge, hero line, title, descriptio
 ### Phase 7: SEO, accessibility, QA (PR J)
 `metadataBase`, canonical, OG and Twitter on every public page, default OG image, breadcrumbs, sitemap with every public page and docs, robots check, internal link checker test, axe-style checks, 390/768/1280 screenshots, Lighthouse pass, full `npm test` and build.
 Done (PR J): see docs/changelog.md; checked by tests/seoA11y.test.ts. The audit scripts used (SEO crawl, axe, Lighthouse) are kept outside the repo.
+
+### Colour and visual refresh
+Shared `bg-site-gradient` on public page shells, indigo `accent-*` in place of the green accent, footer copyright shortened, hover lift and tinted shadows. Nav structure unchanged. Checked by tests/theme.test.ts.
 
 ## 7. Risks
 - Public copy tests are strict (publicContent, publicCopyMatchesApp, copyConsistency, claimsAudit). New pages must be added to their file lists so the rules apply.

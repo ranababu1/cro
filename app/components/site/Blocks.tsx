@@ -7,7 +7,7 @@ export function PageHero({ eyebrow, title, lede, actions, children }: {
     eyebrow?: string; title: React.ReactNode; lede?: React.ReactNode; actions?: { href: string; label: string }[]; children?: React.ReactNode;
 }) {
     return (
-        <div className="border-b border-line bg-surface">
+        <div className="border-b border-line">
             <Container className="py-14 md:py-20">
                 {children}
                 {eyebrow && <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">{eyebrow}</p>}
@@ -23,16 +23,16 @@ export function PageHero({ eyebrow, title, lede, actions, children }: {
     );
 }
 
-/** Closing call to action band on navy. */
+/** Closing call to action band on the page gradient. */
 export function CtaBand({ title, body, href, label }: { title: string; body?: string; href: string; label: string }) {
     return (
-        <section className="bg-navy-950 text-white">
+        <section>
             <Container className="flex flex-col items-start gap-6 py-14 md:flex-row md:items-center md:justify-between md:py-16">
                 <div className="max-w-[640px]">
-                    <h2 className="text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] md:text-[32px]">{title}</h2>
-                    {body && <p className="mt-3 text-[17px] leading-[1.6] text-slate-300">{body}</p>}
+                    <h2 className="text-[26px] font-semibold leading-[1.2] tracking-[-0.02em] text-navy-950 md:text-[32px]">{title}</h2>
+                    {body && <p className="mt-3 text-[17px] leading-[1.6] text-navy-900">{body}</p>}
                 </div>
-                <SiteButton href={href} variant="onDark">{label}<ArrowIcon /></SiteButton>
+                <SiteButton href={href} variant="primary">{label}<ArrowIcon /></SiteButton>
             </Container>
         </section>
     );
@@ -57,6 +57,6 @@ export function SiteCard({ title, body, href, className, children }: { title: st
             {children}
         </>
     );
-    const cls = cn('block rounded-xl border border-line bg-white p-6', href && 'transition-colors hover:border-slate-300 hover:bg-surface', className);
+    const cls = cn('site-lift block rounded-xl border border-line bg-white p-6', className);
     return href ? <a href={href} className={cls}>{inner}</a> : <div className={cls}>{inner}</div>;
 }

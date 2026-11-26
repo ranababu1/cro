@@ -12,9 +12,9 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     const groups = navGroups().map((g) => ({ group: g.group, pages: g.pages.map((p) => ({ slug: p.slug, title: p.title })) }));
     const index = buildSearchIndex();
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <SiteHeader />
-            <div role="region" aria-label="Documentation tools" className="z-40 border-b border-line bg-surface lg:sticky lg:top-[72px]">
+            <div role="region" aria-label="Documentation tools" className="z-40 border-b border-line bg-white lg:sticky lg:top-[72px]">
                 <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-x-6 gap-y-3 px-5 py-3 sm:px-8 lg:h-14 lg:flex-nowrap lg:py-0">
                     <Link href="/docs" className="text-[15px] font-semibold text-navy-950 hover:text-accent-700">Documentation</Link>
                     <nav aria-label="Docs sections" className="hidden items-center gap-5 text-[14px] text-muted-strong lg:flex">

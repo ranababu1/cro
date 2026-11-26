@@ -65,13 +65,13 @@ export default function LandingPage() {
     const early = exampleEarly();
     const ex = WORKED_EXAMPLE;
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(siteJsonLd)) }} />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
             <SiteHeader />
             <main id="main">
                 {/* 1. Hero */}
-                <section className="border-b border-line bg-surface" aria-labelledby="hero-title">
+                <section className="border-b border-line" aria-labelledby="hero-title">
                     <Container className="grid gap-12 py-14 md:py-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,500px)] lg:items-center lg:gap-16">
                         <div>
                             <p className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-[13px] font-semibold tracking-[0.04em] text-accent-700 ring-1 ring-inset ring-line">
@@ -107,7 +107,7 @@ export default function LandingPage() {
                 <Section labelledBy="audiences-title">
                     <h2 id="audiences-title" className="sr-only">Who it is for</h2>
                     <div className="grid gap-6 md:grid-cols-2">
-                        <div className="flex flex-col rounded-2xl border border-line bg-white p-8">
+                        <div className="site-lift flex flex-col rounded-2xl border border-line bg-white p-8">
                             <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">For marketers and product managers</p>
                             <h3 className="mt-3 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em]">Improve what your customers experience.</h3>
                             <p className="mt-3 text-[16px] leading-[1.6] text-muted-strong">Test headlines, calls to action and whole landing pages, then see which version brings more signups. Most tests need no engineering time.</p>
@@ -116,13 +116,13 @@ export default function LandingPage() {
                                 <Link href="/docs/quick-start" className="text-accent-700 hover:underline">Quick start</Link>
                             </div>
                         </div>
-                        <div className="flex flex-col rounded-2xl border border-navy-800 bg-navy-950 p-8 text-white">
-                            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-100">For developers</p>
+                        <div className="site-lift flex flex-col rounded-2xl border border-line bg-white p-8">
+                            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">For developers</p>
                             <h3 className="mt-3 text-[26px] font-semibold leading-[1.2] tracking-[-0.02em]">Build experimentation into your product.</h3>
-                            <p className="mt-3 text-[16px] leading-[1.6] text-slate-300">Deterministic assignment, a small JavaScript API and REST endpoints for your backend, with public and secret keys per environment.</p>
+                            <p className="mt-3 text-[16px] leading-[1.6] text-muted-strong">Deterministic assignment, a small JavaScript API and REST endpoints for your backend, with public and secret keys per environment.</p>
                             <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-6 text-[15px] font-medium">
-                                <Link href="/developers" className="text-white underline-offset-4 hover:underline">Developer hub</Link>
-                                <Link href="/docs/rest-api" className="text-white underline-offset-4 hover:underline">REST API</Link>
+                                <Link href="/developers" className="text-accent-700 hover:underline">Developer hub</Link>
+                                <Link href="/docs/rest-api" className="text-accent-700 hover:underline">REST API</Link>
                             </div>
                         </div>
                     </div>
@@ -133,7 +133,7 @@ export default function LandingPage() {
                     <SectionHeading id="capabilities-title" eyebrow="Capabilities" title="Everything a test needs, from setup to decision" lede="Each item below is in the product today. Plan notes say where a feature needs a paid plan." />
                     <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         {CAPABILITIES.map((c) => (
-                            <li key={c.title} className="flex flex-col rounded-xl border border-line bg-white p-6">
+                            <li key={c.title} className="site-lift flex flex-col rounded-xl border border-line bg-white p-6">
                                 <h3 className="text-[17px] font-semibold">{c.title}</h3>
                                 <p className="mt-1.5 text-[14px] text-muted-strong">{c.body}</p>
                                 <ul className="mt-4 space-y-2 text-[14px] leading-[1.5] text-navy-950">
@@ -151,7 +151,7 @@ export default function LandingPage() {
                     <SectionHeading id="how-title" eyebrow="How it works" title="From hypothesis to decision in seven steps" />
                     <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-7 lg:gap-3">
                         {STEPS.map((s, i) => (
-                            <li key={s.title} className="relative flex gap-4 rounded-xl border border-line bg-white p-5 lg:flex-col lg:gap-3 lg:p-4">
+                            <li key={s.title} className="site-lift relative flex gap-4 rounded-xl border border-line bg-white p-5 lg:flex-col lg:gap-3 lg:p-4">
                                 <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[14px] font-semibold ${i === STEPS.length - 1 ? 'bg-accent-700 text-white' : 'bg-navy-950 text-white'}`}>{i + 1}</span>
                                 <div>
                                     <h3 className="text-[16px] font-semibold leading-snug">{s.title}</h3>
@@ -174,25 +174,25 @@ export default function LandingPage() {
                 {aiLive && (
                     <section id="ai" className="scroll-mt-20 bg-white py-16 md:py-24" aria-labelledby="ai-heading">
                         <Container>
-                            <div className="rounded-3xl bg-navy-950 px-6 py-10 text-white sm:px-10 lg:px-14 lg:py-14">
+                            <div className="rounded-3xl border border-line bg-white/85 px-6 py-10 shadow-site text-navy-950 sm:px-10 lg:px-14 lg:py-14">
                                 <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                                     <div>
-                                        <span className="inline-block rounded-md bg-white/10 px-3 py-1.5 text-[12px] font-semibold tracking-[0.12em] text-accent-100">AI-POWERED</span>
+                                        <span className="inline-block rounded-md bg-accent-50 px-3 py-1.5 text-[12px] font-semibold tracking-[0.12em] text-accent-700 ring-1 ring-inset ring-accent-100">AI-POWERED</span>
                                         <h2 id="ai-heading" className="mt-5 text-[30px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[38px]">Plan better tests.<br className="hidden sm:block" /> Read results faster.</h2>
                                     </div>
-                                    <p className="max-w-[440px] text-[16px] leading-[1.6] text-slate-300">On Growth and Enterprise, bring your own OpenAI, Gemini, DeepSeek or Claude key. You pick the model and pay your provider directly, with no extra charge from us.</p>
+                                    <p className="max-w-[440px] text-[16px] leading-[1.6] text-muted-strong">On Growth and Enterprise, bring your own OpenAI, Gemini, DeepSeek or Claude key. You pick the model and pay your provider directly, with no extra charge from us.</p>
                                 </div>
                                 <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                                     {aiFeatures.map((f) => (
-                                        <li key={f.title} className="rounded-2xl bg-white/[0.06] p-5 ring-1 ring-white/10">
+                                        <li key={f.title} className="rounded-2xl border border-line bg-white p-5">
                                             <h3 className="text-[16px] font-semibold">{f.title}</h3>
-                                            <p className="mt-2 text-[14px] leading-[1.55] text-slate-300">{f.body}</p>
+                                            <p className="mt-2 text-[14px] leading-[1.55] text-muted-strong">{f.body}</p>
                                         </li>
                                     ))}
                                 </ul>
                                 <div className="mt-8 flex flex-wrap gap-3">
-                                    <SiteButton href="/docs/ai" variant="onDark">How AI suggestions work <ArrowIcon /></SiteButton>
-                                    <SiteButton href="/pricing" variant="outlineDark">See plans</SiteButton>
+                                    <SiteButton href="/docs/ai" variant="primary">How AI suggestions work <ArrowIcon /></SiteButton>
+                                    <SiteButton href="/pricing" variant="secondary">See plans</SiteButton>
                                 </div>
                             </div>
                         </Container>
@@ -204,7 +204,7 @@ export default function LandingPage() {
                     <SectionHeading id="marketers-title" eyebrow="For marketers" title="Test the pages your campaigns depend on" lede="Start with the page that gets the most traffic and the goal that matters most. These are the tests teams run first." />
                     <ul className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                         {MARKETER_USE_CASES.map((u) => (
-                            <li key={u.title} className="rounded-xl border border-line bg-white p-6">
+                            <li key={u.title} className="site-lift rounded-xl border border-line bg-white p-6">
                                 <h3 className="text-[17px] font-semibold">{u.title}</h3>
                                 <p className="mt-2 text-[15px] leading-[1.6] text-muted-strong">{u.body}</p>
                                 <p className="mt-4 text-[13px] font-medium text-accent-700">{u.feature}</p>
@@ -222,17 +222,17 @@ export default function LandingPage() {
                 <Section id="developers" tone="navy" labelledBy="developers-title">
                     <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
                         <div>
-                            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-100">For developers</p>
+                            <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">For developers</p>
                             <h2 id="developers-title" className="mt-3 text-[28px] font-semibold leading-[1.2] tracking-[-0.02em] md:text-[32px]">An SDK and an API that do one thing well</h2>
-                            <ul className="mt-6 space-y-3 text-[15px] leading-[1.6] text-slate-300">
-                                <li><strong className="font-semibold text-white">JavaScript SDK.</strong> One dependency-free script with a global <code className="font-mono text-[13px] text-white">ABTest</code> object. It handles bucketing, redirects, visual changes and click goals.</li>
-                                <li><strong className="font-semibold text-white">REST API.</strong> Assign and track from your backend with a secret key, and read results as JSON.</li>
-                                <li><strong className="font-semibold text-white">Deterministic assignment.</strong> The visitor ID and test ID decide the version, so every server and browser agrees.</li>
-                                <li><strong className="font-semibold text-white">Integrations.</strong> GA4 events, Google Tag Manager, a WordPress plugin on paid plans, and signed webhooks.</li>
+                            <ul className="mt-6 space-y-3 text-[15px] leading-[1.6] text-muted-strong">
+                                <li><strong className="font-semibold text-navy-950">JavaScript SDK.</strong> One dependency-free script with a global <code className="font-mono text-[13px] text-navy-950">ABTest</code> object. It handles bucketing, redirects, visual changes and click goals.</li>
+                                <li><strong className="font-semibold text-navy-950">REST API.</strong> Assign and track from your backend with a secret key, and read results as JSON.</li>
+                                <li><strong className="font-semibold text-navy-950">Deterministic assignment.</strong> The visitor ID and test ID decide the version, so every server and browser agrees.</li>
+                                <li><strong className="font-semibold text-navy-950">Integrations.</strong> GA4 events, Google Tag Manager, a WordPress plugin on paid plans, and signed webhooks.</li>
                             </ul>
                             <div className="mt-8 flex flex-wrap gap-3">
-                                <SiteButton href="/developers" variant="onDark">Developer hub <ArrowIcon /></SiteButton>
-                                <SiteButton href="/docs/javascript-sdk" variant="outlineDark">SDK reference</SiteButton>
+                                <SiteButton href="/developers" variant="primary">Developer hub <ArrowIcon /></SiteButton>
+                                <SiteButton href="/docs/javascript-sdk" variant="secondary">SDK reference</SiteButton>
                             </div>
                         </div>
                         <div className="min-w-0 space-y-4">
@@ -276,7 +276,7 @@ export default function LandingPage() {
                     <SectionHeading id="pricing-title" eyebrow="Pricing" title="Start free. Pay when you need more traffic." lede="The free plan has no time limit and clear limits. Past a limit, new visitors see your original page; we never upgrade or bill you automatically. Yearly plans include two months free." />
                     <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         {PLAN_SUMMARY.map((p) => (
-                            <li key={p.name} className={`flex flex-col rounded-xl border bg-white p-6 ${p.name === 'Free' ? 'border-accent-600/50' : 'border-line'}`}>
+                            <li key={p.name} className={`site-lift flex flex-col rounded-xl border bg-white p-6 ${p.name === 'Free' ? 'border-accent-600/50' : 'border-line'}`}>
                                 <h3 className="text-[16px] font-semibold">{p.name}</h3>
                                 <p className="mt-3"><span className="text-[32px] font-semibold tracking-tight">{p.price}</span></p>
                                 <p className="text-[13px] text-muted">{p.note}</p>

@@ -8,7 +8,7 @@ const read = (f: string) => fs.readFileSync(f, 'utf8');
 const pricing = read('app/pricing/page.tsx');
 const cards = read('app/pricing/BillingCards.tsx');
 const legalDoc = read('app/legal/LegalDoc.tsx');
-const OLD_STYLE = /#0b1630|#f8faff|#2563eb|#14b8a6|blue-600|blue-700|blue-50\b|teal-|zinc-|gradient|text-brand-700/;
+const OLD_STYLE = /#0b1630|#f8faff|#2563eb|#14b8a6|blue-600|blue-700|blue-50\b|teal-|zinc-|bg-gradient-to-|text-brand-700/;
 
 describe('pricing and legal pages use the site design', () => {
     it('pricing, plan cards and the legal frame use the site tokens only', () => {

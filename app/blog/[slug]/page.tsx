@@ -29,7 +29,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     const { html, afterFaqHtml, toc, faq, faqHeading } = renderPost(p.markdown);
     const related = relatedPosts(p, getAllPosts()).map((r) => ({ slug: r.slug, title: r.title, description: r.description, date: r.date, dateLabel: formatDate(r.date), readingMinutes: r.readingMinutes, category: r.category }));
     return (
-        <div className="min-h-screen bg-white text-zinc-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             {p.articleSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.articleSchema) }} />}
             {p.faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.faqSchema) }} />}
             {p.breadcrumbSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(p.breadcrumbSchema) }} />}
@@ -38,20 +38,20 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             <ReadingProgress target="article-body" />
             <SiteHeader />
             <main id="main">
-                <header className="border-b border-zinc-100 bg-gradient-to-b from-[#f8faff] to-white">
+                <header className="border-b border-line">
                     <div className="mx-auto max-w-[1360px] px-5 pb-12 pt-10 sm:px-8 sm:pt-14">
                         <div className="xl:pr-[288px]">
-                        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-zinc-500">
-                            <Link href="/blog" className="font-medium text-blue-700 hover:text-blue-900">Blog</Link><span aria-hidden>/</span><span>{p.category}</span>
+                        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[14px] text-muted">
+                            <Link href="/blog" className="font-medium text-accent-700 hover:text-accent-800">Blog</Link><span aria-hidden>/</span><span>{p.category}</span>
                         </nav>
                         <div className="mt-6"><CategoryTag>{p.category}</CategoryTag></div>
-                        <h1 className="mt-4 text-[34px] font-bold leading-[1.12] tracking-[-0.03em] text-[#0b1630] sm:text-[46px]">{p.title}</h1>
-                        <p className="mt-5 text-[19px] leading-relaxed text-zinc-600">{p.description}</p>
+                        <h1 className="mt-4 text-[34px] font-bold leading-[1.12] tracking-[-0.03em] text-navy-950 sm:text-[46px]">{p.title}</h1>
+                        <p className="mt-5 text-[19px] leading-relaxed text-muted-strong">{p.description}</p>
                         <div className="mt-8 flex items-center gap-3">
-                            <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-teal-500 text-[15px] font-semibold text-white">{p.authorName.charAt(0)}</span>
+                            <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-accent-700 text-[15px] font-semibold text-white">{p.authorName.charAt(0)}</span>
                             <div className="text-[14px] leading-tight">
-                                <p className="font-semibold text-[#0b1630]">{p.authorName}</p>
-                                <p className="mt-1 text-zinc-500"><time dateTime={p.date}>{formatDate(p.date)}</time><span aria-hidden className="mx-2">·</span>{p.readingMinutes} min read</p>
+                                <p className="font-semibold text-navy-950">{p.authorName}</p>
+                                <p className="mt-1 text-muted"><time dateTime={p.date}>{formatDate(p.date)}</time><span aria-hidden className="mx-2">·</span>{p.readingMinutes} min read</p>
                             </div>
                         </div>
                         </div>
@@ -61,21 +61,21 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                 <div className="mx-auto grid max-w-[1360px] gap-12 px-5 pt-12 sm:px-8 xl:grid-cols-[minmax(0,1fr)_240px]">
                     <div id="article-body" className="w-full min-w-0 xl:max-w-[1040px]">
                         {toc.length > 2 && (
-                            <details className="toc-mobile mb-10 rounded-xl border border-zinc-200 bg-[#f8faff] xl:hidden">
-                                <summary className="cursor-pointer select-none px-5 py-3.5 text-[15px] font-semibold text-[#0b1630]">On this page</summary>
-                                <ol className="space-y-2 px-5 pb-4 text-[15px]">{toc.map((t) => <li key={t.id}><a href={`#${t.id}`} className="text-zinc-700 hover:text-blue-700">{t.text}</a></li>)}</ol>
+                            <details className="toc-mobile mb-10 rounded-xl border border-line bg-white xl:hidden">
+                                <summary className="cursor-pointer select-none px-5 py-3.5 text-[15px] font-semibold text-navy-950">On this page</summary>
+                                <ol className="space-y-2 px-5 pb-4 text-[15px]">{toc.map((t) => <li key={t.id}><a href={`#${t.id}`} className="text-muted-strong hover:text-accent-700">{t.text}</a></li>)}</ol>
                             </details>
                         )}
                         <article className="blog-prose" dangerouslySetInnerHTML={{ __html: html }} />
                         {faq.length > 0 && (
                             <section aria-labelledby="faq" className="mt-14">
-                                <h2 id="faq" className="scroll-mt-24 text-[28px] font-bold tracking-[-0.02em] text-[#0b1630]">{faqHeading}</h2>
-                                <div className="mt-6 divide-y divide-zinc-200 rounded-2xl border border-zinc-200">
+                                <h2 id="faq" className="scroll-mt-24 text-[28px] font-bold tracking-[-0.02em] text-navy-950">{faqHeading}</h2>
+                                <div className="mt-6 divide-y divide-line rounded-2xl border border-line bg-white">
                                     {faq.map((f) => (
                                         <details key={f.q} className="faq-item group">
-                                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[17px] font-semibold text-[#0b1630] hover:text-blue-700 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600 sm:px-6">
+                                            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-[17px] font-semibold text-navy-950 hover:text-accent-700 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-700 sm:px-6">
                                                 {f.q}
-                                                <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-50 text-blue-700 transition-transform group-open:rotate-45 motion-reduce:transition-none">+</span>
+                                                <span aria-hidden className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent-50 text-accent-700 transition-transform group-open:rotate-45 motion-reduce:transition-none">+</span>
                                             </summary>
                                             <div className="blog-prose blog-prose-tight px-5 pb-5 sm:px-6" dangerouslySetInnerHTML={{ __html: f.a }} />
                                         </details>
@@ -85,10 +85,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                         )}
                         {afterFaqHtml && <div className="blog-prose mt-10" dangerouslySetInnerHTML={{ __html: afterFaqHtml }} />}
 
-                        <aside aria-label="Try freeabtest.com" className="mt-16 rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-teal-50/60 p-7 sm:p-8">
-                            <p className="text-[20px] font-semibold tracking-[-0.01em] text-[#0b1630]">Run your first A/B test for free</p>
-                            <p className="mt-2 text-[16px] leading-relaxed text-zinc-600">Paste one script tag, create a test, and get results you can explain. No card needed.</p>
-                            <Link href="/signin" className="mt-5 inline-flex h-11 items-center gap-2 rounded-xl bg-[#0b1630] px-5 text-[15px] font-medium text-white hover:bg-[#13224a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Start free <span aria-hidden>→</span></Link>
+                        <aside aria-label="Try freeabtest.com" className="mt-16 rounded-2xl border border-accent-100 bg-white p-7 shadow-site sm:p-8">
+                            <p className="text-[20px] font-semibold tracking-[-0.01em] text-navy-950">Run your first A/B test for free</p>
+                            <p className="mt-2 text-[16px] leading-relaxed text-muted-strong">Paste one script tag, create a test, and get results you can explain. No card needed.</p>
+                            <Link href="/signin" className="mt-5 inline-flex h-11 items-center gap-2 rounded-lg bg-navy-950 px-5 text-[15px] font-medium text-white hover:bg-navy-800 hover:shadow-site-btn focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-700">Start free <span aria-hidden>→</span></Link>
                         </aside>
                     </div>
                     {toc.length > 2 && (
@@ -97,9 +97,9 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
                 </div>
 
                 {related.length > 0 && (
-                    <section aria-labelledby="related" className="mt-24 border-t border-zinc-100 bg-[#f8faff]">
+                    <section aria-labelledby="related" className="mt-24 border-t border-line">
                         <div className="mx-auto max-w-[1180px] px-5 py-16 sm:px-8">
-                            <h2 id="related" className="text-[24px] font-bold tracking-[-0.02em] text-[#0b1630]">Keep reading</h2>
+                            <h2 id="related" className="text-[24px] font-bold tracking-[-0.02em] text-navy-950">Keep reading</h2>
                             <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{related.map((r) => <li key={r.slug}><PostCard p={r} /></li>)}</ul>
                         </div>
                     </section>

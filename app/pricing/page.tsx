@@ -121,11 +121,11 @@ const Dash = () => <span className="text-muted">-</span>;
 export default async function PricingPage() {
     const checkout = await canSessionCheckout();
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <SiteHeader />
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(JSON.stringify(faqJsonLd)) }} />
             <main id="main">
-                <header className="border-b border-line bg-surface">
+                <header className="border-b border-line">
                     <div className="mx-auto max-w-[1200px] px-5 pb-14 pt-10 sm:px-8 sm:pt-12">
                         <Breadcrumbs items={[{ href: '/pricing', label: 'Pricing' }]} />
                         <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Pricing</p>
@@ -166,7 +166,7 @@ export default async function PricingPage() {
                     </div>
                 </section>
 
-                <section aria-labelledby="annual-title" className="border-y border-line bg-surface">
+                <section aria-labelledby="annual-title" className="border-y border-line">
                     <div className="mx-auto max-w-[1200px] px-5 py-14 sm:px-8">
                         <h2 id="annual-title" className="text-[22px] font-semibold tracking-[-0.01em] text-navy-950">Annual billing and overages</h2>
                         <ul className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -196,15 +196,15 @@ export default async function PricingPage() {
                     </div>
                 </section>
 
-                <section className="bg-navy-950 text-white">
+                <section>
                     <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-5 py-14 sm:px-8 md:flex-row md:items-center md:justify-between md:py-16">
                         <div className="max-w-[640px]">
-                            <h2 className="text-[26px] font-semibold tracking-[-0.02em] sm:text-[30px]">Run your first test in about 15 minutes.</h2>
-                            <p className="mt-2 text-[16px] text-white/75">Free plan, no card needed. Add the snippet, create a test, read real results.</p>
+                            <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-navy-950 sm:text-[30px]">Run your first test in about 15 minutes.</h2>
+                            <p className="mt-2 text-[16px] text-navy-900">Free plan, no card needed. Add the snippet, create a test, read real results.</p>
                         </div>
                         <div className="flex flex-wrap gap-3">
-                            <Link href="/signin" className="inline-flex h-11 items-center rounded-lg bg-white px-5 text-[15px] font-semibold text-navy-950 hover:bg-surface">Start for free</Link>
-                            <Link href="/docs/quick-start" className="inline-flex h-11 items-center rounded-lg border border-white/40 px-5 text-[15px] font-semibold text-white hover:bg-white/10">Read the quick start</Link>
+                            <Link href="/signin" className="inline-flex h-11 items-center rounded-lg bg-navy-950 px-5 text-[15px] font-semibold text-white hover:bg-navy-800 hover:shadow-site-btn">Start for free</Link>
+                            <Link href="/docs/quick-start" className="inline-flex h-11 items-center rounded-lg border border-line bg-white px-5 text-[15px] font-semibold text-navy-950 hover:shadow-site">Read the quick start</Link>
                         </div>
                     </div>
                 </section>

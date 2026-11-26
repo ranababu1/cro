@@ -13,10 +13,10 @@ export function LegalDoc({ slug, title, intro, children }: { slug: string; title
     const section = isCompany ? 'Company' : 'Legal';
     const self = NAV.find((p) => p.slug === slug);
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <SiteHeader />
             <main id="main">
-                <header className="border-b border-line bg-surface">
+                <header className="border-b border-line">
                     <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 sm:pt-12">
                         <Breadcrumbs items={[{ href: self?.href ?? '/legal/terms', label: title }]} />
                         <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">{section}</p>
