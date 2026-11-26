@@ -18,10 +18,10 @@ export default function BlogIndex() {
     const [featured, ...rest] = posts;
     const categories = [...new Set(rest.map((p) => p.category))].sort();
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <SiteHeader />
             <main id="main">
-                <header className="border-b border-line bg-surface">
+                <header className="border-b border-line">
                     <div className="mx-auto max-w-[1200px] px-5 pb-12 pt-10 sm:px-8 sm:pb-16 sm:pt-12">
                         <Breadcrumbs items={[{ href: '/resources', label: 'Resources' }, { href: '/blog', label: 'Blog' }]} />
                         <p className="mt-8 text-[13px] font-semibold uppercase tracking-[0.08em] text-accent-700">Blog</p>
@@ -32,7 +32,7 @@ export default function BlogIndex() {
 
                 <div className="mx-auto max-w-[1200px] px-5 pb-24 pt-12 sm:px-8 sm:pt-14">
                     {featured && (
-                        <article aria-labelledby="featured-title" className="group relative rounded-xl border border-line bg-white p-6 shadow-xs transition hover:border-navy-800/30 focus-within:ring-2 focus-within:ring-accent-600 sm:p-10">
+                        <article aria-labelledby="featured-title" className="site-lift group relative rounded-xl border border-line bg-white p-6 shadow-xs focus-within:ring-2 focus-within:ring-accent-600 sm:p-10">
                             <div className="flex items-center gap-3"><span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted">Latest</span><CategoryTag>{featured.category}</CategoryTag></div>
                             <h2 id="featured-title" className="mt-4 max-w-[820px] text-[26px] font-semibold leading-tight tracking-[-0.02em] text-navy-950 sm:text-[32px]">
                                 <Link href={`/blog/${featured.slug}`} className="after:absolute after:inset-0 focus-visible:outline-none group-hover:underline">{featured.title}</Link>

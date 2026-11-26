@@ -23,7 +23,7 @@ export function ReadingProgress({ target }: { target: string }) {
     }, [target]);
     return (
         <div aria-hidden className="fixed inset-x-0 top-0 z-[60] h-[3px] bg-transparent">
-            <div ref={bar} className="h-full origin-left bg-gradient-to-r from-blue-600 to-teal-500" style={{ transform: 'scaleX(0)' }} />
+            <div ref={bar} className="h-full origin-left bg-accent-700" style={{ transform: 'scaleX(0)' }} />
         </div>
     );
 }

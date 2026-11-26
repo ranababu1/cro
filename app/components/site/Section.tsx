@@ -1,11 +1,11 @@
 import { cn } from '../ui/cn';
 import { Container } from './Container';
 
-/** Vertical rhythm for marketing sections: 64px on mobile, 96px from md. `tone` sets the background. */
+/** Vertical rhythm for marketing sections: 64px on mobile, 96px from md. `tone` is white, or transparent so the page gradient shows (surface and navy). */
 export function Section({ id, tone = 'white', className, children, labelledBy }: {
     id?: string; tone?: 'white' | 'surface' | 'navy'; className?: string; children: React.ReactNode; labelledBy?: string;
 }) {
-    const bg = tone === 'surface' ? 'bg-surface' : tone === 'navy' ? 'bg-navy-950 text-white' : 'bg-white';
+    const bg = tone === 'surface' || tone === 'navy' ? '' : 'bg-white';
     return (
         <section id={id} aria-labelledby={labelledBy} className={cn('scroll-mt-20 py-16 md:py-24', bg, className)}>
             <Container>{children}</Container>

@@ -22,7 +22,7 @@ export default async function WordPressPage({ searchParams }: { searchParams: Pr
     const limited = (await searchParams).download === 'limit';
     const back = encodeURIComponent(DOWNLOAD);
     return (
-        <div className="min-h-screen bg-white text-navy-950">
+        <div className="min-h-screen bg-site-gradient text-navy-950">
             <SiteHeader />
             <main id="main" className="mx-auto max-w-[900px] px-5 pb-20 pt-10 sm:px-8">
                 <Breadcrumbs items={[{ href: '/wordpress', label: 'WordPress plugin' }]} />

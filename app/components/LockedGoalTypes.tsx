@@ -11,7 +11,7 @@ const WHAT: Record<string, string> = {
 export function LockedGoalTypes({ maxGoals }: { maxGoals: number | null }) {
     const locked = GOAL_TYPES.filter((t) => !BASIC_GOAL_TYPES.includes(t));
     return (
-        <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-teal-50 p-4 text-sm text-[#0b1630]" data-testid="locked-goal-types">
+        <div className="rounded-xl border border-accent-200 bg-accent-50 p-4 text-sm text-navy-950" data-testid="locked-goal-types">
             <p className="font-medium">Free plan: {maxGoals ?? 1} goal per test, a click on a CSS selector.</p>
             <ul className="mt-3 grid gap-2 sm:grid-cols-3">
                 {locked.map((t) => (

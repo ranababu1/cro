@@ -178,7 +178,7 @@ describe('resources hub, nav, footer and sitemap', () => {
     it('the blog index uses the site tokens, with no decorative mock chart', () => {
         for (const f of ['app/blog/page.tsx', 'app/blog/_components/BlogGrid.tsx', 'app/blog/_components/PostCard.tsx']) {
             const src = read(f);
-            expect(src, f).not.toMatch(/#0b1630|#f8faff|blue-600|blue-700|teal-|zinc-|gradient/);
+            expect(src, f).not.toMatch(/#0b1630|#f8faff|blue-600|blue-700|teal-|zinc-|bg-gradient-to-/);
         }
         expect(read('app/blog/page.tsx')).not.toContain('3.6%');
     });
