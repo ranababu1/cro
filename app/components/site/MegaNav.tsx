@@ -18,19 +18,21 @@ export function MegaNav() {
     const pathname = usePathname();
     const [state, setState] = useState<{ label: string; path: string } | null>(null);
     const open = state && state.path === pathname ? state.label : null;
-    const setOpen = useCallback((label: string | null) => setState(label ? { label, path: pathname } : null), [pathname]);
     const [shown, setShown] = useState<string | null>(null);
+    const setOpen = useCallback((label: string | null) => {
+        setState(label ? { label, path: pathname } : null);
+        if (label) setShown(label);
+    }, [pathname]);
     const root = useRef<HTMLDivElement>(null);
     const triggers = useRef<Record<string, HTMLButtonElement | null>>({});
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const baseId = useId();
 
     const clear = () => { if (timer.current) { clearTimeout(timer.current); timer.current = null; } };
-    const close = useCallback(() => { clear(); setOpen(null); }, [setOpen]);
+    const close = useCallback(() => { clear(); setState(null); }, []);
 
     useEffect(() => {
-        if (open) { setShown(open); return; }
-        if (!shown) return;
+        if (open || !shown) return;
         const t = setTimeout(() => setShown(null), EXIT_MS);
         return () => clearTimeout(t);
     }, [open, shown]);
