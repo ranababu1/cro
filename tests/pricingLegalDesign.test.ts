@@ -32,7 +32,7 @@ describe('pricing and legal pages use the site design', () => {
     });
 
     it('legal facts are unchanged', () => {
-        expect(LEGAL.entity).toBe('Imranul Haque Mazumder, trading as FREEABTEST');
+        expect(LEGAL.entity).toBe('FREEABTEST');
         expect(LEGAL.address).toBe('5A-606, Provident Park Square, Kanakpura Rd, Judicial Layout 2nd Phase, Vakil Garden City, Mallasandra, Bengaluru, Karnataka 560109, India');
         expect(LEGAL.governingLaw).toBe('India');
         expect(LEGAL.governingCourts).toBe('the courts of Bengaluru');

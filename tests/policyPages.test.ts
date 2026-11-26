@@ -17,15 +17,15 @@ const policyFiles = [
 
 describe('operator details', () => {
     it('names the legal entity, Razorpay KYC address, Bengaluru courts and contact phone', () => {
-        expect(LEGAL.entity).toBe('Imranul Haque Mazumder, trading as FREEABTEST');
+        expect(LEGAL.entity).toBe('FREEABTEST');
         expect(LEGAL.address).toBe(ADDRESS);
         expect(LEGAL.governingLaw).toBe('India');
         expect(LEGAL.governingCourts).toBe('the courts of Bengaluru');
         expect(LEGAL.contactEmail).toBe('hello@freeabtest.com');
         expect(LEGAL.contactPhone).toBe('+91 9964 180587');
         expect(contactPhoneHref()).toBe('tel:+919964180587');
-        expect(operatorName()).toBe('Imranul Haque Mazumder, trading as FREEABTEST (freeabtest.com)');
-        expect(LEGAL_VERSION).toBe('2026-11-25');
+        expect(operatorName()).toBe('FREEABTEST');
+        expect(LEGAL_VERSION).toBe('2026-11-26');
         const org = organizationJsonLd();
         expect(org.legalName).toBe(LEGAL.entity);
         expect(org.address.postalCode).toBe('560109');
@@ -69,6 +69,28 @@ describe('policy page copy', () => {
             expect(src, `${f} has an em dash`).not.toMatch(/\u2014/);
             expect(src, f).not.toMatch(/github\.com/i);
             expect(src, f).not.toMatch(/\b(vercel|turso|next\.js|drizzle)\b/i);
+        }
+    });
+
+    it('does not use the personal operator name in public page source', () => {
+        const files = [
+            'lib/legal.ts',
+            'app/about/page.tsx',
+            'app/contact/page.tsx',
+            'app/legal/terms/page.tsx',
+            'app/legal/privacy/page.tsx',
+            'app/legal/dpa/page.tsx',
+            'app/legal/cookies/page.tsx',
+            'app/legal/refunds/page.tsx',
+            'app/legal/delivery/page.tsx',
+            'app/security/page.tsx',
+            'app/components/site/SiteFooter.tsx',
+            'app/page.tsx',
+            'app/layout.tsx',
+        ];
+        for (const f of files) {
+            const src = fs.readFileSync(f, 'utf8');
+            expect(src, f).not.toMatch(/Imranul|Mazumder|trading as/i);
         }
     });
 });
