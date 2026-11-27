@@ -5,7 +5,8 @@ import { Card, Alert } from '@/app/components/ui';
 export interface UsageRow { label: string; used: number; limit: number | null; atLimit: string; capacity?: boolean }
 
 /** Plan usage on Overview: one bar per limit, with a plain note at each limit. */
-export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string; note?: string }) {
+export function PlanUsage({ rows, plan, note, hideManageLink = false }: { rows: UsageRow[]; plan: string; note?: string; hideManageLink?: boolean }) {
+    const manage = hideManageLink ? null : <Link href="/settings/billing" className="ml-2 font-medium text-accent-700 hover:underline" data-testid="manage-plan">Manage plan</Link>;
     const limited = rows.filter((r) => r.limit !== null);
     if (!limited.length) {
         // Unlimited plans (Enterprise, platform admin orgs) still show which plan applies.
@@ -13,7 +14,7 @@ export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string
         return (
             <Card className="mt-6 p-5" data-testid="plan-usage">
                 <p className="text-sm font-semibold text-zinc-900">Plan usage</p>
-                <p className="mt-1 text-sm text-zinc-600">Plan: <span className="font-medium capitalize text-zinc-900">{plan}</span>. No limits on tested visitors, tests or projects.</p>
+                <p className="mt-1 text-sm text-zinc-600">Plan: <span className="font-medium capitalize text-zinc-900">{plan}</span>. No limits on tested visitors, tests or projects.{manage}</p>
             </Card>
         );
     }
@@ -22,7 +23,7 @@ export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string
         <Card className="mt-6 p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="text-sm font-semibold text-zinc-900">Plan usage</p>
-                <p className="text-xs text-zinc-500">Plan: <span className="capitalize">{plan}</span>. Daily counts reset at midnight UTC, monthly on the 1st.</p>
+                <p className="text-xs text-zinc-500">Plan: <span className="capitalize">{plan}</span>. Daily counts reset at midnight UTC, monthly on the 1st.{manage}</p>
             </div>
             <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {limited.map((r) => {
@@ -46,7 +47,7 @@ export function PlanUsage({ rows, plan, note }: { rows: UsageRow[]; plan: string
             {note && <p className="mt-4 text-sm text-zinc-600" data-testid="plan-note">{note}</p>}
             {hit.map((r) => (
                 <Alert key={r.label} tone="warning" className="mt-4" title={`${r.label}: limit reached`}>
-                    {r.atLimit} <Link href="/pricing" target="_blank" rel="noopener noreferrer" className="font-medium text-blue-700 hover:underline">See plans</Link>
+                    {r.atLimit} <Link href="/settings/billing" className="font-medium text-blue-700 hover:underline">Upgrade your plan</Link>
                 </Alert>
             ))}
         </Card>

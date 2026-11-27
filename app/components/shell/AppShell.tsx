@@ -19,7 +19,8 @@ export interface AppShellProps {
     currentProjectId: string | null;
     isPlatformAdmin: boolean;
     /** Show Settings, Billing (only once paid checkout is configured). */
-    billing?: boolean;
+    /** Effective plan of the current organization, shown as a badge in the header. */
+    plan?: string;
     children: React.ReactNode;
 }
 
@@ -108,6 +109,24 @@ function ProjectSwitcher({ projects, currentProjectId }: { projects: ShellProjec
     );
 }
 
+const PLAN_LABELS: Record<string, string> = { free: 'Free', starter: 'Starter', growth: 'Growth', enterprise: 'Enterprise' };
+
+/** Small plan badge in the header. It links to Plan and billing, where the plan can be changed. */
+function PlanBadge({ plan }: { plan: string }) {
+    const label = PLAN_LABELS[plan] ?? plan.charAt(0).toUpperCase() + plan.slice(1);
+    return (
+        <Link
+            href="/settings/billing"
+            data-testid="plan-badge"
+            aria-label={`Your plan: ${label}. Open plan and billing`}
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3 text-xs font-medium text-zinc-700 transition-colors hover:border-accent-600 hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-600"
+        >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent-600" />
+            {label}
+        </Link>
+    );
+}
+
 function UserMenu({ user }: { user: AppShellProps['user'] }) {
     const [open, setOpen] = useState(false);
     const ref = useClickOutside(() => setOpen(false));
@@ -139,7 +158,7 @@ function UserMenu({ user }: { user: AppShellProps['user'] }) {
     );
 }
 
-function NavLinks({ isPlatformAdmin, billing = false, onNavigate }: { isPlatformAdmin: boolean; billing?: boolean; onNavigate?: () => void }) {
+function NavLinks({ isPlatformAdmin, onNavigate }: { isPlatformAdmin: boolean; onNavigate?: () => void }) {
     const pathname = usePathname();
     const item = (href: string, label: string, Icon: typeof HomeIcon) => {
         const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href) && !(href === '/admin' && pathname.startsWith('/admin/telemetry')));
@@ -162,7 +181,7 @@ function NavLinks({ isPlatformAdmin, billing = false, onNavigate }: { isPlatform
     return (
         <nav className="flex flex-1 flex-col gap-0.5 px-3">
             {nav.map((n) => item(n.href, n.label, n.icon))}
-            {billing && item('/settings/billing', 'Billing', ListIcon)}
+            {item('/settings/billing', 'Plan and billing', ListIcon)}
             {isPlatformAdmin && (
                 <>
                     <p className="mt-6 mb-1 px-2.5 text-xs font-medium text-zinc-400">Platform</p>
@@ -182,7 +201,7 @@ function NavLinks({ isPlatformAdmin, billing = false, onNavigate }: { isPlatform
     );
 }
 
-export default function AppShell({ user, projects, currentProjectId, isPlatformAdmin, billing = false, children }: AppShellProps) {
+export default function AppShell({ user, projects, currentProjectId, isPlatformAdmin, plan, children }: AppShellProps) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const closeDrawer = useCallback(() => setMobileOpen(false), []);
     const drawer = useRef<HTMLElement>(null);
@@ -195,7 +214,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                 <div className="flex h-14 items-center px-5">
                     <Logo href="/dashboard" />
                 </div>
-                <NavLinks isPlatformAdmin={isPlatformAdmin} billing={billing} />
+                <NavLinks isPlatformAdmin={isPlatformAdmin} />
             </aside>
 
             {/* Mobile drawer */}
@@ -209,7 +228,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                                 <XIcon />
                             </button>
                         </div>
-                        <NavLinks isPlatformAdmin={isPlatformAdmin} billing={billing} onNavigate={() => setMobileOpen(false)} />
+                        <NavLinks isPlatformAdmin={isPlatformAdmin} onNavigate={() => setMobileOpen(false)} />
                         <div className="mt-auto border-t border-zinc-200 px-5 py-4 sm:hidden"><ThemeToggle /></div>
                     </aside>
                 </div>
@@ -222,6 +241,7 @@ export default function AppShell({ user, projects, currentProjectId, isPlatformA
                     </button>
                     <ProjectSwitcher projects={projects} currentProjectId={currentProjectId} />
                     <div className="ml-auto flex items-center gap-3">
+                        {plan && <PlanBadge plan={plan} />}
                         <div className="hidden sm:block"><ThemeToggle /></div>
                         <UserMenu user={user} />
                     </div>

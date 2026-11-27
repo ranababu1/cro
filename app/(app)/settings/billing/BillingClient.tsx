@@ -45,8 +45,11 @@ function loadPayPal(clientId: string): Promise<PayPalNamespace> {
     });
 }
 
-/** Billing for owners: current plan, subscription status, upgrades, downgrades, cancellation and PayPal checkout. */
-export function BillingClient({ clientId, initialPlan, initialPeriod }: { clientId: string; initialPlan: Plan; initialPeriod: Period }) {
+/**
+ * Plan and billing: the current plan for every member, and for owners the subscription status, upgrades, downgrades,
+ * cancellation and PayPal checkout. Without paid checkout (not configured, or test mode for other accounts) it is read-only.
+ */
+export function BillingClient({ clientId, checkoutAvailable, initialPlan, initialPeriod }: { clientId: string; checkoutAvailable: boolean; initialPlan: Plan; initialPeriod: Period }) {
     const [s, setS] = useState<State | null>(null);
     const [failed, setFailed] = useState(false);
     const [plan, setPlan] = useState<Plan>(initialPlan);
@@ -214,14 +217,48 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
 
     if (failed) return <Alert tone="danger">Could not load billing.</Alert>;
     if (!s) return <div className="flex justify-center py-16"><Spinner /></div>;
-    if (!s.enabled) return <Alert tone="neutral">Billing is not available yet.</Alert>;
+    if (!s.enabled || !checkoutAvailable) {
+        const label = NAMES[s.plan ?? 'free'] ?? s.plan;
+        const canUpgrade = s.plan !== 'enterprise';
+        return (
+            <>
+                <PageHeader title="Plan and billing" description="The plan your organization is on." />
+                <Card className="mb-6">
+                    <CardHeader title="Current plan" />
+                    <CardBody>
+                        <dl className="grid gap-4 text-sm sm:grid-cols-3">
+                            <div><dt className="text-zinc-500">Plan</dt><dd className="mt-1 font-medium text-zinc-900" data-testid="billing-plan">{label}</dd></div>
+                        </dl>
+                        {s.owner && s.plan_source && s.plan_source !== 'billing' && <p className="mt-4 text-sm text-zinc-600">Your plan was set up by our team, so it does not depend on a subscription.</p>}
+                    </CardBody>
+                </Card>
+                {canUpgrade && (
+                    <Card className="mb-6">
+                        <CardHeader title="Upgrade your plan" description="Paying online is not open yet." />
+                        <CardBody>
+                            <p className="text-sm text-zinc-700" data-testid="billing-unavailable">
+                                {s.owner === false
+                                    ? 'Ask an owner of your organization to upgrade. '
+                                    : 'To change your plan now, email us from your account email and tell us which plan you want. '}
+                                Prices: Starter $20 a month or $200 a year, Growth $50 a month or $500 a year, in US dollars.
+                            </p>
+                            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
+                                {s.owner !== false && <a className="font-medium text-accent-700 hover:underline" href="mailto:hello@freeabtest.com?subject=Plan%20upgrade">Email hello@freeabtest.com</a>}
+                                <Link className="font-medium text-accent-700 hover:underline" href="/pricing" target="_blank" rel="noopener noreferrer">Compare plans<span className="sr-only"> (opens in a new tab)</span></Link>
+                            </div>
+                        </CardBody>
+                    </Card>
+                )}
+            </>
+        );
+    }
 
     const sameAsActive = sub?.status === 'ACTIVE' && sub.plan === plan && sub.period === period;
     const upgradeSelected = isUpgrade(sub?.plan ?? null, sub?.period ?? null, plan, period);
 
     return (
         <>
-            <PageHeader title="Billing" description="Your plan and payments. Paid plans are billed in US dollars through PayPal." />
+            <PageHeader title="Plan and billing" description="Your plan and payments. Paid plans are billed in US dollars through PayPal." />
             {s.mode === 'sandbox' && <Alert tone="warning" className="mb-4" title="Test mode">Payments use PayPal test accounts. No real money is charged.</Alert>}
             {!s.owner && <Alert tone="neutral">Only owners of the organization can see and change billing.</Alert>}
             {error && <Alert tone="danger" className="mb-4">{error}</Alert>}
@@ -230,7 +267,7 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
             {s.owner && (
                 <>
                     {sub?.status === 'SUSPENDED' && (
-                        <Alert tone="danger" className="mb-4" title="Payment failed — subscription suspended">
+                        <Alert tone="danger" className="mb-4" title="Payment failed, subscription suspended">
                             PayPal could not collect payment. Update your payment method in{' '}
                             {s.manage_url ? <a className="font-medium underline" href={s.manage_url} target="_blank" rel="noopener noreferrer">automatic payments in PayPal</a> : 'PayPal'}{' '}
                             to keep your paid plan{s.plan_ends_at ? ` after ${day(s.plan_ends_at)}` : ''}, or cancel below so PayPal stops retrying.
@@ -247,8 +284,14 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
                     <Card className="mb-6">
                         <CardHeader title="Current plan" />
                         <CardBody>
-                            <dl className="grid gap-4 text-sm sm:grid-cols-3">
+                            <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
                                 <div><dt className="text-zinc-500">Plan</dt><dd className="mt-1 font-medium text-zinc-900" data-testid="billing-plan">{NAMES[s.plan ?? 'free'] ?? s.plan}</dd></div>
+                                <div>
+                                    <dt className="text-zinc-500">Billing period</dt>
+                                    <dd className="mt-1 text-zinc-900" data-testid="billing-interval">
+                                        {sub?.plan && sub.period && s.plan === sub.plan ? `${sub.period === 'yearly' ? 'Yearly' : 'Monthly'} ($${PRICES[sub.plan][sub.period]})` : 'None'}
+                                    </dd>
+                                </div>
                                 <div><dt className="text-zinc-500">Status</dt><dd className="mt-1">{sub ? <Badge>{STATUS[sub.status] ?? sub.status}</Badge> : <span className="text-zinc-700">No subscription</span>}</dd></div>
                                 <div>
                                     <dt className="text-zinc-500">{s.plan_ends_at ? 'Access until' : s.scheduled_plan && s.scheduled_plan_at ? 'Changes on' : 'Next payment'}</dt>
@@ -261,7 +304,7 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
                                     </dd>
                                 </div>
                             </dl>
-                            {s.plan_source && s.plan_source !== 'billing' && <p className="mt-4 text-sm text-zinc-600">Your plan was set up by our team, so it does not depend on a subscription.</p>}
+                            {s.plan_source && s.plan_source !== 'billing' && <p className="mt-4 text-sm text-zinc-600">Your plan was set up by our team, so it does not depend on a subscription.{s.plan !== 'enterprise' && ' You can still subscribe to a higher plan below.'}</p>}
                             {sub?.status === 'CANCELLED' && s.plan_ends_at && s.scheduled_plan && (
                                 <p className="mt-4 text-sm text-zinc-600">
                                     Your current subscription is cancelled and will not renew. You keep {NAMES[s.plan ?? 'free']} until {day(s.plan_ends_at)}. You chose to switch to {NAMES[s.scheduled_plan]} ({s.scheduled_period}); start that subscription here once {day(s.plan_ends_at)} passes.
@@ -303,7 +346,7 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
                         <Card className="mb-6">
                             <CardHeader
                                 title="Change plan"
-                                description="Upgrades apply right away once confirmed with PayPal. Downgrades take effect at the end of the current billing period with no mid-cycle refunds."
+                                description="An upgrade starts a new PayPal subscription that is charged in full today. Your current subscription is cancelled once the new one is active, and the unused part of the current period is not refunded. A downgrade takes effect at the end of the current billing period."
                             />
                             <CardBody>
                                 <div className="flex flex-wrap gap-6">
@@ -334,19 +377,19 @@ export function BillingClient({ clientId, initialPlan, initialPeriod }: { client
                                     {sameAsActive
                                         ? `You are already on ${NAMES[plan]} (${period}).`
                                         : upgradeSelected
-                                            ? `Upgrade to ${NAMES[plan]} ($${PRICES[plan][period]} ${period === 'monthly' ? 'a month' : 'a year'}): takes effect as soon as PayPal confirms.`
+                                            ? `Upgrade to ${NAMES[plan]} ($${PRICES[plan][period]} ${period === 'monthly' ? 'a month' : 'a year'}): you pay the full price today in PayPal, and the change takes effect as soon as PayPal confirms. Your current subscription is then cancelled with no refund for the unused time.`
                                             : `Downgrade to ${NAMES[plan]} ($${PRICES[plan][period]} ${period === 'monthly' ? 'a month' : 'a year'}): takes effect at the end of your current billing period.`}
                                 </p>
                                 <div className="mt-4">
                                     <Button disabled={busy !== null || sameAsActive} onClick={() => void handlePlanChange()}>
-                                        {busy === 'change' ? 'Updating...' : upgradeSelected ? 'Upgrade now' : 'Downgrade at period end'}
+                                        {busy === 'change' ? 'Opening PayPal...' : upgradeSelected ? `Upgrade to ${NAMES[plan]} in PayPal` : 'Downgrade at period end'}
                                     </Button>
                                 </div>
                             </CardBody>
                         </Card>
                     )}
 
-                    {canBuy && (
+                    {canBuy && s.plan !== 'enterprise' && (
                         <Card className="mb-6">
                             <CardHeader title="Choose a paid plan" description="Upgrades take effect once PayPal confirms the payment. No mid-cycle refunds; after a cancellation your plan stays until the end of the period you paid for." />
                             <CardBody>

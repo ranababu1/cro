@@ -40,13 +40,13 @@ export interface SdkKeyContext {
     type: ApiKeyType;
 }
 
-/** SQL for an org's effective plan: Enterprise when a platform admin owns it, else the assigned plan, else billing. */
+/** SQL for an org's effective plan: Enterprise when a platform admin owns it, else the assigned plan (a paid Growth subscription lifts an assigned Starter), else billing. */
 function effectivePlanSql(orgAlias: string, adminEmails: string[]) {
     const o = sql.raw(orgAlias);
     const owned = adminEmails.length
         ? sql`WHEN EXISTS (SELECT 1 FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.org_id = ${o}.id AND m.role = 'owner' AND lower(u.email) IN (${sql.join(adminEmails.map((e) => sql`${e.toLowerCase()}`), sql`, `)})) THEN 'enterprise' `
         : sql``;
-    return sql`(CASE ${owned}WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) WHEN ${o}.plan_ends_at IS NOT NULL AND ${o}.plan_ends_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 'free' WHEN ${o}.scheduled_plan IS NOT NULL AND ${o}.scheduled_plan_at IS NOT NULL AND ${o}.scheduled_plan_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN lower(${o}.scheduled_plan) ELSE coalesce(lower(${o}.plan), 'free') END)`;
+    return sql`(CASE ${owned}WHEN lower(${o}.plan_override) = 'starter' AND lower(${o}.plan) = 'growth' AND (${o}.plan_ends_at IS NULL OR ${o}.plan_ends_at > strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) AND NOT (${o}.scheduled_plan IS NOT NULL AND ${o}.scheduled_plan_at IS NOT NULL AND ${o}.scheduled_plan_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now')) THEN 'growth' WHEN ${o}.plan_override IS NOT NULL THEN lower(${o}.plan_override) WHEN ${o}.plan_ends_at IS NOT NULL AND ${o}.plan_ends_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN 'free' WHEN ${o}.scheduled_plan IS NOT NULL AND ${o}.scheduled_plan_at IS NOT NULL AND ${o}.scheduled_plan_at <= strftime('%Y-%m-%dT%H:%M:%fZ', 'now') THEN lower(${o}.scheduled_plan) ELSE coalesce(lower(${o}.plan), 'free') END)`;
 }
 
 export interface OrgUpdate {
