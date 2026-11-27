@@ -114,7 +114,7 @@ Super-admin only at `/admin/telemetry`. Counters live in `telemetry_daily`; dash
 - Never grant a plan from the browser or a webhook body. Always re-read the subscription from the provider (syncPayPalSubscription). Webhooks are verified with the raw body and recorded by event id in billing_webhook_events before they are applied.
 - Billing writes organizations.plan, plan_ends_at, scheduled_plan, scheduled_period and scheduled_plan_at only. Do not touch plan_override, special-friend allowances or platform admin rules from billing code; they keep winning in lib/entitlements.ts.
 - Upgrades apply immediately (PayPal revise where supported, else new subscription then cancel old once the new one is active). Downgrades and in-app cancellations take effect at the end of the paid period (no mid-cycle refunds).
-- Billing stays hidden until paypalConfig() returns a config, and while PAYPAL_API_BASE is sandbox it stays restricted to platform admins and BILLING_TEST_EMAILS via canUseBillingCheckout / canSessionCheckout. Billing routes use the Node runtime.
+- Paid checkout stays off until paypalConfig() returns a config (Settings, Plan and billing is then read-only and says so), and while PAYPAL_API_BASE is sandbox it stays restricted to platform admins and BILLING_TEST_EMAILS via canUseBillingCheckout / canSessionCheckout. Billing routes use the Node runtime.
 - Public copy must not say checkout is live until the variables are set in production. Never import next-auth in public pages scanned by tests/publicContent.test.ts (use lib/billing/access.ts). Keep PayPal variable names out of public pages and docs. Keep tests/billing.test.ts in sync.
 
 ## Public roadmap

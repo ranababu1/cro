@@ -214,7 +214,8 @@ describe('billing routes', () => {
 
     it('stays hidden while unconfigured: routes answer 404, GET says disabled, PayPal is never called', async () => {
         setEnv(false);
-        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: false });
+        // The plan is still returned so the Plan and billing page and the dashboard can show it.
+        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: false, owner: true, plan: 'free', plan_source: 'billing' });
         expect((await subscribe(req('POST', '/api/billing/subscribe', { plan: 'starter', period: 'monthly' }))).status).toBe(404);
         expect((await changePlan(req('POST', '/api/billing/change', { plan: 'growth', period: 'monthly' }))).status).toBe(404);
         expect((await cancelPlan(req('POST', '/api/billing/cancel'))).status).toBe(404);
@@ -226,7 +227,7 @@ describe('billing routes', () => {
 
     it('in sandbox mode, restricts checkout to platform admins and BILLING_TEST_EMAILS', async () => {
         setEnv(true); // no BILLING_TEST_EMAILS, owner@example.com is not an admin
-        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: false });
+        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: false, owner: true, plan: 'free', plan_source: 'billing' });
         expect((await subscribe(req('POST', '/api/billing/subscribe', { plan: 'starter', period: 'monthly' }))).status).toBe(403);
         expect((await changePlan(req('POST', '/api/billing/change', { plan: 'growth', period: 'monthly' }))).status).toBe(403);
         expect((await cancelPlan(req('POST', '/api/billing/cancel'))).status).toBe(403);
@@ -247,7 +248,7 @@ describe('billing routes', () => {
         allow('owner@example.com,member@example.com');
         session.current = { user: { id: memberId } };
         expect((await subscribe(req('POST', '/api/billing/subscribe', { plan: 'starter', period: 'monthly' }))).status).toBe(403);
-        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: true, owner: false });
+        expect(await (await getBilling(req('GET', '/api/billing'))).json()).toEqual({ enabled: true, owner: false, plan: 'free' });
         session.current = { user: { id: ownerId } };
         expect((await subscribe(req('POST', '/api/billing/subscribe', { plan: 'pro', period: 'monthly' }))).status).toBe(400);
         const res = await subscribe(req('POST', '/api/billing/subscribe', { plan: 'growth', period: 'yearly' }));
@@ -304,25 +305,24 @@ describe('billing routes', () => {
         expect((await getOrgEntitlements(thirdOrg)).plan).toBe('free');
     });
 
-    it('upgrades immediately via PayPal revise when supported', async () => {
+    it('an upgrade starts a new subscription charged in full and never revises the old one (PayPal revise bills the new price only from the next cycle)', async () => {
         allow();
         session.current = { user: { id: otherOwnerId } };
         // otherOrgId is on Starter monthly (I-WEBHOOK12345)
         const r = await changePlan(req('POST', '/api/billing/change', { plan: 'growth', period: 'monthly' }));
         expect(r.status).toBe(200);
         const body = await r.json();
-        expect(body).toMatchObject({ action: 'approve', subscription_id: 'I-WEBHOOK12345' });
-        expect(body.approve_url).toContain('revise');
-        // Before approval, still Starter
+        expect(body.action).toBe('checkout_new');
+        expect(body.approve_url).toContain('sandbox.paypal.com');
+        expect(pp.calls.some((c) => c.url.endsWith('/revise'))).toBe(false);
+        const created = pp.calls.find((c) => c.method === 'POST' && c.url.endsWith('/v1/billing/subscriptions'));
+        expect(JSON.parse(created!.body!).plan_id).toBe('P-GM');
+        // Nothing is granted and the old subscription keeps running until the buyer approves the new one
         expect((await getOrgEntitlements(otherOrgId)).plan).toBe('starter');
-        // After approval on PayPal, confirm syncs and immediately upgrades to Growth
-        subs['I-WEBHOOK12345'] = { ...subs['I-WEBHOOK12345'], plan_id: 'P-GM' };
-        const conf = await (await confirm(req('POST', '/api/billing/paypal/confirm', { subscription_id: 'I-WEBHOOK12345' }))).json();
-        expect(conf.result).toBe('granted');
-        expect((await getOrgEntitlements(otherOrgId)).plan).toBe('growth');
+        expect(subs['I-WEBHOOK12345'].status).toBe('ACTIVE');
     });
 
-    it('upgrades via new subscription then cancels old when PayPal revise is unsupported', async () => {
+    it('approving the new subscription grants Growth and cancels the old one', async () => {
         allow();
         session.current = { user: { id: otherOwnerId } };
         // Downgrade test setup: put otherOrgId back on starter monthly cleanly first via direct PayPal sync
@@ -451,16 +451,36 @@ describe('billing routes', () => {
         expect((await getOrgEntitlements(orgId)).plan).toBe('enterprise');
         expect((await db.getOrganization(orgId))?.plan).toBe('free');
     });
+    it('an org on an assigned Starter plan can subscribe to Growth and then gets Growth', async () => {
+        allow('starter-owner@example.com');
+        const u = await db.createUser({ email: 'starter-owner@example.com', name: 'Starter Owner' });
+        const org = (await db.ensureWorkspace(u)).orgId;
+        await db.updateOrganization(org, { plan_override: 'starter' });
+        clearConfigCache();
+        session.current = { user: { id: u.id } };
+        expect((await getOrgEntitlements(org)).plan).toBe('starter');
+        const res = await subscribe(req('POST', '/api/billing/subscribe', { plan: 'growth', period: 'monthly' }));
+        expect(res.status).toBe(200);
+        const { id } = await res.json();
+        subs[id] = { ...subs[id], status: 'ACTIVE', billing_info: { next_billing_time: '2099-03-01T00:00:00Z', last_payment: { time: '2026-11-25T10:30:00Z' } } };
+        const conf = await (await confirm(req('POST', '/api/billing/paypal/confirm', { subscription_id: id }))).json();
+        expect(conf.result).toBe('granted');
+        const ent = await getOrgEntitlements(org);
+        expect(ent).toMatchObject({ plan: 'growth', planSource: 'billing' });
+        const status = await (await getBilling(req('GET', '/api/billing'))).json();
+        expect(status).toMatchObject({ enabled: true, owner: true, plan: 'growth', subscription: { status: 'ACTIVE', plan: 'growth', period: 'monthly' } });
+    });
 });
 
 describe('billing stays out of sight when off', () => {
-    it('pricing buttons fall back to sign-in, and the nav shows Billing only when enabled', () => {
+    it('pricing buttons always lead to Plan and billing, which says plainly when paid checkout is off', () => {
         const cards = fs.readFileSync('app/pricing/BillingCards.tsx', 'utf8');
-        expect(cards).toContain('checkout = false');
         expect(cards).toMatch(/paid \? `\/signin\?callbackUrl=/);
-        expect(fs.readFileSync('app/pricing/page.tsx', 'utf8')).toContain('canSessionCheckout');
-        expect(fs.readFileSync('app/components/shell/AppShell.tsx', 'utf8')).toContain("billing && item('/settings/billing'");
-        expect(fs.readFileSync('app/(app)/settings/billing/page.tsx', 'utf8')).toContain('notFound()');
+        expect(cards).not.toContain('checkout =');
+        expect(fs.readFileSync('app/components/shell/AppShell.tsx', 'utf8')).toContain("item('/settings/billing', 'Plan and billing'");
+        const page = fs.readFileSync('app/(app)/settings/billing/page.tsx', 'utf8');
+        expect(page).not.toContain('notFound(');
+        expect(page).toContain('checkoutAvailable');
         expect(fs.readFileSync('app/(app)/layout.tsx', 'utf8')).toContain('BillingAlertBanner');
         expect(fs.readFileSync('app/admin/orgs/[id]/page.tsx', 'utf8')).toContain('Billing (read-only)');
         for (const f of [

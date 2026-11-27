@@ -198,7 +198,7 @@ export class BillingActionError extends Error {
 
 /**
  * Changes an active PayPal subscription:
- * - Upgrades apply right away via PayPal revise where supported, else by starting a new subscription and cancelling the old one once active.
+ * - Upgrades apply right away by starting a new subscription (charged in full) and cancelling the old one once the new one is active.
  * - Downgrades take effect at the end of the current paid period (via PayPal revise if supported, else cancelling the current subscription at period end and noting the target plan).
  */
 export async function changeOrgPlan(
@@ -231,19 +231,25 @@ export async function changeOrgPlan(
     const targetPlanId = cfg.plans[targetPlan][targetPeriod];
     const origin = publicAppOrigin();
 
-    try {
-        const rev = await reviseSubscription(cfg, active.provider_subscription_id, {
-            planId: targetPlanId,
-            returnUrl: `${origin}/settings/billing?status=revised&subscription_id=${encodeURIComponent(active.provider_subscription_id)}`,
-            cancelUrl: `${origin}/settings/billing?status=cancelled`,
-        });
-        if (rev.approve_url) {
-            return { action: 'approve', approve_url: rev.approve_url, subscription_id: active.provider_subscription_id };
+    // PayPal applies a revised plan's price from the next billing cycle and does not prorate. Revising an upgrade would
+    // hand over the higher plan while the old, lower price is still being charged (up to a year on a yearly plan).
+    // Upgrades therefore start a new subscription that is charged in full today; the old one is cancelled once the new
+    // one is active (no refund for the unused part of the old period). Downgrades use revise, which is exactly right for them.
+    if (dir === 'downgrade') {
+        try {
+            const rev = await reviseSubscription(cfg, active.provider_subscription_id, {
+                planId: targetPlanId,
+                returnUrl: `${origin}/settings/billing?status=revised&subscription_id=${encodeURIComponent(active.provider_subscription_id)}`,
+                cancelUrl: `${origin}/settings/billing?status=cancelled`,
+            });
+            if (rev.approve_url) {
+                return { action: 'approve', approve_url: rev.approve_url, subscription_id: active.provider_subscription_id };
+            }
+            await syncPayPalSubscription(cfg, active.provider_subscription_id, userId);
+            return { action: 'applied', billing: await billingStatus(orgId) };
+        } catch (e) {
+            if (!(e instanceof PayPalError) || e.status < 400 || e.status >= 500) throw e;
         }
-        await syncPayPalSubscription(cfg, active.provider_subscription_id, userId);
-        return { action: 'applied', billing: await billingStatus(orgId) };
-    } catch (e) {
-        if (!(e instanceof PayPalError) || e.status < 400 || e.status >= 500) throw e;
     }
 
     if (dir === 'upgrade') {

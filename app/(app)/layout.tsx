@@ -3,6 +3,7 @@ import { getAppContext } from '@/lib/appContext';
 import { db } from '@/lib/db';
 import { isProfileComplete } from '@/lib/profile';
 import { isProfileExempt } from '@/lib/profileGate';
+import { getOrgEntitlements } from '@/lib/entitlements';
 import { canUseBillingCheckout } from '@/lib/billing/config';
 import { getOwnerBillingAlert } from '@/lib/billing/service';
 import { BillingAlertBanner } from '../components/BillingAlertBanner';
@@ -36,10 +37,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const showPrompt = !complete && !exempt && !user?.profile_prompt_dismissed_at;
 
     const billingOn = canUseBillingCheckout(ctx.user.email);
+    // Effective plan for the header badge: Enterprise for orgs a platform admin owns, else assigned, else billing.
+    const plan = ctx.current ? (await getOrgEntitlements(ctx.current.org_id)).plan : undefined;
     const billingAlert = billingOn && ctx.current ? await getOwnerBillingAlert(ctx.current.org_id, ctx.user.id) : null;
 
     return (
-        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin} billing={billingOn}>
+        <AppShell user={ctx.user} projects={ctx.projects} currentProjectId={ctx.current?.id ?? null} isPlatformAdmin={ctx.isPlatformAdmin} plan={plan}>
             {billingAlert && <BillingAlertBanner alert={billingAlert} />}
             {showPrompt && <ProfilePrompt />}
             {children}

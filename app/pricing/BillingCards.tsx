@@ -19,8 +19,12 @@ const highlights: Record<string, string[]> = {
     Enterprise: ['Custom tested visitors', 'Unlimited team seats', 'Audit log kept 2 years', 'Named contact with an SLA'],
 };
 
-/** checkout: paid checkout is on, so Starter and Growth go to Billing (through sign-in when signed out). Off: sign-in as before. */
-export function BillingCards({ checkout = false }: { checkout?: boolean }) {
+/**
+ * Starter and Growth always go to Plan and billing with the plan and period chosen here. Signed-out visitors sign in
+ * first and land there; signed-in users go straight there (the sign-in page forwards them). That page shows paid
+ * checkout when it is available, and says plainly when it is not.
+ */
+export function BillingCards() {
     const [yearly, setYearly] = useState(false);
     return (
         <div>
@@ -32,7 +36,7 @@ export function BillingCards({ checkout = false }: { checkout?: boolean }) {
                 {tiers.map((t) => {
                     const price = t.monthly === null ? 'Custom' : `$${yearly ? t.yearly : t.monthly}`;
                     const unit = t.monthly === null ? '' : yearly ? '/yr' : '/mo';
-                    const paid = checkout && (t.name === 'Starter' || t.name === 'Growth');
+                    const paid = t.name === 'Starter' || t.name === 'Growth';
                     const href = paid ? `/signin?callbackUrl=${encodeURIComponent(`/settings/billing?plan=${t.name.toLowerCase()}&period=${yearly ? 'yearly' : 'monthly'}`)}` : t.href;
                     const note = t.monthly === null ? 'Contact us' : t.monthly === 0 ? 'Free forever, no card' : yearly ? `About $${((t.yearly as number) / 12).toFixed(2)}/mo, billed yearly` : 'Billed monthly';
                     return (

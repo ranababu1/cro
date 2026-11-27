@@ -218,6 +218,9 @@ Shared `bg-site-gradient` on public page shells, indigo `accent-*` in place of t
 ### Visual correction and Solutions mega menu
 The site-wide page gradient was removed. Neutral canvas (`#FAFBFF`) leads; indigo is an accent (hero glow, gradient primary buttons, light tints, data-viz highlights, a stronger closing CTA). The Solutions mega menu has an intro, By Team and By Use Case groups and a featured card; the same panel and motion are used for Product, Developers and Resources. Mobile navigation is a spacious slide-out with Back and Close. JSON-LD is a single `@graph` script per page. Checked by tests/theme.test.ts, tests/siteNav.test.ts, tests/seoJsonLd.test.ts.
 
+### Plan visibility and Starter to Growth upgrade
+Done: Settings, Plan and billing is always available (read-only when PayPal is not set up), plan badge in the app header, Plan and billing nav item, pricing buttons for paid plans lead there with the chosen plan, upgrades start a new PayPal subscription (revise only for downgrades), a paid higher tier lifts an assigned Starter plan. Checked by tests/planBilling.test.ts and tests/billing.test.ts. To take payments Imran must set the PayPal variables in production (see docs/currentstate.md, Billing).
+
 ## 7. Risks
 - Public copy tests are strict (publicContent, publicCopyMatchesApp, copyConsistency, claimsAudit). New pages must be added to their file lists so the rules apply.
 - Renaming `/docs/sdk` touches tests (sdkDocsMatch, docs) and blog links; do it in its own PR.

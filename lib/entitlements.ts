@@ -125,8 +125,11 @@ export function computeEntitlements(org: OrgForEntitlements | null, memberEmails
     const billingPlan = ended ? 'free' : downgraded && org?.scheduled_plan ? org.scheduled_plan : org?.plan || 'free';
     const unlimited = memberEmails.some(isSuperAdminEmail);
     const assigned = org?.plan_override && (ASSIGNABLE_PLANS as readonly string[]).includes(org.plan_override) ? org.plan_override : null;
-    const planSource: PlanSource = unlimited ? 'platform_admin' : assigned ? 'assigned' : 'billing';
-    const plan = unlimited ? 'enterprise' : assigned ?? billingPlan;
+    // A paid subscription lifts an assigned Starter or Growth plan to a higher paid tier, so an org on a plan set by our
+    // team can still buy Growth. Assigned Free and Enterprise are fixed choices and always win.
+    const billingLifts = !!assigned && (assigned === 'starter' || assigned === 'growth') && planTier(billingPlan) > planTier(assigned) && planTier(billingPlan) <= 2;
+    const planSource: PlanSource = unlimited ? 'platform_admin' : assigned && !billingLifts ? 'assigned' : 'billing';
+    const plan = unlimited ? 'enterprise' : assigned && !billingLifts ? assigned : billingPlan;
     const paid = isPaidPlan(plan);
     const specialFriend = !!org?.special_friend;
     if (org) org = { ...org, plan };
